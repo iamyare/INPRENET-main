@@ -141,36 +141,65 @@ export class PdfService {
   }
 
   public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean) {
-    let persona = data    
+    // Simulando la función de cálculo de edad
+    const calcularEdad = (fecha: string) => {
+      if (!fecha) return '';
+      const hoy = new Date();
+      const cumpleanos = new Date(fecha);
+      let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+      const mes = hoy.getMonth() - cumpleanos.getMonth();
+      if (mes < 0 || (mes === 0 && hoy.getDate() < cumpleanos.getDate())) {
+        edad--;
+      }
+      return edad;
+    };
+  
+    let persona = data;
     let dataCentTrab = persona?.perfPersCentTrabs;
     let dataRef = persona?.referencias;
     let dataCuenBan = persona?.personasPorBanco;
-    let cargos_publicos = Array.isArray(persona?.peps) 
-  ? persona.peps.flatMap((peps: any) => peps.cargo_publico || []) 
-  : [];
-    let conyuge = data?.conyuge
-    
-    const jsonObj: any = typeof persona?.direccion_residencia_estructurada === 'string'
-  ? persona.direccion_residencia_estructurada.split(',').reduce((acc: any, curr: any) => {
-      const [key, value] = curr.split(':').map((s: string) => s.trim());
-      acc[key] = value;
-      return acc;
-    }, {} as { [key: string]: string })
-  : {};
-
+    let cargos_publicos = Array.isArray(persona?.peps)
+      ? persona.peps.flatMap((peps: any) => peps.cargo_publico || [])
+      : [];
+    let conyuge = data?.conyuge;
+  
+    const jsonObj: any =
+      typeof persona?.direccion_residencia_estructurada === 'string'
+        ? persona.direccion_residencia_estructurada.split(',').reduce(
+            (acc: any, curr: any) => {
+              const [key, value] = curr.split(':').map((s: string) => s.trim());
+              acc[key] = value;
+              return acc;
+            },
+            {} as { [key: string]: string }
+          )
+        : {};
+  
     const content: Array<any> = [
       {
         table: {
           widths: ['14%', '14%', '14%', '14%', '14%', '14%', '14%'],
           body: [
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DATOS GENERALES DEL DOCENTE', colSpan: 6, alignment: 'center', style: ['header'] },
-              {}, {}, {}, {}, {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'DATOS GENERALES DEL DOCENTE',
+                colSpan: 6,
+                alignment: 'center',
+                style: ['header'],
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
               {
                 ...(persona?.foto_perfil?.data?.length > 0
                   ? {
-                      image: `data:image/png;base64,${Buffer.from(persona.foto_perfil.data).toString('base64')}`,
-                      fit: [80, 150],
+                      image: `data:image/png;base64,${Buffer.from(
+                        persona.foto_perfil.data
+                      ).toString('base64')}`,
+                      fit: [75, 100], // Ajusta las dimensiones de la imagen al cuadro
                       alignment: 'center',
                       rowSpan: 3,
                     }
@@ -179,343 +208,1939 @@ export class PdfService {
                       text: 'SIN FOTO',
                       alignment: 'center',
                       rowSpan: 3,
-                    })
-              } 
+                    }),
+              }
+              ,
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NOMBRE DEL DOCENTE', alignment: 'left', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-              text: `${persona?.primer_apellido} ${persona?.segundo_apellido} ${persona?.primer_nombre} ${persona?.segundo_nombre} ${persona?.tercer_nombre || ''}`, 
-              alignment: 'center',
-              colSpan: 5, },
-              {}, {}, {}, {}, {}
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'No DE IDENTIDAD Y/O CARNET DEL RESIDENTE VIGENTE', alignment: 'left', colSpan: 2, style: ['subheader'] },
-              {}, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${persona?.n_identificacion}`, alignment: 'center', colSpan: 4 }, {}, {}, {}, {}
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'GÉNERO', alignment: 'left', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.genero, alignment: 'left', colSpan: 3 },
-              {},
-              {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'ESTADO CIVIL', alignment: 'left', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.estado_civil, alignment: 'left', colSpan: 2 },
-              {}
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NÚMERO DE DEPENDIENTES', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.cantidad_dependientes, alignment: 'left', colSpan: 3 }, {}, {}, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'PROFESIÓN', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.profesion?.descripcion, alignment: 'left', colSpan: 2 }, {}],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NACIONALIDAD', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.pais?.nacionalidad, alignment: 'left', colSpan: 3 }, {}, {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'RTN', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.rtn, alignment: 'left', colSpan: 2 }, {}
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'LUGAR Y FECHA DE NACIMIENTO', alignment: 'center', colSpan: 7, style: ['header'] },
-              {}, {}, {}, {}, {}, {}
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'PAÍS', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.pais?.nombre_pais, alignment: 'left', colSpan: 2 }, {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DEPARTAMENTO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.municipio_nacimiento?.departamento?.nombre_departamento || 'No disponible', alignment: 'left', colSpan: 3 }
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CIUDAD', alignment: 'left', style: ['subheader'] }, { 
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], 
-                text: persona?.municipio_nacimiento?.nombre_municipio || 'No disponible', 
-                alignment: 'left', 
-                colSpan: 2 
-              }, {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'FECHA DE NACIMIENTO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.fecha_nacimiento, alignment: 'left' },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'Edad', alignment: 'left', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${calcularEdad(persona?.fecha_nacimiento)} Años`, alignment: 'left' }
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'REPRESENTACIÓN', alignment: 'left', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.representacion, alignment: 'left', colSpan: 6 }, {}, {},
-              {},
-              {}, {}
-            ],
-
-            [{ borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DECLARACIÓN DE PERSONA POLÍTICAMENTE EXPUESTA (PEPS)', alignment: 'center', colSpan: 7, style: ['header'] },
-            {}, {}, {}, {}, {}, {}
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '¿DESEMPEÑA O HA DESEMPEÑADO UN CARGO PÚBLICO?', alignment: 'center', style: ['subheader'] },
               {
-                ...(cargos_publicos?.length > 0
-                  ? {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `SI`, alignment: 'center', colSpan: 6
-                  }
-                  : {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NO',
-                    alignment: 'center', colSpan: 6
-                  })
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'NOMBRE DEL DOCENTE',
+                alignment: 'left',
+                style: ['subheader'],
               },
-              {}, {}, {}, {}, {}
-            ],
-
-            ...cargos_publicos.length > 0 ? cargos_publicos.flatMap((cargo: any, index: number) => {
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: [
+                  persona?.primer_apellido,
+                  persona?.segundo_apellido,
+                  persona?.primer_nombre,
+                  persona?.segundo_nombre,
+                  persona?.tercer_nombre,
+                ]
+                  .filter((name) => name && name.trim() !== "")
+                  .join(" "),
+                alignment: 'center',
+                style: 'smallCell',
+                colSpan: 5,
+              },
               
-              return [
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `CARGO DESEMPEÑADO #${index + 1}`, alignment: 'center', colSpan: 2, style: ['subheader'] }, {}, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${cargo?.cargo}`, alignment: 'left' },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'PERÍODO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${cargo?.fecha_inicio || ''} / ${cargo?.fecha_fin || ''}`, alignment: 'left', colSpan: 3 }, {}, {}
-                ],
-              ]
-            }) : [],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DIRECCIÓN DOMICILIARIA DEL DOCENTE', alignment: 'center', colSpan: 7, style: ['header'] }
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'BARRIO O COLONIA', alignment: 'center', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'AVENIDA', alignment: 'center', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CALLE', alignment: 'center', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'SECTOR', alignment: 'center', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'BLOQUE', alignment: 'center', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'N DE CASA', alignment: 'center', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'COLOR DE CASA', alignment: 'center', style: ['subheader'] }
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.["BARRIO_COLONIA"], alignment: 'center' },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.AVENIDA, alignment: 'center' },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.CALLE, alignment: 'center' },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.SECTOR, alignment: 'center' },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.BLOQUE, alignment: 'center' },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.["N° DE CASA"], alignment: 'center' },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.["COLOR CASA"], alignment: 'center' }
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'ALDEA', alignment: 'center', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CASERÍO', alignment: 'center', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DEPARTAMENTO', alignment: 'center', colSpan: 2, style: ['subheader'] },
               {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'MUNICIPIO', alignment: 'center', colSpan: 2, style: ['subheader'] },
               {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CIUDAD', alignment: 'center', style: ['subheader'] }
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.ALDEA, alignment: 'center' },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.CASERIO, alignment: 'center' },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona.municipio.departamento.nombre_departamento, alignment: 'center', colSpan: 2 },
               {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona.municipio.nombre_municipio, alignment: 'center', colSpan: 2 },
               {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'center' }
+              {},
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'OTROS PUNTOS DE REFERENCIA', alignment: 'left', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona.direccion_residencia, alignment: 'left', colSpan: 6 }, {}, {}, {}, {}, {}
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'No DE IDENTIDAD Y/O CARNET DEL RESIDENTE VIGENTE',
+                alignment: 'left',
+                colSpan: 2,
+                style: ['subheader'],
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: `${persona?.n_identificacion}`,
+                alignment: 'center',
+                style: 'smallCell',
+                colSpan: 4,
+              },
+              {},
+              {},
+              {},
+              {},
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NÚMEROS DE TELEFÓNICOS', alignment: 'left', rowSpan: 2, style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CASA', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.telefono_1, alignment: 'left', colSpan: 2 }, {}, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CORREO ELECTRÓNICO 1', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.correo_1, alignment: 'left', colSpan: 2 }, {}
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'GÉNERO',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.genero || '',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 3,
+              },
+              {},
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'ESTADO CIVIL',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.estado_civil || '',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'NÚMERO DE DEPENDIENTES',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.cantidad_dependientes || '',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 3,
+              },
+              {},
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'PROFESIÓN',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.profesion?.descripcion || '',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'NACIONALIDAD',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.pais?.nacionalidad || '',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 3,
+              },
+              {},
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'RTN',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.rtn || '',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'LUGAR Y FECHA DE NACIMIENTO',
+                alignment: 'center',
+                colSpan: 7,
+                style: ['header'],
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'PAÍS',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.pais?.nombre_pais || '',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'DEPARTAMENTO',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text:
+                  persona?.municipio_nacimiento?.departamento?.nombre_departamento ||
+                  'No disponible',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 3,
+              },
+              {},
+              {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CIUDAD',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text:
+                  persona?.municipio_nacimiento?.nombre_municipio ||
+                  'No disponible',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'FECHA DE NACIMIENTO',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.fecha_nacimiento || '',
+                alignment: 'left',
+                style: 'smallCell',
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'Edad',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.fecha_nacimiento
+                  ? `${calcularEdad(persona?.fecha_nacimiento)} Años`
+                  : '',
+                alignment: 'left',
+              },
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'REPRESENTACIÓN',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.representacion || '',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 6,
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'DECLARACIÓN DE PERSONA POLÍTICAMENTE EXPUESTA (PEPS)',
+                alignment: 'center',
+                colSpan: 7,
+                style: ['header'],
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                // Haz la pregunta más larga (o la que necesites)
+                text: '¿ACTUALMENTE DESEMPEÑA O HA DESEMPEÑADO ALGÚN CARGO PÚBLICO EN LA ADMINISTRACIÓN DEL GOBIERNO?',
+                style: ['subheader'],
+                alignment: 'left',
+                colSpan: 6, // Ocupe 6 columnas de las 7 totales
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {
+                // Esta última celda es la columna 7, donde va "SI" o "NO"
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: cargos_publicos?.length > 0 ? 'SI' : 'NO',
+                alignment: 'center',
+              },
+            ],            
+            // Sección de CARGOS PÚBLICOS (PEPS)
+            ...(() => {
+              if (cargos_publicos?.length > 0) {
+                return cargos_publicos.flatMap((cargo: any, index: number) => {
+                  return [
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: `CARGO DESEMPEÑADO #${index + 1}`,
+                        alignment: 'center',
+                        colSpan: 2,
+                        style: ['subheader'],
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: `${cargo?.cargo || ''}`,
+                        alignment: 'left',
+                        style: 'smallCell'
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'PERÍODO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: `${cargo?.fecha_inicio || ''} / ${
+                          cargo?.fecha_fin || ''
+                        }`,
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 3,
+                      },
+                      {},
+                      {},
+                    ],
+                  ];
+                });
+              } else {
+                // Sección vacía si no hay cargos públicos
+                return [
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: `CARGO DESEMPEÑADO #1`,
+                      alignment: 'center',
+                      colSpan: 2,
+                      style: ['subheader'],
+                    },
+                    {},
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: ``,
+                      alignment: 'left',
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'PERÍODO',
+                      alignment: 'left',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: ` / `,
+                      alignment: 'left',
+                      style: 'smallCell',
+                      colSpan: 3,
+                    },
+                    {},
+                    {},
+                  ],
+                ];
+              }
+            })(),
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'DIRECCIÓN DOMICILIARIA DEL DOCENTE',
+                alignment: 'center',
+                colSpan: 7,
+                style: ['header'],
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'BARRIO O COLONIA',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'AVENIDA',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CALLE',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'SECTOR',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'BLOQUE',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'N DE CASA',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'COLOR DE CASA',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: jsonObj?.['BARRIO_COLONIA'] || '\n',
+                alignment: 'center',
+                style: 'smallCell',
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: jsonObj?.AVENIDA || '\n',
+                alignment: 'center',
+                style: 'smallCell',
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: jsonObj?.CALLE || '\n',
+                alignment: 'center',
+                style: 'smallCell',
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: jsonObj?.SECTOR || '\n',
+                alignment: 'center',
+                style: 'smallCell',
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: jsonObj?.BLOQUE || '\n',
+                alignment: 'center',
+                style: 'smallCell',
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: jsonObj?.['N° DE CASA'] || '\n',
+                alignment: 'center',
+                style: 'smallCell',
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: jsonObj?.['COLOR CASA'] || '\n',
+                alignment: 'center',
+                style: 'smallCell',
+              },
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'ALDEA',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CASERÍO',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'DEPARTAMENTO',
+                alignment: 'center',
+                colSpan: 2,
+                style: ['subheader'],
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'MUNICIPIO',
+                alignment: 'center',
+                colSpan: 2,
+                style: ['subheader'],
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CIUDAD',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: jsonObj?.ALDEA || '\n',
+                alignment: 'center',
+                style: 'smallCell',
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: jsonObj?.CASERIO || '\n',
+                alignment: 'center',
+                style: 'smallCell',
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text:
+                  persona?.municipio?.departamento?.nombre_departamento ||
+                  '',
+                alignment: 'center',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.municipio?.nombre_municipio || '\n',
+                alignment: 'center',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: '',
+                alignment: 'center',
+              },
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'OTROS PUNTOS DE REFERENCIA',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona.direccion_residencia || '\n',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 6,
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'NÚMEROS DE TELEFÓNICOS',
+                alignment: 'left',
+                rowSpan: 2,
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CASA',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.telefono_1 || '\n',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CORREO ELECTRÓNICO 1',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.correo_1 || '\n',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
             ],
             [
               {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CELULAR', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.telefono_2, alignment: 'left', colSpan: 2 }, {}, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CORREO ELECTRÓNICO 2', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.correo_2, alignment: 'left', colSpan: 2 }, {}
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CELULAR',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.telefono_2 || '\n',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CORREO ELECTRÓNICO 2',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.correo_2 || '\n',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DATOS DE CUENTAS BANCARIAS', alignment: 'center', colSpan: 7, style: ['header'] },
-              {}, {}, {}, {}, {}, {}
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'DATOS DE CUENTAS BANCARIAS',
+                alignment: 'center',
+                colSpan: 7,
+                style: ['header'],
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
             ],
-            ...dataCuenBan?.length > 0 ? dataCuenBan.flatMap((b: any) => {
-              return [
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'BANCO', alignment: 'left', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.banco?.nombre_banco}`, alignment: 'left', colSpan: 2 }, {},
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'No. DE CUENTA BANCARIA ACTUAL', alignment: 'left', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.num_cuenta, alignment: 'left', colSpan: 3 }, {}, {}
-                ],
-              ]
-            }) : [],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'INSTITUCIONES EDUCATIVAS', alignment: 'center', colSpan: 7, style: ['header'] },
-              {}, {}, {}, {}, {}, {}
-            ],
-            ...dataCentTrab?.length > 0 ? dataCentTrab.flatMap((b: any, index: number) => {
-              const direccionCentro = typeof b.centroTrabajo?.direccion_1 === 'string'
-              ? b.centroTrabajo.direccion_1.split(',').reduce((acc: any, curr: any) => {
-                  const [key, value] = curr.split(':').map((s: string) => s.trim());
-                  acc[key] = value;
-                  return acc;
-                }, {} as { [key: string]: string })
-              : {};
-              return [
-                [
+            // Sección de CUENTAS BANCARIAS
+            ...(() => {
+              if (dataCuenBan?.length > 0) {
+                return dataCuenBan.flatMap((b: any) => {
+                  return [
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'BANCO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: `${b?.banco?.nombre_banco || ''}`,
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 2,
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'No. DE CUENTA',
+                        alignment: 'left',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.num_cuenta || '',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 3,
+                      },
+                      {},
+                      {},
+                    ],
+                  ];
+                });
+              } else {
+                // Sección vacía si no hay cuentas bancarias
+                return [
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'BANCO',
+                      alignment: 'left',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'left',
+                      style: 'smallCell',
+                      colSpan: 2,
+                    },
+                    {},
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'No. DE CUENTA',
+                      alignment: 'left',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'left',
+                      style: 'smallCell',
+                      colSpan: 3,
+                    },
+                    {},
+                    {},
+                  ],
+                ];
+              }
+            })(),
+            // Encabezado de la sección
+          [
+            {
+              borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+              text: 'INSTITUCIONES EDUCATIVAS',
+              alignment: 'center',
+              colSpan: 7,
+              style: ['header'],
+            },
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+          ],
 
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `CENTRO EDUCATIVO #${index + 1}`, alignment: 'center', colSpan: 7, style: ['subheader'] }, {},
-                  {}, {},
-                  {}, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NOMBRE DEL CENTRO EDUCATIVO', alignment: 'left', style: ['subheader'], colSpan: 3 }, {}, {},
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'SECTOR', alignment: 'center', colSpan: 4, style: ['subheader'] }, {}, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.centroTrabajo?.nombre_centro_trabajo, alignment: 'left', colSpan: 3 }, {}, {},
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.centroTrabajo?.sector_economico, alignment: 'left', colSpan: 4 }, {}, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CARGO', alignment: 'left', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.cargo, alignment: 'left', colSpan: 6 }, {}, {}, {}, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'FECHA DE INGRESO', alignment: 'left', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.fecha_ingreso, alignment: 'left', colSpan: 2 }, {},
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'FECHA DE PAGO', alignment: 'left', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.fecha_pago, alignment: 'left', colSpan: 3 }, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'INGRESO / SALARIO MENSUAL', alignment: 'left', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `L. ${b?.salario_base}`, alignment: 'left', colSpan: 6 },
-                  {}, {},
-                  {}, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DIRECCIÓN DEL CENTRO EDUCATIVO', alignment: 'center', colSpan: 7, style: ['subheader'] }, {},
-                  {}, {},
-                  {}, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DEPARTAMENTO', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'MUNICIPIO', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CIUDAD', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'ALDEA', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'BARRIO O COLONIA', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'AVENIDA / CALLE', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'SECTOR', alignment: 'center', style: ['subheader'] },
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.centroTrabajo?.municipio?.departamento?.nombre_departamento}`, alignment: 'center' },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.centroTrabajo?.municipio?.nombre_municipio}`, alignment: 'center' },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'center' },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'center' },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'center' },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'center' },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'center' },
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'TELÉFONO 1', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.centroTrabajo?.celular_1, alignment: 'center', colSpan: 2 },
-                  {},
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'TELÉFONO 2', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.centroTrabajo?.celular_2, alignment: 'center', colSpan: 3 },
-                  {},
-                  {},
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'OTROS PUNTOS DE REFERENCIA', alignment: 'left', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.centroTrabajo?.direccion_2, alignment: 'left', colSpan: 6 }, {}, {}, {}, {}, {}
-                ],
+// Sección de centros educativos:
+        ...(() => {
+          if (dataCentTrab?.length > 0) {
+            // CUANDO SÍ HAY CENTROS
+            return dataCentTrab.flatMap((b: any, index: number) => {
+              // Ejemplo: parseamos dirección si la guardamos en "direccionCentro"
+                  const direccionCentro =
+                    typeof b.centroTrabajo?.direccion_1 === 'string'
+                      ? b.centroTrabajo.direccion_1.split(',').reduce((acc: any, curr: any) => {
+                          const [key, value] = curr.split(':').map((s: string) => s.trim());
+                          acc[key] = value;
+                          return acc;
+                        }, {} as { [key: string]: string })
+                      : {};
 
-              ];
-            }) : [],
+                  return [
+                    // Fila 1: título "CENTRO EDUCATIVO #..."
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: `CENTRO EDUCATIVO #${index + 1}`,
+                        alignment: 'center',
+                        colSpan: 7,
+                        style: ['subheader'],
+                      },
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                    ],
+                    // Fila 2: Nombre del centro, Sector
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'NOMBRE DEL CENTRO EDUCATIVO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                        colSpan: 3,
+                      },
+                      {},
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'SECTOR',
+                        alignment: 'center',
+                        colSpan: 4,
+                        style: ['subheader'],
+                      },
+                      {},
+                      {},
+                      {},
+                    ],
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.nombre_centro_trabajo || '\n',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 3,
+                      },
+                      {},
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.sector_economico || '\n',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 4,
+                      },
+                      {},
+                      {},
+                      {},
+                    ],
+                    // Fila 3: Cargo
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'CARGO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.cargo || '',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 6,
+                      },
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                    ],
+                    // Fila 4: Fecha de Ingreso, Fecha de Pago
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'FECHA DE INGRESO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.fecha_ingreso || '',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 2,
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'FECHA DE PAGO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.fecha_pago || '',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 3,
+                      },
+                      {},
+                      {},
+                    ],
+                    // Fila 5: Ingreso / Salario Mensual
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'INGRESO / SALARIO MENSUAL',
+                        alignment: 'left',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.salario_base ? `L. ${b?.salario_base}` : '',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 6,
+                      },
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                    ],
+                    // Fila 6: Título dirección
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'DIRECCIÓN DEL CENTRO EDUCATIVO',
+                        alignment: 'center',
+                        colSpan: 7,
+                        style: ['subheader'],
+                      },
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                    ],
+                    // Fila 7: 7 columnas - DEPARTAMENTO, MUNICIPIO, CIUDAD, ALDEA, BARRIO O COLONIA, AVENIDA/CALLE, SECTOR
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'DEPARTAMENTO',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'MUNICIPIO',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'CIUDAD',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'ALDEA',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'BARRIO O COLONIA',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'AVENIDA / CALLE',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'SECTOR',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                    ],
+                    // Fila 8: 7 columnas con data real (o vacía)
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.municipio?.departamento?.nombre_departamento || '',
+                        alignment: 'center',
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.municipio?.nombre_municipio || '',
+                        alignment: 'center',
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: '', // Llena con lo que parsees para "CIUDAD"
+                        alignment: 'center',
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: '', // Llena con lo que parsees para "ALDEA"
+                        alignment: 'center',
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: '', // Llena con lo que parsees para "BARRIO O COLONIA"
+                        alignment: 'center',
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: '', // Llena con lo que parsees para "AVENIDA / CALLE"
+                        alignment: 'center',
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: '', // Llena con lo que parsees para "SECTOR"
+                        alignment: 'center',
+                      },
+                    ],
+                    // Fila 9: Teléfonos
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'TELÉFONO 1',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.celular_1 || '',
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 2,
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'TELÉFONO 2',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.celular_2 || '',
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 3,
+                      },
+                      {},
+                      {},
+                    ],
+                    // Fila 10: Otros puntos de referencia
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'OTROS PUNTOS DE REFERENCIA',
+                        alignment: 'left',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.direccion_2 || '',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 6,
+                      },
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                    ],
+                  ];
+                });
+              } else {
+                // CUANDO NO HAY CENTROS (dataCentTrab es vacío o no existe)
+                return [
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'CENTRO EDUCATIVO #1',
+                      alignment: 'center',
+                      colSpan: 7,
+                      style: ['subheader'],
+                    },
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'NOMBRE DEL CENTRO EDUCATIVO',
+                      alignment: 'left',
+                      style: ['subheader'],
+                      colSpan: 3,
+                    },
+                    {},
+                    {},
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'SECTOR',
+                      alignment: 'center',
+                      colSpan: 4,
+                      style: ['subheader'],
+                    },
+                    {},
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'left',
+                      style: 'smallCell',
+                      colSpan: 3,
+                    },
+                    {},
+                    {},
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'left',
+                      style: 'smallCell',
+                      colSpan: 4,
+                    },
+                    {},
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'CARGO',
+                      alignment: 'left',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'left',
+                      style: 'smallCell',
+                      colSpan: 6,
+                    },
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'FECHA DE INGRESO',
+                      alignment: 'left',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'left',
+                      style: 'smallCell',
+                      colSpan: 2,
+                    },
+                    {},
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'FECHA DE PAGO',
+                      alignment: 'left',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'left',
+                      style: 'smallCell',
+                      colSpan: 3,
+                    },
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'INGRESO / SALARIO MENSUAL',
+                      alignment: 'left',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'left',
+                      style: 'smallCell',
+                      colSpan: 6,
+                    },
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'DIRECCIÓN DEL CENTRO EDUCATIVO',
+                      alignment: 'center',
+                      colSpan: 7,
+                      style: ['subheader'],
+                    },
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                  ],
+                  // Aquí nuevamente las 7 columnas: Departamento, Municipio, Ciudad, Aldea, Barrio/Colonia, Avenida/Calle, Sector
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'DEPARTAMENTO',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'MUNICIPIO',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'CIUDAD',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'ALDEA',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'BARRIO O COLONIA',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'AVENIDA / CALLE',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'SECTOR',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                    },
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'TELÉFONO 1',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 2,
+                    },
+                    {},
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'TELÉFONO 2',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 3,
+                    },
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'OTROS PUNTOS DE REFERENCIA',
+                      alignment: 'left',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'left',
+                      style: 'smallCell',
+                      colSpan: 6,
+                    },
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                  ],
+                ];
+              }
+            })(),
 
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DATOS GENERALES DEL CÓNYUGE', alignment: 'center', colSpan: 7, style: ['header'] },
-              {}, {}, {}, {}, {}, {}
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'DATOS GENERALES DEL CÓNYUGE',
+                alignment: 'center',
+                colSpan: 7,
+                style: ['header'],
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NOMBRE COMPLETO DEL CÓNYUGE', alignment: 'center', style: ['subheader'] },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'NOMBRE COMPLETO DEL CÓNYUGE',
+                alignment: 'center',
+                style: ['subheader'],
+              },
               {
                 ...(conyuge?.primer_apellido
                   ? {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${conyuge?.primer_apellido} ${conyuge?.segundo_apellido} ${conyuge?.primer_nombre} ${conyuge?.segundo_nombre}`, alignment: 'center', colSpan: 6
-                  }
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: [
+                        conyuge?.primer_apellido,
+                        conyuge?.segundo_apellido,
+                        conyuge?.primer_nombre,
+                        conyuge?.segundo_nombre,
+                      ]
+                        .filter((name) => name && name.trim() !== "")
+                        .join(" "),
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 6,
+                    }
                   : {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '',
-                    alignment: 'center', colSpan: 6
-                  })
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 6,
+                    }),
               },
-              {}, {}, {}, {}, {}
+              {},
+              {},
+              {},
+              {},
+              {},
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'No DE IDENTIDAD', alignment: 'center', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.n_identificacion || '', alignment: 'center', colSpan: 6 },
-              {}, {}, {}, {}, {}
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'No DE IDENTIDAD',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: conyuge?.n_identificacion || '',
+                alignment: 'center',
+                style: 'smallCell',
+                colSpan: 6,
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'FECHA DE NACIMIENTO', alignment: 'center', rowSpan: 2, style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NÚMEROS TELEFÓNICOS', alignment: 'center', rowSpan: 3, style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CASA', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.telefono_1 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'FECHA DE NACIMIENTO',
+                alignment: 'center',
+                rowSpan: 2,
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'NÚMEROS TELEFÓNICOS',
+                alignment: 'center',
+                rowSpan: 3,
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CASA',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: conyuge?.telefono_1 || '',
+                alignment: 'center',
+                style: 'smallCell',
+                colSpan: 4,
+              },
+              {},
+              {},
+              {},
             ],
             [
               {},
               {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CELULAR', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.telefono_2 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
-            ],
-            [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.fecha_nacimiento || '', alignment: 'center' },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CELULAR',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: conyuge?.telefono_2 || '',
+                alignment: 'center',
+                style: 'smallCell',
+                colSpan: 4,
+              },
               {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'TRABAJO', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.telefono_3 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
+              {},
+              {},
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '¿TRABAJA?', alignment: 'left', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.trabaja || '', alignment: 'left', colSpan: 2 }, {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '¿ES AFILIADO?', alignment: 'left', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.esAfiliado, alignment: 'left', colSpan: 3 }, {}, {}
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: conyuge?.fecha_nacimiento || '',
+                alignment: 'center',
+                style: 'smallCell',
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'TRABAJO',
+                alignment: 'center',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: conyuge?.telefono_3 || '',
+                alignment: 'center',
+                style: 'smallCell',
+                colSpan: 4,
+              },
+              {},
+              {},
+              {},
             ],
-
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'REFERENCIAS', alignment: 'center', colSpan: 7, style: ['header'] },
-              {}, {}, {}, {}, {}, {}
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: '¿TRABAJA?',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: conyuge?.trabaja || '',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: '¿ES AFILIADO?',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: conyuge?.esAfiliado || '',
+                alignment: 'left',
+                style: 'smallCell',
+                colSpan: 3,
+              },
+              {},
+              {},
             ],
-
-            ...dataRef?.length > 0 ? dataRef.flatMap((b: any, index: number) => {
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'REFERENCIAS',
+                alignment: 'center',
+                colSpan: 7,
+                style: ['header'],
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+            ],
+            // Sección de REFERENCIAS
+            ...(() => {
               const formatText = (text: any) => text || '';
-              return [
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `REFERENCIA #${index + 1}`, alignment: 'center', colSpan: 7, style: ['subheader'] },
-                  {}, {}, {}, {}, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NOMBRE COMPLETO', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${formatText(b?.primer_apellido)} ${formatText(b?.segundo_apellido)} ${formatText(b?.primer_nombre)} ${formatText(b?.segundo_nombre)}`, alignment: 'center', colSpan: 6 },
-                  {}, {}, {}, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DIRECCIÓN', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: formatText(b?.direccion), alignment: 'center', colSpan: 6 },
-                  {}, {}, {}, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'PARENTESCO', alignment: 'center', rowSpan: 2, style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NÚMEROS TELEFÓNICOS', alignment: 'center', rowSpan: 3, style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CASA', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: formatText(b?.telefono_domicilio), alignment: 'center', colSpan: 4 },
-                  {}, {}, {}
-                ],
-                [
-                  {}, {},
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CELULAR', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: formatText(b?.telefono_personal), alignment: 'center', colSpan: 4 },
-                  {}, {}, {}
-                ],
-                [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: formatText(b?.parentesco), alignment: 'center' },
-                  {},
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'TRABAJO', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: formatText(b?.telefono_trabajo), alignment: 'center', colSpan: 4 },
-                  {}, {}, {}
-                ],
-              ];
-            }) : [],
-          ]
+              if (dataRef?.length > 0) {
+                return dataRef.flatMap((b: any, index: number) => {
+                  return [
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: `REFERENCIA #${index + 1}`,
+                        alignment: 'center',
+                        colSpan: 7,
+                        style: ['subheader'],
+                      },
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                    ],
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'NOMBRE COMPLETO',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: [
+                          b?.primer_apellido,
+                          b?.segundo_apellido,
+                          b?.primer_nombre,
+                          b?.segundo_nombre,
+                        ]
+                          .filter((name) => name && name.trim() !== "")
+                          .join(" "),                        
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 6,
+                      },
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                    ],
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'DIRECCIÓN',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: formatText(b?.direccion),
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 6,
+                      },
+                      {},
+                      {},
+                      {},
+                      {},
+                      {},
+                    ],
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'PARENTESCO',
+                        alignment: 'center',
+                        rowSpan: 2,
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'NÚMEROS TELEFÓNICOS',
+                        alignment: 'center',
+                        rowSpan: 3,
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'CASA',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: formatText(b?.telefono_domicilio),
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 4,
+                      },
+                      {},
+                      {},
+                      {},
+                    ],
+                    [
+                      {},
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'CELULAR',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: formatText(b?.telefono_personal),
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 4,
+                      },
+                      {},
+                      {},
+                      {},
+                    ],
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: formatText(b?.parentesco),
+                        alignment: 'center',
+                        style: 'smallCell',
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'TRABAJO',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: formatText(b?.telefono_trabajo),
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 4,
+                      },
+                      {},
+                      {},
+                      {},
+                    ],
+                  ];
+                });
+              } else {
+                // Sección vacía si no hay referencias
+                return [
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: `REFERENCIA #1`,
+                      alignment: 'center',
+                      colSpan: 7,
+                      style: ['subheader'],
+                    },
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'NOMBRE COMPLETO',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 6,
+                    },
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'DIRECCIÓN',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 6,
+                    },
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'PARENTESCO',
+                      alignment: 'center',
+                      rowSpan: 2,
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'NÚMEROS TELEFÓNICOS',
+                      alignment: 'center',
+                      rowSpan: 3,
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'CASA',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 4,
+                    },
+                    {},
+                    {},
+                    {},
+                  ],
+                  [
+                    {},
+                    {},
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'CELULAR',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 4,
+                    },
+                    {},
+                    {},
+                    {},
+                  ],
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                    },
+                    {},
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'TRABAJO',
+                      alignment: 'center',
+                      style: ['subheader'],
+                    },
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: '',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 4,
+                    },
+                    {},
+                    {},
+                    {},
+                  ],
+                ];
+              }
+            })(),
+          ],
         },
       },
     ];
+  
+    /* 
+     Si quieres incluir el QR, descomenta y ajusta a tu necesidad:
+     if (includeQR) {
+       const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
+       content.push({ image: qrCode, width: 100, alignment: 'center', margin: [0, 10, 10, 10] });
+     }
+    */
 
-    /* if (includeQR) {
-      const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
-      content.push({ image: qrCode, width: 100, alignment: 'center', margin: [0, 10, 10, 10] });
-    } */
-
+     content.push(
+      {
+        text: 'Declaro solemnemente que la información antes proporcionada en está solicitud es veraz y objetiva y autorizo al INPREMA para que pueda ser revisada y confirmada en las Instituciones públicas y privadas.',
+        margin: [0, 20, 0, 20],
+        style: 'leyenda',
+      },
+      {
+        table: {
+          widths: ['33%', '33%', '34%'],
+          body: [
+            [
+              {
+                margin: [0, 50, 0, 0],
+                stack: [
+                  { text: '_______________________________', style: 'footer', alignment: 'center' },
+                  { text: 'Lugar y Fecha', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
+                ],
+                border: [false, false, false, false],
+              },
+              {
+                margin: [0, 50, 0, 0],
+                stack: [
+                  { text: '_______________________________', style: 'footer', alignment: 'center' },
+                  { text: 'Firma del Docente', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
+                ],
+                border: [false, false, false, false],
+              },
+              {
+                stack: [
+                  {
+                    canvas: [
+                      {
+                        type: 'rect',
+                        x: 0,
+                        y: 0,
+                        w: 80,
+                        h: 100,
+                        lineColor: '#000000',
+                      },
+                    ],
+                    margin: [40, 0, 0, 0],
+                  },
+                  {
+                    text: 'HUELLA',
+                    alignment: 'center',
+                    margin: [0, 5, 0, 0],
+                    style: 'footer',
+                  },
+                ],
+                border: [false, false, false, false],
+              },
+            ],
+          ],
+        },
+        layout: 'noBorders',
+      },
+      {
+        table: {
+          widths: ['100%'],
+          body: [
+            [
+              {
+                text: 'PARA USO EXCLUSIVO DEL INPREMA',
+                style: 'header',
+                alignment: 'center',
+              },
+            ],
+          ],
+        },
+        margin: [0, 20, 0, 0],
+      },
+      {
+        table: {
+          widths: ['33%', '33%', '34%'],
+          body: [
+            [
+              {
+                margin: [0, 40, 0, 0],
+                stack: [
+                  { text: '_______________________________', style: 'footer', alignment: 'center' },
+                  { text: 'Nombre del empleado que atendió al docente', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
+                ],
+                border: [false, false, false, false],
+              },
+              {
+                margin: [0, 40, 0, 0],
+                stack: [
+                  { text: '_______________________________', style: 'footer', alignment: 'center' },
+                  { text: 'Código de Empleado', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
+                ],
+                border: [false, false, false, false],
+              },
+              {
+                margin: [0, 40, 0, 0],
+                stack: [
+                  { text: '_______________________________', style: 'footer', alignment: 'center' },
+                  { text: 'Firma del Empleado', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
+                ],
+                border: [false, false, false, false],
+              },
+            ],
+          ],
+        },
+        layout: 'noBorders',
+      }
+    );
+    
     return {
       pageSize: 'letter',
       pageMargins: [40, 100, 40, 60],
       background: {
         image: data.base64data,
         width: 595.28,
-        height: 800
+        height: 800,
       },
       content: content,
       styles: {
@@ -523,51 +2148,55 @@ export class PdfService {
           fontSize: 10,
           bold: true,
           alignment: 'center',
-          //margin: [0, 20, 0, 20],
           color: 'black',
-          fillColor: 'lightgray'
+          fillColor: 'lightgray',
         },
         subheader: {
-          fontSize: 10,
+          fontSize: 8,
           alignment: 'left',
           color: 'white',
           fillColor: '#1c9588',
           bold: true,
-          //margin: [40, 10, 40, 5]
         },
         name: {
           fontSize: 12,
           bold: true,
           alignment: 'center',
-          margin: [40, 10, 40, 5]
+          margin: [40, 10, 40, 5],
         },
         body: {
-          fontSize: 10,
+          fontSize: 8,
           alignment: 'left',
-          margin: [40, 10, 40, 5]
+          margin: [40, 10, 40, 5],
         },
         dni: {
           fontSize: 11,
-          bold: true
+          bold: true,
         },
         signature: {
           fontSize: 12,
           bold: true,
           alignment: 'center',
-          margin: [0, 10, 0, 0]
+          margin: [0, 10, 0, 0],
         },
         signatureTitle: {
           fontSize: 12,
-          alignment: 'center'
+          alignment: 'center',
         },
         footer: {
           fontSize: 10,
           alignment: 'right',
-        }
-      }
+        },
+        smallCell: {
+          fontSize: 8, 
+        },
+        leyenda: {
+          fontSize: 10, 
+        },
+      },
     };
   }
-
+  
   async generateConstanciaAfiliacion(data: any, includeQR: boolean): Promise<Buffer> {
     return this.generateConstancia(data, includeQR, this.generateConstanciaAfiliacionTemplate);
   }

@@ -24,6 +24,7 @@ import { format } from 'date-fns';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
+import axios from 'axios';
 
 @Injectable()
 export class AfiliadoService {
@@ -66,6 +67,27 @@ export class AfiliadoService {
     private readonly paisRepository: Repository<Net_Pais>
 
   ) { }
+
+  async obtenerUbicacion(ip: string): Promise<any> {
+    try {
+      const response = await axios.get(`https://ipapi.co/${ip}/json/`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener la ubicación:', error.message);
+      return null;
+    }
+  }
+
+  obtenerMunicipio(ciudad: string): string {
+    const municipios = {
+      Tegucigalpa: 'Distrito Central',
+      'San Pedro Sula': 'San Pedro Sula',
+      'La Ceiba': 'La Ceiba',
+      // Agrega más ciudades y municipios aquí
+    };
+
+    return municipios[ciudad] || 'Municipio desconocido';
+  }
 
   async getMovimientosOrdenados(id_persona: number, id_tipo_cuenta: number): Promise<any> {
     try {

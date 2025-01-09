@@ -13,8 +13,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   HttpException,
-  Req,
-  UnauthorizedException
+  Req
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
@@ -28,6 +27,25 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 export class AfiliadoController {
 
   constructor(private readonly afiliadoService: AfiliadoService) { }
+
+  @Get('/ubicacion')
+  async obtenerUbicacion(@Req() req): Promise<any> {
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const ipLimpia = ip.includes(':') ? ip.split(':').pop() : ip;
+    try {
+      const ubicacion = await this.afiliadoService.obtenerUbicacion(ipLimpia);
+
+      if (ubicacion && ubicacion.city) {
+        const municipio = this.afiliadoService.obtenerMunicipio(ubicacion.city);
+        return { municipio, ubicacion };
+      } else {
+        return { error: 'No se pudo determinar la ubicación' };
+      }
+    } catch (error) {
+      return { error: 'Error al procesar la solicitud', detalle: error.message };
+    }
+  }
+
 
   @Get(':id_persona/movimientos-ordenados/:id_tipo_cuenta')
   async getMovimientosOrdenados(

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity({ name: 'NET_CONSULTAS_MEDICAS' })
 export class Net_Consultas_Medicas {
@@ -31,4 +31,10 @@ export class Net_Consultas_Medicas {
 
   @Column({ name: 'FECHA_CIERRE', type: 'date', nullable: true })
   fecha_cierre: string;
+
+  @CreateDateColumn({ name: 'FECHA_CREACION', type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+  fecha_creacion: Date;
+
+  @Column({ name: 'USUARIO_CREACION', type: 'varchar2', length: 255, nullable: true })
+  usuario_creacion: string;
 }

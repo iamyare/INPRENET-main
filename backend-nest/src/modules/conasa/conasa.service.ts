@@ -210,47 +210,56 @@ export class ConasaService {
 
   async obtenerContratoYBeneficiariosPorDNI(dni: string): Promise<any> {
     const persona = await this.personaRepository.findOne({
-      where: { n_identificacion: dni },
-      relations: ['detallePersona'],
+        where: { n_identificacion: dni },
+        relations: ['detallePersona'],
     });
-    
+
     if (!persona) {
-      throw new NotFoundException(`No se encontró ninguna persona con el DNI ${dni}`);
+        throw new NotFoundException(`No se encontró ninguna persona con el DNI ${dni}`);
     }
+
     const contrato = await this.contratosRepository.findOne({
-      where: { titular: { id_persona: persona.id_persona } },
-      relations: ['plan', 'beneficiarios'],
+        where: { titular: { id_persona: persona.id_persona } },
+        relations: ['plan', 'plan.categoria', 'beneficiarios'],
     });
-  
+
     if (!contrato) {
-      throw new NotFoundException(`No se encontró ningún contrato para la persona con DNI ${dni}`);
+        throw new NotFoundException(`No se encontró ningún contrato para la persona con DNI ${dni}`);
     }
+
     const contratoFormateado = {
-      idContrato: contrato.id_contrato,
-      numeroProducto: contrato.numero_producto,
-      lugarCobro: contrato.lugar_cobro,
-      fechaInicioContrato: contrato.fecha_inicio_contrato,
-      fechaCancelacionContrato: contrato.fecha_cancelacion_contrato,
-      status: contrato.status,
-      plan: {
-        idPlan: contrato.plan.id_plan,
-        nombrePlan: contrato.plan.nombre_plan,
-        precio: contrato.plan.precio,
-        descripcion: contrato.plan.descripcion,
-        proteccionPara: contrato.plan.proteccion_para,
-      },
-      beneficiarios: contrato.beneficiarios.map((beneficiario) => ({
-        idBeneficiario: beneficiario.id_beneficiario,
-        primerNombre: beneficiario.primer_nombre,
-        segundoNombre: beneficiario.segundo_nombre,
-        primerApellido: beneficiario.primer_apellido,
-        segundoApellido: beneficiario.segundo_apellido,
-        parentesco: beneficiario.parentesco,
-        fechaNacimiento: beneficiario.fecha_nacimiento,
-      })),
+        idContrato: contrato.id_contrato,
+        numeroProducto: contrato.numero_producto,
+        lugarCobro: contrato.lugar_cobro,
+        fechaInicioContrato: contrato.fecha_inicio_contrato,
+        fechaCancelacionContrato: contrato.fecha_cancelacion_contrato,
+        status: contrato.status,
+        plan: {
+            idPlan: contrato.plan.id_plan,
+            nombrePlan: contrato.plan.nombre_plan,
+            precio: contrato.plan.precio,
+            descripcion: contrato.plan.descripcion,
+            proteccionPara: contrato.plan.proteccion_para,
+            categoria: contrato.plan.categoria
+                ? {
+                      idCategoria: contrato.plan.categoria.id_categoria,
+                      nombre: contrato.plan.categoria.nombre,
+                  }
+                : null,
+        },
+        beneficiarios: contrato.beneficiarios.map((beneficiario) => ({
+            idBeneficiario: beneficiario.id_beneficiario,
+            primerNombre: beneficiario.primer_nombre,
+            segundoNombre: beneficiario.segundo_nombre,
+            primerApellido: beneficiario.primer_apellido,
+            segundoApellido: beneficiario.segundo_apellido,
+            parentesco: beneficiario.parentesco,
+            fechaNacimiento: beneficiario.fecha_nacimiento,
+        })),
     };
     return contratoFormateado;
-  }
+}
+
 
   async obtenerPlanillaContratosActivos(email: string, password: string): Promise<any[]> {
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
@@ -468,13 +477,12 @@ export class ConasaService {
     email: string,
     password: string
   ): Promise<object> {
-    // Validar credenciales del usuario
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
       where: {
         correo_1: email,
         usuarioEmpresas: {
           usuarioModulos: {
-            rolModulo: { nombre: In(['ADMINISTRADOR' ,'CONSULTA', 'TODO']) },
+            rolModulo: { nombre: In(['ADMINISTRADOR', 'CONSULTA', 'TODO']) },
           },
         },
       },
@@ -507,14 +515,13 @@ export class ConasaService {
       const { dni } = consultaDto;
   
       try {
-        // Validar longitud del DNI
         if (!dni || dni.length !== 13) {
           throw new Error('El DNI debe tener exactamente 13 caracteres.');
         }
   
-        // Crear y guardar la consulta directamente
         const nuevaConsulta = this.consultaRepository.create({
           ...consultaDto,
+          usuario_creacion: email,
         });
   
         await this.consultaRepository.save(nuevaConsulta);
@@ -526,14 +533,13 @@ export class ConasaService {
         });
       }
     }
-  
-    // Retornar resultados
     return {
       message: 'Proceso de registro de asistencias médicas completado.',
       totalExitosos: resultados.totalExitosos,
       fallidos: resultados.fallidos,
     };
   }
+  
 
   async obtenerDatos(email: string, password: string, tipo: number): Promise<any> {
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
@@ -782,8 +788,6 @@ export class ConasaService {
   
   async cancelarContrato(dto: CancelarContratoDto): Promise<string> {
     let contrato: Net_Contratos_Conasa | undefined;
-
-    // Buscar contrato por ID o por n_identificacion
     if (dto.id_contrato) {
         contrato = await this.contratosRepository.findOne({
             where: { id_contrato: dto.id_contrato, status: 'ACTIVO' },

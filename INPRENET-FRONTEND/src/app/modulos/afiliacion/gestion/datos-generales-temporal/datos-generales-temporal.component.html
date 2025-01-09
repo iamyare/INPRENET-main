@@ -15,16 +15,6 @@
     
 
     <form [formGroup]="formGroup" style="margin: 1%;" (change)="onDatosGeneralesChange()">
-      <div class="voluntario-card compact">
-        <div class="voluntario-row">
-          <h4> ¿Es voluntario?</h4>
-          <mat-radio-group formControlName="voluntario" class="voluntario-radio-inline">
-            <mat-radio-button [value]="true">Sí</mat-radio-button>
-            <mat-radio-button [value]="false">No</mat-radio-button>
-          </mat-radio-group>
-        </div>
-      </div>
-      
       <div class="row">
         <div class="col-lg-4 col-md-12">
           <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">
@@ -37,7 +27,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_tipo_identificacion')?.invalid && formGroup.get('id_tipo_identificacion')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Tipo de Identificación es requerido.
+              Es requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -47,16 +37,16 @@
             <mat-icon matPrefix>credit_card</mat-icon>
             <input matInput formControlName="n_identificacion" (blur)="formGroup.get('n_identificacion')?.markAsTouched()">
             <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('required') && formGroup.get('n_identificacion')?.touched">
-              Número de Identificación es requerido.
+              Es requerido.
             </mat-error>
             <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('minlength') && formGroup.get('n_identificacion')?.touched">
-              El número de identificación debe tener al menos {{ formGroup.get('id_tipo_identificacion')?.value === 2 ? 9 : 13 }} caracteres.
+              Debe tener al menos {{ formGroup.get('id_tipo_identificacion')?.value === 2 ? 9 : 13 }} caracteres.
             </mat-error>
             <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('maxlength') && formGroup.get('n_identificacion')?.touched">
-              El número de identificación no puede tener más de 15 caracteres.
+              No puede tener más de 15 caracteres.
             </mat-error>
             <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('pattern') && formGroup.get('n_identificacion')?.touched">
-              El número de identificación {{ formGroup.get('id_tipo_identificacion')?.value === 3 ? 'puede contener números y letras' : 'solo puede contener números' }}.
+              {{ formGroup.get('id_tipo_identificacion')?.value === 3 ? 'Puede contener números y letras' : 'Solo puede contener números' }}.
             </mat-error>
           </mat-form-field>
 
@@ -68,7 +58,7 @@
             <input matInput formControlName="rtn">
             <mat-error *ngIf="formGroup.get('rtn')?.invalid && formGroup.get('rtn')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Debes ingresar un RTN válido de 14 dígitos.
+              Debes ingresar 14 dígitos.
             </mat-error>
           </mat-form-field>
         </div>
@@ -88,7 +78,7 @@
             <mat-hint>DD/MM/YYYY</mat-hint>
             <mat-error *ngIf="formGroup.get('fecha_nacimiento')?.invalid && formGroup.get('fecha_nacimiento')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Fecha de Nacimiento es requerida.
+              Es requerida.
             </mat-error>
           </mat-form-field>
         </div>
@@ -104,7 +94,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('genero')?.invalid && formGroup.get('genero')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Género es requerido.
+              Es requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -118,7 +108,7 @@
             <input matInput formControlName="primer_nombre">
             <mat-error *ngIf="formGroup.get('primer_nombre')?.invalid && formGroup.get('primer_nombre')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Primer Nombre es requerido y debe tener entre 1 y 40 caracteres sin espacios.
+               Debe tener entre 1 y 40 caracteres.
             </mat-error>
           </mat-form-field>
         </div>
@@ -129,7 +119,7 @@
             <input matInput formControlName="segundo_nombre">
             <mat-error *ngIf="formGroup.get('segundo_nombre')?.invalid && formGroup.get('segundo_nombre')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Segundo Nombre no puede tener más de 40 caracteres.
+              No puede tener más de 40 caracteres.
             </mat-error>
           </mat-form-field>
         </div>
@@ -154,7 +144,7 @@
             <input matInput formControlName="primer_apellido">
             <mat-error *ngIf="formGroup.get('primer_apellido')?.invalid && formGroup.get('primer_apellido')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Primer Apellido es requerido y debe tener entre 1 y 40 caracteres sin espacios.
+              Debe tener entre 1 y 40 caracteres.
             </mat-error>
           </mat-form-field>
         </div>
@@ -179,16 +169,16 @@
           <mat-icon matPrefix>phone</mat-icon>
           <input matInput formControlName="telefono_1">
           <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('required') && formGroup.get('telefono_1')?.touched">
-            Teléfono 1 es requerido.
+            Es requerido.
           </mat-error>
           <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('minlength') && formGroup.get('telefono_1')?.touched">
-            El teléfono debe tener al menos 8 caracteres.
+            Debe tener al menos 8 caracteres.
           </mat-error>
           <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('maxlength') && formGroup.get('telefono_1')?.touched">
-            El teléfono no puede tener más de 12 caracteres.
+            No puede tener más de 12 caracteres.
           </mat-error>
           <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('pattern') && formGroup.get('telefono_1')?.touched">
-            El formato del teléfono no es válido.
+            El formato no es válido.
           </mat-error>
         </mat-form-field>
       </div>
@@ -247,7 +237,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('estado_civil')?.invalid && formGroup.get('estado_civil')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Estado Civil es requerido.
+              Es requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -258,7 +248,7 @@
             <input matInput formControlName="cantidad_hijos" type="number">
             <mat-error *ngIf="formGroup.get('cantidad_hijos')?.invalid && formGroup.get('cantidad_hijos')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Cantidad de Hijos es requerida.
+              Es requerida.
             </mat-error>
           </mat-form-field>
         </div>
@@ -287,7 +277,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('grado_academico')?.invalid && formGroup.get('grado_academico')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Grado Académico es requerido.
+              Es requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -302,7 +292,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_profesion')?.invalid && formGroup.get('id_profesion')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Profesión es requerida.
+              Es requerida.
             </mat-error>
           </mat-form-field>
         </div>
@@ -317,7 +307,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('representacion')?.invalid && formGroup.get('representacion')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Representación es requerida.
+              Es requerida.
             </mat-error>
           </mat-form-field>
         </div>
@@ -335,7 +325,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_pais')?.invalid && formGroup.get('id_pais')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Nacionalidad es requerida.
+              Es requerida.
             </mat-error>
           </mat-form-field>
         </div>
@@ -350,7 +340,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_departamento_nacimiento')?.invalid && formGroup.get('id_departamento_nacimiento')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Departamento de Nacimiento es requerido.
+              Es requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -365,7 +355,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_municipio_nacimiento')?.invalid && formGroup.get('id_municipio_nacimiento')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Municipio de Nacimiento es requerido.
+              Es requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -383,7 +373,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_departamento_residencia')?.invalid && formGroup.get('id_departamento_residencia')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Departamento de Residencia es requerido.
+              Es requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -398,7 +388,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_municipio_residencia')?.invalid && formGroup.get('id_municipio_residencia')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Municipio de Residencia es requerido.
+              Es requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -413,7 +403,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('grupo_etnico')?.invalid && formGroup.get('grupo_etnico')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Grupo Étnico es requerido.
+              Es requerido.
             </mat-error>
           </mat-form-field>
         </div>

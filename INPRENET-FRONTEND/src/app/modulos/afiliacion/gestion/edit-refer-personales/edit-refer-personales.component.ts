@@ -76,12 +76,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         validationRules: [Validators.required, Validators.minLength(3)]
       },
       {
-        header: 'Numero De Identificacion',
-        col: 'n_identificacion',
-        isEditable: true,
-        validationRules: [Validators.required, Validators.minLength(3)]
-      },
-      {
         header: 'Tipo De Referencia',
         col: 'tipo_referencia',
         isEditable: true,
@@ -138,7 +132,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
           .map((item: any) => {
             const filaProcesada = {
               id_referencia: item.id_referencia ?? '',
-              n_identificacion: item.n_identificacion ?? '',
               nombre_completo: `${item.primer_nombre ?? ''} ${item.segundo_nombre ?? ''} ${item.primer_apellido ?? ''} ${item.segundo_apellido ?? ''}`.trim(),
               parentesco: item.parentesco || '',
               direccion: item.direccion ?? '',
@@ -287,15 +280,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         editable: true,
         icono: 'work',
         validadores: [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]
-      },
-      {
-        nombre: 'n_identificacion',
-        tipo: 'text',
-        requerido: true,
-        etiqueta: 'Número de Identificación',
-        editable: true,
-        icono: 'badge',
-        validadores: [Validators.required, Validators.pattern(/^\d{13}$/)]
       }
     ];
 
@@ -348,7 +332,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
           telefono_domicilio: result.telefono_domicilio,
           telefono_personal: result.telefono_personal,
           telefono_trabajo: result.telefono_trabajo,
-          n_identificacion: result.n_identificacion,
           tipo_referencia: result.tipo_referencia,
           parentesco: result.parentesco,
           estado: 'ACTIVO'

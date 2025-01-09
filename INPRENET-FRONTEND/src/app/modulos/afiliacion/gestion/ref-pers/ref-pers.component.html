@@ -24,7 +24,6 @@
             </mat-error>
           </mat-form-field>
                        
-                  
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Primer Nombre</mat-label>
             <input matInput type="text" formControlName="primer_nombre" [readonly]="formGroup.get('conyuge')?.disabled">
@@ -116,15 +115,7 @@
         <div *ngFor="let ref of referencias.controls; index as i" [formGroupName]="i" class="reference-group">
           <h4 class="reference-title">Referencia Número: {{ i + 1 }}</h4>
 
-          <div class="form-row">
-            <mat-form-field class="half-width" appearance="outline">
-              <mat-label>Número de Identificación</mat-label>
-              <input matInput type="text" formControlName="n_identificacion">
-              <mat-error *ngIf="referencias.at(i).get('n_identificacion')?.invalid && referencias.at(i).get('n_identificacion')?.touched">
-                <mat-icon>error</mat-icon> {{ getErrorMessageForIdentificacion(i) }}
-              </mat-error>
-            </mat-form-field>                        
-
+          <div class="form-row">                 
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Tipo de Referencia</mat-label>
               <mat-select formControlName="tipo_referencia">

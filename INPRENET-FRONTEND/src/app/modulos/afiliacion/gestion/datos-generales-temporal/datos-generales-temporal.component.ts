@@ -63,9 +63,6 @@ ngOnInit(): void {
   // Agregar el control de discapacidad
   this.formGroup.addControl('discapacidad', new FormControl(false, Validators.required));
 
-  // Agregar el control de voluntario
-  this.formGroup.addControl('voluntario', new FormControl(false, Validators.required));
-
   // Resetear la cámara si el componente de cámara existe
   if (this.camaraComponent) {
       this.camaraComponent.resetCamera();
@@ -102,7 +99,6 @@ ngOnInit(): void {
           this.formGroup = this.fb.group({
               peps: this.fb.array([]),
               discapacidades: this.fb.array([]),
-              voluntario: [false, Validators.required],
               discapacidad: [false, Validators.required],
               ...this.initialData
           });
@@ -111,14 +107,12 @@ ngOnInit(): void {
           this.formGroup = this.fb.group({
               peps: this.fb.array([]),
               discapacidades: this.fb.array([]),
-              voluntario: [false, Validators.required],
               discapacidad: [false, Validators.required],
               fotoPerfil: new FormControl(null, Validators.required)
           });
       }
   } else {
       this.formGroup.reset({
-          voluntario: false,
           discapacidad: false,
           fotoPerfil: null
       });
@@ -228,7 +222,6 @@ ngOnInit(): void {
       Validators.maxLength(75),
       Validators.required
   ]));
-  this.formGroup.addControl('voluntario', new FormControl(false, Validators.required));
 
   // Cargar datos iniciales
   this.cargarDatosIniciales();
@@ -288,7 +281,6 @@ ngOnInit(): void {
   resetForm(): void {
     // Reinicia los valores predeterminados de los controles
     this.formGroup.reset({
-      voluntario: false, // NO
       discapacidad: false, // NO
       FotoPerfil: null // Restablecer FotoPerfil si es necesario
     });

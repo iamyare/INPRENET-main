@@ -2,7 +2,6 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 import { WebcamImage, WebcamInitError } from 'ngx-webcam';
 import { FormStateService } from 'src/app/services/form-state.service';
-import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-camara',
@@ -12,7 +11,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 export class CamaraComponent implements OnInit {
   @Output() imageCaptured = new EventEmitter<string>();
 
-  public mostrarWebcam = false; // Iniciar con la cámara apagada
+  public mostrarWebcam = false;
   public dispositivoId!: string;
   public opcionesVideo: MediaTrackConstraints = {};
   public errors: WebcamInitError[] = [];
@@ -25,7 +24,7 @@ export class CamaraComponent implements OnInit {
   }
 
   public triggerCaptura(): void {
-    this.mostrarWebcam = true; // Activar la cámara antes de capturar
+    this.mostrarWebcam = true;
     this.trigger.next();
   }
 
@@ -47,7 +46,7 @@ export class CamaraComponent implements OnInit {
         message = `Error desconocido: ${error.message}`;
     }
   
-    alert(message); // Mostrar mensaje al usuario
+    alert(message);
     console.error(message, error);
   }
   
@@ -56,7 +55,7 @@ export class CamaraComponent implements OnInit {
       this.imagenWebcam = imagen;
       this.imageCaptured.emit(imagen.imageAsDataUrl);
       this.formStateService.setFotoPerfil(imagen.imageAsDataUrl);
-      this.mostrarWebcam = false; // Apagar la cámara después de capturar la imagen
+      this.mostrarWebcam = false;
     } else {
       console.error('La imagen capturada no es válida');
     }
@@ -79,7 +78,7 @@ export class CamaraComponent implements OnInit {
         console.error('Error al obtener acceso a la cámara:', error);
       });
     }
-    this.errors = []; // Limpiar los errores registrados
+    this.errors = [];
   }
 
   public get triggerObservable(): Observable<void> {

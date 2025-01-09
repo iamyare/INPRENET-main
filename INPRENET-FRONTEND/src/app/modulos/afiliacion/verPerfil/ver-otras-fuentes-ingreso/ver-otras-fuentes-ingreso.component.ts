@@ -176,7 +176,7 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
         requerido: false,
         etiqueta: 'Monto Ingreso',
         editable: true,
-        icono: 'attach_money',
+        icono: 'money',
         validaciones: [Validators.required]
       },
       {

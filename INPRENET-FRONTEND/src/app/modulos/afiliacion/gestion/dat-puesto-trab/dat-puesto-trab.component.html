@@ -60,9 +60,6 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
-            
-
-
           </div>
 
           <div class="form-row">
@@ -82,7 +79,7 @@
           <div class="form-row">
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Salario</mat-label>
-              <mat-icon matPrefix>attach_money</mat-icon>
+              <mat-icon matPrefix>money</mat-icon>
               <input matInput formControlName="salario_base">
               <mat-error *ngFor="let error of getErrors(i, 'salario_base')">
                 <mat-icon>error</mat-icon> {{ error }}

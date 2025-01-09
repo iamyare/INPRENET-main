@@ -1,9 +1,45 @@
 <div class="back-button-container">
-    <button mat-raised-button color="primary" class="back-button" routerLink="/home/conasa/menu-conasa">
-      <mat-icon>arrow_back</mat-icon> Regresar al Menú
-    </button>
-  </div>
+  <button mat-raised-button color="primary" class="back-button" routerLink="/home/conasa/menu-conasa">
+    <mat-icon>arrow_back</mat-icon> Regresar al Menú
+  </button>
+</div>
 
-  <div class="menu-title">
-    <h1>{{ menuTitle }}</h1>
+<div class="menu-title">
+  <h1>{{ menuTitle }}</h1>
+</div>
+
+<app-perfil-header (personaEncontrada)="handlePersonaEncontrada($event)"></app-perfil-header>
+
+<div *ngIf="persona && contratos.length > 0" class="contratos-container">
+  <h2 class="section-title">Contratos del Titular</h2>
+  <div *ngFor="let contrato of contratos" class="contrato-card">
+    <mat-card class="styled-card">
+      <mat-card-header>
+        <mat-card-title>Contrato: {{ contrato.numeroProducto }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p><strong>Plan:</strong> {{ contrato.plan?.nombrePlan || 'Sin información' }}</p>
+        <p><strong>Categoría:</strong> {{ contrato.plan?.categoria?.nombre || 'Sin información' }}</p>
+        <p><strong>Estado:</strong> {{ contrato.status }}</p>
+        <p><strong>Fecha de Inicio:</strong> {{ contrato.fechaInicioContrato }}</p>
+        <p><strong>Lugar de Cobro:</strong> {{ contrato.lugarCobro }}</p>
+      </mat-card-content>
+      <mat-card-actions class="card-actions">
+        <mat-form-field appearance="outline" class="motivo-field">
+          <mat-label>Motivo de Cancelación</mat-label>
+          <input matInput [(ngModel)]="motivoCancelacion" />
+        </mat-form-field>
+        <button mat-raised-button color="warn" class="cancel-button" (click)="cancelarContrato(contrato.idContrato)">
+          Cancelar Contrato
+        </button>
+      </mat-card-actions>
+    </mat-card>
   </div>
+</div>
+
+<div *ngIf="persona && contratos.length === 0" class="no-contracts">
+  <p>Este titular no tiene contratos Activos.</p>
+  <button mat-raised-button color="primary" class="new-contract-button" routerLink="/home/conasa/menu-conasa/ingresar-asistencia">
+    Crear Nuevo Contrato
+  </button>
+</div>

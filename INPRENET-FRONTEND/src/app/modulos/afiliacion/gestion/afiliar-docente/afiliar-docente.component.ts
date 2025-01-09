@@ -17,6 +17,8 @@ import { OtrasFuentesIngresoComponent } from '../otras-fuentes-ingreso/otras-fue
 import { FormStateService } from '../../../../services/form-state.service';
 import { CamaraComponent} from '../../../../components/camara/camara.component';
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
+import { AfiliadoService } from '../../../../services/afiliado.service';
+import { PersonaService } from '../../../../services/persona.service';
 
 @Component({
   selector: 'app-afiliar-docente',
@@ -51,8 +53,9 @@ export class AfiliarDocenteComponent implements OnInit {
   fotoPerfil: string = '';
   formErrors: any = null;
 
-  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private datosEstaticosService: DatosEstaticosService,
-    private toastr: ToastrService,  private formStateService: FormStateService, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private datosEstaticosService: DatosEstaticosService, 
+    private toastr: ToastrService,  private formStateService: FormStateService, private http: HttpClient, private afiliadoService: AfiliadoService,
+    private personaService: PersonaService) {
     this.convertirImagenABase64('../assets/images/membratadoFinal.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
     }).catch(error => {
@@ -119,106 +122,146 @@ export class AfiliarDocenteComponent implements OnInit {
     return formGroup.invalid && (formGroup.touched || formGroup.dirty);
   }
 //-----------------------------------------------
-onSubmit(): void {
-  const datosGenerales = this.formGroup.get('datosGenerales')?.value;
+  onSubmit(): void {
+    const datosGenerales = this.formGroup.get('datosGenerales')?.value;
 
-  // Validar que la foto de perfil esté presente
-  if (!datosGenerales?.fotoPerfil) {
+    // Validar que la foto de perfil esté presente
+    if (!datosGenerales?.fotoPerfil) {
       this.toastr.warning('Por favor, capture una fotografía antes de enviar.', 'Advertencia');
       return; // Detener el envío si falta la foto
-  }
+    }
 
-  if (this.formGroup.valid) {
+    if (this.formGroup.valid) {
+      // Recoger los datos de otros pasos
       const referenciasPersonales = this.formGroup.get('referenciasPersonales')?.value;
       const bancos = this.formGroup.get('bancos')?.value;
       const centrosTrabajo = this.formGroup.get('centrosTrabajo')?.value;
       const colegiosMagisteriales = datosGenerales.ColMags || [];
       const beneficiarios = this.formGroup.get('beneficiarios')?.value.beneficiario || [];
 
+      // (Opcional) Generar PDF de beneficiarios si existen
       if (beneficiarios && beneficiarios.length > 0) {
-          const documentDefinition = this.getDocumentDefinition(beneficiarios, datosGenerales, this.backgroundImageBase64);
-          pdfMake.createPdf(documentDefinition).download('beneficiarios.pdf');
+        const documentDefinition = this.getDocumentDefinition(
+          beneficiarios, 
+          datosGenerales, 
+          this.backgroundImageBase64
+        );
+        pdfMake.createPdf(documentDefinition).download('beneficiarios.pdf');
       }
 
+      // Construir el objeto que enviarás al backend
       const formattedData = {
-          persona: {
-              id_tipo_identificacion: datosGenerales.id_tipo_identificacion,
-              id_pais_nacionalidad: datosGenerales.id_pais,
-              n_identificacion: datosGenerales.n_identificacion,
-              rtn: datosGenerales.rtn,
-              grupo_etnico: datosGenerales.grupo_etnico,
-              estado_civil: datosGenerales.estado_civil.toUpperCase(),
-              primer_nombre: datosGenerales.primer_nombre.toUpperCase(),
-              segundo_nombre: datosGenerales.segundo_nombre?.toUpperCase(),
-              tercer_nombre: datosGenerales.tercer_nombre?.toUpperCase(),
-              primer_apellido: datosGenerales.primer_apellido.toUpperCase(),
-              segundo_apellido: datosGenerales.segundo_apellido?.toUpperCase(),
-              genero: datosGenerales.genero.toUpperCase(),
-              cantidad_hijos: datosGenerales.cantidad_hijos,
-              representacion: datosGenerales.representacion.toUpperCase(),
-              grado_academico: datosGenerales.grado_academico.toUpperCase(),
-              telefono_1: datosGenerales.telefono_1,
-              telefono_2: datosGenerales.telefono_2,
-              correo_1: datosGenerales.correo_1,
-              correo_2: datosGenerales.correo_2,
-              fecha_nacimiento: datosGenerales.fecha_nacimiento,
-              direccion_residencia_estructurada: this.formatDireccion(datosGenerales).toUpperCase(),
-              id_municipio_residencia: datosGenerales.id_municipio_residencia,
-              id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
-              id_profesion: datosGenerales.id_profesion,
-              discapacidades: this.formatDiscapacidades(datosGenerales.discapacidades) || [],
-              fecha_afiliacion: new Date().toISOString()
-          },
-          familiares: this.formatFamiliares(datosGenerales, referenciasPersonales),
-          peps: this.formatPeps(datosGenerales.peps || []),
-          detallePersona: {
-              eliminado: "NO",
-              tipo_persona: "AFILIADO",
-              nombre_estado: "ACTIVO",
-              voluntario: datosGenerales.voluntario ? 'SI' : 'NO'
-          },
-          colegiosMagisteriales: colegiosMagisteriales.map((col: any) => ({
-              id_colegio: col.id_colegio
-          })),
-          bancos: this.formatBancos(bancos.bancos || []),
-          centrosTrabajo: this.formatCentrosTrabajo(centrosTrabajo.trabajo || []),
-          otrasFuentesIngreso: this.formatOtrasFuentesIngreso(centrosTrabajo.otrasFuentesIngreso || []),
-          referencias: this.formatReferencias(referenciasPersonales.refpers || []),
-          beneficiarios: this.formatBeneficiarios(beneficiarios || []),
+        persona: {
+          id_tipo_identificacion: datosGenerales.id_tipo_identificacion,
+          id_pais_nacionalidad: datosGenerales.id_pais,
+          n_identificacion: datosGenerales.n_identificacion,
+          rtn: datosGenerales.rtn,
+          grupo_etnico: datosGenerales.grupo_etnico,
+          estado_civil: datosGenerales.estado_civil?.toUpperCase(),
+          primer_nombre: datosGenerales.primer_nombre?.toUpperCase(),
+          segundo_nombre: datosGenerales.segundo_nombre?.toUpperCase(),
+          tercer_nombre: datosGenerales.tercer_nombre?.toUpperCase(),
+          primer_apellido: datosGenerales.primer_apellido?.toUpperCase(),
+          segundo_apellido: datosGenerales.segundo_apellido?.toUpperCase(),
+          genero: datosGenerales.genero?.toUpperCase(),
+          cantidad_hijos: datosGenerales.cantidad_hijos,
+          representacion: datosGenerales.representacion?.toUpperCase(),
+          grado_academico: datosGenerales.grado_academico?.toUpperCase(),
+          telefono_1: datosGenerales.telefono_1,
+          telefono_2: datosGenerales.telefono_2,
+          correo_1: datosGenerales.correo_1,
+          correo_2: datosGenerales.correo_2,
+          fecha_nacimiento: datosGenerales.fecha_nacimiento,
+          direccion_residencia_estructurada: this.formatDireccion(datosGenerales).toUpperCase(),
+          id_municipio_residencia: datosGenerales.id_municipio_residencia,
+          id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
+          id_profesion: datosGenerales.id_profesion,
+          discapacidades: this.formatDiscapacidades(datosGenerales.discapacidades) || [],
+          fecha_afiliacion: new Date().toISOString()
+        },
+        familiares: this.formatFamiliares(datosGenerales, referenciasPersonales),
+        peps: this.formatPeps(datosGenerales.peps || []),
+        detallePersona: {
+          eliminado: 'NO',
+          tipo_persona: 'AFILIADO',
+          nombre_estado: 'ACTIVO'
+        },
+        colegiosMagisteriales: colegiosMagisteriales.map((col: any) => ({
+          id_colegio: col.id_colegio
+        })),
+        bancos: this.formatBancos(bancos.bancos || []),
+        centrosTrabajo: this.formatCentrosTrabajo(centrosTrabajo.trabajo || []),
+        otrasFuentesIngreso: this.formatOtrasFuentesIngreso(centrosTrabajo.otrasFuentesIngreso || []),
+        referencias: this.formatReferencias(referenciasPersonales.refpers || []),
+        beneficiarios: this.formatBeneficiarios(beneficiarios || []),
       };
 
-      const fotoPerfilBase64 = this.fotoPerfil || '';
+      // Convertir foto de perfil base64 a File (si existe)
+      const fotoPerfilBase64 = datosGenerales?.fotoPerfil || '';
+      
       let fileFoto: any;
 
       if (fotoPerfilBase64) {
-          const fotoBlob = this.dataURItoBlob(fotoPerfilBase64);
-          fileFoto = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
+        const fotoBlob = this.dataURItoBlob(fotoPerfilBase64);
+        fileFoto = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
       }
 
-      console.log(formattedData);
+      // Archivo de identificación (ej. escaneo de cédula)
+      const fileIdent = datosGenerales?.archivo_identificacion;
 
-      let fileIdent = datosGenerales?.archivo_identificacion;
-
+      // Llamar al servicio para crear afiliación
       this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
-          response => {
-              console.log('Datos enviados con éxito:', response);
-              this.toastr.success('Datos enviados con éxito', 'Éxito');
-              this.resetForm(); // Reinicia todo tras el envío
-              this.formStateService.resetFotoPerfil(); // Limpia explícitamente la foto del servicio
-          },
-          error => {
-              console.error('Error al enviar los datos:', error);
-              const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
-              this.toastr.error(errorMessage, 'Error');
+        (response: any) => {
+          console.log('Datos enviados con éxito:', response);
+          this.toastr.success('Datos enviados con éxito', 'Éxito');
+          
+          const dniAfiliado = response[0].n_identificacion; 
+          if (!dniAfiliado) {
+            console.warn('No se recibió un n_identificacion en la respuesta.');
+            return;
           }
+          
+          this.personaService.getPersonaByDni(dniAfiliado).subscribe(
+            (personaActualizada: any) => {
+              if (!personaActualizada) {
+                console.error('No se encontró la persona luego de crear la afiliación.');
+                return;
+              }
+
+              this.afiliadoService.generarConstanciaAfiliacion2(personaActualizada).subscribe(() => {
+                this.afiliadoService.generarConstanciaQR(personaActualizada, 'afiliacion2').subscribe((blob: Blob) => {
+                  const downloadURL = window.URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = downloadURL;
+                  link.download = this.generarNombreArchivo(personaActualizada, 'afiliacion2');
+                  link.click();
+                  window.URL.revokeObjectURL(downloadURL);
+                });
+              });
+            },
+            (err) => {
+              console.error('Error al consultar persona por DNI:', err);
+            }
+          );
+
+          this.resetForm();
+          this.formStateService.resetFotoPerfil();
+        },
+        (error: any) => {
+          console.error('Error al enviar los datos:', error);
+          const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
+          this.toastr.error(errorMessage, 'Error');
+        }
       );
-  } else {
+    } else {
+      // Formulario inválido
       this.formErrors = this.generateFormErrors(this.formGroup);
-      console.error('Errores del formulario:', this.formErrors);
+      //console.error('Errores del formulario:', this.formErrors);
       this.markAllAsTouched(this.formGroup);
       this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
+    }
   }
-}
+
 //-------------------------------------------------------------------
   getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
     userDetails.forEach(item => {
@@ -488,12 +531,6 @@ onSubmit(): void {
     }));
   }
 
-  private formatColegiosMagisteriales(colMags: any[]): any[] {
-    return colMags.map(col => ({
-      id_colegio: col.id_colegio
-    }));
-  }
-
   private formatBancos(bancos: any[]): any[] {
     return bancos.map(banco => ({
       id_banco: banco.id_banco,
@@ -603,14 +640,12 @@ onSubmit(): void {
   dataURItoBlob(dataURI: string): Blob {
     const byteString = atob(dataURI.split(',')[1]);
     const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-
     const buffer = new ArrayBuffer(byteString.length);
     const data = new DataView(buffer);
 
     for (let i = 0; i < byteString.length; i++) {
       data.setUint8(i, byteString.charCodeAt(i));
     }
-
     return new Blob([buffer], { type: mimeString });
   }
 
@@ -629,13 +664,52 @@ onSubmit(): void {
  
     if (this.datosGeneralesComponent) {
       this.datosGeneralesComponent.formGroup.patchValue({
-        voluntario: false, // NO
-        discapacidad: false, // NO
+        discapacidad: false,
       });
       
       if (this.datosGeneralesComponent && this.datosGeneralesComponent.camaraComponent) {
         this.datosGeneralesComponent.camaraComponent.resetCamera();
       }      
+    }
+
+    this.steps.forEach((step) => {
+      step.formGroup.reset();
+    });
+
+    if (this.benefComponent) {
+      this.benefComponent.reset();
+    }
+  
+    if (this.pepsComponent) {
+      this.pepsComponent.reset();
+    }
+  
+    if (this.bancosComponent) {
+      this.bancosComponent.reset();
+    }
+  
+    if (this.refPersComponent) {
+      this.refPersComponent.reset();
+    }
+  
+    if (this.colMagisterialesComponent) {
+      this.colMagisterialesComponent.reset();
+    }
+  
+    if (this.centrosTrabajoComponent) {
+      this.centrosTrabajoComponent.reset();
+    }
+  
+    if (this.beneficiariosComponent) {
+      this.beneficiariosComponent.reset();
+    }
+  
+    if (this.datPuestoTrabComponent) {
+      this.datPuestoTrabComponent.reset();
+    }
+  
+    if (this.otrasFuentesIngresoComponent) {
+      this.otrasFuentesIngresoComponent.reset();
     }
 
     this.stepper.reset();
@@ -644,13 +718,10 @@ onSubmit(): void {
 
     this.markAllAsTouched(this.steps[0].formGroup);
 
-    console.log('Formulario reiniciado con valores predeterminados.');
-
-    // Reiniciar cámara del componente de datos generales si existe
     if (this.datosGeneralesComponent) {
       if (typeof this.datosGeneralesComponent.useCamera === 'function') {
         if (this.datosGeneralesComponent && typeof this.datosGeneralesComponent.useCamera === 'function') {
-          this.datosGeneralesComponent.useCamera = true; // O false, dependiendo de lo que necesites
+          this.datosGeneralesComponent.useCamera = true;
         }
       }
     }
@@ -713,4 +784,11 @@ onSubmit(): void {
         : errorMessages[key] || 'Error desconocido.';
     });
   }
+
+  generarNombreArchivo(persona: any, tipo: string): string {
+    const nombreCompleto = `${persona.primer_nombre}_${persona.primer_apellido}`;
+    const fechaActual = new Date().toISOString().split('T')[0];
+    return `${nombreCompleto}_${fechaActual}_constancia_${tipo}.pdf`;
+  }
+  
 }

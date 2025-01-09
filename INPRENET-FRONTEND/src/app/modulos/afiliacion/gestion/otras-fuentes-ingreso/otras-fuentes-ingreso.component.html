@@ -24,7 +24,7 @@
             <!-- Monto de Ingreso -->
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Monto De Ingreso</mat-label>
-              <mat-icon matPrefix>attach_money</mat-icon>
+              <mat-icon matPrefix>money</mat-icon>
               <input matInput formControlName="monto_ingreso" type="number">
               <mat-error *ngFor="let error of getErrors(i, 'monto_ingreso')">
                 <mat-icon>error</mat-icon> {{ error }}

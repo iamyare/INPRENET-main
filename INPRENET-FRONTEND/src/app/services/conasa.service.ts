@@ -116,9 +116,9 @@ export class ConasaService {
     );
   }
 
-  cancelarContrato(payload: { n_identificacion?: string; id_contrato?: number; motivo_cancelacion: string }): Observable<any> {
+  cancelarContrato(payload: { n_identificacion?: string; id_contrato?: number; motivo_cancelacion: string }): Observable<string> {
     const url = `${this.baseUrl}/cancelar-contrato`;
-    return this.http.post<any>(url, payload).pipe(
+    return this.http.post<string>(url, payload, { responseType: 'text' as 'json' }).pipe(
       catchError((error) => {
         console.error('Error al cancelar contrato', error);
         return throwError(() => error);

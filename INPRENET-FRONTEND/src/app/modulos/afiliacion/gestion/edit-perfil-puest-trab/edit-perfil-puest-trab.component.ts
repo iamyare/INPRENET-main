@@ -212,7 +212,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
       { nombre: 'direccion_1', tipo: 'text', requerido: true, etiqueta: 'Direccion 1', editable: false, icono: 'place' },
       { nombre: 'direccion_2', tipo: 'text', requerido: true, etiqueta: 'Direccion 2', editable: false, icono: 'place' },
       { nombre: 'numero_acuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true, icono: 'description', validaciones: [Validators.required, Validators.maxLength(40)] },
-      { nombre: 'salarioBase', tipo: 'number', requerido: true, etiqueta: 'Salario Base', editable: true, icono: 'attach_money', validaciones: [Validators.required, Validators.min(0)] },
+      { nombre: 'salarioBase', tipo: 'number', requerido: true, etiqueta: 'Salario Base', editable: true, icono: 'money', validaciones: [Validators.required, Validators.min(0)] },
       { nombre: 'fechaRango', tipo: 'daterange', requerido: false, etiqueta: 'Periodo laboral', editable: true, icono: 'event', validaciones: [Validators.required] },
       { nombre: 'cargo', tipo: 'text', requerido: false, etiqueta: 'Cargo', editable: true, icono: 'work_outline', validaciones: [Validators.required, Validators.maxLength(40)] },
       { nombre: 'jornada', tipo: 'list', requerido: true, etiqueta: 'Jornada', editable: true, opciones: this.jornadas, icono: 'schedule' },

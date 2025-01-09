@@ -80,11 +80,11 @@ export class AfiliacionService {
       throw new NotFoundException('El término de búsqueda no puede estar vacío.');
     }
     const palabras = terminos.split(' ').map(palabra => palabra.trim().toLowerCase());
-  
+
     if (palabras.length === 0) {
       throw new NotFoundException('No se proporcionaron palabras válidas para buscar.');
     }
-  
+
     const query = this.personaRepository.createQueryBuilder('persona')
       .select([
         'persona.primer_nombre',
@@ -94,10 +94,10 @@ export class AfiliacionService {
         'persona.segundo_apellido',
         'persona.n_identificacion',
       ]);
-  
+
     const parametros: Record<string, string> = {};
     let whereClause = '';
-  
+
     palabras.forEach((palabra, palabraIndex) => {
       const marcadorBase = `palabra${palabraIndex}`;
       const condiciones = [
@@ -122,11 +122,11 @@ export class AfiliacionService {
         .where(whereClause)
         .setParameters(parametros)
         .getMany();
-  
+
       if (personas.length === 0) {
         throw new NotFoundException(`No se encontraron personas con los términos: ${terminos}`);
       }
-  
+
       return personas.map(persona => ({
         nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.tercer_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
         dni: persona.n_identificacion,
@@ -136,7 +136,7 @@ export class AfiliacionService {
       throw new Error('Ocurrió un error inesperado. Inténtelo de nuevo más tarde.');
     }
   }
-   
+
   async actualizarFotoPersona(idPersona: number, fotoPerfil: Buffer): Promise<net_persona> {
     const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
 
@@ -151,80 +151,80 @@ export class AfiliacionService {
 
   async getPersonaByn_identificacioni(n_identificacion: string): Promise<any> {
     const persona = await this.personaRepository.findOne({
-        where: { n_identificacion },
-        relations: [
-            'tipoIdentificacion',
-            'pais',
-            'municipio',
-            'municipio.departamento',
-            'municipio_defuncion',
-            'municipio_nacimiento',
-            'municipio_nacimiento.departamento',
-            'profesion',
-            'detallePersona',
-            'peps',
-            'peps.cargo_publico',
-            'detallePersona.tipoPersona',
-            'detallePersona.estadoAfiliacion',
-            'referencias',
-            'personasPorBanco',
-            'personasPorBanco.banco',
-            'detalleDeduccion',
-            'perfPersCentTrabs',
-            'perfPersCentTrabs.centroTrabajo',
-            'perfPersCentTrabs.centroTrabajo.municipio',
-            'perfPersCentTrabs.centroTrabajo.municipio.departamento',
-            'cuentas',
-            'detallePlanIngreso',
-            'colegiosMagisteriales',
-            'otra_fuente_ingreso',
-        ],
+      where: { n_identificacion },
+      relations: [
+        'tipoIdentificacion',
+        'pais',
+        'municipio',
+        'municipio.departamento',
+        'municipio_defuncion',
+        'municipio_nacimiento',
+        'municipio_nacimiento.departamento',
+        'profesion',
+        'detallePersona',
+        'peps',
+        'peps.cargo_publico',
+        'detallePersona.tipoPersona',
+        'detallePersona.estadoAfiliacion',
+        'referencias',
+        'personasPorBanco',
+        'personasPorBanco.banco',
+        'detalleDeduccion',
+        'perfPersCentTrabs',
+        'perfPersCentTrabs.centroTrabajo',
+        'perfPersCentTrabs.centroTrabajo.municipio',
+        'perfPersCentTrabs.centroTrabajo.municipio.departamento',
+        'cuentas',
+        'detallePlanIngreso',
+        'colegiosMagisteriales',
+        'otra_fuente_ingreso',
+      ],
     });
 
     if (!persona) {
-        throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
+      throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
     }
 
     // Buscar el cónyuge en la tabla Net_Familia
     const conyuge = await this.familiaRepository.findOne({
-        where: { persona: { id_persona: persona.id_persona }, parentesco: 'CÓNYUGE' },
-        relations: ['referenciada'], // Relación para obtener los datos del cónyuge
+      where: { persona: { id_persona: persona.id_persona }, parentesco: 'CÓNYUGE' },
+      relations: ['referenciada'], // Relación para obtener los datos del cónyuge
     });
 
     // Verificar si el cónyuge es afiliado
     const esAfiliado = conyuge && conyuge.referenciada
-        ? await this.verificarSiEsAfiliado(conyuge.referenciada.n_identificacion)
-        : "NO";
+      ? await this.verificarSiEsAfiliado(conyuge.referenciada.n_identificacion)
+      : "NO";
 
     // Agregar la información del cónyuge, incluyendo si trabaja y si es afiliado
     return {
-        ...persona,
-        conyuge: conyuge
-            ? {
-                ...conyuge.referenciada,
-                trabaja: conyuge.trabaja,
-                esAfiliado: esAfiliado
-            }
-            : null,
+      ...persona,
+      conyuge: conyuge
+        ? {
+          ...conyuge.referenciada,
+          trabaja: conyuge.trabaja,
+          esAfiliado: esAfiliado
+        }
+        : null,
     };
-}
+  }
 
   async verificarSiEsAfiliado(n_identificacion: string): Promise<string> {
-      const persona = await this.personaRepository
-          .createQueryBuilder('persona')
-          .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
-          .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
-          .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
-          .getOne();
+    const persona = await this.personaRepository
+      .createQueryBuilder('persona')
+      .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
+      .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
+      .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
+      .getOne();
 
-      if (!persona) {
-          return "NO";
-      }
+    if (!persona) {
+      return "NO";
+    }
 
-      const tiposPermitidos = ['AFILIADO', 'JUBILADO', 'PENSIONADO'];
-      return persona.detallePersona?.some(detalle =>
-          tiposPermitidos.includes(detalle.tipoPersona?.tipo_persona || '')
-      ) ? "SI" : "NO";
+    const tiposPermitidos = ['AFILIADO', 'JUBILADO', 'PENSIONADO'];
+    return persona.detallePersona?.some(detalle =>
+      tiposPermitidos.includes(detalle.tipoPersona?.tipo_persona || '')
+    ) ? "SI" : "NO";
   }
 
   async updateFotoPerfil(id: number, fotoPerfil: Buffer): Promise<net_persona> {
@@ -541,7 +541,7 @@ export class AfiliacionService {
         index === self.findIndex(f => f.parentesco === 'CÓNYUGE')
       );
     });
-  
+
     for (const familiaDto of familiaSinDuplicados) {
       const personaReferencia = await this.crearOActualizarPersona(
         familiaDto.persona_referencia,
@@ -549,7 +549,7 @@ export class AfiliacionService {
         entityManager,
         personasMap
       );
-  
+
       const relacionExistente = await this.familiaRepository.findOne({
         where: {
           persona: { id_persona: idPersona },
@@ -557,14 +557,14 @@ export class AfiliacionService {
           parentesco: familiaDto.parentesco,
         },
       });
-  
+
       if (!relacionExistente) {
         const familia = entityManager.create(Net_Familia, {
           parentesco: familiaDto.parentesco,
           persona: { id_persona: idPersona },
           referenciada: { id_persona: personaReferencia.id_persona },
         });
-  
+
         await entityManager.save(Net_Familia, familia);
       } else {
         await entityManager.update(
@@ -577,7 +577,7 @@ export class AfiliacionService {
       }
     }
   }
-  
+
   async crearDiscapacidades(
     discapacidadesDto: CrearDiscapacidadDto[],
     idPersona: number,
@@ -747,7 +747,7 @@ export class AfiliacionService {
 
     return persona;
   }
-  
+
   formatDateToYYYYMMDD(dateString: string): string {
     if (!dateString) return null;
     const date = new Date(dateString);

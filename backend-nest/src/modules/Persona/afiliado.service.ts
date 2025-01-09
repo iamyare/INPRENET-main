@@ -825,6 +825,40 @@ export class AfiliadoService {
     };
   }
 
+  async getDesignadosOBeneficiarios(dni: string): Promise<any> {
+    const query = `
+      SELECT
+        np.N_IDENTIFICACION AS DNI_PERSONA,
+        nc.N_IDENTIFICACION AS DNI_CAUSANTE,
+        ndp.ID_PERSONA AS ID_PERSONA,
+        ndp.ID_CAUSANTE AS ID_CAUSANTE,
+        ndp.ID_CAUSANTE_PADRE AS ID_CAUSANTE_PADRE,
+        ndp.ID_DETALLE_PERSONA AS ID_DETALLE_PERSONA,
+        ndp.ID_ESTADO_AFILIACION AS ID_ESTADO_AFILIACION,
+        nc.PRIMER_NOMBRE AS NOMBRE_CAUSANTE,
+        nc.PRIMER_APELLIDO AS APELLIDO_CAUSANTE,
+        np.PRIMER_NOMBRE AS NOMBRE_PERSONA,
+        np.PRIMER_APELLIDO AS APELLIDO_PERSONA,
+        ndp.ID_TIPO_PERSONA,
+        tipoP.TIPO_PERSONA AS NOMBRE_TIPO_PERSONA,
+        nea.NOMBRE_ESTADO AS ESTADO_AFILIACION,
+        ndp.OBSERVACION
+      FROM NET_DETALLE_PERSONA ndp
+      JOIN NET_PERSONA np ON ndp.ID_PERSONA = np.ID_PERSONA
+      JOIN NET_PERSONA nc ON ndp.ID_CAUSANTE = nc.ID_PERSONA
+      JOIN NET_TIPO_PERSONA tipoP ON tipoP.ID_TIPO_PERSONA = ndp.ID_TIPO_PERSONA
+      LEFT JOIN NET_ESTADO_AFILIACION nea ON ndp.ID_ESTADO_AFILIACION = nea.CODIGO
+      WHERE np.N_IDENTIFICACION = :dni
+    `;
+
+    const resultado = await this.entityManager.query(query, [dni]);
+    if (!resultado.length) {
+      throw new NotFoundException(`No se encontraron registros para el DNI: ${dni}`);
+    }
+
+    return resultado;
+  }
+
   async buscarCuentasPorN_IDENTIFICACION(n_identificacion: string): Promise<any> {
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion },
@@ -985,15 +1019,15 @@ export class AfiliadoService {
         );
       }
 
-      // Obtención de la profesión (solo si no es null)
+      // Obtención de la profesión
       const profesion = datosGenerales.dato?.id_profesion
         ? await this.profesionRepository.findOne({
-          where: { id_profesion: datosGenerales.dato?.id_profesion },
+          where: { id_profesion: datosGenerales.dato.id_profesion },
         })
-        : null;
+        : null; // Si no se envía, no buscará la profesión.
 
-      if (datosGenerales.dato?.id_profesion && !profesion) {
-        throw new NotFoundException(`No se encontró la profesión con el ID ${datosGenerales.dato?.id_profesion}`);
+      if (!profesion && datosGenerales.dato?.id_profesion) {
+        throw new NotFoundException(`No se encontró la profesión con el ID ${datosGenerales.dato.id_profesion}`);
       }
 
       // Obtención de municipios de residencia y nacimiento
@@ -1167,6 +1201,57 @@ export class AfiliadoService {
   async getAllEstados(): Promise<net_estado_afiliacion[]> {
     return this.estadoAfiliacionRepository.find();
   }
+
+  async updateEstadoAfil(payload: { idPersona: number, idCausante: number, idCausantePadre: number, idDetallePersona: number, idEstadoAfiliacion: number, dniCausante: string; estadoAfiliacion: string; observacion: string }): Promise<{ codigo: number; mensaje: string }> {
+    try {
+
+      const estadoAfiliacion = await this.estadoAfiliacionRepository
+        .createQueryBuilder('estadoAfiliacion')
+        .where('estadoAfiliacion.NOMBRE_ESTADO = :estadoAfiliacion', { estadoAfiliacion: payload.estadoAfiliacion })
+        .getOne();
+
+      console.log(estadoAfiliacion);
+
+
+      // Buscar el registro
+      const detallePersona = await this.detallePersonaRepository
+        .createQueryBuilder('detalle')
+        .where('detalle.ID_CAUSANTE = :idCausante', { idCausante: payload.idCausante })
+        .andWhere('detalle.ID_DETALLE_PERSONA = :idDetallePersona', { idDetallePersona: payload.idDetallePersona })
+        .andWhere('detalle.ID_PERSONA = :idPersona', { idPersona: payload.idPersona })
+        .andWhere('detalle.ID_CAUSANTE_PADRE = :idCausantePadre', { idCausantePadre: payload.idCausantePadre })
+        .getOne();
+
+      if (!detallePersona) {
+        return {
+          codigo: 404,
+          mensaje: `No se encontró el registro con ID_CAUSANTE ${payload.idCausante}, ID_PERSONA ${payload.idPersona}.`,
+        };
+      }
+
+      // Actualizar los valores
+      detallePersona.ID_ESTADO_AFILIACION = estadoAfiliacion.codigo
+      detallePersona.observacion = payload.observacion;
+
+      // Guardar los cambios
+      await this.detallePersonaRepository.save(detallePersona);
+
+      return {
+        codigo: 200,
+        mensaje: 'Registro actualizado correctamente',
+      };
+    } catch (error) {
+      // Manejo de errores
+      console.error('Error al actualizar el registro:', error);
+
+      return {
+        codigo: 500,
+        mensaje: 'Error interno al intentar actualizar el registro',
+      };
+    }
+  }
+
+
 
   private handleException(error: any): void {
     this.logger.error(error);

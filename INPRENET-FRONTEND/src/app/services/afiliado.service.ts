@@ -93,9 +93,24 @@ export class AfiliadoService {
     return this.http.put(url, updatedData);
   }
 
-  buscarMovimientosPorDNI(dni: string): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/movimientos/${dni}`;
-    return this.http.get<any>(url);
+  buscarDetPersona(dni: string): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/causantes/${dni}`;
+    return this.http.get<any[]>(url).pipe(
+      map((res: any) => {
+        let data = res?.data;
+        return data.map((item: any) => ({
+          ID_PERSONA: item.ID_PERSONA,
+          ID_CAUSANTE: item.ID_CAUSANTE,
+          ID_CAUSANTE_PADRE: item.ID_CAUSANTE_PADRE,
+          ID_DETALLE_PERSONA: item.ID_DETALLE_PERSONA,
+          ID_ESTADO_AFILIACION: item.ID_ESTADO_AFILIACION,
+          dniCausante: item.DNI_CAUSANTE,
+          tipoPersona: item.NOMBRE_TIPO_PERSONA || 'No disponible',
+          estadoAfiliacion: item.ESTADO_AFILIACION || 'Sin estado',
+          observacion: item.OBSERVACION || 'Sin observación'
+        }));
+      })
+    );
   }
 
   buscarCuentasPorDNI(dni: string): Observable<any> {
@@ -368,5 +383,14 @@ export class AfiliadoService {
         return res;
       })
     );
+  }
+
+  getDesignadosOBeneficiariosPorCausante(dniCausante: string): Observable<any> {
+    return this.http.get(`${environment.API_URL}/api/persona/causantes/${dniCausante}`);
+  }
+
+  updateEstadoAfiliacionPorDni(payload: { idPersona: number, idCausante: number, idCausantePadre: number, idDetallePersona: number, idEstadoAfiliacion: number, dniCausante: string; estadoAfiliacion: string; observacion: string }): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/updateEstadoAfiliacion`; // Asegúrate de que esta sea la URL correcta
+    return this.http.put<any>(url, payload);
   }
 }

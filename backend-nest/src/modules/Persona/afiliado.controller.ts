@@ -94,8 +94,7 @@ export class AfiliadoController {
   @Get('/movimientos/:dni')
   async buscarMovimientosPorN_IDENTIFICACION(@Param('dni') dni: string) {
     try {
-      const resultado =
-        await this.afiliadoService.buscarPersonaYMovimientosPorN_IDENTIFICACION(dni);
+      const resultado = await this.afiliadoService.buscarPersonaYMovimientosPorN_IDENTIFICACION(dni);
       return resultado;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -339,4 +338,18 @@ export class AfiliadoController {
   remove(@Param('id') id: string) {
     return this.afiliadoService.remove(+id);
   }
+
+  @Get('causantes/:dniCausante')
+  async getDesignadosOBeneficiarios(@Param('dniCausante') dniCausante: string) {
+    const resultado = await this.afiliadoService.getDesignadosOBeneficiarios(dniCausante);
+    return { status: 'success', data: resultado };
+  }
+
+  @Put('updateEstadoAfiliacion')
+  async updateEstadoAfiliacion(@Body() payload: any) {
+    // Implementación del servicio
+    await this.afiliadoService.updateEstadoAfil(payload,);
+    return { message: 'Estado actualizado correctamente' };
+  }
 }
+

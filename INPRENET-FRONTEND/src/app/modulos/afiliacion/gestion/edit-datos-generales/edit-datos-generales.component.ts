@@ -51,6 +51,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     causa_fallecimiento: ["", [Validators.required]],
     estado: ["", [Validators.required]],
     fecha_defuncion: ["", [Validators.required]],
+    fecha_reporte_fallecido: ["", [Validators.required]],
     id_departamento_defuncion: ["", [Validators.required]],
     id_municipio_defuncion: ["", [Validators.required]],
     tipo_persona: [""],   // Control solo lectura
@@ -111,6 +112,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       fallecido: ['NO', Validators.required],
       causa_fallecimiento: ['', this.conditionalValidator(() => this.form1?.get('fallecido')?.value === 'SI', Validators.required)],
       fecha_defuncion: ['', this.conditionalValidator(() => this.form1?.get('fallecido')?.value === 'SI', Validators.required)],
+      fecha_reporte_fallecido: ['', this.conditionalValidator(() => this.form1?.get('fallecido')?.value === 'SI', Validators.required)],
       id_departamento_defuncion: ['', this.conditionalValidator(() => this.form1?.get('fallecido')?.value === 'SI', Validators.required)],
       id_municipio_defuncion: ['', this.conditionalValidator(() => this.form1?.get('fallecido')?.value === 'SI', Validators.required)],
       tipo_persona: [''],
@@ -124,6 +126,7 @@ export class EditDatosGeneralesComponent implements OnInit {
         this.form1.patchValue({
           causa_fallecimiento: '',
           fecha_defuncion: '',
+          fecha_reporte_fallecido: '',
           id_departamento_defuncion: '',
           id_municipio_defuncion: '',
         });
@@ -377,6 +380,7 @@ export class EditDatosGeneralesComponent implements OnInit {
           // Rellenar valores de form1
           this.form1.controls.fallecido.setValue(result?.fallecido);
           this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
+          this.form1.controls.fecha_reporte_fallecido.setValue(result?.fecha_reporte_fallecido);
           this.form1.controls.causa_fallecimiento.setValue(
             result?.ID_CAUSA_FALLECIMIENTO
           );
@@ -428,6 +432,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       fallecido: this.form1.controls.fallecido.value,
       causa_fallecimiento: formValues.causa_fallecimiento,
       fecha_defuncion: convertirFechaInputs(formValues.fecha_defuncion!),
+      fecha_reporte_fallecido: convertirFechaInputs(formValues.fecha_reporte_fallecido!),
       id_departamento_defuncion: formValues.id_departamento_defuncion,
       id_municipio_defuncion: formValues.id_municipio_defuncion,
       estado: formValues.estado,

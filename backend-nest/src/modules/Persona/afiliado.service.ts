@@ -20,7 +20,7 @@ import { NET_MOVIMIENTO_CUENTA } from '../transacciones/entities/net_movimiento_
 import { net_causas_fallecimientos } from './entities/net_causas_fallecimientos.entity';
 import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
@@ -1083,7 +1083,32 @@ export class AfiliadoService {
         );
       }
 
-      const data: any = {
+      // Definir formato de entrada y salida
+      const formatoEntrada = 'yyyy-MM-dd';  // Formato de fecha que recibes
+      const formatoSalida = 'yyyy-MM-dd';   // Formato de fecha que necesitas
+
+      // Convierte la fecha de defunción y la fecha de reporte de fallecido
+      const fechaDefuncion = datosGenerales.fecha_defuncion
+        ? format(parse(datosGenerales.fecha_defuncion, formatoEntrada, new Date()), formatoSalida)
+        : temp.fecha_defuncion
+          ? format(parse(temp.fecha_defuncion, formatoEntrada, new Date()), formatoSalida)
+          : null;
+
+      const fechaReporteFallecido = datosGenerales.fecha_reporte_fallecido
+        ? format(parse(datosGenerales.fecha_reporte_fallecido, formatoEntrada, new Date()), formatoSalida)
+        : temp.fecha_reporte_fallecido
+          ? format(parse(temp.fecha_reporte_fallecido, formatoEntrada, new Date()), formatoSalida)
+          : null;
+
+      console.log(fechaDefuncion); // Verifica el formato correcto
+      console.log(fechaReporteFallecido);
+
+      // Convierte las fechas a objetos Date sin zona horaria
+      const fechaDefuncionDate = fechaDefuncion ? new Date(fechaDefuncion + 'T00:00:00') : null;
+      const fechaReporteFallecidoDate = fechaReporteFallecido ? new Date(fechaReporteFallecido + 'T00:00:00') : null;
+
+      // Construcción del objeto 'data' con las fechas correctas
+      const data: net_persona = {
         ...temp,
         id_persona: idPersona,
         fallecido: datosGenerales.fallecido ? datosGenerales.fallecido : 'NO',
@@ -1092,7 +1117,9 @@ export class AfiliadoService {
         municipio_defuncion: datosGenerales.id_municipio_defuncion || null,
         causa_fallecimiento: causaFallecimiento,
         profesion: profesion,
-        fecha_defuncion: datosGenerales.fecha_defuncion ?? temp.fecha_defuncion, pais: pais, // Relación ManyToOne con Net_Pais
+        fecha_defuncion: fechaDefuncionDate,  // Ahora con la hora ajustada a las 00:00
+        fechaReporteFallecido: fechaReporteFallecidoDate,  // Ahora con la hora ajustada a las 00:00
+        pais: pais,
         tipoIdentificacion: tipoIdentificacion,
       };
 
@@ -1105,6 +1132,9 @@ export class AfiliadoService {
       if (fotoPerfil?.buffer) {
         data.foto_perfil = Buffer.from(fotoPerfil.buffer);
       }
+
+      console.log(data);
+
 
       const afiliado = await this.personaRepository.preload(data);
       if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
@@ -1207,11 +1237,8 @@ export class AfiliadoService {
 
       const estadoAfiliacion = await this.estadoAfiliacionRepository
         .createQueryBuilder('estadoAfiliacion')
-        .where('estadoAfiliacion.NOMBRE_ESTADO = :estadoAfiliacion', { estadoAfiliacion: payload.estadoAfiliacion })
+        .where('TRIM(estadoAfiliacion.NOMBRE_ESTADO) = :estadoAfiliacion', { estadoAfiliacion: payload.estadoAfiliacion.trim() })
         .getOne();
-
-      console.log(estadoAfiliacion);
-
 
       // Buscar el registro
       const detallePersona = await this.detallePersonaRepository
@@ -1219,7 +1246,7 @@ export class AfiliadoService {
         .where('detalle.ID_CAUSANTE = :idCausante', { idCausante: payload.idCausante })
         .andWhere('detalle.ID_DETALLE_PERSONA = :idDetallePersona', { idDetallePersona: payload.idDetallePersona })
         .andWhere('detalle.ID_PERSONA = :idPersona', { idPersona: payload.idPersona })
-        .andWhere('detalle.ID_CAUSANTE_PADRE = :idCausantePadre', { idCausantePadre: payload.idCausantePadre })
+        .orWhere('detalle.ID_CAUSANTE_PADRE = :idCausantePadre', { idCausantePadre: payload.idCausantePadre })
         .getOne();
 
       if (!detallePersona) {

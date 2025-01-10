@@ -123,10 +123,10 @@ export class net_persona {
     certificado_defuncion: any;
 
     @Column('date', { nullable: true, name: 'FECHA_DEFUNCION' })
-    fecha_defuncion: string;
+    fecha_defuncion: Date;
 
     @Column('date', { nullable: true, name: 'FECHA_REPORTE_FALLECIDO' })
-    fechaReporteFallecido: string;
+    fechaReporteFallecido: Date;
 
     @Column('blob', { nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
     archivo_identificacion: any;

@@ -21,6 +21,14 @@ function convertirFechaInputs(fecha: string): string {
   return ""
 }
 
+function convertirFechaInputsDMY(fecha: string): string {
+  if (fecha) {
+    const fechaMoment = moment.utc(fecha);
+    return fechaMoment.format('DD/MM/YYYY');
+  }
+  return ""
+}
+
 function obtenerNombreMes(fecha: string): string {
   if (fecha) {
     const fechaObjeto = new Date(fecha);
@@ -41,4 +49,4 @@ function obtenerNombreMes(fecha: string): string {
   return '';
 }
 
-export { convertirFecha, convertirFechaInputs, obtenerNombreMes }
+export { convertirFechaInputsDMY, convertirFecha, convertirFechaInputs, obtenerNombreMes }

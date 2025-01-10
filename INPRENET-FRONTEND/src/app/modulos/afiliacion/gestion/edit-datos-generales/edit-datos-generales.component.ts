@@ -95,6 +95,17 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.previsualizarInfoAfil();
     this.cargarDepartamentos();
 
+    this.svcAfiliado.buscarDetPersona(this.Afiliado.n_identificacion).subscribe(
+      (detalles: any[]) => {
+        this.tableData = detalles;
+        this.loading = false;
+      },
+      (error) => {
+        console.error('Error al cargar movimientos:', error);
+        this.loading = false;
+      }
+    );
+
     // Inicializar el form con validaciones condicionales
     this.form1 = this.fb.group({
       fallecido: ['NO', Validators.required],
@@ -286,6 +297,7 @@ export class EditDatosGeneralesComponent implements OnInit {
             : null;
 
           // Otras propiedades globales (estadoAfiliacion, fallecido, etc.)
+
           this.estadoAfiliacion = result.estadoAfiliacion;
           this.fallecido = result.fallecido;
 
@@ -378,16 +390,7 @@ export class EditDatosGeneralesComponent implements OnInit {
           this.form1.controls.estado.setValue(result?.estadoAfiliacion?.codigo);
           this.form1.controls.voluntario.setValue(result?.VOLUNTARIO || 'NO');
 
-          this.svcAfiliado.buscarDetPersona(result.N_IDENTIFICACION).subscribe(
-            (detalles: any[]) => {
-              this.tableData = detalles;
-              this.loading = false;
-            },
-            (error) => {
-              console.error('Error al cargar movimientos:', error);
-              this.loading = false;
-            }
-          );
+
         },
         (error) => {
           this.toastr.error(`Error: ${error.error.message}`);

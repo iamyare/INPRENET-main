@@ -4,68 +4,51 @@
   </div>
 
   <div *ngIf="datos && !loading">
-    <app-datos-generales
-      [initialData]="initialData"
-      [indicesSeleccionados]="indicesSeleccionados"
-      [discapacidadSeleccionada]="true"
-      (newDatosGenerales)="setDatosGenerales($event)"
-      (imageCaptured)="onImageCaptured($event)">
-    </app-datos-generales>
-
-    <br>
-    <mat-form-field class="example-full-width inputs" appearance="outline">
-      <mat-label>Dirección Completa</mat-label>
-      <textarea matInput [(ngModel)]="direccionCompleta" readonly></textarea>
-    </mat-form-field>
-
-    <div class="pdf-preview">
-      <h4>Archivo de Identificación</h4>
-      <iframe *ngIf="archivoIdentificacionUrl" [src]="archivoIdentificacionUrl" width="100%" height="500px"></iframe>
-      <app-botonarchivos labelBoton="Archivo de Identificación" (setArchivo)="getArchivoIdentificacion($event)"></app-botonarchivos>
-    </div>
-
-
 
     <!-- Formulario Reactivo -->
-    <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
+
       <mat-card class="tabla-datos-persona">
         <mat-card-title>Estado y Tipo De Persona</mat-card-title>
         <mat-card-content>
           <div class="responsive-table-container">
             <table mat-table [dataSource]="tableData" class="mat-elevation-z8 tabla-con-estilo">
 
-              <!-- DNICausante -->
-              <ng-container matColumnDef="ID_PERSONA" class="hidden-column">
-                <mat-header-cell *matHeaderCellDef>ID PERSONA</mat-header-cell>
-                <mat-cell *matCellDef="let element">
+              <!-- ID_PERSONA (oculto) -->
+              <ng-container matColumnDef="ID_PERSONA">
+                <mat-header-cell *matHeaderCellDef style="display: none;">ID PERSONA</mat-header-cell>
+                <mat-cell *matCellDef="let element" style="display: none;">
                   {{ element.ID_PERSONA }}
                 </mat-cell>
               </ng-container>
-              <!-- DNICausante -->
-              <ng-container matColumnDef="ID_CAUSANTE" class="hidden-column">
-                <mat-header-cell *matHeaderCellDef>ID CAUSANTE</mat-header-cell>
-                <mat-cell *matCellDef="let element">
+
+              <!-- ID_CAUSANTE (oculto) -->
+              <ng-container matColumnDef="ID_CAUSANTE">
+                <mat-header-cell *matHeaderCellDef style="display: none;">ID CAUSANTE</mat-header-cell>
+                <mat-cell *matCellDef="let element" style="display: none;">
                   {{ element.ID_CAUSANTE }}
                 </mat-cell>
               </ng-container>
-              <!-- DNICausante -->
-              <ng-container matColumnDef="ID_CAUSANTE_PADRE" class="hidden-column" >
-                <mat-header-cell *matHeaderCellDef>ID CAUSANTE PADRE</mat-header-cell>
-                <mat-cell *matCellDef="let element">
+
+              <!-- ID_CAUSANTE_PADRE (oculto) -->
+              <ng-container matColumnDef="ID_CAUSANTE_PADRE">
+                <mat-header-cell *matHeaderCellDef style="display: none;">ID CAUSANTE PADRE</mat-header-cell>
+                <mat-cell *matCellDef="let element" style="display: none;">
                   {{ element.ID_CAUSANTE_PADRE }}
                 </mat-cell>
               </ng-container>
-              <!-- DNICausante -->
-              <ng-container matColumnDef="ID_DETALLE_PERSONA" class="hidden-column" >
-                <mat-header-cell *matHeaderCellDef>ID DETALLE PERSONA</mat-header-cell>
-                <mat-cell *matCellDef="let element">
+
+              <!-- ID_DETALLE_PERSONA (oculto) -->
+              <ng-container matColumnDef="ID_DETALLE_PERSONA">
+                <mat-header-cell *matHeaderCellDef style="display: none;">ID DETALLE PERSONA</mat-header-cell>
+                <mat-cell *matCellDef="let element" style="display: none;">
                   {{ element.ID_DETALLE_PERSONA }}
                 </mat-cell>
               </ng-container>
-              <!-- DNICausante -->
-              <ng-container matColumnDef="ID_ESTADO_AFILIACION" class="hidden-column" >
-                <mat-header-cell *matHeaderCellDef>ID ESTADO AFILIACION</mat-header-cell>
-                <mat-cell *matCellDef="let element">
+
+              <!-- ID_ESTADO_AFILIACION (oculto) -->
+              <ng-container matColumnDef="ID_ESTADO_AFILIACION">
+                <mat-header-cell *matHeaderCellDef style="display: none;">ID ESTADO AFILIACION</mat-header-cell>
+                <mat-cell *matCellDef="let element" style="display: none;">
                   {{ element.ID_ESTADO_AFILIACION }}
                 </mat-cell>
               </ng-container>
@@ -141,6 +124,27 @@
         </mat-card-content>
       </mat-card>
 
+
+    <app-datos-generales
+      [initialData]="initialData"
+      [indicesSeleccionados]="indicesSeleccionados"
+      [discapacidadSeleccionada]="true"
+      (newDatosGenerales)="setDatosGenerales($event)"
+      (imageCaptured)="onImageCaptured($event)">
+    </app-datos-generales>
+
+    <br>
+    <mat-form-field class="example-full-width inputs" appearance="outline">
+      <mat-label>Dirección Completa</mat-label>
+      <textarea matInput [(ngModel)]="direccionCompleta" readonly></textarea>
+    </mat-form-field>
+
+    <div class="pdf-preview">
+      <h4>Archivo de Identificación</h4>
+      <iframe *ngIf="archivoIdentificacionUrl" [src]="archivoIdentificacionUrl" width="100%" height="500px"></iframe>
+      <app-botonarchivos labelBoton="Archivo de Identificación" (setArchivo)="getArchivoIdentificacion($event)"></app-botonarchivos>
+    </div>
+    <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
       <mat-card>
         <mat-card-title class="custom-title">Datos de Fallecimiento</mat-card-title>
         <mat-card-content>
@@ -229,7 +233,6 @@
           </div>
         </div>
       </mat-card >
-
     </form>
 
     <button

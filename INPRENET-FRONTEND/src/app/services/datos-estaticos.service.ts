@@ -95,6 +95,8 @@ export class DatosEstaticosService {
       value: estado.codigo
     }));
 
+    console.log(this.estados);
+
     return this.estados;
   }
 
@@ -157,7 +159,7 @@ export class DatosEstaticosService {
       return this.departamentos;
     }
   }
-  
+
   async getDepartamentosPropietario(): Promise<any[]> {
     try {
       const response = await firstValueFrom(this.direccionSer.getAllDepartments());
@@ -172,7 +174,7 @@ export class DatosEstaticosService {
       return this.departamentos;
     }
   }
-   
+
   gettipoIdent = async () => {
     const response = await this.tipoIdentificacionService.obtenerTiposIdentificacion().toPromise();
     const mappedResponse = response.map((item: { id_identificacion: any; tipo_identificacion: any; }) => ({
@@ -282,7 +284,7 @@ export class DatosEstaticosService {
   getColegiosMagisteriales(): Observable<any[]> {
     return this.colegiosMagSVC.getAllColegiosMagisteriales().pipe(
       map(response => {
-        this.colegiosMagisteriales = response.data.map((item: { id_colegio: any; descripcion: any; abreviatura:any }) => ({
+        this.colegiosMagisteriales = response.data.map((item: { id_colegio: any; descripcion: any; abreviatura: any }) => ({
           label: String(item.abreviatura),
           abreviatura: String(item.descripcion),
           value: item.id_colegio,
@@ -331,27 +333,35 @@ export class DatosEstaticosService {
   ];
 
   representacion = [
-    { "value": 'POR CUENTA PROPIA', "label": "POR CUENTA PROPIA"
+    {
+      "value": 'POR CUENTA PROPIA', "label": "POR CUENTA PROPIA"
     },
-    { "value": "POR TERCEROS", "label": "POR TERCEROS"
+    {
+      "value": "POR TERCEROS", "label": "POR TERCEROS"
     }
   ];
 
   genero = [
-    { "value": "MASCULINO", "label": "MASCULINO"
+    {
+      "value": "MASCULINO", "label": "MASCULINO"
     },
-    { "value": "FEMENINO", "label": "FEMENINO"
+    {
+      "value": "FEMENINO", "label": "FEMENINO"
     },
-    { "value": "OTRO", "label": "OTRO"
+    {
+      "value": "OTRO", "label": "OTRO"
     },
   ];
 
   sexo = [
-    { "value": "M", "label": "MASCULINO"
+    {
+      "value": "M", "label": "MASCULINO"
     },
-    { "value": "F", "label": "FEMENINO"
+    {
+      "value": "F", "label": "FEMENINO"
     },
-    { "value": "OTRO", "label": "OTRO"
+    {
+      "value": "OTRO", "label": "OTRO"
     }
   ];
 

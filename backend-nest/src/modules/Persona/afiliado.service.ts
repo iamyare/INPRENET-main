@@ -606,7 +606,7 @@ export class AfiliadoService {
         net_detalle_persona "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
       INNER JOIN
       NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
-      INNER JOIN
+      LEFT JOIN
       net_estado_afiliacion "estadoPers" ON "detA"."ID_ESTADO_AFILIACION" = "estadoPers"."CODIGO"
     WHERE
       "Afil"."N_IDENTIFICACION" = '${n_identificacionAfil}' AND 

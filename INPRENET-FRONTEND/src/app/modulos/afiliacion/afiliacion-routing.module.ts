@@ -13,8 +13,15 @@ import { NivelEducativoComponent } from './mantenimiento/nivel-educativo/nivel-e
 import { AfiliarDocenteComponent } from './gestion/afiliar-docente/afiliar-docente.component';
 import { RoleGuard } from 'src/app/guards/role-guard.guard';
 import { PermisosService } from 'src/app/services/permisos.service';
+import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
 
 const routes: Routes = [
+  {
+    path: 'constancias-afiliados',
+    component: ContanciasAfiliadosComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIÓN', 'afiliacion/constancias-afiliados') }
+  },
   {
     path: 'nuevo-centro',
     component: AfiliacionCentrosComponent,

@@ -72,6 +72,7 @@ import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-fam
 import { DatosGeneralesTemporalComponent } from './gestion/datos-generales-temporal/datos-generales-temporal.component';
 import { BeneficiarioSinCausanteComponent } from './verPerfil/beneficiario-sin-causante/beneficiario-sin-causante.component';
 import { DesignadoComponent } from './verPerfil/designado/designado.component';
+import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
 
 @NgModule({
   declarations: [
@@ -141,7 +142,8 @@ import { DesignadoComponent } from './verPerfil/designado/designado.component';
     AgregarFamiliarComponent,
     DatosGeneralesTemporalComponent,
     BeneficiarioSinCausanteComponent,
-    DesignadoComponent
+    DesignadoComponent,
+    ContanciasAfiliadosComponent
   ],
   imports: [
     CommonModule,

@@ -69,6 +69,13 @@ export class PermisosService {
             { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
             { role: 'ADMINISTRADOR', module: 'AFILIACION' }
           ]
+        },
+        'afiliacion/constancias-afiliados': {
+          title: 'Ver Centro Educativo',
+          permisos: [
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
+            { role: 'ADMINISTRADOR', module: 'AFILIACION' }
+          ]
         }
       }
     },

@@ -65,12 +65,25 @@
       </app-dynamic-table>
 
       <div style="background-color: white; margin-bottom: 1%; text-align: center">
+        <!-- Botón que abre la modal -->
         <button mat-raised-button color="primary"
-          [disabled]="detallePlanilla.beneficios_cargados == 'NO'"
-          (click)="actualizarFechaCierrePlanilla()"
-          style="margin: 2% 2%; padding: 10px 20px; color: #ffffff; border-radius: 5px;">
-          Cerrar planilla
+        [disabled]="detallePlanilla.beneficios_cargados == 'NO'"
+        (click)="actualizarFechaCierrePlanilla()"
+        style="margin: 2% 2%; padding: 10px 20px; color: #ffffff; border-radius: 5px;">
+        Cerrar planilla
         </button>
+
+        <!-- Modal de confirmación -->
+        <ng-template #confirmacionModal>
+        <h2 mat-dialog-title>Confirmar cierre de planilla</h2>
+        <mat-dialog-content>
+        <p>¿Estás seguro de cerrar la planilla?</p>
+        </mat-dialog-content>
+        <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+        <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+        </mat-dialog-actions>
+        </ng-template>
       </div>
       <div style="text-align: right; margin: 10px;">
         <button mat-raised-button color="accent" (click)="descargarExcelCompleto()">

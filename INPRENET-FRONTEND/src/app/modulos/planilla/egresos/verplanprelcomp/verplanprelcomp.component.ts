@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, OnChanges, OnInit, SimpleChanges, TemplateRef, ViewChild } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -19,6 +19,7 @@ import { firstValueFrom } from 'rxjs';
   styleUrls: ['./verplanprelcomp.component.scss']
 })
 export class VerplanprelcompComponent implements OnInit, OnChanges {
+  @ViewChild('confirmacionModal') confirmacionModal!: TemplateRef<any>;
   convertirFecha = convertirFecha;
   idPlanilla: any = "";
   dataPlan: any;
@@ -241,8 +242,19 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   }
 
   actualizarFechaCierrePlanilla(): void {
-    this.updatePlanillaACerrada(this.codigoPlanilla);
+    const dialogRef = this.dialog.open(this.confirmacionModal);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirmar') {
+        console.log('Cierre de planilla confirmado');
+        // Aquí puedes implementar la lógica para cerrar la planilla.
+        this.updatePlanillaACerrada(this.codigoPlanilla);
+      } else {
+        console.log('Cierre de planilla cancelado');
+      }
+    });
   }
+
 
   updatePlanillaACerrada(codigo_planilla: string): void {
     this.planillaService.updatePlanillaACerrada(codigo_planilla).subscribe({
@@ -281,21 +293,21 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
       return;
     }
-  
+
     this.isLoading = true;
-  
+
     try {
       const response: any = await firstValueFrom(
         this.planillaService.exportarDetallesCompletosExcel(this.idPlanilla)
       );
-  
+
       const blob = new Blob([response], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
-  
+
       const nombreArchivo = `PlanillaCompleta_${this.idPlanilla}.xlsx`;
       saveAs(blob, nombreArchivo);
-  
+
       this.toastr.success('Archivo Excel completo generado y descargado con éxito');
     } catch (error) {
       console.error('Error al descargar el Excel completo:', error);
@@ -304,17 +316,17 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       this.isLoading = false;
     }
   }
-  
-  
 
-async descargarExcelPorPlanilla() {
-  if (!this.idPlanilla) {
+
+
+  async descargarExcelPorPlanilla() {
+    if (!this.idPlanilla) {
       this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
       return;
-  }
-  this.isLoading = true;
-  try {
-      const response:any = await this.planillaService.descargarReporteDetallePagoPreliminar(this.idPlanilla).toPromise();
+    }
+    this.isLoading = true;
+    try {
+      const response: any = await this.planillaService.descargarReporteDetallePagoPreliminar(this.idPlanilla).toPromise();
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(blob, `Detalle_Pago_Planilla_${this.idPlanilla}.xlsx`);
       this.toastr.success('Archivo Excel descargado con éxito');
@@ -326,6 +338,6 @@ async descargarExcelPorPlanilla() {
       this.isLoading = false;
     }
   }
-  
+
 }
 

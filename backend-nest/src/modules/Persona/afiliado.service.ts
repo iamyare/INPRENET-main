@@ -998,13 +998,13 @@ export class AfiliadoService {
         }
       }
 
-      // Obtención del estado de afiliación
+      /* // Obtención del estado de afiliación
       const estadoP = await this.estadoAfiliacionRepository.findOne({
         where: { codigo: datosGenerales.estado },
       });
       if (!estadoP) {
         throw new NotFoundException(`No se ha encontrado el estado de afiliación con el código ${datosGenerales.estado}`);
-      }
+      } */
 
       // Obtención de la causa de fallecimiento (solo si no es null)
       const causaFallecimiento = datosGenerales.causa_fallecimiento
@@ -1151,7 +1151,7 @@ export class AfiliadoService {
         await this.detallePersonaRepository.update(
           { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
           {
-            ID_ESTADO_AFILIACION: estadoP.codigo,
+            //ID_ESTADO_AFILIACION: estadoP.codigo,
             ID_TIPO_PERSONA: datosGenerales.tipo_persona || null,
             voluntario: voluntario,
           }
@@ -1160,7 +1160,7 @@ export class AfiliadoService {
         await this.detallePersonaRepository.save({
           ID_PERSONA: idPersona,
           ID_CAUSANTE: idPersona,
-          ID_ESTADO_AFILIACION: estadoP.codigo,
+          //ID_ESTADO_AFILIACION: estadoP.codigo,
           ID_TIPO_PERSONA: datosGenerales.tipo_persona || null,
           VOLUNTARIO: voluntario,
         });

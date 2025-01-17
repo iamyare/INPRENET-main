@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { ToastrService } from 'ngx-toastr';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
@@ -11,6 +11,11 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrls: ['./cargarbef-ded.component.scss']
 })
 export class CargarbefDedComponent {
+  @ViewChild('confirmarAsignacionModal') confirmarAsignacionModal!: TemplateRef<any>;
+  @ViewChild('confirmarAsignacionBeneficiariosModal') confirmarAsignacionBeneficiariosModal!: TemplateRef<any>;
+  @ViewChild('confirmarAsignacionComplementariaModal') confirmarAsignacionComplementariaModal!: TemplateRef<any>;
+  @ViewChild('confirmarAsignacionJubiladosModal') confirmarAsignacionJubiladosModal!: TemplateRef<any>;
+
   tipoPlanilla: any;
   dni: string = '';
   beneficios: any[] = [];
@@ -51,6 +56,59 @@ export class CargarbefDedComponent {
       },
       error: err => {
         this.toastr.error('Error al generar la planilla complementaria para Beneficiarios y Afiliados', 'Error');
+      }
+    });
+  }
+
+  confirmarAsignacionBeneficios(): void {
+    const dialogRef = this.dialog.open(this.confirmarAsignacionModal);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirmar') {
+        console.log('Asignación de beneficios confirmada');
+        this.asignarBeneficiosOrdinariaJubiladosPensionados(); // Llama a tu método real
+      } else {
+        console.log('Asignación de beneficios cancelada');
+      }
+    });
+  }
+
+
+  confirmarAsignacionBeneficiarios(): void {
+    const dialogRef = this.dialog.open(this.confirmarAsignacionBeneficiariosModal);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirmar') {
+        console.log('Asignación de beneficios confirmada');
+        this.asignarBeneficiosOrdinariaBeneficiariosAfiliados(); // Llama a tu método real
+      } else {
+        console.log('Asignación de beneficios cancelada');
+      }
+    });
+  }
+
+  confirmarAsignacionComplementaria(): void {
+    const dialogRef = this.dialog.open(this.confirmarAsignacionComplementariaModal);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirmar') {
+        console.log('Asignación de beneficios complementaria confirmada');
+        this.asignarBeneficiosComplementariaBeneficiariosAfiliados(); // Llama a tu método real
+      } else {
+        console.log('Asignación de beneficios complementaria cancelada');
+      }
+    });
+  }
+
+  confirmarAsignacionJubilados(): void {
+    const dialogRef = this.dialog.open(this.confirmarAsignacionJubiladosModal);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirmar') {
+        console.log('Asignación de beneficios complementaria a Jubilados confirmada');
+        this.asignarBeneficiosComplementariaJubiladosPensionados(); // Llama a tu método real
+      } else {
+        console.log('Asignación de beneficios complementaria a Jubilados cancelada');
       }
     });
   }

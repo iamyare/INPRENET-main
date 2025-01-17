@@ -368,7 +368,7 @@ export class EditDatosGeneralesComponent implements OnInit {
             id_departamento_nacimiento: result?.id_departamento_nacimiento,
             id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
             discapacidad: result?.discapacidades?.length > 0 ? true : false,
-            id_tipo_identificacion: result?.ID_PROFESION
+            id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION
           };
 
           // Manejo de discapacidades

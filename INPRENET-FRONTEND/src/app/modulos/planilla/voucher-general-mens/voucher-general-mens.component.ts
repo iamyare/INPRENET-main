@@ -250,16 +250,18 @@ export class VoucherGeneralMensComponent {
         let data: any[] = [];
         detallePersona.forEach((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
           detalle.detalleBeneficio.forEach((beneficio: any) => {
-            const montoPorPeriodo = beneficio.detallePagBeneficio[0].monto_a_pagar;
-            sumaBeneficios += montoPorPeriodo;
+            beneficio.detallePagBeneficio.forEach((detallePago: any) => {
+              const montoPorPeriodo = detallePago.monto_a_pagar;
+              sumaBeneficios += montoPorPeriodo;
 
-            data.push({
-              CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
-              NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
-              MontoAPagar: montoPorPeriodo,
-              METODO_PAGO: beneficio.metodo_pago,
-              NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
-              NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
+              data.push({
+                CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
+                NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
+                MontoAPagar: montoPorPeriodo,
+                METODO_PAGO: beneficio.metodo_pago,
+                NOMBRE_BANCO: detallePago.personaporbanco ? detallePago.personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
+                NUM_CUENTA: detallePago.personaporbanco ? detallePago.personaporbanco.num_cuenta : 'NO PROPORCIONADO'
+              });
             });
           });
         });

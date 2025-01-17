@@ -84,7 +84,7 @@ export class PlanillaService {
         LEFT JOIN net_persona_por_banco pb ON dpb.id_af_banco = pb.id_af_banco
         LEFT JOIN net_banco nb ON pb.id_banco = nb.id_banco
         INNER JOIN net_beneficio b ON dpb.id_beneficio = b.id_beneficio
-        WHERE dpb.id_planilla = ${idPlanilla}
+        WHERE dpb.id_planilla = ${idPlanilla} AND dpb.estado = 'EN PRELIMINAR'
       `;
 
       const deduccionesQuery = `
@@ -103,7 +103,7 @@ export class PlanillaService {
         LEFT JOIN net_persona_por_banco pb ON dd.id_af_banco = pb.id_af_banco
         LEFT JOIN net_banco nb ON pb.id_banco = nb.id_banco
         INNER JOIN net_deduccion d ON dd.id_deduccion = d.id_deduccion
-        WHERE dd.id_planilla = ${idPlanilla}
+        WHERE dd.id_planilla = ${idPlanilla} AND dd.estado_aplicacion = 'EN PRELIMINAR'
       `;
 
       const beneficios = await this.entityManager.query(beneficiosQuery);
@@ -2740,7 +2740,9 @@ GROUP BY
         };
       });
 
-      return newResult;
+      const orderedResult = newResult.sort((a, b) => a.TOTAL_NETO - b.TOTAL_NETO);
+
+      return orderedResult;
     } catch (error) {
       this.logger.error('Error ejecutando la consulta', error.stack);
       throw new InternalServerErrorException('Error ejecutando la consulta');
@@ -3015,7 +3017,7 @@ GROUP BY
           id_tipo_planilla: 1,
           n_identificacion: beneficio.n_identificacion.trim(),
         };
-      });
+      }).sort((a, b) => a.neto - b.neto);
       return result;
     } catch (error) {
       console.error('Error al obtener los detalles preliminares de pago por planilla:', error);
@@ -3087,7 +3089,8 @@ GROUP BY
             AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
             AND dd."ESTADO_APLICACION" = 'COBRADA'
-            AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
+            --AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
+            AND dd.ID_AF_BANCO IS NOT NULL
             AND ded."ID_CENTRO_TRABAJO" = 1
         GROUP BY 
             dd."ID_PERSONA"
@@ -3110,8 +3113,9 @@ GROUP BY
             AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
             AND dd."ESTADO_APLICACION" = 'COBRADA'
-            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
-            AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
+            --AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+            AND dd.ID_AF_BANCO IS NOT NULL
+            AND ded.ID_CENTRO_TRABAJO != 1
         GROUP BY 
             dd."ID_PERSONA"
     `;
@@ -3137,7 +3141,8 @@ GROUP BY
           id_tipo_planilla: 1,
           n_identificacion: beneficio.n_identificacion.trim(),
         };
-      });
+      }).sort((a, b) => a.neto - b.neto);;
+
       return result;
     } catch (error) {
       console.error('Error al obtener los detalles de pago por planilla:', error);
@@ -3214,7 +3219,7 @@ GROUP BY
             AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
             AND planilla."ID_TIPO_PLANILLA" IN (1,2)
             AND dd."ESTADO_APLICACION" = 'COBRADA'
-            AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
+            --AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
             AND ded."ID_CENTRO_TRABAJO" = 1
             AND dd."ID_AF_BANCO" IS NULL        
             GROUP BY 
@@ -3225,7 +3230,7 @@ GROUP BY
         SELECT 
             dd."ID_PERSONA",
             SUM(dd.MONTO_APLICADO) AS "deducciones_terceros"
-        FROM 
+        FROM  
             "NET_PLANILLA" planilla
         LEFT JOIN 
             "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
@@ -3239,7 +3244,8 @@ GROUP BY
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
             AND dd."ESTADO_APLICACION" = 'COBRADA'
             AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
-            AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
+            AND ded."ID_CENTRO_TRABAJO" != 1
+            --AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
             AND dd."ID_AF_BANCO" IS NULL
         GROUP BY 
             dd."ID_PERSONA"
@@ -3266,7 +3272,7 @@ GROUP BY
           id_tipo_planilla: 1,
           n_identificacion: beneficio.n_identificacion.trim(),
         };
-      });
+      }).sort((a, b) => a.neto - b.neto);
       return result;
     } catch (error) {
       console.error('Error al obtener los detalles de pago por planilla:', error);
@@ -3324,23 +3330,16 @@ GROUP BY
         n_identificacion: '',
       });
 
-      // Verificar y combinar las celdas para la fila del total
+      // Obtener la fila del total
       const totalRow = detailedSheet.getRow(lastRowIndex);
 
-      if (!detailedSheet.getCell(`A${lastRowIndex}`).isMerged) {
-        detailedSheet.mergeCells(`A${lastRowIndex}:B${lastRowIndex}`);
-      }
-
+      // Asignar valores sin combinar celdas
       totalRow.getCell(1).value = 'TOTAL';
       totalRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
       totalRow.getCell(1).font = { bold: true };
 
-      if (!detailedSheet.getCell(`C${lastRowIndex}`).isMerged) {
-        detailedSheet.mergeCells(`C${lastRowIndex}:G${lastRowIndex}`);
-      }
-
-      totalRow.getCell(3).value = total.toFixed(2);
-      totalRow.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
+      totalRow.getCell(3).value = Number(parseFloat(total.toFixed(2)));
+      totalRow.getCell(3).alignment = { vertical: 'middle' };
       totalRow.getCell(3).font = { bold: true };
 
       // Agregar las filas concatenadas en la hoja "Concatenado"
@@ -3348,7 +3347,7 @@ GROUP BY
         const concatenatedRow = [
           item.codigo_banco,
           item.numero_cuenta,
-          parseFloat(item.neto).toFixed(2),
+          Number(parseFloat(item.neto).toFixed(2)),
           item.nombre_completo,
           currentDate,
           '1',

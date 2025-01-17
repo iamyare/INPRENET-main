@@ -144,12 +144,13 @@ export class DeduccionService {
     } else {
       return { error: `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`, processed: false };
     }
-    if (persona) {
-      if (!(persona.personasPorBanco)) {
-        return { error: `No se encontró un banco activo para la persona`, processed: false };
-      }
-    } else {
+
+    if (!persona) {
       return { error: `No se encontró persona con DNI: ${parsedDni}`, processed: false };
+    }
+
+    if (!persona.personasPorBanco) {
+      return { error: `No se encontró un banco activo para la persona`, processed: false };
     }
 
     let isComplementaria = false
@@ -199,10 +200,27 @@ export class DeduccionService {
           return { error: `Deducción duplicada detectada`, processed: false };
         }
 
-        const detalleDeduccion = repositories.detalleDeduccionRepository.create({
+        const deduccionesAgrupadas = await repositories.detalleDeduccionRepository
+          .createQueryBuilder('detalle')
+          .select('detalle.persona.id_persona', 'id_persona')
+          .addSelect('SUM(detalle.monto_total)', 'total_monto')
+          .where('detalle.anio = :anio', { anio: parsedAnio })
+          .andWhere('detalle.mes = :mes', { mes: parsedMes })
+          .andWhere('detalle.deduccion.id_persona = :id_persona', { id_persona: deduccion.id_persona })
+          .andWhere('detalle.estado_aplicacion = :estado_aplicacion', { estado_aplicacion: 'EN PRELIMINAR' })
+          .andWhere('detalle.deduccion.id_deduccion = :idDeduccion', { idDeduccion: deduccion.id_deduccion })
+          .andWhere('detalle.planilla.id_planilla = :idPlanilla', { idPlanilla: plan.id_planilla })
+          .groupBy('detalle.persona.id_persona')
+          .getRawOne();
+
+        //console.log(deduccionesAgrupadas);
+
+        /* const detalleDeduccion = repositories.detalleDeduccionRepository.create({
           anio: parsedAnio,
           mes: parsedMes,
-          monto_total: parsedMontoTotal,
+          monto_total = deduccionesAgrupadas?.total_monto 
+                        ? deduccionesAgrupadas.total_monto + parsedMontoTotal 
+                        : parsedMontoTotal;
           monto_aplicado: parsedMontoTotal,
           estado_aplicacion: 'EN PRELIMINAR',
           persona: persona.id_persona,
@@ -211,7 +229,7 @@ export class DeduccionService {
           personaPorBanco: persona.personasPorBanco[0],
         });
 
-        await repositories.detalleDeduccionRepository.save(detalleDeduccion);
+        await repositories.detalleDeduccionRepository.save(detalleDeduccion); */
         return { processed: true };
       }
 

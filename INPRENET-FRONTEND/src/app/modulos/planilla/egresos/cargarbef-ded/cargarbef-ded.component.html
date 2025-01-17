@@ -6,35 +6,90 @@
 
       <mat-tab label="Cargar Beneficios">
         <div>
+          <!-- Botón con confirmación -->
           <button
-            *ngIf="tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS'"
+          *ngIf="tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS'"
+          mat-raised-button
+          color="primary"
+          class="asignar-beneficios-btn"
+          (click)="confirmarAsignacionBeneficiarios()">
+          Asignar beneficios a planilla ordinaria de Beneficiarios y Afiliados
+          </button>
+
+          <!-- Modal de confirmación -->
+          <ng-template #confirmarAsignacionBeneficiariosModal>
+          <h2 mat-dialog-title>Confirmar asignación</h2>
+          <mat-dialog-content>
+            <p>¿Estás seguro de asignar los beneficios a la planilla ordinaria de Beneficiarios y Afiliados?</p>
+          </mat-dialog-content>
+          <mat-dialog-actions align="end">
+            <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+            <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+          </mat-dialog-actions>
+          </ng-template>
+          <!-- Botón con confirmación -->
+          <button *ngIf="tipoPlanilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS'"
+          mat-raised-button
+          (click)="confirmarAsignacionBeneficios()"
+          color="primary"
+          class="asignar-beneficios-btn">
+          Asignar beneficios a planilla ordinaria de Jubilados y Pensionados
+          </button>
+
+          <!-- Modal de confirmación -->
+          <ng-template #confirmarAsignacionModal>
+          <h2 mat-dialog-title>Confirmar asignación</h2>
+          <mat-dialog-content>
+          <p>¿Estás seguro de asignar los beneficios a la planilla ordinaria de Jubilados y Pensionados?</p>
+          </mat-dialog-content>
+          <mat-dialog-actions align="end">
+          <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+          <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+          </mat-dialog-actions>
+          </ng-template>
+
+          <div>
+            <!-- Botón con confirmación -->
+            <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA DE BENEFICIARIOS'"
             mat-raised-button
             color="primary"
             class="asignar-beneficios-btn"
-            (click)="asignarBeneficiosOrdinariaBeneficiariosAfiliados()">
-            Asignar beneficios a planilla ordinaria de Beneficiarios y Afiliados
-          </button>
-          <button *ngIf="tipoPlanilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS'"
-           mat-raised-button (click)="asignarBeneficiosOrdinariaJubiladosPensionados()"
-           color="primary"
-            class="asignar-beneficios-btn">
-            Asignar beneficios a planilla ordinaria de Jubilados y Pensionados
-          </button>
-
-          <div>
-            <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA DE BENEFICIARIOS' "
-              mat-raised-button color="primary" (click)="asignarBeneficiosComplementariaBeneficiariosAfiliados()"
-              color="primary"
-              class="asignar-beneficios-btn">
-              Asignar beneficios a planilla complementaria de Beneficiarios y Afiliados
+            (click)="confirmarAsignacionComplementaria()">
+            Asignar beneficios a planilla complementaria de Beneficiarios y Afiliados
             </button>
+
+            <!-- Modal de confirmación -->
+            <ng-template #confirmarAsignacionComplementariaModal>
+            <h2 mat-dialog-title>Confirmar asignación</h2>
+            <mat-dialog-content>
+            <p>¿Estás seguro de asignar los beneficios a la planilla complementaria de Beneficiarios y Afiliados?</p>
+            </mat-dialog-content>
+            <mat-dialog-actions align="end">
+            <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+            <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+            </mat-dialog-actions>
+            </ng-template>
+
+           <!-- Botón con confirmación -->
             <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS'"
-            mat-raised-button
-            (click)="asignarBeneficiosComplementariaJubiladosPensionados()"
-            color="primary"
-            class="asignar-beneficios-btn">
+                    mat-raised-button
+                    color="primary"
+                    class="asignar-beneficios-btn"
+                    (click)="confirmarAsignacionJubilados()">
               Asignar beneficios a planilla complementaria de Jubilados y Pensionados
             </button>
+
+            <!-- Modal de confirmación -->
+            <ng-template #confirmarAsignacionJubiladosModal>
+              <h2 mat-dialog-title>Confirmar asignación</h2>
+              <mat-dialog-content>
+                <p>¿Estás seguro de asignar los beneficios a la planilla complementaria de Jubilados y Pensionados?</p>
+              </mat-dialog-content>
+              <mat-dialog-actions align="end">
+                <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+                <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+              </mat-dialog-actions>
+            </ng-template>
           </div>
 
         </div>

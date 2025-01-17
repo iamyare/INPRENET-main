@@ -11,6 +11,8 @@ import { CrearMovimientoDTO } from './dto/voucher.dto';
 import { NET_PROFESIONES } from './entities/net_profesiones.entity';
 import { Net_Colegios_Magisteriales } from './entities/net_colegios_magisteriales.entity';
 import { crearCuentaDTO } from './dto/cuenta-transaccioens.dto';
+import path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class TransaccionesService {
@@ -33,10 +35,48 @@ export class TransaccionesService {
   ) {
   }
 
+  async obtenerReporteAfiliados() {
+    const query = `
+      SELECT 
+          DOCENTE AS "Número de Identificación del Afiliado",
+          NOMBRE AS "Nombre del Afiliado",
+          FECHA_NACIMIENTO AS "Fecha de Nacimiento del Afiliado",
+          ULTIMO_SUELDO AS "Último Salario de Cotización",
+          ULTIMO_APORTA AS "Monto de la Aportación mensual",
+          TOTAL_COTIZACIONES AS "Cotizaciones acumuladas nominales sin Intereses",
+          FECHA_AFILIACION AS "Fecha de ingreso al sistema del Afiliado",
+          CASE
+              WHEN AÑO_PRI_SALARIO IS NOT NULL AND MES_PRI_SALARIO IS NOT NULL AND 
+                   AÑO_ULT_SALARIO IS NOT NULL AND MES_ULT_SALARIO IS NOT NULL THEN
+                   ((AÑO_ULT_SALARIO - AÑO_PRI_SALARIO) * 12) + (MES_ULT_SALARIO - MES_PRI_SALARIO)
+              ELSE
+                  NULL
+          END AS "Número de meses cotizados",
+          CASE 
+              WHEN MES_ULT_SALARIO BETWEEN 1 AND 12 THEN 
+                  TO_DATE(AÑO_ULT_SALARIO || '-' || LPAD(MES_ULT_SALARIO, 2, '0') || '-01', 'YYYY-MM-DD')
+              ELSE 
+                  NULL
+          END AS "Fecha de última cotización del Afiliado",
+          ESTADO_CIVIL AS "Código de Tipo de Estado Civil",
+          NUMERO_DE_HIJOS AS "Número de Hijos",
+          SECTOR AS "Código de Tipo del Sector del Afiliado"
+      FROM 
+          A_AFILIADOS_INGRESAR_2025
+    `;
+    const data = await this.personaRepository.query(query);
+
+    if (!data || data.length === 0) {
+      throw new NotFoundException('No se encontraron datos para el reporte.');
+    }
+
+    return data;
+  }
+
   async obtenerCuentasPorIdentificacion(n_identificacion: string): Promise<any[]> {
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion },
-      relations: ['cuentas', 'cuentas.tipoCuenta'], // Incluye el tipo de cuenta
+      relations: ['cuentas', 'cuentas.tipoCuenta'],
     });
   
     if (!persona) {
@@ -61,8 +101,8 @@ export class TransaccionesService {
   }
   
   private generarNumeroCuenta(idPersona: number): string {
-    const timestamp = Date.now().toString(); // Marca de tiempo única
-    const randomDigits = Math.floor(1000 + Math.random() * 9000).toString(); // 4 dígitos aleatorios
+    const timestamp = Date.now().toString();
+    const randomDigits = Math.floor(1000 + Math.random() * 9000).toString(); 
     return `${idPersona}${timestamp.substring(timestamp.length - 6)}${randomDigits}`;
   }
 

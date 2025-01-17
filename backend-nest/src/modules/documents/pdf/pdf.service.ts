@@ -2041,11 +2041,13 @@ export class PdfService {
               {
                 margin: [0, 50, 0, 0],
                 stack: [
+                  { text: 'Tegucigalpa, 10 de enero de 2025', style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
                   { text: 'Lugar y Fecha', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
                 ],
                 border: [false, false, false, false],
               },
+              
               {
                 margin: [0, 50, 0, 0],
                 stack: [

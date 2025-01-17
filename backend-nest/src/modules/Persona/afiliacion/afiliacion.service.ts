@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { Net_Tipo_Persona } from '../entities/net_tipo_persona.entity';
 import { net_persona } from '../entities/net_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Like, Repository } from 'typeorm';
+import { Between, EntityManager, Like, Raw, Repository } from 'typeorm';
 import { CrearPersonaDto } from './dtos/crear-persona.dto';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Tipo_Identificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
@@ -75,6 +75,35 @@ export class AfiliacionService {
     private readonly entityManager: EntityManager,
   ) { }
 
+  async obtenerFallecidosPorMes(mes: number, anio: number): Promise<any[]> {
+    try {
+      const inicioMes = `01/${String(mes).padStart(2, '0')}/${String(anio).slice(-2)}`;
+      const finMes = `${new Date(anio, mes, 0).getDate()}/${String(mes).padStart(2, '0')}/${String(anio).slice(-2)}`;
+  
+      const personasFallecidas = await this.personaRepository
+        .createQueryBuilder('persona')
+        .select([
+          'persona.n_identificacion AS n_identificacion',
+          `(NVL(persona.primer_nombre, '') || ' ' || NVL(persona.segundo_nombre, '') || ' ' || NVL(persona.primer_apellido, '') || ' ' || NVL(persona.segundo_apellido, '')) AS nombres_completos`,
+          `TO_CHAR(persona.fecha_defuncion, 'DD/MM/YYYY') AS fecha_defuncion`,
+          `TO_CHAR(persona.fechaReporteFallecido, 'DD/MM/YYYY') AS fecha_reporte_fallecido`
+        ])
+        .where(
+          `persona.fallecido = :fallecido 
+           AND TO_DATE(persona.fechaReporteFallecido, 'DD/MM/YY') 
+           BETWEEN TO_DATE(:inicioMes, 'DD/MM/YY') 
+           AND TO_DATE(:finMes, 'DD/MM/YY')`,
+          { fallecido: 'SI', inicioMes, finMes }
+        )
+        .getRawMany();
+  
+      return personasFallecidas;
+    } catch (error) {
+      console.error('Error al obtener fallecidos por mes:', error.message, error.stack);
+      throw new Error('Ocurrió un error inesperado. Inténtelo de nuevo más tarde o contacte con soporte si el problema persiste.');
+    }
+  }
+  
   async buscarPersonaPorNombresYApellidos(terminos: string): Promise<{ nombre_completo: string; dni: string }[]> {
     if (!terminos) {
       throw new NotFoundException('El término de búsqueda no puede estar vacío.');

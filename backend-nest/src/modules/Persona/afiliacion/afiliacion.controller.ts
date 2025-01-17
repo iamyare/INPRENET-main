@@ -20,11 +20,26 @@ import { Net_Familia } from '../entities/net_familia.entity';
 import { CrearFamiliaDto } from './dtos/crear-familiar.dto';
 import { CrearPepsDto } from './dtos/crear-peps.dto';
 import { CrearDiscapacidadDto } from './dtos/crear-discapacidad.dto';
+import { ObtenerFallecidosDto } from './dtos/obtener-fallecidos.dto';
 
 @Controller('afiliacion')
 export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
+
+  @Get('fallecidos-reportados')
+async obtenerFallecidos(@Query('mes') mes: number, @Query('anio') anio: number) {
+  try {
+    const fallecidos = await this.afiliacionService.obtenerFallecidosPorMes(mes, anio);
+    return { message: 'Personas fallecidas encontradas', data: fallecidos };
+  } catch (error) {
+    throw new HttpException(
+      'Ocurrió un error inesperado. Inténtelo de nuevo más tarde o contacte con soporte si el problema persiste.',
+      HttpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
 
   @Get('buscar-por-nombres-apellidos')
   async buscarPersona(@Query('terminos') terminos: string) {

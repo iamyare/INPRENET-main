@@ -10,6 +10,11 @@ import { crearCuentaDTO } from './dto/cuenta-transaccioens.dto';
 export class TransaccionesController {
   constructor(private readonly transaccionesService: TransaccionesService) { }
 
+  @Get('reporte-afiliados')
+  async obtenerReporteAfiliados() {
+    return await this.transaccionesService.obtenerReporteAfiliados();
+  }
+
   @Get('cuentas/:n_identificacion')
   async obtenerCuentasPorIdentificacion(@Param('n_identificacion') n_identificacion: string) {
       console.log(`Identificación recibida: ${n_identificacion}`);

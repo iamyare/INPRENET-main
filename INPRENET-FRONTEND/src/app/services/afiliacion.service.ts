@@ -10,6 +10,16 @@ export class AfiliacionService {
 
   constructor(private http: HttpClient) { }
 
+  obtenerFallecidosPorMes(mes: number, anio: number): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/fallecidos-reportados`;
+    return this.http.get<any>(url, { params: { mes: mes.toString(), anio: anio.toString() } }).pipe(
+      catchError((error) => {
+        console.error('Error al obtener fallecidos por mes', error);
+        return throwError(() => new Error('Error al obtener fallecidos. Por favor, intente nuevamente.'));
+      })
+    );
+  }
+
   buscarPersonaPorNombresYApellidos(terminos: string): Observable<any> {
     const url = `${environment.API_URL}/api/afiliacion/buscar-por-nombres-apellidos`;
     return this.http.get<any>(url, { params: { terminos } }).pipe(

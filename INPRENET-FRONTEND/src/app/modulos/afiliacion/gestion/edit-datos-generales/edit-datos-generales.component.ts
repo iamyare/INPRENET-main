@@ -67,6 +67,8 @@ export class EditDatosGeneralesComponent implements OnInit {
   tableData: any[] = [];
   formObservacion = new FormControl('');
 
+  private isUpdating = false; // Bandera para evitar recursión infinita
+
   constructor(
     private fb: FormBuilder,
     private svcAfiliado: AfiliadoService,
@@ -107,22 +109,97 @@ export class EditDatosGeneralesComponent implements OnInit {
       }
     );
 
-    // Inicializar el form con validaciones condicionales
+    // ==================================
+    // 1) Inicializar form1 con validaciones condicionales
+    // ==================================
     this.form1 = this.fb.group({
       fallecido: ['NO', Validators.required],
-      causa_fallecimiento: ['', this.conditionalValidator(() => this.form1?.get('fallecido')?.value === 'SI', Validators.required)],
-      fecha_defuncion: ['', this.conditionalValidator(() => this.form1?.get('fallecido')?.value === 'SI', Validators.required)],
-      fecha_reporte_fallecido: ['', this.conditionalValidator(() => this.form1?.get('fallecido')?.value === 'SI', Validators.required)],
-      id_departamento_defuncion: ['', this.conditionalValidator(() => this.form1?.get('fallecido')?.value === 'SI', Validators.required)],
-      id_municipio_defuncion: ['', this.conditionalValidator(() => this.form1?.get('fallecido')?.value === 'SI', Validators.required)],
+      causa_fallecimiento: [
+        '',
+        /* this.conditionalValidator(
+          () => this.form1?.get('fallecido')?.value === 'SI',
+          Validators.required
+        ), */
+      ],
+      fecha_defuncion: [
+        '',
+        /* this.conditionalValidator(
+          () => this.form1?.get('fallecido')?.value === 'SI',
+          Validators.required
+        ), */
+      ],
+      fecha_reporte_fallecido: [
+        '',
+        this.conditionalValidator(
+          () => this.form1?.get('fallecido')?.value === 'SI',
+          Validators.required
+        ),
+      ],
+      id_departamento_defuncion: [
+        '',
+        /* this.conditionalValidator(
+          () => this.form1?.get('fallecido')?.value === 'SI',
+          Validators.required
+        ), */
+      ],
+      id_municipio_defuncion: [
+        '',
+        /* this.conditionalValidator(
+          () => this.form1?.get('fallecido')?.value === 'SI',
+          Validators.required
+        ), */
+      ],
       tipo_persona: [''],
       estado: [''],
       voluntario: ['NO', Validators.required],
     });
 
-    // Escuchar cambios en el campo "fallecido" para limpiar los campos si es "NO"
+    // ==================================
+    // 2) Agregamos el control para el archivo, sin validadores de entrada
+    // ==================================
+    if (!this.formDatosGenerales.contains('archivoCertDef')) {
+      this.formDatosGenerales.addControl('archivoCertDef', new FormControl(''));
+    }
+
+    // ==================================
+    // 3) Suscribirnos a changes de "fallecido"
+    // ==================================
     this.form1.get('fallecido')?.valueChanges.subscribe((value) => {
-      if (value === 'NO') {
+      if (this.isUpdating) return;
+      this.isUpdating = true;
+
+      // Un array con los nombres de los campos a habilitar/deshabilitar
+      const fieldsToHandle = [
+        'causa_fallecimiento',
+        'fecha_defuncion',
+        'fecha_reporte_fallecido',
+        'id_departamento_defuncion',
+        'id_municipio_defuncion',
+      ];
+
+      // Control para el Certificado de Defunción
+      const certDefControl = this.formDatosGenerales.get('archivoCertDef');
+
+      if (value === 'SI') {
+        // 3.1) Habilitar los campos
+        fieldsToHandle.forEach((field) => {
+          this.form1.get(field)?.enable();
+        });
+        // Habilitar y requerir el archivo
+        if (certDefControl) {
+          certDefControl.setValidators([Validators.required]);
+          certDefControl.enable();
+          certDefControl.updateValueAndValidity();
+        }
+
+        // Marcar como tocados para mostrar errores
+        Object.keys(this.form1.controls).forEach((key) => {
+          const control = this.form1.get(key);
+          control?.markAsTouched();
+          control?.updateValueAndValidity({ onlySelf: true });
+        });
+      } else {
+        // 3.2) Limpiar y deshabilitar los campos cuando "NO"
         this.form1.patchValue({
           causa_fallecimiento: '',
           fecha_defuncion: '',
@@ -130,7 +207,26 @@ export class EditDatosGeneralesComponent implements OnInit {
           id_departamento_defuncion: '',
           id_municipio_defuncion: '',
         });
+
+        fieldsToHandle.forEach((field) => {
+          const ctrl = this.form1.get(field);
+          // Deja en blanco y quita errores
+          ctrl?.markAsUntouched();
+          ctrl?.setErrors(null);
+          // Finalmente deshabilita para que no puedan editarse
+          ctrl?.disable();
+        });
+
+        // Quitar la obligatoriedad de 'archivoCertDef', limpiar su valor y deshabilitar
+        if (certDefControl) {
+          certDefControl.clearValidators();
+          certDefControl.setValue(null);
+          certDefControl.disable();
+          certDefControl.updateValueAndValidity();
+        }
       }
+
+      this.isUpdating = false;
     });
   }
 
@@ -378,9 +474,17 @@ export class EditDatosGeneralesComponent implements OnInit {
           }
 
           // Rellenar valores de form1
+          console.log(result);
+
           this.form1.controls.fallecido.setValue(result?.fallecido);
-          this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
-          this.form1.controls.fecha_reporte_fallecido.setValue(result?.fecha_reporte_fallecido);
+
+          // Sumar un día a las fechas antes de asignarlas al formulario
+          const fechaDefuncion = result?.fecha_defuncion ? this.sumarDia(result.fecha_defuncion) : null;
+          const fechaReporte = result?.fecha_reporte_fallecido ? this.sumarDia(result.fecha_reporte_fallecido) : null;
+
+          this.form1.controls.fecha_defuncion.setValue(fechaDefuncion);
+          this.form1.controls.fecha_reporte_fallecido.setValue(fechaReporte);
+
           this.form1.controls.causa_fallecimiento.setValue(
             result?.ID_CAUSA_FALLECIMIENTO
           );
@@ -402,6 +506,11 @@ export class EditDatosGeneralesComponent implements OnInit {
         }
       );
     }
+  }
+  sumarDia(fechaStr: string): string {
+    const fecha = new Date(fechaStr); // Crear el objeto Date
+    fecha.setDate(fecha.getDate() + 1); // Sumar un día
+    return fecha.toISOString().split('T')[0]; // Devolver solo la parte de la fecha
   }
 
   //------------------------------------------------------------------
@@ -535,4 +644,15 @@ export class EditDatosGeneralesComponent implements OnInit {
     }
     return new Blob([buffer], { type: mimeString });
   }
+
+  //------------------------------------------------------------------
+  removeArchivoDefuncion(): void {
+    // Limpia el valor del control
+    this.formDatosGenerales.get('archivoCertDef')?.setValue(null);
+
+    // Si deseas, marcas el control como “touched” o “dirty”
+    this.formDatosGenerales.get('archivoCertDef')?.markAsTouched();
+    this.formDatosGenerales.get('archivoCertDef')?.markAsDirty();
+  }
+  //------------------------------------------------------------------
 }

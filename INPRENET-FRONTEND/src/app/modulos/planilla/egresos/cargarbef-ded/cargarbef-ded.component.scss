@@ -36,13 +36,13 @@ h3 {
 button {
   margin: 10px 0;
   display: block;
-  background-color: #229e92;
-  color: white;
+  //background-color: #229e92;
+  //color: white;
   border-radius: 5px;
 }
 
 button:hover {
-  background-color: #1b7a70;
+  //background-color: #1b7a70;
 }
 
 button.asignar-beneficios-btn {
@@ -50,9 +50,9 @@ button.asignar-beneficios-btn {
   /* Hace que el botón ocupe una fila completa */
   margin: 20px auto;
   /* Centrado horizontalmente y con espacio alrededor */
-  background-color: #229e92;
+  //background-color: #229e92;
   /* Color de fondo */
-  color: white;
+  //color: white;
   /* Color de texto */
   border-radius: 5px;
   /* Bordes redondeados */
@@ -61,7 +61,7 @@ button.asignar-beneficios-btn {
 }
 
 button.asignar-beneficios-btn:hover {
-  background-color: #1b7a70;
+  //background-color: #1b7a70;
   /* Color de hover */
 }
 

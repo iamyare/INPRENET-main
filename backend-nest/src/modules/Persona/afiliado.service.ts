@@ -301,6 +301,7 @@ export class AfiliadoService {
       ID_CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.id_causa_fallecimiento,
       CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.nombre,
       fallecido: persona.fallecido,
+      fecha_reporte_fallecido: persona.fechaReporteFallecido,
       estadoAfiliacion: {
         codigo: detalleRelevante?.estadoAfiliacion?.codigo || null,
         nombre_estado: detalleRelevante?.estadoAfiliacion?.nombre_estado || null,
@@ -1100,9 +1101,6 @@ export class AfiliadoService {
           ? format(parse(temp.fecha_reporte_fallecido, formatoEntrada, new Date()), formatoSalida)
           : null;
 
-      console.log(fechaDefuncion); // Verifica el formato correcto
-      console.log(fechaReporteFallecido);
-
       // Convierte las fechas a objetos Date sin zona horaria
       const fechaDefuncionDate = fechaDefuncion ? new Date(fechaDefuncion + 'T00:00:00') : null;
       const fechaReporteFallecidoDate = fechaReporteFallecido ? new Date(fechaReporteFallecido + 'T00:00:00') : null;
@@ -1132,8 +1130,6 @@ export class AfiliadoService {
       if (fotoPerfil?.buffer) {
         data.foto_perfil = Buffer.from(fotoPerfil.buffer);
       }
-
-      console.log(data);
 
 
       const afiliado = await this.personaRepository.preload(data);

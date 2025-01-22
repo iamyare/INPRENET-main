@@ -162,7 +162,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             };
 
             if (item.fallecido === "NO") {
-              if (item.tipo_persona == 'AFILIADO' && (item.estado_persona == 'ACTIVO' || item.estado_persona == 'SUSPENDIDO')) {
+              if (item.tipo_persona == 'AFILIADO' && (item.estado_persona == 'ACTIVO' || item.estado_persona == 'SUSPENSO AUTOMATICO' || item.estado_persona == 'SUSPENSO POR OFICIO')) {
                 this.getTipoBen(item?.tipo_persona);
               } if (item.tipo_persona == 'AFILIADO' && (item.estado_persona == 'INACTIVO')) {
                 this.toastr.warning(`La persona se encuentra ${item.estado_persona}. No se puede asignar beneficios a los Afiliados ${item.estado_persona}`, "Advertencia");
@@ -349,7 +349,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         },
         {
           type: 'date',
-          label: 'Fecha de presentacion',
+          label: 'Fecha de presentación',
           name: 'fecha_presentacion',
           max: new Date().toISOString().split('T')[0],
           validations: [Validators.required, noFutureDateValidator],
@@ -534,6 +534,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       }
 
       const temp = await this.getTipoBenBeneficiarios(row.tipo_afiliado);
+      console.log(temp);
+
       if (!temp || temp.length === 0) {
         this.mostrarB = false;  // No mostrar el formulario de beneficios
         return;  // Detener la ejecución
@@ -653,6 +655,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
 
   }
+
   async prueba1(event: any): Promise<any> {
     let ben = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona("DESIGNADO").toPromise();
     this.beneficios = ben.map((item: any) => {

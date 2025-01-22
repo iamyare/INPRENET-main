@@ -946,6 +946,8 @@ export class DetalleBeneficioService {
 
   async obtenerTipoBeneficioByTipoPersona(tipoPersona: string): Promise<any[]> {
     try {
+      console.log(tipoPersona);
+
       const tipoBen = await this.benTipoPerRepository.find({
         where: {
           tipPersona: { tipo_persona: tipoPersona },

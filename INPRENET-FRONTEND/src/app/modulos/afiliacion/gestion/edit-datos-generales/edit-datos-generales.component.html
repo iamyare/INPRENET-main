@@ -144,6 +144,7 @@
       <iframe *ngIf="archivoIdentificacionUrl" [src]="archivoIdentificacionUrl" width="100%" height="500px"></iframe>
       <app-botonarchivos labelBoton="Archivo de Identificación" (setArchivo)="getArchivoIdentificacion($event)"></app-botonarchivos>
     </div>
+
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
       <mat-card>
         <mat-card-title class="custom-title">Datos de Fallecimiento</mat-card-title>
@@ -237,24 +238,60 @@
             </div>
           </div>
         </mat-card-content>
-        <div class="pdf-container">
+
+
           <div class="pdf-preview">
             <h4>Certificado de Defunción</h4>
-            <iframe *ngIf="certificadoDefuncionUrl" [src]="certificadoDefuncionUrl" width="100%" height="500px"></iframe>
-            <app-botonarchivos labelBoton="Certificado de Defuncion" (setArchivo)="getArchivoDef($event)"></app-botonarchivos>
+            <iframe
+              *ngIf="certificadoDefuncionUrl"
+              [src]="certificadoDefuncionUrl"
+              width="100%"
+              height="500px"
+            ></iframe>
+
+            <!-- Botón para subir el Certificado de Defunción -->
+            <app-botonarchivos
+              labelBoton="Certificado de Defunción"
+              (setArchivo)="getArchivoDef($event)"
+            ></app-botonarchivos>
+
+            <!-- Mensaje de error si es requerido y fallecido = 'SI' -->
+            <!-- <mat-error
+              *ngIf="
+                formDatosGenerales.get('archivoCertDef')?.hasError('required') &&
+                form1.get('fallecido')?.value === 'SI'
+              "
+            >
+              Por favor, adjuntar el Certificado PDF de Defunción.
+              (Verificar que el archivo sea el correcto).
+            </mat-error> -->
+
+            <!-- Botón para eliminar el archivo si ya existe -->
+            <button
+              mat-raised-button
+              color="warn"
+              *ngIf="formDatosGenerales.get('archivoCertDef')?.value"
+              (click)="removeArchivoDefuncion()"
+              style="margin-top: 1rem;"
+            >
+              <mat-icon>delete</mat-icon>
+              Eliminar Archivo
+            </button>
           </div>
-        </div>
-      </mat-card >
+          </mat-card>
     </form>
 
-    <button
-      mat-raised-button
-      color="primary"
-      style="color: white; margin: 1% 0 1% 0"
-      (click)="GuardarInformacion()"
-      *ngIf="mostrarBotonGuardar"
-    >
-      Guardar
-    </button>
+   <!-- Botón principal "Guardar" -->
+   <!-- ||
+   (form1.get('fallecido')?.value === 'SI' &&
+    !formDatosGenerales.get('archivoCertDef')?.value)" -->
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="GuardarInformacion()"
+          [disabled]="
+            form1.invalid " >
+          Guardar
+        </button>
   </div>
 </div>

@@ -49,36 +49,53 @@ export class UsuarioService {
           correo_1: correo,
         },
       },
-      relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.centroTrabajo', 'usuarioModulos', 'usuarioModulos.rolModulo', 'usuarioModulos.rolModulo.modulo'],
+      relations: [
+        'empleadoCentroTrabajo',
+        'empleadoCentroTrabajo.empleado',
+        'empleadoCentroTrabajo.centroTrabajo',
+        'usuarioModulos',
+        'usuarioModulos.rolModulo',
+        'usuarioModulos.rolModulo.modulo',
+      ],
     });
-
+  
     if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
-    if (usuario.usuarioModulos.length == 0) {
+  
+    if (usuario.usuarioModulos.length === 0) {
       throw new UnauthorizedException('No tiene roles asignados a ese usuario.');
     }
+  
     const isPasswordValid = await bcrypt.compare(contrasena, usuario.contrasena);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
-
-    const rolesModulos = usuario.usuarioModulos.map(um => ({
+  
+    const rolesModulos = usuario.usuarioModulos.map((um) => ({
       rol: um.rolModulo.nombre,
-      modulo: um.rolModulo.modulo.nombre
+      modulo: um.rolModulo.modulo.nombre,
     }));
-
+  
+    const nombreEmpleado = usuario.empleadoCentroTrabajo.empleado?.nombreEmpleado || 'No disponible';
+  
     const payload = {
       correo,
       sub: usuario.id_usuario_empresa,
       rolesModulos,
       idCentroTrabajo: usuario.empleadoCentroTrabajo.centroTrabajo.id_centro_trabajo,
+      departamento: usuario.empleadoCentroTrabajo.departamento,
+      numero_empleado: usuario.empleadoCentroTrabajo.numeroEmpleado,
+      municipio: usuario.empleadoCentroTrabajo.municipio,
+      nombrePuesto: usuario.empleadoCentroTrabajo.nombrePuesto,
+      nombreEmpleado,
     };
+  
     const accessToken = this.jwtService.sign(payload, { expiresIn: '100d' });
-
+  
     return { accessToken };
   }
-
+  
   async logout(req, res) {
     return res.json({ message: 'Sesión cerrada' });
   }

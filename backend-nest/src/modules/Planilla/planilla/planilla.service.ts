@@ -3,7 +3,7 @@ import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { EntityManager, Not, QueryFailedError, Raw, Repository } from 'typeorm';
+import { EntityManager, QueryFailedError, Raw, Repository } from 'typeorm';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Persona_Por_Banco } from '../../banco/entities/net_persona-banco.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -65,11 +65,22 @@ export class PlanillaService {
   ) {
   };
 
-  async generarExcelDetallesCompletos(idPlanilla: number, @Res() res: Response): Promise<void> {
+  async generarExcelDetallesCompletos(
+    idPlanilla: number,
+    estado: number,
+    @Res() res: Response
+  ): Promise<void> {
     if (!idPlanilla || typeof idPlanilla !== 'number') {
       throw new BadRequestException('idPlanilla debe ser un número válido');
     }
+    if (estado !== 1 && estado !== 2) {
+      throw new BadRequestException('El estado debe ser 1 o 2');
+    }
+  
     try {
+      const estadoBeneficios = estado === 1 ? 'EN PRELIMINAR' : 'PAGADA';
+      const estadoDeducciones = estado === 1 ? 'EN PRELIMINAR' : 'COBRADA';
+  
       const beneficiosQuery = `
         SELECT DISTINCT
           np.n_identificacion AS "DNI",
@@ -84,9 +95,9 @@ export class PlanillaService {
         LEFT JOIN net_persona_por_banco pb ON dpb.id_af_banco = pb.id_af_banco
         LEFT JOIN net_banco nb ON pb.id_banco = nb.id_banco
         INNER JOIN net_beneficio b ON dpb.id_beneficio = b.id_beneficio
-        WHERE dpb.id_planilla = ${idPlanilla} AND dpb.estado = 'EN PRELIMINAR'
+        WHERE dpb.id_planilla = ${idPlanilla} AND dpb.estado = '${estadoBeneficios}'
       `;
-
+  
       const deduccionesQuery = `
         SELECT DISTINCT
           np.n_identificacion AS "DNI",
@@ -103,14 +114,14 @@ export class PlanillaService {
         LEFT JOIN net_persona_por_banco pb ON dd.id_af_banco = pb.id_af_banco
         LEFT JOIN net_banco nb ON pb.id_banco = nb.id_banco
         INNER JOIN net_deduccion d ON dd.id_deduccion = d.id_deduccion
-        WHERE dd.id_planilla = ${idPlanilla} AND dd.estado_aplicacion = 'EN PRELIMINAR'
+        WHERE dd.id_planilla = ${idPlanilla} AND dd.estado_aplicacion = '${estadoDeducciones}'
       `;
-
+  
       const beneficios = await this.entityManager.query(beneficiosQuery);
       const deducciones = await this.entityManager.query(deduccionesQuery);
       const deduccionesInprema = deducciones.filter((item: any) => item.ID_CENTRO_TRABAJO === 1);
       const deduccionesTerceros = deducciones.filter((item: any) => item.ID_CENTRO_TRABAJO !== 1);
-
+  
       const workbook = new ExcelJS.Workbook();
       const beneficiosSheet = workbook.addWorksheet('Beneficios');
       beneficiosSheet.columns = [
@@ -123,8 +134,7 @@ export class PlanillaService {
         { header: 'Estado', key: 'ESTADO', width: 15 },
       ];
       beneficiosSheet.addRows(beneficios);
-
-      // Hoja de Deducciones INPREMA
+  
       const deduccionesInpremaSheet = workbook.addWorksheet('Deducciones INPREMA');
       deduccionesInpremaSheet.columns = [
         { header: 'DNI', key: 'DNI', width: 15 },
@@ -134,8 +144,7 @@ export class PlanillaService {
         { header: 'Estado Aplicación', key: 'ESTADO_APLICACION', width: 20 },
       ];
       deduccionesInpremaSheet.addRows(deduccionesInprema);
-
-      // Hoja de Deducciones Terceros
+  
       const deduccionesTercerosSheet = workbook.addWorksheet('Deducciones Terceros');
       deduccionesTercerosSheet.columns = [
         { header: 'DNI', key: 'DNI', width: 15 },
@@ -145,12 +154,12 @@ export class PlanillaService {
         { header: 'Estado Aplicación', key: 'ESTADO_APLICACION', width: 20 },
       ];
       deduccionesTercerosSheet.addRows(deduccionesTerceros);
-
+  
       res.setHeader(
         'Content-Disposition',
         `attachment; filename="Detalles_Planilla_${idPlanilla}.xlsx"`
       );
-
+  
       await workbook.xlsx.write(res);
       res.end();
     } catch (error) {
@@ -158,7 +167,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al generar el archivo Excel.');
     }
   }
-
+  
   async procesarPagoBeneficio(): Promise<void> {
     try {
       // Rutas de las imágenes para el contenido del correo

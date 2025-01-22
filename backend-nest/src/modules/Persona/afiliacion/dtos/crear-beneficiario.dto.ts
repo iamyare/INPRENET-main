@@ -14,6 +14,10 @@ export class CrearBeneficiarioDto {
   porcentaje: number;
 
   @IsOptional()
+  @IsString()
+  parentesco?: string;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CrearDiscapacidadDto)

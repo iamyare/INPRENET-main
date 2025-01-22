@@ -18,13 +18,19 @@ import * as fs from 'fs';
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
 
-  @Get('exportar-detalles-completos-excel/:idPlanilla')
+  @Get('exportar-detalles-completos-excel/:idPlanilla/:estado')
   async exportarExcelDetalles(
     @Param('idPlanilla') idPlanilla: number,
+    @Param('estado') estado: number,
     @Res() res,
   ): Promise<void> {
-    await this.planillaService.generarExcelDetallesCompletos(idPlanilla, res);
+    if (isNaN(idPlanilla) || isNaN(estado)) {
+      throw new BadRequestException('Los parámetros idPlanilla y estado deben ser números válidos');
+    }
+
+    await this.planillaService.generarExcelDetallesCompletos(idPlanilla, estado, res);
   }
+
 
   @Post('pago-beneficio')
   @HttpCode(HttpStatus.OK)

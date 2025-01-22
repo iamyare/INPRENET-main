@@ -707,6 +707,7 @@ export class AfiliadoService {
         idEstadoPersona: beneficiario.estadoAfiliacion?.codigo || null,
         estadoDescripcion: beneficiario.estadoAfiliacion?.nombre_estado || null,
         porcentaje: beneficiario.porcentaje || null,
+        parentesco: beneficiario.parentesco || null,
         tipoPersona: beneficiario.tipoPersona?.tipo_persona || null,
         discapacidades: beneficiario.persona?.personaDiscapacidades
           ?.filter(discapacidad => discapacidad.discapacidad?.id_discapacidad)

@@ -547,6 +547,7 @@ export class AfiliacionService {
         ID_TIPO_PERSONA: tipoPersonaBeneficiario.id_tipo_persona,
         eliminado: 'NO',
         porcentaje: crearBeneficiarioDto.porcentaje,
+        parentesco: crearBeneficiarioDto.parentesco || null,
       });
       const detalleGuardado = await entityManager.save(net_detalle_persona, detalleBeneficiario);
       resultados.push(detalleGuardado);

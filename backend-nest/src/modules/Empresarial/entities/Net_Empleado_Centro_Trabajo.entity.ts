@@ -28,6 +28,12 @@ export class Net_Empleado_Centro_Trabajo {
   @Column('varchar2', { length: 100, nullable: false, name: 'NOMBRE_PUESTO' })
   nombrePuesto: string;
 
+  @Column('varchar2', { length: 50, nullable: true, name: 'DEPARTAMENTO' })
+  departamento: string;
+
+  @Column('varchar2', { length: 50, nullable: true, name: 'MUNICIPIO' })
+  municipio: string;
+
   @OneToMany(() => Net_Usuario_Empresa, usuarioEmpresa => usuarioEmpresa.empleadoCentroTrabajo)
   usuarioEmpresas: Net_Usuario_Empresa[];
 }

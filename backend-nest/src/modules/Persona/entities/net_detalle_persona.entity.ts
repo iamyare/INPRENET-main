@@ -69,4 +69,7 @@ export class net_detalle_persona {
 
     @Column('varchar2', { length: 500, nullable: true, name: 'OBSERVACION' })
     observacion: string;
+
+    @Column('varchar2', { length: 100, nullable: true, name: 'PARENTESCO' })
+    parentesco: string;
 }

@@ -1,5 +1,5 @@
 import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
-import { Check, Column, Entity, Index, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, Index, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
@@ -140,7 +140,7 @@ export class net_persona {
     @Column('varchar2', { length: 500, nullable: true, name: 'OBSERVACION' })
     observacion: string;
 
-    @Column('date', { nullable: true, name: 'ULTIMA_FECHA_ACTUALIZACION' })
+    @UpdateDateColumn({ type: 'timestamp', name: 'ULTIMA_FECHA_ACTUALIZACION' })
     ultima_fecha_actualizacion: Date;
 
     @Column('blob', { nullable: true, name: 'FOTO_PERFIL' })

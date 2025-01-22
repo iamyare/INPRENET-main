@@ -7,6 +7,8 @@ import { DriveService } from '../drive/drive.service';
 import { unirNombres } from '../../../shared/formatoNombresP';
 import { calcularEdad } from '../../../shared/calcularEdad';
 import * as path from 'path';
+import { EmpleadoDto } from './empleado.dto';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class PdfService {
@@ -51,94 +53,94 @@ export class PdfService {
     });
   }
 
-  async generateConstanciaAfiliacionTemplate(data: any, includeQR: boolean) {
+  async generateConstanciaAfiliacionTemplate(data: any, includeQR: boolean, dto: EmpleadoDto) {
     const content: Array<any> = [
-      { text: 'A QUIEN INTERESE', style: 'header' },
-      {
-        text: 'El Instituto Nacional de Previsión del Magisterio (INPREMA), por este medio indica que:',
-        style: 'subheader'
-      },
-      {
-        text: unirNombres(data.primer_nombre, data.segundo_nombre, data.tercer_nombre, data.primer_apellido, data.segundo_apellido),
-        style: 'name'
-      },
-      {
-        text: [
-          { text: 'Se encuentra afiliado a este Sistema de Previsión con el número ' },
-          { text: `${data.n_identificacion}`, style: 'dni' }
-        ],
-        style: 'body'
-      },
-      {
-        text: `Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de Tegucigalpa, Departamento de Francisco Morazán, a los ${new Date().getDate()} días del mes de ${new Date().toLocaleString('es-HN', { month: 'long' })} del año ${new Date().getFullYear()}.`,
-        style: 'body'
-      },
-      { text: '\n\n\n' },
-      { image: data.firmaDigitalBase64, width: 150, alignment: 'center', margin: [0, 0, 0, -20] },
-      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
-      { text: '[Nombre]', style: 'signature' },
-      { text: 'Jefe Departamento de Afiliación', style: 'signatureTitle' },
-      { text: '\n\n\n' }
+        { text: 'A QUIEN INTERESE', style: 'header' },
+        {
+            text: 'El Instituto Nacional de Previsión del Magisterio (INPREMA), por este medio indica que:',
+            style: 'subheader'
+        },
+        {
+            text: unirNombres(data.primer_nombre, data.segundo_nombre, data.tercer_nombre, data.primer_apellido, data.segundo_apellido),
+            style: 'name'
+        },
+        {
+            text: [
+                { text: 'Se encuentra afiliado a este Sistema de Previsión con el número ' },
+                { text: `${data.n_identificacion}`, style: 'dni' }
+            ],
+            style: 'body'
+        },
+        {
+            text: `Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de ${dto.municipio}, Departamento de ${dto.departamento}, a los ${new Date().getDate()} días del mes de ${new Date().toLocaleString('es-HN', { month: 'long' })} del año ${new Date().getFullYear()}.`,
+            style: 'body'
+        },
+        { text: '\n\n\n' },
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
+        { text: dto.nombreEmpleado, style: 'signature' }, // Nombre del empleado
+        { text: dto.nombrePuesto, style: 'signatureTitle' }, // Puesto del empleado
+        { text: '\n\n\n' }
     ];
 
     if (includeQR) {
-      const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
-      content.push({ image: qrCode, width: 100, alignment: 'center' });
+        const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
+        content.push({ image: qrCode, width: 100, alignment: 'center' });
     }
 
     return {
-      pageSize: 'A4',
-      pageMargins: [40, 120, 40, 60],
-      background: {
-        image: data.base64data,
-        width: 595.28,
-        height: 841.89
-      },
-      content: content,
-      styles: {
-        header: {
-          fontSize: 18,
-          bold: true,
-          alignment: 'center',
-          margin: [0, 20, 0, 20],
+        pageSize: 'A4',
+        pageMargins: [40, 120, 40, 60],
+        background: {
+            image: data.base64data,
+            width: 595.28,
+            height: 841.89
         },
-        subheader: {
-          fontSize: 11,
-          alignment: 'left',
-          margin: [40, 10, 40, 5]
-        },
-        name: {
-          fontSize: 14,
-          bold: true,
-          alignment: 'center',
-          margin: [40, 10, 40, 5]
-        },
-        body: {
-          fontSize: 11,
-          alignment: 'left',
-          margin: [40, 10, 40, 5]
-        },
-        dni: {
-          fontSize: 11,
-          bold: true
-        },
-        signature: {
-          fontSize: 12,
-          bold: true,
-          alignment: 'center',
-          margin: [0, 10, 0, 0]
-        },
-        signatureTitle: {
-          fontSize: 12,
-          alignment: 'center'
-        },
-        footer: {
-          fontSize: 10,
-          alignment: 'right',
+        content: content,
+        styles: {
+            header: {
+                fontSize: 18,
+                bold: true,
+                alignment: 'center',
+                margin: [0, 20, 0, 20],
+            },
+            subheader: {
+                fontSize: 11,
+                alignment: 'left',
+                margin: [40, 10, 40, 5]
+            },
+            name: {
+                fontSize: 14,
+                bold: true,
+                alignment: 'center',
+                margin: [40, 10, 40, 5]
+            },
+            body: {
+                fontSize: 11,
+                alignment: 'left',
+                margin: [40, 10, 40, 5]
+            },
+            dni: {
+                fontSize: 11,
+                bold: true
+            },
+            signature: {
+                fontSize: 12,
+                bold: true,
+                alignment: 'center',
+                margin: [0, 10, 0, 0]
+            },
+            signatureTitle: {
+                fontSize: 12,
+                alignment: 'center'
+            },
+            footer: {
+                fontSize: 10,
+                alignment: 'right',
+            }
         }
-      }
     };
-  }
+}
+
 
   public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean) {
     // Simulando la función de cálculo de edad
@@ -2199,24 +2201,33 @@ export class PdfService {
     };
   }
   
-  async generateConstanciaAfiliacion(data: any, includeQR: boolean): Promise<Buffer> {
-    return this.generateConstancia(data, includeQR, this.generateConstanciaAfiliacionTemplate);
-  }
+  async generateConstanciaAfiliacion(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
+    return this.generateConstancia({ ...data, dto }, includeQR, (data, includeQR) => 
+        this.generateConstanciaAfiliacionTemplate(data, includeQR, dto)
+    );
+}
 
   async generateConstanciaAfiliacion2(data: any, includeQR: boolean): Promise<Buffer> {
     return this.generateConstancia(data, includeQR, this.generateConstanciaAfiliacionTemplate2);
   }
 
-  async generateAndUploadConstancia(data: any, type: string): Promise<string> {
+  async generateAndUploadConstancia(data: any, dto: EmpleadoDto, type: string): Promise<string> {
+    const errors = await validate(dto);
+    if (errors.length > 0) {
+      throw new Error(
+        `Validation failed: ${errors
+          .map(err => Object.values(err.constraints || {}).join(', '))
+          .join('; ')}`,
+      );
+    }
     const nombreCompleto = `${data.primer_nombre}_${data.primer_apellido}`;
     const fechaActual = new Date().toISOString().split('T')[0];
     const fileName = `${nombreCompleto}_${fechaActual}_constancia_${type}`;
-
-    // Generar documento sin QR
+  
     let pdfBufferWithoutQR;
     switch (type) {
       case 'afiliacion':
-        pdfBufferWithoutQR = await this.generateConstanciaAfiliacion(data, false);
+        pdfBufferWithoutQR = await this.generateConstanciaAfiliacion(data, false, dto);
         break;
       case 'afiliacion2':
         pdfBufferWithoutQR = await this.generateConstanciaAfiliacion2(data, false);
@@ -2236,44 +2247,42 @@ export class PdfService {
       default:
         throw new Error('Invalid constancia type');
     }
-
+  
     const fileId = await this.driveService.uploadFile(`${fileName}_sin_qr.pdf`, pdfBufferWithoutQR);
-
-    // Generar documento con QR
+  
     let pdfBufferWithQR;
     switch (type) {
       case 'afiliacion':
-        pdfBufferWithQR = await this.generateConstanciaAfiliacion({ ...data, fileId }, true);
-        break;
+        pdfBufferWithQR = await this.generateConstanciaAfiliacion({ ...data, fileId }, true, dto);
+    break;
       case 'afiliacion2':
-        pdfBufferWithQR = await this.generateConstanciaAfiliacion({ ...data, fileId }, true);
+        pdfBufferWithQR = await this.generateConstanciaAfiliacion2({ ...data, dto, fileId }, true);
         break;
       case 'renuncia-cap':
-        pdfBufferWithQR = await this.generateConstanciaRenunciaCap({ ...data, fileId }, true);
+        pdfBufferWithQR = await this.generateConstanciaRenunciaCap({ ...data, dto, fileId }, true);
         break;
       case 'no-cotizar':
-        pdfBufferWithQR = await this.generateConstanciaNoCotizar({ ...data, fileId }, true);
+        pdfBufferWithQR = await this.generateConstanciaNoCotizar({ ...data, dto, fileId }, true);
         break;
       case 'debitos':
-        pdfBufferWithQR = await this.generateConstanciaDebitos({ ...data, fileId }, true);
+        pdfBufferWithQR = await this.generateConstanciaDebitos({ ...data, dto, fileId }, true);
         break;
       case 'tiempo-cotizar-con-monto':
-        pdfBufferWithQR = await this.generateConstanciaTiempoCotizarConMonto({ ...data, fileId }, true);
+        pdfBufferWithQR = await this.generateConstanciaTiempoCotizarConMonto({ ...data, dto, fileId }, true);
         break;
       default:
         throw new Error('Invalid constancia type');
     }
-
-    // Guardar el documento con QR localmente
+  
     fs.writeFileSync(`${fileName}_con_qr.pdf`, pdfBufferWithQR);
-
+  
     return fileId;
   }
-
-  async generateConstanciaWithQR(data: any, type: string): Promise<Buffer> {
+  
+  async generateConstanciaWithQR(data: any, type: string, dto: EmpleadoDto): Promise<Buffer> {
     switch (type) {
       case 'afiliacion':
-        return await this.generateConstanciaAfiliacion(data, true);
+        return await this.generateConstanciaAfiliacion(data, true, dto);
       case 'renuncia-cap':
         return await this.generateConstanciaRenunciaCap(data, true);
       case 'no-cotizar':
@@ -2334,8 +2343,6 @@ export class PdfService {
         const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
         content.push({ image: qrCode, width: 100, alignment: 'center' });
       }
-
-
       return {
         pageSize: 'A4',
         pageMargins: [40, 120, 40, 60],

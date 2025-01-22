@@ -71,5 +71,18 @@
     </app-dynamic-table-prueba>
   </div>
 
+  <!-- Spinner de carga -->
+  <div class="spinner-container" *ngIf="isLoading" style="text-align: center; margin: 20px;">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    <p>Generando reporte, por favor espere...</p>
+  </div>
 
+  <!-- Botón para descargar Excel (visible solo si hay una planilla seleccionada) -->
+  <div style="text-align: right; margin: 10px;" *ngIf="idPlanilla">
+    <button mat-raised-button color="accent" [disabled]="isLoading" (click)="descargarExcelCompleto()">
+      Descargar detalles en Excel
+    </button>
+  </div>
+
+  
 </div>

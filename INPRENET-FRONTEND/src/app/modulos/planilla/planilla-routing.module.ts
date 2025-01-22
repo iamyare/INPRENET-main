@@ -20,6 +20,7 @@ import { NuevoTipoDeduccionComponent } from './egresos/Mantenimiento/nuevo-tipo-
 import { EditarTipoDeduccionComponent } from './egresos/Mantenimiento/editar-tipo-deduccion/editar-tipo-deduccion.component';
 import { VoucherGeneralMensComponent } from './voucher-general-mens/voucher-general-mens.component';
 import { AportacionCotizacionComponent } from './ingresos/aportacion-cotizacion/aportacion-cotizacion.component';
+import { VerplancerradaComponent } from './egresos/verplancerrada/verplancerrada.component';
 
 const routes: Routes = [
   {
@@ -86,6 +87,12 @@ const routes: Routes = [
   {
     path: 'Egresos',
     children: [
+      {
+        path: 'planilla-definitivas',
+        component: VerplancerradaComponent,
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('PLANILLA', 'planilla/Egresos/planilla-definitivas') }
+      },
       {
         path: 'proceso-planilla',
         component: ProcesoPlanillaComponent,

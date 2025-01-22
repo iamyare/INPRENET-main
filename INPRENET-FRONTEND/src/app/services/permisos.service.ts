@@ -59,22 +59,24 @@ export class PermisosService {
         'afiliacion/nuevo-centro': {
           title: 'Nuevo Centro Educativo',
           permisos: [
-            { role: 'MODIFICACION AFILIACION', module: 'AFILIACION' },
-            { role: 'ADMINISTRADOR', module: 'AFILIACION' }
+            /* { role: 'MODIFICACION AFILIACION', module: 'AFILIACION' },
+            { role: 'ADMINISTRADOR', module: 'AFILIACION' } */
           ]
         },
         'afiliacion/ver-datos-centro': {
           title: 'Ver Centro Educativo',
           permisos: [
-            { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
-            { role: 'ADMINISTRADOR', module: 'AFILIACION' }
+            /* { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
+            { role: 'ADMINISTRADOR', module: 'AFILIACION' } */
           ]
         },
         'afiliacion/constancias-afiliados': {
           title: 'Ver Centro Educativo',
           permisos: [
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
-            { role: 'ADMINISTRADOR', module: 'AFILIACION' }
+            { role: 'ADMINISTRADOR', module: 'AFILIACION' },
+            { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
+            { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
           ]
         }
       }
@@ -100,6 +102,12 @@ export class PermisosService {
     },
     PLANILLA: {
       rutas: {
+          'planilla/Egresos/planilla-definitivas': {
+          title: 'PLANILLAS DEFINITIVAS',
+          permisos: [
+            { role: 'CONSULTA COBROS', module: 'COBROS' }
+          ]
+        },
         'planilla/Egresos/cargar-fallecidos': {
           title: 'Cargar Bajas (FALLECIDOS)',
           permisos: [
@@ -169,6 +177,7 @@ export class PermisosService {
             { role: 'ADMINISTRADOR', module: 'PLANILLA' },
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
             { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
+            { role: 'CONSULTA COBROS', module: 'COBROS' },
           ]
         }
       }
@@ -179,7 +188,8 @@ export class PermisosService {
           title: 'Detalle Envío',
           permisos: [
             { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
-            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
+            { role: 'ADMINISTRADOR', module: 'ESCALAFON' },
+            { role: 'CONSULTA COBROS', module: 'COBROS' }
           ]
         },
         'escalafon/Ver-movimientos': {

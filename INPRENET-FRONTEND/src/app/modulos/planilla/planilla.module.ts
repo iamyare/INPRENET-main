@@ -82,7 +82,7 @@ import { AportacionCotizacionComponent } from './ingresos/aportacion-cotizacion/
     CambioEstadoTipoPerComponent,
     P60RentasComponent,
     VoucherGeneralMensComponent,
-    AportacionCotizacionComponent
+    AportacionCotizacionComponent,
   ],
   imports: [
     CommonModule,

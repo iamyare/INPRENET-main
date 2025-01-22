@@ -1,9 +1,8 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { DireccionService } from 'src/app/services/direccion.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
-import { BeneficiosService } from 'src/app/services/beneficios.service';
-
+import { DireccionService } from '../../../../services/direccion.service';
+import { DatosEstaticosService } from '../../../../services/datos-estaticos.service';
+import { BeneficiosService } from '../../../../services/beneficios.service';
 @Component({
   selector: 'app-benef',
   templateUrl: './benef.component.html',
@@ -17,6 +16,7 @@ export class BenefComponent implements OnInit {
   public tipo_discapacidad: any[] = [];
   public parentesco: any;
   public departamentos: any = [];
+  public genero: any = [];
   public departamentosNacimiento: any = [];
   public minDate: Date;
 
@@ -30,13 +30,13 @@ export class BenefComponent implements OnInit {
     private direccionService: DireccionService,
     private datosEstaticosService: DatosEstaticosService,
     private beneficiosService: BeneficiosService,
-    private cdr: ChangeDetectorRef
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
   }
 
   ngOnInit(): void {
+    this.genero = this.datosEstaticosService.genero;
     if (!this.formGroup.get('beneficiario')) {
       const beneficiariosArray = this.fb.array([]);
       beneficiariosArray.setValidators(this.identidadUnicaValidator.bind(this));
@@ -76,11 +76,11 @@ export class BenefComponent implements OnInit {
       tercer_nombre: new FormControl(datosBeneficiario?.tercer_nombre || ''),
       primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.maxLength(40)]),
       segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
-      genero: new FormControl(datosBeneficiario?.genero || ''),
+      genero: new FormControl(datosBeneficiario?.genero || '', [Validators.required]),
       telefono_1: new FormControl(''),
       correo_1: new FormControl(''),
       correo_2: new FormControl(''),
-      fecha_nacimiento: new FormControl(''),
+      fecha_nacimiento: new FormControl('', [Validators.required]),
       direccion_residencia: new FormControl(''),
       id_municipio_residencia: new FormControl(null),
       id_departamento_residencia: new FormControl(null),
@@ -408,5 +408,6 @@ export class BenefComponent implements OnInit {
   get beneficiariosControls(): FormGroup[] {
     return this.beneficiarios.controls as FormGroup[];
   }
+  
   
 }

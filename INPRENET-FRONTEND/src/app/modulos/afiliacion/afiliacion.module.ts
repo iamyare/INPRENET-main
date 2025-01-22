@@ -1,6 +1,6 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MaterialAngularModule } from 'src/app/material-angular/material-angular.module';
+import { MaterialAngularModule } from '../../../../src/app/material-angular/material-angular.module';
 import { AdminCentroEducativoComponent } from './Centros-Educativos/admin-centro-educativo/admin-centro-educativo.component';
 import { AfiliacionCentrosComponent } from './Centros-Educativos/afiliacion-centros/afiliacion-centros.component';
 import { DatosGeneralesCentroComponent } from './Centros-Educativos/datos-generales-centro/datos-generales-centro.component';
@@ -21,7 +21,7 @@ import { JubiladoComponent } from './verPerfil/jubilado/jubilado.component';
 import { PensionadoComponent } from './verPerfil/pensionado/pensionado.component';
 import { PerfilComponent } from './verPerfil/perfil/perfil.component';
 import { VoluntarioComponent } from './verPerfil/voluntario/voluntario.component';
-import { ComponentsModule } from 'src/app/components/components.module';
+import { ComponentsModule } from '../../../../src/app/components/components.module';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { AfiliacionRoutingModule } from './afiliacion-routing.module';
 import { DatBancComponent } from './nose/dat-banc/dat-banc.component';

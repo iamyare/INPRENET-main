@@ -47,6 +47,10 @@ export class DatosGeneralesComponent implements OnInit {
           discapacidades: this.fb.array([]),
           ...this.initialData
         });
+        if (this.initialData.fecha_nacimiento) {
+          const fechaNacimiento = new Date(this.initialData.fecha_nacimiento + 'T00:00:00');
+          this.formGroup.patchValue({ fecha_nacimiento: fechaNacimiento });
+        }
         this.cargarDiscapacidades();
       } else {
         this.formGroup = this.fb.group({

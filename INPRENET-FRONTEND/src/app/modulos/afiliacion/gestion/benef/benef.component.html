@@ -136,6 +136,14 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
+
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Género</mat-label>
+              <mat-icon matPrefix>person</mat-icon>
+              <mat-select formControlName="genero">
+                <mat-option *ngFor="let item of genero" [value]="item.value">{{ item.label }}</mat-option>
+              </mat-select>
+            </mat-form-field>
           </div>
 
           <!-- Datos de Residencia -->

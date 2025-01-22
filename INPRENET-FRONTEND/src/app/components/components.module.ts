@@ -34,6 +34,7 @@ import { GestionarDiscapacidadDialogComponent } from './dinamicos/gestionar-disc
 import { HomePageComponent } from './home-page/home-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { DynamicConstanciasComponent } from './dinamicos/dynamic-constancias/dynamic-constancias.component';
 
 
 @NgModule({
@@ -68,7 +69,8 @@ import { SharedModule } from 'src/app/shared/shared.module';
     PerfilHeaderComponent,
     GestionarDiscapacidadDialogComponent,
     HomePageComponent,
-    CustomTableComponent
+    CustomTableComponent,
+    DynamicConstanciasComponent
   ],
   imports: [
     CommonModule,
@@ -105,7 +107,8 @@ import { SharedModule } from 'src/app/shared/shared.module';
     LandingPageComponent,
     DynamicInputDialogComponent,
     DynamicStepsComponent,
-    GestionarDiscapacidadDialogComponent
+    GestionarDiscapacidadDialogComponent,
+    DynamicConstanciasComponent
   ]
 })
 export class ComponentsModule { }

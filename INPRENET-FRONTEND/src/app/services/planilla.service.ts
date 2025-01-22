@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, BehaviorSubject, catchError, throwError, map } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../src/environments/environment';
 import { Estatus60Rentas } from '../modulos/planilla/p-60-rentas/p_60_rentas.interface';
 
 @Injectable({
@@ -11,13 +11,12 @@ import { Estatus60Rentas } from '../modulos/planilla/p-60-rentas/p_60_rentas.int
 export class PlanillaService {
   constructor(private http: HttpClient, private toastr: ToastrService) { }
 
-  exportarDetallesCompletosExcel(idPlanilla: number): Observable<Blob> {
-    const url = `${environment.API_URL}/api/planilla/exportar-detalles-completos-excel/${idPlanilla}`;
+  exportarDetallesCompletosExcel(idPlanilla: number, estado: number): Observable<Blob> {
+    const url = `${environment.API_URL}/api/planilla/exportar-detalles-completos-excel/${idPlanilla}/${estado}`;
     return this.http.get(url, {
       responseType: 'blob' as 'json'
     }) as Observable<Blob>;
   }
-
 
   getDetalleBeneficiosYDeduccionesPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
     const params = new HttpParams()

@@ -1,16 +1,14 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { EventEmitter, Injectable, Output } from '@angular/core';
-import { Router } from '@angular/router';
 import { Observable, catchError, map, throwError } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AfiliadoService {
   @Output() PersonasEdit: EventEmitter<any> = new EventEmitter();
-  constructor(private http: HttpClient, private router: Router) { }
-
+  constructor(private http: HttpClient) { }
 
   generarConstancia(data: any): void {
     const url = `${environment.API_URL}/api/documents/constancia-pdf`;
@@ -23,7 +21,7 @@ export class AfiliadoService {
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.download = `constancia_${data.type}.pdf`; // Nombre del archivo PDF descargado
+          link.download = `constancia_${data.type}.pdf`;
           link.click();
           window.URL.revokeObjectURL(url);
         },
@@ -33,9 +31,9 @@ export class AfiliadoService {
       );
   }
 
-  generarConstanciaAfiliacion(data: any): Observable<any> {
+  generarConstanciaAfiliacion(data: any, dto: any): Observable<any> {
     const url = `${environment.API_URL}/api/documents/constancia-afiliacion`;
-    return this.http.post<any>(url, data);
+    return this.http.post<any>(url, { data, dto });
   }
 
   generarConstanciaAfiliacion2(data: any): Observable<any> {
@@ -43,11 +41,15 @@ export class AfiliadoService {
     return this.http.post<any>(url, data);
   }
 
-  generarConstanciaQR(data: any, type: string): Observable<Blob> {
+  generarConstanciaQR(data: any, dto: any, type: string): Observable<Blob> {
     const url = `${environment.API_URL}/api/documents/constancia-qr`;
-    return this.http.post(url, { ...data, type }, { responseType: 'blob' });
+    return this.http.post(
+      url,
+      { ...data, dto, type },
+      { responseType: 'blob' }
+    );
   }
-
+    
   generarConstanciaRenunciaCap(data: any): Observable<any> {
     const url = `${environment.API_URL}/api/documents/constancia-renuncia-cap`;
     return this.http.post<any>(url, data);

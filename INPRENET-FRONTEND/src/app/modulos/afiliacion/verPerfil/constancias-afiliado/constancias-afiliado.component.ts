@@ -56,7 +56,7 @@ export class ConstanciasAfiliadoComponent {
   }
 
   generarConstanciaAfiliacion() {
-    this.obtenerPersonaActualizada((personaActualizada) => {
+    /* this.obtenerPersonaActualizada((personaActualizada) => {
       const data = {
         primer_nombre: personaActualizada.primer_nombre,
         segundo_nombre: personaActualizada.segundo_nombre,
@@ -66,7 +66,7 @@ export class ConstanciasAfiliadoComponent {
         n_identificacion: personaActualizada.n_identificacion,
       };
 
-      this.afiliadoService.generarConstanciaAfiliacion(data).subscribe();
+      //this.afiliadoService.generarConstanciaAfiliacion(data).subscribe();
       this.afiliadoService.generarConstanciaQR(data, 'afiliacion').subscribe((blob: Blob) => {
         const downloadURL = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -75,11 +75,11 @@ export class ConstanciasAfiliadoComponent {
         link.click();
         window.URL.revokeObjectURL(downloadURL);
       });
-    });
+    }); */
   }
 
   generarConstanciaAfiliacion2() {
-    this.obtenerPersonaActualizada((personaActualizada) => {
+    /* this.obtenerPersonaActualizada((personaActualizada) => {
       this.afiliadoService.generarConstanciaAfiliacion2(personaActualizada).subscribe();
       this.afiliadoService.generarConstanciaQR(personaActualizada, 'afiliacion2').subscribe((blob: Blob) => {
         const downloadURL = window.URL.createObjectURL(blob);
@@ -89,11 +89,11 @@ export class ConstanciasAfiliadoComponent {
         link.click();
         window.URL.revokeObjectURL(downloadURL);
       });
-    });
+    }); */
   }
   
   generarConstanciaRenunciaCap() {
-    this.obtenerPersonaActualizada((personaActualizada) => {
+    /* this.obtenerPersonaActualizada((personaActualizada) => {
       const data = {
         primer_nombre: personaActualizada.primer_nombre,
         segundo_nombre: personaActualizada.segundo_nombre,
@@ -112,11 +112,11 @@ export class ConstanciasAfiliadoComponent {
         link.click();
         window.URL.revokeObjectURL(downloadURL);
       });
-    });
+    }); */
   }
 
   generarConstanciaNoCotizar() {
-    this.obtenerPersonaActualizada((personaActualizada) => {
+    /* this.obtenerPersonaActualizada((personaActualizada) => {
       const data = {
         primer_nombre: personaActualizada.primer_nombre,
         segundo_nombre: personaActualizada.segundo_nombre,
@@ -135,11 +135,11 @@ export class ConstanciasAfiliadoComponent {
         link.click();
         window.URL.revokeObjectURL(downloadURL);
       });
-    });
+    }); */
   }
 
   generarConstanciaDebitos() {
-    this.obtenerPersonaActualizada((personaActualizada) => {
+    /* this.obtenerPersonaActualizada((personaActualizada) => {
       const data = {
         primer_nombre: personaActualizada.primer_nombre,
         segundo_nombre: personaActualizada.segundo_nombre,
@@ -158,11 +158,11 @@ export class ConstanciasAfiliadoComponent {
         link.click();
         window.URL.revokeObjectURL(downloadURL);
       });
-    });
+    }); */
   }
   
   generarConstanciaTiempoCotizarConMonto() {
-    this.obtenerPersonaActualizada((personaActualizada) => {
+    /* this.obtenerPersonaActualizada((personaActualizada) => {
       const data = {
         primer_nombre: personaActualizada.primer_nombre,
         segundo_nombre: personaActualizada.segundo_nombre,
@@ -181,7 +181,7 @@ export class ConstanciasAfiliadoComponent {
         link.click();
         window.URL.revokeObjectURL(downloadURL);
       });
-    });
+    }); */
   }
   
 }

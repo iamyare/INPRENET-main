@@ -209,6 +209,9 @@ export class AfiliarDocenteComponent implements OnInit {
       // Archivo de identificación (ej. escaneo de cédula)
       const fileIdent = datosGenerales?.archivo_identificacion;
 
+      console.log(formattedData);
+      
+
       // Llamar al servicio para crear afiliación
       this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
         (response: any) => {
@@ -229,7 +232,7 @@ export class AfiliarDocenteComponent implements OnInit {
               }
 
               this.afiliadoService.generarConstanciaAfiliacion2(personaActualizada).subscribe(() => {
-                this.afiliadoService.generarConstanciaQR(personaActualizada, 'afiliacion2').subscribe((blob: Blob) => {
+                this.afiliadoService.generarConstanciaQR(personaActualizada, personaActualizada, 'afiliacion2').subscribe((blob: Blob) => {
                   const downloadURL = window.URL.createObjectURL(blob);
                   const link = document.createElement('a');
                   link.href = downloadURL;
@@ -580,6 +583,8 @@ export class AfiliarDocenteComponent implements OnInit {
 
   private formatBeneficiarios(beneficiarios: any[]): any[] {
     return beneficiarios.map(beneficiario => {
+      console.log(beneficiario);
+      
       const discapacidades = this.mapDiscapacidades(beneficiario.discapacidades);
       return {
         persona: {
@@ -597,12 +602,15 @@ export class AfiliarDocenteComponent implements OnInit {
           id_municipio_nacimiento: beneficiario.id_municipio_nacimiento
         },
         discapacidades: this.formatDiscapacidades(discapacidades),
-        porcentaje: beneficiario.porcentaje || null
+        porcentaje: beneficiario.porcentaje || null,
+        parentesco: beneficiario.parentesco?.toUpperCase() || null,
       };
     });
   }
 
   private formatFamiliares(datosGenerales: any, referenciasPersonales: any): any[] {
+    console.log(datosGenerales.familiares);
+    
     const familiares = datosGenerales.familiares || [];
     return [
       ...familiares.map((familiar: any) => ({

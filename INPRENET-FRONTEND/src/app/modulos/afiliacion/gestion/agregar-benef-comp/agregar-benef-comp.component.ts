@@ -44,6 +44,7 @@ export class AgregarBenefCompComponent implements OnInit {
         segundo_apellido: beneficiario.segundo_apellido,
         telefono_1: beneficiario.telefono_1,
         fecha_nacimiento: beneficiario.fecha_nacimiento,
+        genero: beneficiario.genero,
         direccion_residencia: beneficiario.direccion_residencia,
         id_municipio_residencia: beneficiario.id_municipio_residencia,
         id_municipio_nacimiento: beneficiario.id_municipio_nacimiento

@@ -1,0 +1,16 @@
+<div class="constancias-container">
+    <h3>Seleccione una Constancia</h3>
+    <div class="buttons-container">
+      <button
+        *ngFor="let button of buttons"
+        [ngClass]="{
+          'button': true,
+          'selected': selectedConstancia === button.label
+        }"
+        (click)="onButtonClick(button)"
+      >
+        {{ button.label }}
+      </button>
+    </div>
+  </div>
+  

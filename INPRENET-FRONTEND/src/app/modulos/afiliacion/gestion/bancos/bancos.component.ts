@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { DatosEstaticosService } from '../../../../services/datos-estaticos.service';
 
 @Component({
   selector: 'app-bancos',
@@ -34,16 +34,22 @@ export class BancosComponent implements OnInit {
   }
 
   agregarBanco(): void {
+    if (this.bancosArray.length >= 1) {
+      return;
+    }
+  
     const bancoForm = this.fb.group({
       id_banco: ['', Validators.required],
       num_cuenta: ['', [Validators.required, Validators.minLength(8), Validators.pattern('^[0-9]*$')]],
-      estado: ['INACTIVO', Validators.required]
+      estado: ['ACTIVO', Validators.required]
     });
+  
     this.bancosArray.push(bancoForm);
     this.markAllAsTouched(bancoForm);
     this.formGroup.markAsTouched();
   }
-
+  
+  
   eliminarBanco(index: number): void {
     if (this.bancosArray.length > 0) {
       this.bancosArray.removeAt(index);

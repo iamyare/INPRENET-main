@@ -7,7 +7,8 @@
   <div class="card-body" [formGroup]="formGroup">
     <div formArrayName="bancos">
       <div *ngFor="let banco of bancosArray.controls; let i = index" [formGroupName]="i" class="reference-group">
-        <h4 class="reference-title">Banco Número: {{ i + 1 }}</h4>
+        <h4 class="reference-title">Banco</h4>
+    
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Nombre del Banco</mat-label>
@@ -17,29 +18,21 @@
                 {{ banco.label }}
               </mat-option>
             </mat-select>
-            <mat-error *ngIf="bancosArray.at(i).get('id_banco')?.invalid && bancosArray.at(i).get('id_banco')?.touched">
+            <mat-error *ngIf="bancosArray.at(i).get('id_banco')?.invalid">
               <mat-icon>error</mat-icon> El banco es requerido.
             </mat-error>
           </mat-form-field>
-
+    
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Número de Cuenta</mat-label>
             <mat-icon matPrefix>credit_card</mat-icon>
             <input matInput formControlName="num_cuenta" type="text">
-            <mat-error *ngIf="bancosArray.at(i).get('num_cuenta')?.invalid && bancosArray.at(i).get('num_cuenta')?.touched">
+            <mat-error *ngIf="bancosArray.at(i).get('num_cuenta')?.invalid">
               <mat-icon>error</mat-icon> {{ getErrors(i, 'num_cuenta')[0] }}
             </mat-error>
           </mat-form-field>
         </div>
-
-        <div class="full-width">
-          <label>¿Es la cuenta principal?</label>
-          <mat-radio-group formControlName="estado" class="radio-group">
-            <mat-radio-button value="ACTIVO">Sí</mat-radio-button>
-            <mat-radio-button value="INACTIVO">No</mat-radio-button>
-          </mat-radio-group>
-        </div>
-
+    
         <div class="action-buttons">
           <button mat-button color="warn" (click)="eliminarBanco(i)">
             <mat-icon>delete</mat-icon> Eliminar Banco
@@ -47,11 +40,13 @@
         </div>
       </div>
     </div>
+    
 
-    <div class="action-buttons">
+    <div class="action-buttons" *ngIf="bancosArray.length === 0">
       <button mat-button color="primary" (click)="agregarBanco()">
         <mat-icon>add</mat-icon> Agregar Cuenta De Banco
       </button>
     </div>
+    
   </div>
 </div>

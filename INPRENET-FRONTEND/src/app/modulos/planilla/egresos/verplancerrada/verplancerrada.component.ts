@@ -14,6 +14,8 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { TotalesporbydDialogComponent } from '../totalesporbydDialog/totalesporbydDialog.component';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
+import { saveAs } from 'file-saver';
+import { firstValueFrom } from 'rxjs';
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -29,6 +31,7 @@ export class VerplancerradaComponent {
   idPlanilla: any = "";
   datosFormateados: any;
   myFormFields: FieldConfig[] = [];
+  isLoading: boolean = false;
 
   datosTabl: any[] = [];
   myColumnsDed: TableColumn[] = [];
@@ -1293,4 +1296,35 @@ export class VerplancerradaComponent {
       margin: margin
     };
   }
+
+  async descargarExcelCompleto(): Promise<void> {
+    if (!this.idPlanilla) {
+      this.toastr.error('Debe seleccionar una planilla válida antes de descargar el reporte.');
+      return;
+    }
+
+    this.isLoading = true; 
+  
+    try {
+      const response: any = await firstValueFrom(
+        this.planillaService.exportarDetallesCompletosExcel(this.idPlanilla, 2)
+      );
+  
+      const blob = new Blob([response], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+  
+      const nombreArchivo = `PlanillaCompleta_${this.idPlanilla}.xlsx`;
+      saveAs(blob, nombreArchivo);
+  
+      this.toastr.success('Archivo Excel completo generado y descargado con éxito');
+    } catch (error) {
+      console.error('Error al descargar el Excel completo:', error);
+      this.toastr.error('Ocurrió un error al descargar el archivo Excel');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+  
+
 }

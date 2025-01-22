@@ -9,7 +9,6 @@ import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 import { DialogDesgloseComponent } from '../dialog-desglose/dialog-desglose.component';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { DynamicDialogComponent } from 'src/app/components/dinamicos/dynamic-dialog/dynamic-dialog.component';
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { firstValueFrom } from 'rxjs';
 
@@ -293,21 +292,22 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
       return;
     }
-
+  
     this.isLoading = true;
-
+  
     try {
+      // Siempre envía el estado 1 al método del servicio
       const response: any = await firstValueFrom(
-        this.planillaService.exportarDetallesCompletosExcel(this.idPlanilla)
+        this.planillaService.exportarDetallesCompletosExcel(this.idPlanilla, 1)
       );
-
+  
       const blob = new Blob([response], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
-
+  
       const nombreArchivo = `PlanillaCompleta_${this.idPlanilla}.xlsx`;
       saveAs(blob, nombreArchivo);
-
+  
       this.toastr.success('Archivo Excel completo generado y descargado con éxito');
     } catch (error) {
       console.error('Error al descargar el Excel completo:', error);
@@ -316,8 +316,6 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       this.isLoading = false;
     }
   }
-
-
 
   async descargarExcelPorPlanilla() {
     if (!this.idPlanilla) {

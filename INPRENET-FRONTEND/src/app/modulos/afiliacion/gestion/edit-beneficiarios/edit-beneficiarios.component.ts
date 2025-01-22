@@ -78,9 +78,12 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       { header: 'Número De Identificación', col: 'n_identificacion', validationRules: [Validators.required, Validators.minLength(3)] },
       { header: 'Nombres', col: 'nombres' },
       { header: 'Apellidos', col: 'apellidos' },
+      { header: 'Parentesco', col: 'parentesco' },
       { header: 'Porcentaje', col: 'porcentaje' },
+      { header: 'Genero', col: 'genero' },
       { header: 'Fecha de Nacimiento', col: 'fecha_nacimiento' },
-      { header: 'Discapacidades', col: 'discapacidades' }
+      { header: 'Discapacidades', col: 'discapacidades' },
+      
     ];
     this.getFilas().then(() => this.cargar());
   }
@@ -95,6 +98,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
+          console.log(item);
+          
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy');
@@ -118,6 +123,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
             id_municipio_residencia: item.idMunicipioResidencia,
             id_estado_persona: item.idEstadoPersona,
             porcentaje: item.porcentaje,
+            parentesco: item.parentesco,
             tipo_persona: item.tipoPersona,
             discapacidades
           };

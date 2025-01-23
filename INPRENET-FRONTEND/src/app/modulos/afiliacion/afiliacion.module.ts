@@ -72,6 +72,7 @@ import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-fam
 import { DatosGeneralesTemporalComponent } from './gestion/datos-generales-temporal/datos-generales-temporal.component';
 import { BeneficiarioSinCausanteComponent } from './verPerfil/beneficiario-sin-causante/beneficiario-sin-causante.component';
 import { DesignadoComponent } from './verPerfil/designado/designado.component';
+import { ReporteFallecidosComponent } from './reporte-fallecidos/reporte-fallecidos.component';
 import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
 
 @NgModule({
@@ -114,7 +115,7 @@ import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados
     DatPuestoTrabComponent,
     RefPersComponent,
     BenefComponent,
-    EditPerfilPuestTrabComponent, 
+    EditPerfilPuestTrabComponent,
     EditColegiosMagisterialesComponent,
     DatosPropietarioComponent,
     DatosContadorComponent,
@@ -143,7 +144,8 @@ import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados
     DatosGeneralesTemporalComponent,
     BeneficiarioSinCausanteComponent,
     DesignadoComponent,
-    ContanciasAfiliadosComponent
+    ContanciasAfiliadosComponent,
+    ReporteFallecidosComponent
   ],
   imports: [
     CommonModule,

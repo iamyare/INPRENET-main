@@ -434,8 +434,8 @@ export class DetalleBeneficioService {
                        ${parseFloat(datos.monto_primera_cuota) ? parseFloat(datos.monto_primera_cuota) : null},
                        ${parseFloat(datos.monto_ultima_cuota) ? parseFloat(datos.monto_ultima_cuota) : null},
                        ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : null},
-                       '${datos.estado_solicitud}',
-                       '${datos.observacion}',
+                       ${datos.estado_solicitud ? `'${datos.estado_solicitud}'` : null},
+                       ${datos.observacion ? `'${datos.observacion}'` : null},
                         ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
                         ${estadoPP.id_usuario_empresa},
                         ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null},
@@ -557,8 +557,8 @@ export class DetalleBeneficioService {
                          ${parseFloat(datos.monto_primera_cuota) ? parseFloat(datos.monto_primera_cuota) : null},
                          ${parseFloat(datos.monto_ultima_cuota) ? parseFloat(datos.monto_ultima_cuota) : null},
                          ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : null},
-                         '${datos.estado_solicitud}',
-                         '${datos.observacion}',
+                         ${datos.estado_solicitud ? `'${datos.estado_solicitud}'` : null},
+                         ${datos.observacion ? `'${datos.observacion}'` : null},
                          ${estadoPP.id_usuario_empresa},
                          ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
                          ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null},
@@ -946,8 +946,6 @@ export class DetalleBeneficioService {
 
   async obtenerTipoBeneficioByTipoPersona(tipoPersona: string): Promise<any[]> {
     try {
-      console.log(tipoPersona);
-
       const tipoBen = await this.benTipoPerRepository.find({
         where: {
           tipPersona: { tipo_persona: tipoPersona },

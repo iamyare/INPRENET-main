@@ -221,7 +221,7 @@ export class net_persona {
     @Column('date', { nullable: true, name: 'FECHA_AFILIACION' })
     fecha_afiliacion: string;
 
-    @OneToMany(() => Net_Detalle_Prestamo, prestamo => prestamo.deduccion)
+    @OneToMany(() => Net_Detalle_Prestamo, prestamo => prestamo.persona)
     detallePrestamos: Net_Detalle_Prestamo[];
 
 }

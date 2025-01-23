@@ -1689,7 +1689,7 @@ GROUP BY
           'detallePersona.detalleBeneficio.detallePagBeneficio',
           'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco',
           'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco.banco',
-          'detallePersona.detalleBeneficio.detallePagBeneficio.planilla',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.planilla.tipoPlanilla',
         ]
       });
 
@@ -1714,6 +1714,7 @@ GROUP BY
           'detalleDeduccion.deduccion',
           'detalleDeduccion.deduccion.centroTrabajo',
           'detalleDeduccion.planilla',
+          'detalleDeduccion.planilla.tipoPlanilla',
         ]
       });
 
@@ -2240,6 +2241,206 @@ GROUP BY
           DEDUCCIONES_TERCEROS: deduccionT ? deduccionT['DEDUCCIONES_TERCEROS'] : null
         };
       });
+
+      return newResult;
+    } catch (error) {
+      this.logger.error(`Error al obtener totales por planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los totales por planilla.');
+    }
+  }
+
+  async ObtenerPlanDefinPersonasCONTA(codPlanilla: string, page?: number, limit?: number): Promise<any> {
+    let query = `
+            SELECT DISTINCT
+            per."N_IDENTIFICACION" AS "DNI",
+            tipoP."TIPO_PERSONA" AS "TIPO_PERSONA",
+            per."ID_PERSONA",
+            perPorBan."NUM_CUENTA",
+            banco."NOMBRE_BANCO",
+            SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIO",
+             TRIM(
+                per."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||
+                per."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(per."TERCER_NOMBRE", '')
+            )  AS "NOMBRE_COMPLETO"
+        FROM 
+            "NET_DETALLE_PAGO_BENEFICIO" detBs
+        
+        JOIN 
+            "NET_PLANILLA" plan
+        ON 
+            plan."ID_PLANILLA" = detBs."ID_PLANILLA"
+        JOIN 
+            "NET_DETALLE_BENEFICIO_AFILIADO" detBA
+        ON 
+            detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
+            AND detBs."ID_PERSONA" = detBA."ID_PERSONA"
+            AND detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+            AND detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
+        JOIN 
+            "NET_BENEFICIO" ben
+        ON 
+            detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
+        JOIN 
+            "NET_DETALLE_PERSONA" detP
+        ON 
+            detBA."ID_PERSONA" = detP."ID_PERSONA"
+            AND detBA."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
+            AND detBA."ID_CAUSANTE" = detP."ID_CAUSANTE"
+        JOIN 
+            "NET_TIPO_PERSONA" tipoP
+        ON 
+            detP."ID_TIPO_PERSONA" = tipoP."ID_TIPO_PERSONA"
+        JOIN 
+            "NET_PERSONA" per
+        ON 
+            per."ID_PERSONA" = detP."ID_PERSONA"
+        JOIN 
+            "NET_PERSONA_POR_BANCO" perPorBan
+        ON 
+            detBs."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+        JOIN 
+            "NET_BANCO" banco
+        ON 
+            banco."ID_BANCO" = perPorBan."ID_BANCO"
+        
+        WHERE
+                detBs."ESTADO" = 'PAGADA' AND
+                plan."CODIGO_PLANILLA" = '${codPlanilla}' 
+                --AND
+                --plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
+                --plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
+                --plan."ALTAS_CARGADAS" = 'SI' AND
+                --plan."BAJAS_CARGADAS" = 'SI' 
+                
+        GROUP BY 
+        per."N_IDENTIFICACION",
+        per."ID_PERSONA",
+        tipoP."TIPO_PERSONA",
+        perPorBan."NUM_CUENTA",
+        banco."NOMBRE_BANCO",
+            TRIM(
+                per."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||
+                per."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(per."TERCER_NOMBRE", '')
+            ) 
+        ORDER BY  TRIM(
+                per."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||
+                per."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(per."TERCER_NOMBRE", '')
+            ) 
+    `;
+
+    let queryI = `
+            SELECT 
+            per."ID_PERSONA",
+                    SUM(dd."MONTO_APLICADO") AS "DEDUCCIONES_INPREMA"
+            FROM "NET_PLANILLA" plan 
+            INNER JOIN "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
+            INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
+            INNER JOIN "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+            JOIN
+                      "NET_PERSONA_POR_BANCO" perPorBan
+                  ON
+                      dd."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+                  JOIN
+                      "NET_BANCO" banco
+                  ON
+                      banco."ID_BANCO" = perPorBan."ID_BANCO"
+
+                      INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA" 
+
+
+            INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
+
+            WHERE
+                dd."ESTADO_APLICACION" = 'COBRADA' AND
+                instFin."NOMBRE_CENTRO_TRABAJO" = 'INPREMA' AND
+                plan."CODIGO_PLANILLA" = '${codPlanilla}'
+                --AND
+                --plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
+                --plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
+                --plan."ALTAS_CARGADAS" = 'SI' AND
+                --plan."BAJAS_CARGADAS" = 'SI' 
+            GROUP BY 
+                per."ID_PERSONA"
+    `;
+
+    let queryT = `
+          SELECT 
+          per."ID_PERSONA",
+                  SUM(dd."MONTO_APLICADO") AS "DEDUCCIONES_TERCEROS"
+          FROM "NET_PLANILLA" plan 
+          INNER JOIN "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
+          INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
+          INNER JOIN "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
+          JOIN
+                      "NET_PERSONA_POR_BANCO" perPorBan
+                  ON
+                      dd."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+                  JOIN
+                      "NET_BANCO" banco
+                  ON
+                      banco."ID_BANCO" = perPorBan."ID_BANCO"
+
+                      INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
+
+
+          INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
+
+          WHERE
+              dd."ESTADO_APLICACION" = 'COBRADA' AND
+              instFin."NOMBRE_CENTRO_TRABAJO" != 'INPREMA' AND
+              plan."CODIGO_PLANILLA" = '${codPlanilla}' 
+                --AND
+                --plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
+                --plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
+                --plan."ALTAS_CARGADAS" = 'SI' AND
+                --plan."BAJAS_CARGADAS" = 'SI' 
+          GROUP BY 
+          per."ID_PERSONA"
+    `;
+
+    interface Persona {
+      DNI: string;
+      ID_PERSONA: number;
+      NUM_CUENTA: string;
+      NOMBRE_BANCO: string;
+      TOTAL_BENEFICIO: number;
+      NOMBRE_COMPLETO: string;
+      DEDUCCIONES_INPREMA?: number;
+      DEDUCCIONES_TERCEROS?: number;
+    }
+
+    interface Deduccion {
+      ID_PERSONA: number;
+      DEDUCCIONES_INPREMA?: number;
+      DEDUCCIONES_TERCEROS?: number;
+    }
+
+    try {
+      const result: Persona[] = await this.entityManager.query(query);
+      const resultI: Deduccion[] = await this.entityManager.query(queryI);
+      const resultT: Deduccion[] = await this.entityManager.query(queryT);
+
+      const newResult = result.map(persona => {
+        const deduccionI = resultI.find(d => d.ID_PERSONA === persona.ID_PERSONA);
+        const deduccionT = resultT.find(d => d.ID_PERSONA === persona.ID_PERSONA);
+
+        return {
+          ...persona,
+          DEDUCCIONES_INPREMA: deduccionI ? deduccionI['DEDUCCIONES_INPREMA'] : null,
+          DEDUCCIONES_TERCEROS: deduccionT ? deduccionT['DEDUCCIONES_TERCEROS'] : null
+        };
+      });
+
+      console.log(newResult)
 
       return newResult;
     } catch (error) {

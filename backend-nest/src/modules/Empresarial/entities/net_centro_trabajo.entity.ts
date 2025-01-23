@@ -10,6 +10,7 @@ import { Net_Centro_Trabajo_Nivel } from './net_centro_trabajo_nivel.entity';
 import { net_modulo } from 'src/modules/usuario/entities/net_modulo.entity';
 import { Net_Estado_Centro_Trabajo } from './net_estado_centro_trabajo.entity';
 import { Net_Empleado_Centro_Trabajo } from './net_empleado_centro_trabajo.entity';
+import { Net_Detalle_Prestamo } from 'src/modules/prestamos/entities/net_detalle_prestamo.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
 @Check('CK_TIPO_CENTRO_TRAB', `TIPO IN ('EDUCACION', 'INSTITUCION')`)
@@ -111,6 +112,9 @@ export class Net_Centro_Trabajo {
 
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanIngreso => detallePlanIngreso.centroTrabajo)
     detalle_plani_ingr: Net_Detalle_planilla_ingreso[];
+
+    @OneToMany(() => Net_Detalle_Prestamo, detallePrestamo => detallePrestamo.centroTrabajo)
+    detallePrestamo: Net_Detalle_Prestamo[];
 
     @OneToMany(() => Net_Deduccion, deduccion => deduccion.centroTrabajo)
     deduccion: Net_Deduccion[];

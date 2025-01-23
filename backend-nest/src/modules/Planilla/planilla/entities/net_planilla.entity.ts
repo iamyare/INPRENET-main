@@ -3,6 +3,7 @@ import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.ent
 import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 import { Net_Detalle_planilla_ingreso } from '../../Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity';
+import { Net_Detalle_Prestamo } from 'src/modules/prestamos/entities/net_detalle_prestamo.entity';
 
 @Entity({ name: 'NET_PLANILLA' })
 @Check(`estado IN ('ACTIVA', 'CERRADA', 'PAGADA')`)
@@ -54,6 +55,9 @@ export class Net_Planilla {
 
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanillaIngreso => detallePlanillaIngreso.planilla)
     detallesPlanillaIngreso: Net_Detalle_planilla_ingreso[];
+
+    @OneToMany(() => Net_Detalle_Prestamo, detallePrestamo => detallePrestamo.planilla)
+    detallePrestamo: Net_Detalle_Prestamo[];
 
     @Column('varchar2', { nullable: false, default: 'NO', name: 'BENEFICIOS_CARGADOS' })
     beneficios_cargados: string;

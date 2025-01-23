@@ -253,8 +253,8 @@ export class VoucherGeneralMensComponent {
             beneficio.detallePagBeneficio.forEach((detallePago: any) => {
               const montoPorPeriodo = detallePago.monto_a_pagar;
               sumaBeneficios += montoPorPeriodo;
-
               data.push({
+                TIPO_PLANILLA: detallePago.planilla.tipoPlanilla.nombre_planilla,
                 CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
                 NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
                 MontoAPagar: montoPorPeriodo,
@@ -271,8 +271,8 @@ export class VoucherGeneralMensComponent {
           let dataDed = resultados.deduccion.detalleDeduccion.map((deduccion: any) => {
             const montoDeduccion = deduccion.monto_aplicado;
             sumaDeducciones += montoDeduccion;
-
             return {
+              TIPO_PLANILLA: deduccion.planilla.tipoPlanilla.nombre_planilla,
               NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
               NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
               TotalMontoAplicado: montoDeduccion
@@ -281,18 +281,20 @@ export class VoucherGeneralMensComponent {
 
           tablaDed = {
             table: {
-              widths: ['*', '*', '*'],
+              widths: ['*', '*', '*', '*'],
               body: [
-                [{ text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
+                [{ text: 'TIPO PLANILLA', style: 'tableHeader' }, { text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
                 ...dataDed.flatMap((b: any) => {
                   if (b.length === 0) {
                     return [[
+                      { text: '---------------', alignment: 'center' },
                       { text: '---------------', alignment: 'center' },
                       { text: '---------------', alignment: 'center' },
                       { text: formatCurrency(0), style: 'alignRight' },
                     ]];
                   } else {
                     return [[
+                      { text: b.TIPO_PLANILLA },
                       { text: b.NOMBRE_INSTITUCION },
                       { text: b.NOMBRE_DEDUCCION },
                       { text: formatCurrency(b.TotalMontoAplicado), style: 'alignRight' }
@@ -345,11 +347,12 @@ export class VoucherGeneralMensComponent {
                 },
                 {
                   table: {
-                    widths: ['*', '*', '*'],
+                    widths: ['*', '*', '*', '*'],
                     body: [
-                      [{ text: 'CAUSANTE', style: 'tableHeader' }, { text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
+                      [{ text: 'TIPO PLANILLA', style: 'tableHeader' }, { text: 'CAUSANTE', style: 'tableHeader' }, { text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
                       ...data.flatMap((b: any) => {
                         return [[
+                          { text: b.TIPO_PLANILLA },
                           { text: b.CAUSANTE },
                           { text: b.NOMBRE_BENEFICIO },
                           { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },

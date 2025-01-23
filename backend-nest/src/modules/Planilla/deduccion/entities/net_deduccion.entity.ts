@@ -37,8 +37,8 @@ export class Net_Deduccion {
     @OneToMany(() => Net_Deduccion_Tipo_Planilla, dedTipoPlanilla => dedTipoPlanilla.deduccion)
     dedTipoPlanilla: Net_Deduccion_Tipo_Planilla[];
 
-    @OneToMany(() => Net_Detalle_Prestamo, prestamo => prestamo.deduccion)
-    detallePrestamos: Net_Detalle_Prestamo[];
+    /* @OneToMany(() => Net_Detalle_Prestamo, prestamo => prestamo.deduccion)
+    detallePrestamos: Net_Detalle_Prestamo[]; */
 
 
 

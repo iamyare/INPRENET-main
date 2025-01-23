@@ -101,8 +101,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     { label: "PENSIONADO", value: 'PENSIONADO' }
   ];
 
-  tipoPersonaSelected: any;
-  tipoBenefSelected: any;
+  tipoPersonaSelected: any = null;
+  tipoBenefSelected: any = null;
   beneficios: any;
 
   constructor(
@@ -282,12 +282,16 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             return null; // Devuelve null explícitamente para cumplir con la expectativa de retorno.
           })
           .filter((item: any) => item !== null); // Elimina valores nulos del resultado.
-        this.mostrarDB = true;
+        this.mostrarDB = false;
         return temp;
 
 
       } else if (this.Afiliado.tipo_persona == "AFILIADO") {
-        beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(this.tipoPersonaSelected).toPromise();
+        if (this.tipoPersonaSelected) {
+          beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(this.tipoPersonaSelected).toPromise();
+        } else if (!this.tipoPersonaSelected) {
+          beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(this.Afiliado.tipo_persona).toPromise();
+        }
 
         this.myFormFields1[0].options = this.tiposPersona;
         this.myFormFields1[0].display = true;
@@ -530,11 +534,10 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       // Obtiene los beneficios basados en el tipo de afiliado seleccionado
       if (row.tipo_afiliado === "BENEFICIARIO") {
+        const temp = await this.getTipoBenBeneficiarios(row.tipo_afiliado);
         this.toastr.warning(`La persona se encuentra como beneficiario. No se puede asignar beneficios a los beneficiarios del mismo causante, solo a los designados`, "Advertencia");
       }
-
       const temp = await this.getTipoBenBeneficiarios(row.tipo_afiliado);
-      console.log(temp);
 
       if (!temp || temp.length === 0) {
         this.mostrarB = false;  // No mostrar el formulario de beneficios
@@ -926,10 +929,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficiarios si el afiliado ya falleció */
     // console.log(this.datosFormateados);
-
     //AFILIADOS O BENEFICIARIOS
-
-    console.log(this.datosFormateados);
 
     if (this.Afiliado.fallecido != "SI") {
       this.datosFormateados["dni"] = this.form?.value.dni;
@@ -958,6 +958,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado, this.Afiliado.id_persona).subscribe(
         {
           next: (response) => {
+            this.mostrarB = false;
             this.toastr.success("se asignó correctamente el beneficio");
             this.getFilas().then(() => this.cargar());
             this.limpiarFormulario();
@@ -978,8 +979,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   limpiarFormulario(): void {
     // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
     //this.Afiliado = [];
-    this.tipoPersonaSelected = []
-    this.tipoBenefSelected = []
+    this.tipoPersonaSelected = null
+    this.tipoBenefSelected = null
     this.desOBenSeleccionado = []
 
     if (this.form1) {

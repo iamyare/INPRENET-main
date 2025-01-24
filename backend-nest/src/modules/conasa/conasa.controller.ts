@@ -191,10 +191,11 @@ export class ConasaController {
 
   @Post('/registrar-consulta-medica')
   @ApiResponse({ status: 201, description: 'Proceso de registro completado.' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos.' })
   @ApiResponse({ status: 401, description: 'Error de autorización.' })
-  @ApiResponse({ status: 500, description: 'Error en el proceso de registro.' })
   async crearConsultas(
-    @Body() crearConsultasDto: CrearConsultaDto[], // Sin ParseArrayPipe
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    crearConsultasDto: CrearConsultaDto[],
     @Req() req: Request,
   ) {
     const authorization = req.headers['authorization'];
@@ -219,6 +220,8 @@ export class ConasaController {
 
     return await this.conasaService.crearConsultasMedicas(crearConsultasDto, email, password);
   }
+
+
 
   @Get('cuadres')
   async obtenerDatos(

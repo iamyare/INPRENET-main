@@ -37,4 +37,7 @@ export class Net_Consultas_Medicas {
 
   @Column({ name: 'USUARIO_CREACION', type: 'varchar2', length: 255, nullable: true })
   usuario_creacion: string;
+
+  @Column({ name: 'CORRCASO', type: 'number', nullable: true })
+  corrcaso?: number;
 }

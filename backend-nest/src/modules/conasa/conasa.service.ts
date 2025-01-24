@@ -512,13 +512,56 @@ export class ConasaService {
     };
   
     for (const consultaDto of crearConsultasDto) {
-      const { dni } = consultaDto;
+      const {
+        dni,
+        corrcaso,
+        fecha_consulta,
+        motivo_consulta,
+        tiempo_sintomas,
+        tipo_atencion,
+        triage,
+        diagnostico_presuntivo,
+        detalle_atencion,
+        fecha_cierre,
+      } = consultaDto;
   
       try {
         if (!dni || dni.length !== 13) {
-          throw new Error('El DNI debe tener exactamente 13 caracteres.');
+          throw new Error('El campo "dni" es obligatorio y debe tener exactamente 13 caracteres.');
         }
   
+        if (!fecha_consulta) {
+          throw new Error('El campo "fecha_consulta" es obligatorio.');
+        }
+  
+        if (!motivo_consulta) {
+          throw new Error('El campo "motivo_consulta" es obligatorio.');
+        }
+  
+        if (!tiempo_sintomas) {
+          throw new Error('El campo "tiempo_sintomas" es obligatorio.');
+        }
+  
+        if (!tipo_atencion) {
+          throw new Error('El campo "tipo_atencion" es obligatorio.');
+        }
+  
+        if (!triage) {
+          throw new Error('El campo "triage" es obligatorio.');
+        }
+  
+        if (!diagnostico_presuntivo) {
+          throw new Error('El campo "diagnostico_presuntivo" es obligatorio.');
+        }
+  
+        if (detalle_atencion && detalle_atencion.length > 500) {
+          throw new Error('El campo "detalle_atencion" no debe exceder los 500 caracteres.');
+        }
+  
+        if (fecha_cierre && isNaN(Date.parse(fecha_cierre))) {
+          throw new Error('El campo "fecha_cierre" debe tener un formato de fecha válido.');
+        }
+
         const nuevaConsulta = this.consultaRepository.create({
           ...consultaDto,
           usuario_creacion: email,
@@ -528,11 +571,12 @@ export class ConasaService {
         resultados.totalExitosos += 1;
       } catch (error) {
         resultados.fallidos.push({
-          dni,
+          corrcaso,
           error: error.message,
         });
       }
     }
+  
     return {
       message: 'Proceso de registro de asistencias médicas completado.',
       totalExitosos: resultados.totalExitosos,

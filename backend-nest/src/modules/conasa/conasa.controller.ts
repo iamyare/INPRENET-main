@@ -221,8 +221,6 @@ export class ConasaController {
     return await this.conasaService.crearConsultasMedicas(crearConsultasDto, email, password);
   }
 
-
-
   @Get('cuadres')
   async obtenerDatos(
     @Req() req: Request,

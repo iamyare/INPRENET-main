@@ -71,7 +71,7 @@
   <!-- PARA DESIGNADOS BENEFICIARIOS -->
    <div *ngIf="filas.length > 0">
     <div *ngIf="filas[0]?.estado_afil_detalle_persona != 'ERROR' && mostrarB && Afiliado.fallecido == 'SI' && (
-      (Afiliado.tipo_persona == 'AFILIADO' && (Afiliado.estado_persona == 'ACTIVO' || Afiliado.estado_persona == 'SUSPENSO AUTOMATICO' || Afiliado.estado_persona == 'SUSPENSO POR OFICIO' )) ||
+      (Afiliado.tipo_persona == 'AFILIADO' && (Afiliado.estado_persona == 'REGISTRADO' || Afiliado.estado_persona == 'ACTIVO' || Afiliado.estado_persona == 'SUSPENSO AUTOMATICO' || Afiliado.estado_persona == 'SUSPENSO POR OFICIO' )) ||
       Afiliado.tipo_persona == 'JUBILADO'  && (Afiliado.estado_persona != 'ERROR')||
       Afiliado.tipo_persona == 'PENSIONADO'  && (Afiliado.estado_persona != 'ERROR'))"
       style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">

@@ -317,6 +317,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   };
 
   getTipoBenBeneficiarios = async (tipoPers: any) => {
+    console.log(tipoPers);
+
     try {
 
       const beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(tipoPers).toPromise();
@@ -337,7 +339,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
          */
         {
           type: 'dropdown', label: 'Tipo persona', name: 'tipo_persona',
-          options: [{ label: "DESIGNADO", value: "DESIGNADO" }],
+          options: [{ label: `${tipoPers}`, value: `${tipoPers}` }],
           validations: [Validators.required], display: true
         },
         {
@@ -535,7 +537,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       // Obtiene los beneficios basados en el tipo de afiliado seleccionado
       if (row.tipo_afiliado === "BENEFICIARIO") {
         const temp = await this.getTipoBenBeneficiarios(row.tipo_afiliado);
-        this.toastr.warning(`La persona se encuentra como beneficiario. No se puede asignar beneficios a los beneficiarios del mismo causante, solo a los designados`, "Advertencia");
+        //this.toastr.warning(`La persona se encuentra como beneficiario.No se puede asignar beneficios a los beneficiarios del mismo causante, solo a los designados`, "Advertencia");
       }
       const temp = await this.getTipoBenBeneficiarios(row.tipo_afiliado);
 
@@ -660,18 +662,21 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   async prueba1(event: any): Promise<any> {
-    let ben = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona("DESIGNADO").toPromise();
-    this.beneficios = ben.map((item: any) => {
-      return {
-        label: item.beneficio.nombre_beneficio,
-        value: item.beneficio.nombre_beneficio,
-        periodicidad: item.beneficio.periodicidad,
-        numero_rentas_max: item.beneficio.numero_rentas_max,
-        regimen: item.beneficio.regimen
-      };
-    });
+    if (event.fieldName == 'tipo_persona') {
+      let ben = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(event.value).toPromise();
+      this.beneficios = ben.map((item: any) => {
+        return {
+          label: item.beneficio.nombre_beneficio,
+          value: item.beneficio.nombre_beneficio,
+          periodicidad: item.beneficio.periodicidad,
+          numero_rentas_max: item.beneficio.numero_rentas_max,
+          regimen: item.beneficio.regimen
+        };
+      });
 
-    this.myFormFields2[1].options = this.beneficios;
+      this.myFormFields2[1].options = this.beneficios;
+
+    }
 
     if (event.fieldName == "nombre_beneficio") {
       this.tipoBenefSelected = event.value;

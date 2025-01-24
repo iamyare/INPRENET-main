@@ -12,7 +12,7 @@ export class CrearConsultaDto {
 
   @IsString()
   @IsNotEmpty({ message: 'El campo "motivo_consulta" es obligatorio.' })
-  @MaxLength(255, { message: 'El campo "motivo_consulta" no debe exceder los 255 caracteres.' })
+  @MaxLength(1000, { message: 'El campo "motivo_consulta" no debe exceder los 1000 caracteres.' })
   motivo_consulta: string;
 
   @IsString()
@@ -29,12 +29,12 @@ export class CrearConsultaDto {
 
   @IsString()
   @IsNotEmpty({ message: 'El campo "diagnostico_presuntivo" es obligatorio.' })
-  @MaxLength(255, { message: 'El campo "diagnostico_presuntivo" no debe exceder los 255 caracteres.' })
+  @MaxLength(1000, { message: 'El campo "diagnostico_presuntivo" no debe exceder los 1000 caracteres.' })
   diagnostico_presuntivo: string;
 
   @IsString()
   @IsOptional()
-  @MaxLength(500, { message: 'El campo "detalle_atencion" no debe exceder los 500 caracteres.' })
+  @MaxLength(1000, { message: 'El campo "detalle_atencion" no debe exceder los 1000 caracteres.' })
   detalle_atencion?: string;
 
   @IsDateString({}, { message: 'El campo "fecha_cierre" debe tener un formato de fecha válido.' })

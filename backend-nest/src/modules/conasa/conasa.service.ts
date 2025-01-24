@@ -554,7 +554,7 @@ export class ConasaService {
           throw new Error('El campo "diagnostico_presuntivo" es obligatorio.');
         }
   
-        if (detalle_atencion && detalle_atencion.length > 500) {
+        if (detalle_atencion && detalle_atencion.length > 1000) {
           throw new Error('El campo "detalle_atencion" no debe exceder los 500 caracteres.');
         }
   
@@ -576,7 +576,6 @@ export class ConasaService {
         });
       }
     }
-  
     return {
       message: 'Proceso de registro de asistencias médicas completado.',
       totalExitosos: resultados.totalExitosos,

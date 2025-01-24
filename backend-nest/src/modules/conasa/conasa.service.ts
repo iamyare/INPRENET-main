@@ -540,7 +540,6 @@ export class ConasaService {
     };
   }
   
-
   async obtenerDatos(email: string, password: string, tipo: number): Promise<any> {
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
       where: {
@@ -589,11 +588,10 @@ export class ConasaService {
         INNER JOIN net_tipo_planilla tp ON p.id_tipo_planilla = tp.id_tipo_planilla
         WHERE tp.nombre_planilla IN ('ORDINARIA DE JUBILADOS Y PENSIONADOS', 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS')
           AND TRUNC(p.periodo_inicio, 'MM') = TRUNC(SYSDATE, 'MM')
-          AND p.estado = 'PAGADA'
+          AND p.estado = 'CERRADA'
       `;
       const planillaPagadaResult = await this.dataSource.query(planillaPagadaQuery);
       const planillasPagadas = planillaPagadaResult[0]?.PAGADAS || 0;
-    
       const query = `
         WITH planillas_filtradas AS (
             SELECT
@@ -646,6 +644,8 @@ export class ConasaService {
       `;
     
       const result = await this.dataSource.query(query);
+      console.log(result);
+      
     
       const {
         TOTAL_MES_ACTUAL,

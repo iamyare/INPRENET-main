@@ -105,4 +105,24 @@ export class DocumentsController {
       }
     }
 
+    @Post('constancia-beneficios')
+    async postConstanciaBeneficios(
+      @Body('data') data: any,
+      @Body('dto') dto: EmpleadoDto,
+      @Body('includeQR') includeQR: boolean,
+      @Res() res: Response
+    ) {
+      try {
+        const fileId = await this.pdfService.generateAndUploadConstancia(data, dto, 'beneficios');
+        res.json({ fileId });
+      } catch (error) {
+        console.error('Error al generar la constancia de beneficios:', error.message);
+        res.status(500).json({
+          message: 'Error interno al generar la constancia de beneficios',
+          error: error.message,
+        });
+      }
+    }
+
+
 }

@@ -5,7 +5,6 @@ import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { DriveService } from '../drive/drive.service';
 import { unirNombres } from '../../../shared/formatoNombresP';
-import { calcularEdad } from '../../../shared/calcularEdad';
 import * as path from 'path';
 import { EmpleadoDto } from './empleado.dto';
 import { validate } from 'class-validator';
@@ -54,6 +53,7 @@ export class PdfService {
   }
 
   async generateConstanciaAfiliacionTemplate(data: any, includeQR: boolean, dto: EmpleadoDto) {
+    
     const content: Array<any> = [
         { text: 'A QUIEN INTERESE', style: 'header' },
         {
@@ -75,27 +75,50 @@ export class PdfService {
             text: `Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de ${dto.municipio}, Departamento de ${dto.departamento}, a los ${new Date().getDate()} días del mes de ${new Date().toLocaleString('es-HN', { month: 'long' })} del año ${new Date().getFullYear()}.`,
             style: 'body'
         },
-        { text: '\n\n\n' },
+        { text: '\n\n\n' }
+    ];
+
+    // Espaciado adicional para empujar la firma hacia abajo
+    content.push({ text: '\n\n\n\n\n\n\n\n\n' });
+
+    // Firma
+    content.push(
         { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
         { text: dto.nombreEmpleado, style: 'signature' }, // Nombre del empleado
         { text: dto.nombrePuesto, style: 'signatureTitle' }, // Puesto del empleado
         { text: '\n\n\n' }
-    ];
+    );
 
-    if (includeQR) {
+    /* if (includeQR) {
         const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
         content.push({ image: qrCode, width: 100, alignment: 'center' });
-    }
+    } */
 
     return {
         pageSize: 'A4',
-        pageMargins: [40, 120, 40, 60],
+        pageMargins: [40, 120, 40, 85],
         background: {
             image: data.base64data,
             width: 595.28,
             height: 841.89
         },
         content: content,
+        footer: function (currentPage, pageCount) {
+            const user = dto.correo.split('@')[0]; // Cortamos el correo antes de la arroba
+            return {
+                table: {
+                    widths: ['*', '*', '*'],
+                    body: [
+                        [
+                            { text: `Fecha y Hora: ${new Date().toLocaleString()}`, alignment: 'left', border: [false, false, false, false], style: { fontSize: 8 }, },
+                            { text: `Generó: ${user}`, alignment: 'center', border: [false, false, false, false], style: { fontSize: 8 }, },
+                            { text: `Página: ${currentPage} de ${pageCount}`, alignment: 'right', border: [false, false, false, false], style: { fontSize: 8 }, }
+                        ]
+                    ]
+                },
+                margin: [20, 0, 20, 20]
+            };
+        },
         styles: {
             header: {
                 fontSize: 18,
@@ -134,13 +157,12 @@ export class PdfService {
                 alignment: 'center'
             },
             footer: {
-                fontSize: 10,
+                fontSize: 8,
                 alignment: 'right',
             }
         }
     };
-}
-
+  }
 
   public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean) {
     // Simulando la función de cálculo de edad
@@ -2205,7 +2227,7 @@ export class PdfService {
     return this.generateConstancia({ ...data, dto }, includeQR, (data, includeQR) => 
         this.generateConstanciaAfiliacionTemplate(data, includeQR, dto)
     );
-}
+  }
 
   async generateConstanciaAfiliacion2(data: any, includeQR: boolean): Promise<Buffer> {
     return this.generateConstancia(data, includeQR, this.generateConstanciaAfiliacionTemplate2);
@@ -2244,6 +2266,9 @@ export class PdfService {
       case 'tiempo-cotizar-con-monto':
         pdfBufferWithoutQR = await this.generateConstanciaTiempoCotizarConMonto(data, false);
         break;
+      case 'beneficios':
+        pdfBufferWithoutQR = await this.generateConstanciaBeneficios(data, false, dto);
+        break;
       default:
         throw new Error('Invalid constancia type');
     }
@@ -2254,7 +2279,7 @@ export class PdfService {
     switch (type) {
       case 'afiliacion':
         pdfBufferWithQR = await this.generateConstanciaAfiliacion({ ...data, fileId }, true, dto);
-    break;
+        break;
       case 'afiliacion2':
         pdfBufferWithQR = await this.generateConstanciaAfiliacion2({ ...data, dto, fileId }, true);
         break;
@@ -2270,6 +2295,9 @@ export class PdfService {
       case 'tiempo-cotizar-con-monto':
         pdfBufferWithQR = await this.generateConstanciaTiempoCotizarConMonto({ ...data, dto, fileId }, true);
         break;
+      case 'beneficios': // Nuevo caso para constancia de beneficios con QR
+        pdfBufferWithQR = await this.generateConstanciaBeneficios({ ...data, fileId }, true, dto);
+        break;
       default:
         throw new Error('Invalid constancia type');
     }
@@ -2278,24 +2306,26 @@ export class PdfService {
   
     return fileId;
   }
-  
+
   async generateConstanciaWithQR(data: any, type: string, dto: EmpleadoDto): Promise<Buffer> {
-    switch (type) {
-      case 'afiliacion':
-        return await this.generateConstanciaAfiliacion(data, true, dto);
-      case 'renuncia-cap':
-        return await this.generateConstanciaRenunciaCap(data, true);
-      case 'no-cotizar':
-        return await this.generateConstanciaNoCotizar(data, true);
-      case 'debitos':
-        return await this.generateConstanciaDebitos(data, true);
-      case 'tiempo-cotizar-con-monto':
-        return await this.generateConstanciaTiempoCotizarConMonto(data, true);
-      case 'afiliacion2':
-        return await this.generateConstanciaAfiliacion2(data, true);
-      default:
-        throw new Error('Invalid constancia type');
-    }
+      switch (type) {
+          case 'afiliacion':
+              return await this.generateConstanciaAfiliacion(data, true, dto);
+          case 'renuncia-cap':
+              return await this.generateConstanciaRenunciaCap(data, true);
+          case 'no-cotizar':
+              return await this.generateConstanciaNoCotizar(data, true);
+          case 'debitos':
+              return await this.generateConstanciaDebitos(data, true);
+          case 'tiempo-cotizar-con-monto':
+              return await this.generateConstanciaTiempoCotizarConMonto(data, true);
+          case 'afiliacion2':
+              return await this.generateConstanciaAfiliacion2(data, true);
+          case 'beneficios': 
+              return await this.generateConstanciaBeneficios(data, true, dto);
+          default:
+              throw new Error('Invalid constancia type');
+      }
   }
 
   async generateConstanciaRenunciaCap(data: any, includeQR: boolean): Promise<Buffer> {
@@ -2644,6 +2674,139 @@ export class PdfService {
     return this.generateConstancia(data, includeQR, templateFunction);
   }
 
+  async generateConstanciaBeneficios(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
+    const templateFunction = async (data: any, includeQR: boolean) => {
+        const content: Array<any> = [
+            { text: 'A QUIEN INTERESE', style: 'header' },
+            {
+                text: `El Instituto Nacional de Previsión del Magisterio (INPREMA) informa que:`,
+                style: 'subheader',
+            },
+            {
+                text: `*************${data.nombre_completo.toUpperCase()}*************`,
+                style: 'highlightedName',
+            },
+            {
+                text: `Con tarjeta de identidad número ${data.n_identificacion}`,
+                style: 'body',
+            },
+            {
+                text: `Goza del Beneficio **${data.beneficio.toUpperCase()}**`,
+                style: 'benefit',
+            },
+            {
+                text: `Con residencia en el Departamento de: ********${data.departamento.toUpperCase()}********`,
+                style: 'body',
+            },
+            {
+                text: `Cuyo monto asciende a la cantidad de Lps. ***${data.monto.toFixed(2)} ${data.monto_letras.toUpperCase()}***`,
+                style: 'body',
+            },
+            {
+                text: `Beneficio otorgado a partir del ${data.fecha_inicio} y para los fines que el interesado estime conveniente, se le extiende el presente documento en la ciudad de ${dto.municipio}, el ${new Date().getDate()} de ${new Date().toLocaleString('es-HN', { month: 'long' })} del ${new Date().getFullYear()}.`,
+                style: 'body',
+            },
+            { text: '\n\n\n' },
+            // Espaciado adicional para empujar la firma hacia abajo
+            { text: '\n\n\n\n\n\n\n\n\n' },
+            { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
+            { text: dto.nombreEmpleado, style: 'signature' }, // Nombre del empleado
+            { text: dto.nombrePuesto, style: 'signatureTitle' }, // Puesto del empleado
+        ];
+
+        // QR opcional
+        /* if (includeQR) {
+            const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
+            content.push({ image: qrCode, width: 100, alignment: 'center', margin: [0, 20, 0, 0] });
+        } */
+
+        return {
+            pageSize: 'A4',
+            pageMargins: [40, 120, 40, 85],
+            background: {
+                image: data.base64data, // Base64 del fondo
+                width: 595.28, // Ancho en puntos para A4
+                height: 841.89, // Alto en puntos para A4
+            },
+            content: content,
+            footer: function (currentPage, pageCount) {
+                const user = dto.correo.split('@')[0]; // Usuario antes de la arroba
+                return {
+                    table: {
+                        widths: ['*', '*', '*'],
+                        body: [
+                            [
+                                {
+                                    text: `Fecha y Hora: ${new Date().toLocaleString()}`,
+                                    alignment: 'left',
+                                    border: [false, false, false, false],
+                                    style: { fontSize: 8 },
+                                },
+                                {
+                                    text: `Generó: ${user}`,
+                                    alignment: 'center',
+                                    border: [false, false, false, false],
+                                    style: { fontSize: 8 },
+                                },
+                                {
+                                    text: `Página: ${currentPage} de ${pageCount}`,
+                                    alignment: 'right',
+                                    border: [false, false, false, false],
+                                    style: { fontSize: 8 },
+                                },
+                            ],
+                        ],
+                    },
+                    margin: [20, 0, 20, 20],
+                };
+            },
+            styles: {
+                header: {
+                    fontSize: 18,
+                    bold: true,
+                    alignment: 'center',
+                    margin: [0, 20, 0, 20],
+                },
+                subheader: {
+                    fontSize: 11,
+                    alignment: 'left',
+                    margin: [40, 10, 40, 5],
+                },
+                highlightedName: {
+                    fontSize: 14,
+                    bold: true,
+                    alignment: 'center',
+                    margin: [40, 10, 40, 5],
+                },
+                benefit: {
+                    fontSize: 12,
+                    bold: true,
+                    alignment: 'center',
+                    margin: [0, 10, 0, 10],
+                },
+                body: {
+                    fontSize: 11,
+                    alignment: 'left',
+                    margin: [40, 10, 40, 5],
+                },
+                signature: {
+                    fontSize: 12,
+                    bold: true,
+                    alignment: 'center',
+                    margin: [0, 10, 0, 0],
+                },
+                signatureTitle: {
+                    fontSize: 12,
+                    alignment: 'center',
+                },
+            },
+        };
+    };
+
+    // Utiliza generateConstancia para manejar el fondo y la firma
+    return this.generateConstancia(data, includeQR, templateFunction);
+  } 
+  
   async generateMovimientosPdf(data: any): Promise<Buffer> {
     try {
       const base64data = await this.getMembreteHorizontalBase64();
@@ -2663,105 +2826,105 @@ export class PdfService {
       console.error('Error en generateMovimientosPdf:', error);
       throw error;
     }
-}
+  }
 
-getMovimientosPdfTemplate(data: any, base64data: string) {
-    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    const tipoCuenta = data.tipoCuenta || 'N/A';
-    const numeroCuenta = data.numeroCuenta || 'N/A';
-    const nombreCompleto = `${data.PRIMER_NOMBRE || ''} ${data.SEGUNDO_NOMBRE || ''} ${data.PRIMER_APELLIDO || ''} ${data.SEGUNDO_APELLIDO || ''}`.trim();
-    const identificacion = data.N_IDENTIFICACION || 'N/A';
+  getMovimientosPdfTemplate(data: any, base64data: string) {
+      const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+      const tipoCuenta = data.tipoCuenta || 'N/A';
+      const numeroCuenta = data.numeroCuenta || 'N/A';
+      const nombreCompleto = `${data.PRIMER_NOMBRE || ''} ${data.SEGUNDO_NOMBRE || ''} ${data.PRIMER_APELLIDO || ''} ${data.SEGUNDO_APELLIDO || ''}`.trim();
+      const identificacion = data.N_IDENTIFICACION || 'N/A';
 
-    const tableBody = [
-      [{ text: 'Año', style: 'tableHeader' }, ...months.map(month => ({ text: month, style: 'tableHeader' })), { text: 'Total', style: 'tableHeader' }],
-      ...Object.keys(data.movimientos).map(year => {
-        const yearTotal = Array(12).fill(0).reduce((acc, _, i) => {
-          const movimientos = data.movimientos[year][i + 1] || [];
-          const totalMes = movimientos.reduce((sum, mov) => sum + mov.MONTO, 0);
-          return acc + totalMes;
-        }, 0);
-
-        return [
-          { text: year, style: 'year' },
-          ...Array(12).fill('').map((_, i) => {
+      const tableBody = [
+        [{ text: 'Año', style: 'tableHeader' }, ...months.map(month => ({ text: month, style: 'tableHeader' })), { text: 'Total', style: 'tableHeader' }],
+        ...Object.keys(data.movimientos).map(year => {
+          const yearTotal = Array(12).fill(0).reduce((acc, _, i) => {
             const movimientos = data.movimientos[year][i + 1] || [];
-            return {
-              text: movimientos.length ? movimientos.map(mov => mov.MONTO.toLocaleString('en-US', { minimumFractionDigits: 2 })).join('\n') : '-',
-              style: 'movementCell'
-            };
-          }),
-          { text: yearTotal.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
-        ];
-      })
-    ];
+            const totalMes = movimientos.reduce((sum, mov) => sum + mov.MONTO, 0);
+            return acc + totalMes;
+          }, 0);
 
-    // Totales calculados
-    const totalAportaciones = Object.keys(data.movimientos).reduce((acc, year) => {
-      const yearTotal = Array(12).fill(0).reduce((sum, _, i) => {
-        const movimientos = data.movimientos[year][i + 1] || [];
-        return sum + movimientos.reduce((mesSum, mov) => mesSum + mov.MONTO, 0);
+          return [
+            { text: year, style: 'year' },
+            ...Array(12).fill('').map((_, i) => {
+              const movimientos = data.movimientos[year][i + 1] || [];
+              return {
+                text: movimientos.length ? movimientos.map(mov => mov.MONTO.toLocaleString('en-US', { minimumFractionDigits: 2 })).join('\n') : '-',
+                style: 'movementCell'
+              };
+            }),
+            { text: yearTotal.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
+          ];
+        })
+      ];
+
+      // Totales calculados
+      const totalAportaciones = Object.keys(data.movimientos).reduce((acc, year) => {
+        const yearTotal = Array(12).fill(0).reduce((sum, _, i) => {
+          const movimientos = data.movimientos[year][i + 1] || [];
+          return sum + movimientos.reduce((mesSum, mov) => mesSum + mov.MONTO, 0);
+        }, 0);
+        return acc + yearTotal;
       }, 0);
-      return acc + yearTotal;
-    }, 0);
 
-    return {
-      pageSize: 'A3',
-      pageOrientation: 'landscape',
-      pageMargins: [40, 100, 40, 40],
-      background: {
-        image: base64data,
-        width: 900,
-        height: 600,
-        alignment: 'center',
-        margin: [0, -10, 0, 0]
-      },
-      content: [
-        {
-          columns: [
-            { text: `Nombre: ${nombreCompleto}`, style: 'personaInfo' },
-            { text: `Identidad: ${identificacion}`, style: 'personaInfo' },
-            { text: `Tipo de Cuenta: ${tipoCuenta}`, style: 'personaInfo' },
-            { text: `Número de Cuenta: ${numeroCuenta}`, style: 'personaInfo' }
-          ],
-          columnGap: 20,
-          margin: [0, 10, 0, 10]
+      return {
+        pageSize: 'A3',
+        pageOrientation: 'landscape',
+        pageMargins: [40, 100, 40, 40],
+        background: {
+          image: base64data,
+          width: 900,
+          height: 600,
+          alignment: 'center',
+          margin: [0, -10, 0, 0]
         },
-        {
+        content: [
+          {
+            columns: [
+              { text: `Nombre: ${nombreCompleto}`, style: 'personaInfo' },
+              { text: `Identidad: ${identificacion}`, style: 'personaInfo' },
+              { text: `Tipo de Cuenta: ${tipoCuenta}`, style: 'personaInfo' },
+              { text: `Número de Cuenta: ${numeroCuenta}`, style: 'personaInfo' }
+            ],
+            columnGap: 20,
+            margin: [0, 10, 0, 10]
+          },
+          {
+            table: {
+              widths: Array(14).fill('*'),
+              body: tableBody
+            },
+            layout: {
+              hLineWidth: function () { return 0.5; },
+              vLineWidth: function () { return 0.5; },
+              hLineColor: function () { return '#aaaaaa'; },
+              vLineColor: function () { return '#aaaaaa'; },
+            },
+            margin: [0, 0, 0, 10]
+          }
+        ],
+        footer: (currentPage, pageCount) => ({
           table: {
-            widths: Array(14).fill('*'),
-            body: tableBody
-          },
-          layout: {
-            hLineWidth: function () { return 0.5; },
-            vLineWidth: function () { return 0.5; },
-            hLineColor: function () { return '#aaaaaa'; },
-            vLineColor: function () { return '#aaaaaa'; },
-          },
-          margin: [0, 0, 0, 10]
-        }
-      ],
-      footer: (currentPage, pageCount) => ({
-        table: {
-          widths: ['*', '*', '*'],
-          body: [
-            [
-              { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
-              { text: 'GENERÓ: INPRENET', alignment: 'center', border: [false, false, false, false], fontSize: 8 },
-              { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
+            widths: ['*', '*', '*'],
+            body: [
+              [
+                { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
+                { text: 'GENERÓ: INPRENET', alignment: 'center', border: [false, false, false, false], fontSize: 8 },
+                { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
+              ]
             ]
-          ]
-        },
-        margin: [20, 0, 20, 20]
-      }),
-      styles: {
-        personaInfo: { fontSize: 12, bold: true },
-        year: { fontSize: 10, bold: true, alignment: 'center' },
-        tableHeader: { bold: true, fontSize: 10, alignment: 'center', fillColor: '#eeeeee' },
-        movementCell: { fontSize: 9, alignment: 'center' },
-        totalCell: { fontSize: 10, alignment: 'center', bold: true, color: '#000' }
-      }
-    };
-}
+          },
+          margin: [20, 0, 20, 20]
+        }),
+        styles: {
+          personaInfo: { fontSize: 12, bold: true },
+          year: { fontSize: 10, bold: true, alignment: 'center' },
+          tableHeader: { bold: true, fontSize: 10, alignment: 'center', fillColor: '#eeeeee' },
+          movementCell: { fontSize: 9, alignment: 'center' },
+          totalCell: { fontSize: 10, alignment: 'center', bold: true, color: '#000' }
+        }
+      };
+  }
 
   
 

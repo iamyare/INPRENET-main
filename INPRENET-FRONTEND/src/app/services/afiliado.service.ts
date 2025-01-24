@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { environment } from '../../../src/environments/environment';
@@ -10,37 +10,6 @@ export class AfiliadoService {
   @Output() PersonasEdit: EventEmitter<any> = new EventEmitter();
   constructor(private http: HttpClient) { }
 
-  generarConstancia(data: any): void {
-    const url = `${environment.API_URL}/api/documents/constancia-pdf`;
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-
-    this.http
-      .post(url, data, { headers, responseType: 'blob' })
-      .subscribe(
-        (blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `constancia_${data.type}.pdf`;
-          link.click();
-          window.URL.revokeObjectURL(url);
-        },
-        (error) => {
-          console.error('Error al descargar el PDF', error);
-        }
-      );
-  }
-
-  generarConstanciaAfiliacion(data: any, dto: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-afiliacion`;
-    return this.http.post<any>(url, { data, dto });
-  }
-
-  generarConstanciaAfiliacion2(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-afiliacion2`;
-    return this.http.post<any>(url, data);
-  }
-
   generarConstanciaQR(data: any, dto: any, type: string): Observable<Blob> {
     const url = `${environment.API_URL}/api/documents/constancia-qr`;
     return this.http.post(
@@ -49,30 +18,10 @@ export class AfiliadoService {
       { responseType: 'blob' }
     );
   }
-    
-  generarConstanciaRenunciaCap(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-renuncia-cap`;
-    return this.http.post<any>(url, data);
-  }
 
-  generarConstanciaNoCotizar(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-no-cotizar`;
+  generarConstanciaAfiliacion2(data: any): Observable<any> {
+    const url = `${environment.API_URL}/api/documents/constancia-afiliacion2`;
     return this.http.post<any>(url, data);
-  }
-
-  generarConstanciaDebitos(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-debitos`;
-    return this.http.post<any>(url, data);
-  }
-
-  generarConstanciaTiempoCotizarConMonto(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-tiempo-cotizar-con-monto`;
-    return this.http.post<any>(url, data);
-  }
-
-  createPersonaWithDetailsAndWorkCenters(formData: FormData): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/afiliacion`;
-    return this.http.post<any>(url, formData);
   }
 
   createBeneficiarioConDetalle(personaData: any): Observable<any> {

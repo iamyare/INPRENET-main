@@ -904,7 +904,6 @@ export class AfiliadoService {
         .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfPersCentTrabs')
         .leftJoinAndSelect('perfPersCentTrabs.centroTrabajo', 'centroTrabajo')
         .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
-        .andWhere('perfPersCentTrabs.estado = :estado', { estado: 'ACTIVO' })
         .getOne();
 
       if (!persona || !persona.perfPersCentTrabs) {

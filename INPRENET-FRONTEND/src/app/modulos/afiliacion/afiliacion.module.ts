@@ -74,6 +74,7 @@ import { BeneficiarioSinCausanteComponent } from './verPerfil/beneficiario-sin-c
 import { DesignadoComponent } from './verPerfil/designado/designado.component';
 import { ReporteFallecidosComponent } from './reporte-fallecidos/reporte-fallecidos.component';
 import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
+import { DialogSuboptionsComponent } from './constancias/dialog-suboptions/dialog-suboptions.component';
 
 @NgModule({
   declarations: [
@@ -145,7 +146,8 @@ import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados
     BeneficiarioSinCausanteComponent,
     DesignadoComponent,
     ContanciasAfiliadosComponent,
-    ReporteFallecidosComponent
+    ReporteFallecidosComponent,
+    DialogSuboptionsComponent
   ],
   imports: [
     CommonModule,

@@ -4,14 +4,13 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { unirNombres } from '../../../../shared/functions/formatoNombresP';
-import { BeneficiosService } from 'src/app/services/beneficios.service';
+import { BeneficiosService } from '../../../../../../src/app/services/beneficios.service';
 import { convertirFecha } from '../../../../shared/functions/formatoFecha';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
-import { AbstractControl, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { format, parseISO } from 'date-fns';
 import { montoTotalValidator, noDecimalValidator } from '../nuevo-beneficio-afil/nuevo-beneficio-afil.component';
 interface Campo {
   nombre: string;
@@ -178,7 +177,6 @@ export class VerEditarBeneficioAfilComponent {
     this.form = event;
   }
 
-  //Funciones para llenar tabla
   getFilas = async () => {
     try {
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();

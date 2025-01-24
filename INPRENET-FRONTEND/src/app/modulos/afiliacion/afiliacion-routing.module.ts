@@ -20,31 +20,31 @@ const routes: Routes = [
     path: 'constancias-afiliados',
     component: ContanciasAfiliadosComponent,
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIÓN', 'afiliacion/constancias-afiliados') }
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIONES', 'afiliacion/constancias-afiliados') }
   },
   {
     path: 'nuevo-centro',
     component: AfiliacionCentrosComponent,
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIÓN', 'afiliacion/nuevo-centro') }
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIONES', 'afiliacion/nuevo-centro') }
   },
   {
     path: 'ver-datos-centro',
     component: VerDatosCentrosComponent,
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIÓN', 'afiliacion/ver-datos-centro') }
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIONES', 'afiliacion/ver-datos-centro') }
   },
   {
     path: 'buscar-persona',
     component: BuscarPersonaComponent,
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIÓN', 'afiliacion/buscar-persona') }
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIONES', 'afiliacion/buscar-persona') }
   },
   {
     path: 'nueva-afiliacion',
     component: AfiliarDocenteComponent,
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIÓN', 'afiliacion/nueva-afiliacion') }
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIONES', 'afiliacion/nueva-afiliacion') }
   },
   {
     path: 'mantenimiento',

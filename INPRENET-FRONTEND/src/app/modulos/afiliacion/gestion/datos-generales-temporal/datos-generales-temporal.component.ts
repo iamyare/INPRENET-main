@@ -42,7 +42,6 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   constructor(private fb: FormBuilder,
     private direccionSer: DireccionService,
     private datosEstaticos: DatosEstaticosService,
-    private validationService: ValidationService,
     private formStateService: FormStateService,
 
     private cdr: ChangeDetectorRef, // -> 'Inyectamos ChangeDetectorRef'
@@ -81,7 +80,7 @@ ngOnInit(): void {
       this.onDiscapacidadChange({ value });
   });
 
-  const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
+  const noSpecialCharsPattern = '^[a-zA-Z\\s]*$';
   const addressPattern = /^[a-zA-Z0-9\s.]*$/;
 
   // Inicializar controles adicionales del formulario
@@ -93,7 +92,6 @@ ngOnInit(): void {
 
   this.setValidacionesIdentificacion(false);
 
-  // Cargar datos iniciales o restablecer el formulario
   if (!this.formGroup) {
       if (this.initialData) {
           this.formGroup = this.fb.group({
@@ -279,16 +277,13 @@ ngOnInit(): void {
     this.cargarMunicipiosNacimiento(departamentoId);
   }
   resetForm(): void {
-    // Reinicia los valores predeterminados de los controles
     this.formGroup.reset({
-      discapacidad: false, // NO
-      FotoPerfil: null // Restablecer FotoPerfil si es necesario
+      discapacidad: false,
+      FotoPerfil: null
     });
   
-    // Limpia cualquier lista de discapacidades seleccionadas
     this.formGroup.setControl('discapacidades', this.fb.array([]));
   
-    // Opcional: Recarga información estática si es necesario
     this.cargarDiscapacidades();
   }
   
@@ -503,8 +498,8 @@ ngOnInit(): void {
     Object.keys(this.formGroup.controls).forEach(field => {
       const control = this.formGroup.get(field);
       if (control instanceof FormControl) {
-        control.markAsTouched();  // Marca el campo como tocado
-        control.markAsDirty();    // Marca el campo como modificado
+        control.markAsTouched();
+        control.markAsDirty();
       } else if (control instanceof FormGroup || control instanceof FormArray) {
         Object.keys(control.controls).forEach(subField => {
           const subControl = control.get(subField);

@@ -52,47 +52,48 @@ export class EditarDialogComponent implements OnInit {
 
   crearFormulario() {
     const group: { [key: string]: FormControl | FormGroup } = {};
-
+  
     this.data.campos.forEach(campo => {
       let valorInicial = this.data.valoresIniciales[campo.nombre] || '';
       const validadores = campo.validadores || [];
-
+  
       if (campo.tipo === 'daterange') {
         const dateRangeGroup = this.fb.group({
-          start: [this.convertToDate(valorInicial?.start), validadores],
-          end: [this.convertToDate(valorInicial?.end), validadores]
+          start: [this.convertToDate(valorInicial?.start) || null, validadores],
+          end: [this.convertToDate(valorInicial?.end) || null, validadores]
         });
         group[campo.nombre] = dateRangeGroup;
       } else if (campo.tipo === 'date') {
         group[campo.nombre] = new FormControl(
-          { value: this.convertToDate(valorInicial), disabled: !campo.editable },
+          { value: this.convertToDate(valorInicial) || null, disabled: !campo.editable },
           validadores
         );
       } else {
         group[campo.nombre] = new FormControl({ value: valorInicial, disabled: !campo.editable }, validadores);
       }
     });
-
+  
     this.formGroup = this.fb.group(group);
     this.cdr.detectChanges();
-  }
+  }  
 
-  convertToDate(value: string | Date): Date {
+  convertToDate(value: string | Date | null | undefined): Date | null {
+    if (!value) {
+      return null; // Retorna null si el valor no es válido
+    }
+  
     if (value instanceof Date) {
       return value;
     }
-
-    if (typeof value === 'string') {
-      // Extraemos los componentes de la fecha
+  
+    if (typeof value === 'string' && value.includes('-')) {
       const [year, month, day] = value.split('-').map(Number);
-
-      // Creamos la fecha ajustándola directamente como local sin desfase
-      return new Date(year, month - 1, day); // `month - 1` porque los meses empiezan desde 0 en JavaScript
+      return new Date(year, month - 1, day); // Meses en JavaScript empiezan desde 0
     }
-
-    // Retornamos una fecha por defecto si el valor no es válido
-    return new Date();
+  
+    return null; // Retorna null si no cumple con los casos anteriores
   }
+  
 
 
 

@@ -285,13 +285,14 @@
    <!-- ||
    (form1.get('fallecido')?.value === 'SI' &&
     !formDatosGenerales.get('archivoCertDef')?.value)" -->
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="GuardarInformacion()"
-          [disabled]="
-            form1.invalid " >
-          Guardar
-        </button>
+      <button
+      mat-raised-button
+      color="primary"
+      (click)="GuardarInformacion()"
+      [disabled]="form1.invalid || !mostrarBotonGuardar"
+    >
+      Guardar
+    </button>
+  
   </div>
 </div>

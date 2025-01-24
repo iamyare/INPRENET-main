@@ -36,13 +36,12 @@ export class PermisosService {
         }
       }
     },
-    AFILIACIÓN: {
+    AFILIACIONES: {
       rutas: {
         'afiliacion/nueva-afiliacion': {
           title: 'Nueva Afiliación',
           permisos: [
             { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
-            { role: 'CONSULTA AFILIACION', module: 'AFILIACION', permiso: 'ver' },
             { role: 'ADMINISTRADOR', module: 'AFILIACION', permiso: 'editar' },
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' }
           ]

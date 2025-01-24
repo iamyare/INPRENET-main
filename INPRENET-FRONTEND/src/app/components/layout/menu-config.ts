@@ -25,7 +25,7 @@ export const MENU_CONFIG: Section[] = [
     ],
   },
   {
-    name: 'AFILIACIÓN',
+    name: 'AFILIACIONES',
     items: [
       {
         title: 'DOCENTES',
@@ -33,7 +33,7 @@ export const MENU_CONFIG: Section[] = [
         children: [
           { title: 'Nueva Afiliación', route: 'afiliacion/nueva-afiliacion', icon: 'person_add' },
           { title: 'Buscar Persona', route: 'afiliacion/buscar-persona', icon: 'person_search' },
-          { title: 'Constancias', route: 'afiliacion/constancias-afiliados', icon: 'person_search' },
+          { title: 'Constancias', route: 'afiliacion/constancias-afiliados', icon: 'description' },
         ],
       },
       {

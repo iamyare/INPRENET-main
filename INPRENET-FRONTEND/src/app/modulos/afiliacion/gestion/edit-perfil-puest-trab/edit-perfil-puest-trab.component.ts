@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
-import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
+import { EditarDialogComponent } from '../../../../../../src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
@@ -170,6 +170,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     if (this.Afiliado.n_identificacion) {
       try {
         const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.n_identificacion).toPromise();
+        
         this.filas = data.map((item: any) => ({
           id_perf_pers_centro_trab: item.id_perf_pers_centro_trab,
           codigo: item.centroTrabajo.codigo,
@@ -308,8 +309,15 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     });
   }
 
-  convertirCadenaAFecha(fecha: string): Date | null {
+  convertirCadenaAFecha(fecha: string | null | undefined): Date | null {
+    if (!fecha || !fecha.includes('/')) {
+      return null; // Retorna null si la fecha es null, undefined o no contiene el formato esperado
+    }
+  
     const [day, month, year] = fecha.split('/').map(Number);
-    return new Date(year, month - 1, day);
+    return new Date(year, month - 1, day); // Retorna la fecha si el formato es correcto
   }
+  
+  
+  
 }

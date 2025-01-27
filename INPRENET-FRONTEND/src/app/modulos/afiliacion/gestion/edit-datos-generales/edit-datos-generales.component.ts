@@ -84,7 +84,7 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   ngOnInit(): void {
     this.mostrarBotonGuardar = this.permisosService.userHasPermission(
-      'AFILIACIÓN',
+      'AFILIACIONES',
       'afiliacion/buscar-persona',
       'editar'
     );

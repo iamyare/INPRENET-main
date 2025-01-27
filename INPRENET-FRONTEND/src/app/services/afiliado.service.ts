@@ -10,7 +10,7 @@ export class AfiliadoService {
   @Output() PersonasEdit: EventEmitter<any> = new EventEmitter();
   constructor(private http: HttpClient) { }
 
-  generarConstanciaQR(data: any, dto: any, type: string): Observable<Blob> {
+  generarConstanciaQR(data: any, type: string, dto: any): Observable<Blob> {
     const url = `${environment.API_URL}/api/documents/constancia-qr`;
     return this.http.post(
       url,

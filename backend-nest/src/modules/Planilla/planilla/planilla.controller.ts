@@ -136,8 +136,6 @@ export class PlanillaController {
     if (!periodoInicio || !periodoFinalizacion || !idTiposPlanilla) {
       throw new BadRequestException('Todos los parámetros son obligatorios.');
     }
-
-    // Convertir la cadena `idTiposPlanilla` a un array de números
     const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
 
     try {

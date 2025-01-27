@@ -146,7 +146,7 @@ export class ContanciasAfiliadosComponent implements OnInit {
       return;
     }
 
-    this.afiliadoService.generarConstanciaQR(data, dto, 'afiliacion').subscribe(
+    this.afiliadoService.generarConstanciaQR(data, 'afiliacion', dto ).subscribe(
       (blob: Blob) => {
         const nombreArchivo = this.generarNombreArchivo(this.persona, 'afiliacion');
         this.manejarDescarga(blob, nombreArchivo);
@@ -230,7 +230,7 @@ export class ContanciasAfiliadosComponent implements OnInit {
             }
   
             // Llama al servicio para generar la constancia
-            this.afiliadoService.generarConstanciaQR(data, dto, 'beneficios').subscribe(
+            this.afiliadoService.generarConstanciaQR(data, 'beneficios', dto).subscribe(
               (blob: Blob) => {
                 const nombreArchivo = this.generarNombreArchivo(this.persona, 'beneficio');
                 this.manejarDescarga(blob, nombreArchivo);

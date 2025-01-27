@@ -554,8 +554,8 @@ export class ConasaService {
           throw new Error('El campo "diagnostico_presuntivo" es obligatorio.');
         }
   
-        if (detalle_atencion && detalle_atencion.length > 1000) {
-          throw new Error('El campo "detalle_atencion" no debe exceder los 500 caracteres.');
+        if (detalle_atencion && detalle_atencion.length > 2000) {
+          throw new Error('El campo "detalle_atencion" no debe exceder los 2000 caracteres.');
         }
   
         if (fecha_cierre && isNaN(Date.parse(fecha_cierre))) {

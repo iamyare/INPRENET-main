@@ -9,7 +9,6 @@ import * as QRCode from 'qrcode';
 
 // Importamos pdfmake como en el frontend
 import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 
 @Injectable()
 export class VoucherService {
@@ -18,7 +17,6 @@ export class VoucherService {
     private personaRepository: Repository<net_persona>,
     private readonly mailService: MailService,
   ) {
-    (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
   }
 
   private async getMembreteBase64(): Promise<string> {
@@ -326,7 +324,7 @@ export class VoucherService {
       },
       defaultStyle: {
         fontSize: 10,
-        font: 'Roboto',
+        //font: 'Roboto',
       },
       pageSize: 'LETTER',
       pageOrientation: 'portrait',

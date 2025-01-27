@@ -3207,7 +3207,7 @@ GROUP BY
         WHERE 
             planilla."ID_PLANILLA" = :idPlanilla
             AND dd."ESTADO_APLICACION" = 'EN PRELIMINAR'
-            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51, 45)
         GROUP BY 
             dd."ID_PERSONA"
     `;

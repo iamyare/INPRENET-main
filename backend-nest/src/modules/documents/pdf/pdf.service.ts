@@ -14,7 +14,6 @@ export class PdfService {
   constructor(private readonly driveService: DriveService) {
     (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
   }
-
   async getMembreteHorizontalBase64(): Promise<string> {
     const imagesPath = process.env.IMAGES_PATH || path.resolve(__dirname, '../../../../assets/images');
     const imagePath = path.join(imagesPath, 'membretado_horizontal.jpg');
@@ -2233,15 +2232,18 @@ export class PdfService {
     return this.generateConstancia(data, includeQR, this.generateConstanciaAfiliacionTemplate2);
   }
 
-  async generateAndUploadConstancia(data: any, dto: EmpleadoDto, type: string): Promise<string> {
-    const errors = await validate(dto);
-    if (errors.length > 0) {
-      throw new Error(
-        `Validation failed: ${errors
-          .map(err => Object.values(err.constraints || {}).join(', '))
-          .join('; ')}`,
-      );
+  async generateAndUploadConstancia(data: any, type: string, dto?: EmpleadoDto): Promise<string> {
+    if (dto) {
+      const errors = await validate(dto);
+      if (errors.length > 0) {
+        throw new Error(
+          `Validation failed: ${errors
+            .map(err => Object.values(err.constraints || {}).join(', '))
+            .join('; ')}`,
+        );
+      }
     }
+  
     const nombreCompleto = `${data.primer_nombre}_${data.primer_apellido}`;
     const fechaActual = new Date().toISOString().split('T')[0];
     const fileName = `${nombreCompleto}_${fechaActual}_constancia_${type}`;
@@ -2295,7 +2297,7 @@ export class PdfService {
       case 'tiempo-cotizar-con-monto':
         pdfBufferWithQR = await this.generateConstanciaTiempoCotizarConMonto({ ...data, dto, fileId }, true);
         break;
-      case 'beneficios': // Nuevo caso para constancia de beneficios con QR
+      case 'beneficios':
         pdfBufferWithQR = await this.generateConstanciaBeneficios({ ...data, fileId }, true, dto);
         break;
       default:
@@ -2306,28 +2308,39 @@ export class PdfService {
   
     return fileId;
   }
+  
 
-  async generateConstanciaWithQR(data: any, type: string, dto: EmpleadoDto): Promise<Buffer> {
-      switch (type) {
-          case 'afiliacion':
-              return await this.generateConstanciaAfiliacion(data, true, dto);
-          case 'renuncia-cap':
-              return await this.generateConstanciaRenunciaCap(data, true);
-          case 'no-cotizar':
-              return await this.generateConstanciaNoCotizar(data, true);
-          case 'debitos':
-              return await this.generateConstanciaDebitos(data, true);
-          case 'tiempo-cotizar-con-monto':
-              return await this.generateConstanciaTiempoCotizarConMonto(data, true);
-          case 'afiliacion2':
-              return await this.generateConstanciaAfiliacion2(data, true);
-          case 'beneficios': 
-              return await this.generateConstanciaBeneficios(data, true, dto);
-          default:
-              throw new Error('Invalid constancia type');
+  async generateConstanciaWithQR(data: any, type: string, dto?: EmpleadoDto): Promise<Buffer> {
+    if (dto) {
+      const errors = await validate(dto);
+      if (errors.length > 0) {
+        throw new Error(
+          `Validation failed: ${errors
+            .map(err => Object.values(err.constraints || {}).join(', '))
+            .join('; ')}`
+        );
       }
+    }
+    switch (type) {
+      case 'afiliacion':
+        return await this.generateConstanciaAfiliacion(data, true, dto);
+      case 'renuncia-cap':
+        return await this.generateConstanciaRenunciaCap(data, true);
+      case 'no-cotizar':
+        return await this.generateConstanciaNoCotizar(data, true);
+      case 'debitos':
+        return await this.generateConstanciaDebitos(data, true);
+      case 'tiempo-cotizar-con-monto':
+        return await this.generateConstanciaTiempoCotizarConMonto(data, true);
+      case 'afiliacion2':
+        return await this.generateConstanciaAfiliacion2(data, true);
+      case 'beneficios':
+        return await this.generateConstanciaBeneficios(data, true, dto);
+      default:
+        throw new Error('Invalid constancia type');
+    }
   }
-
+  
   async generateConstanciaRenunciaCap(data: any, includeQR: boolean): Promise<Buffer> {
     const templateFunction = async (data: any, includeQR: boolean) => {
       const content: Array<any> = [

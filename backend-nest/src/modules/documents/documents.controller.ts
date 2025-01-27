@@ -29,7 +29,7 @@ export class DocumentsController {
     @Res() res: Response
   ) {
     try {
-      const fileId = await this.pdfService.generateAndUploadConstancia(data, dto, 'afiliacion');
+      const fileId = await this.pdfService.generateAndUploadConstancia(data, 'afiliacion', dto);
       res.json({ fileId });
     } catch (error) {
       console.error('Error al generar la constancia:', error.message);
@@ -41,12 +41,12 @@ export class DocumentsController {
   }
   
   @Post('constancia-afiliacion2')
-  async postConstanciaAfiliacion2(@Body() data: any, @Body('dto') dto: EmpleadoDto, @Res() res: Response) {
+  async postConstanciaAfiliacion2(@Body() data: any, @Res() res: Response) {
     if (!data || !data.primer_nombre || !data.n_identificacion) {
       return res.status(400).json({ message: 'Datos incompletos en la solicitud.' });
     }
     try {
-      const fileId = await this.pdfService.generateAndUploadConstancia(data, dto, 'afiliacion2');
+      const fileId = await this.pdfService.generateAndUploadConstancia(data, 'afiliacion2');
       res.json({ fileId });
     } catch (error) {
       console.error('Error al generar constancia de afiliación 2:', error);
@@ -57,36 +57,36 @@ export class DocumentsController {
   @Post('constancia-renuncia-cap')
   async postConstanciaRenunciaCap(@Body() data: any, @Body('dto') dto: EmpleadoDto, @Res() res: Response) {
 
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, dto, 'renuncia-cap');
+    const fileId = await this.pdfService.generateAndUploadConstancia(data,'renuncia-cap',dto,);
     res.json({ fileId });
   }
 
   @Post('constancia-no-cotizar')
   async postConstanciaNoCotizar(@Body() data: any,  @Body('dto') dto: EmpleadoDto, @Res() res: Response) {
 
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, dto, 'no-cotizar');
+    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'no-cotizar', dto);
     res.json({ fileId });
   }
 
   @Post('constancia-debitos')
   async postConstanciaDebitos(@Body() data: any,  @Body('dto') dto: EmpleadoDto, @Res() res: Response) {
 
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, dto, 'debitos');
+    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'debitos', dto);
     res.json({ fileId });
   }
 
   @Post('constancia-tiempo-cotizar-con-monto')
   async postConstanciaTiempoCotizarConMonto(@Body() data: any,  @Body('dto') dto: EmpleadoDto, @Res() res: Response) {
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, dto, 'tiempo-cotizar-con-monto');
+    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'tiempo-cotizar-con-monto', dto);
     res.json({ fileId });
   }
 
-  @Post('constancia-qr')
+    @Post('constancia-qr')
     async postConstanciaQR(
-      @Body('dto') dto: EmpleadoDto, 
       @Body('type') type: string,
-      @Body() data: any,         
-      @Res() res: Response
+      @Body() data: any,
+      @Res() res: Response,
+      @Body('dto') dto?: EmpleadoDto
     ) {
       try {
         const pdfBuffer = await this.pdfService.generateConstanciaWithQR(data, type, dto);
@@ -113,7 +113,7 @@ export class DocumentsController {
       @Res() res: Response
     ) {
       try {
-        const fileId = await this.pdfService.generateAndUploadConstancia(data, dto, 'beneficios');
+        const fileId = await this.pdfService.generateAndUploadConstancia(data, 'beneficios', dto);
         res.json({ fileId });
       } catch (error) {
         console.error('Error al generar la constancia de beneficios:', error.message);

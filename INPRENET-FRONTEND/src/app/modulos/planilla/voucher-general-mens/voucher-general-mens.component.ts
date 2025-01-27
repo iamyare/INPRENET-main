@@ -219,7 +219,7 @@ export class VoucherGeneralMensComponent {
 
   async construirPDFBen(resultados: any, backgroundImageBase64: string) {
     const token = sessionStorage.getItem('token');
-    let dataToken
+    let dataToken;
     if (token) {
       dataToken = this.authService.decodeToken(token);
     }
@@ -255,7 +255,7 @@ export class VoucherGeneralMensComponent {
               sumaBeneficios += montoPorPeriodo;
               data.push({
                 TIPO_PLANILLA: detallePago.planilla.tipoPlanilla.nombre_planilla,
-                CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
+                CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || '-----------------------',
                 NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
                 MontoAPagar: montoPorPeriodo,
                 METODO_PAGO: beneficio.metodo_pago,
@@ -279,33 +279,53 @@ export class VoucherGeneralMensComponent {
             };
           });
 
+          // Función para agrupar por TIPO_PLANILLA
+          function agruparPorTipoPlanilla(dataDed: any[]) {
+            const agrupado: { [key: string]: any[] } = {};
+
+            dataDed.forEach((item) => {
+              if (!agrupado[item.TIPO_PLANILLA]) {
+                agrupado[item.TIPO_PLANILLA] = [];
+              }
+              agrupado[item.TIPO_PLANILLA].push(item);
+            });
+
+            return Object.entries(agrupado); // Retorna un array de [TIPO_PLANILLA, items[]]
+          }
+
           tablaDed = {
             table: {
               widths: ['*', '*', '*', '*'],
               body: [
-                [{ text: 'TIPO PLANILLA', style: 'tableHeader' }, { text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
-                ...dataDed.flatMap((b: any) => {
-                  if (b.length === 0) {
-                    return [[
-                      { text: '---------------', alignment: 'center' },
-                      { text: '---------------', alignment: 'center' },
-                      { text: '---------------', alignment: 'center' },
-                      { text: formatCurrency(0), style: 'alignRight' },
-                    ]];
-                  } else {
-                    return [[
-                      { text: b.TIPO_PLANILLA },
+                // Encabezados
+                [
+                  { text: 'TIPO PLANILLA', style: 'tableHeader' },
+                  { text: 'INSTITUCIÓN', style: 'tableHeader' },
+                  { text: 'DEDUCCIÓN', style: 'tableHeader' },
+                  { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] },
+                ],
+                // Datos agrupados, filtrados y procesados
+                ...agruparPorTipoPlanilla(dataDed).flatMap(([tipoPlanilla, items]) => {
+                  // Filtrar para excluir filas con TotalMontoAplicado = 0.00
+                  const filteredItems = items.filter((b) => b.TotalMontoAplicado !== 0.00);
+                  return filteredItems.map((b, index) => {
+                    return [
+                      index === 0
+                        ? { text: tipoPlanilla, rowSpan: filteredItems.length } // Combinar celdas para TIPO_PLANILLA
+                        : {}, // Celdas vacías para las filas combinadas
                       { text: b.NOMBRE_INSTITUCION },
                       { text: b.NOMBRE_DEDUCCION },
-                      { text: formatCurrency(b.TotalMontoAplicado), style: 'alignRight' }
-                    ]];
-                  }
-                })
-              ]
+                      { text: formatCurrency(b.TotalMontoAplicado), style: 'alignRight' },
+                    ];
+                  });
+                }),
+              ],
             },
             margin: [0, 5, 0, 0],
-            style: 'tableExample'
-          }
+            style: 'tableExample',
+          };
+
+
         }
         const mesAnio = obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio)
 
@@ -341,6 +361,14 @@ export class VoucherGeneralMensComponent {
                       { text: 'PAGO TOTAL: ' + formatCurrency(neto) },
                       { text: 'MÉTODO DE PAGO: ' + (data[0]?.METODO_PAGO || 'NO PROPORCIONADO') },
                       { text: 'BANCO: ' + (data[0]?.NOMBRE_BANCO || 'NO PROPORCIONADO') },
+                    ],
+                    [
+                      {
+                        image: qrImage,
+                        width: 80, // Reducir el tamaño del QR
+                        margin: [0, -30, 0, 0], // Agregar un margen negativo para subir 25px
+                        alignment: 'center',
+                      },
                     ]
                   ],
                   margin: [0, 10, 0, 0]
@@ -349,16 +377,27 @@ export class VoucherGeneralMensComponent {
                   table: {
                     widths: ['*', '*', '*', '*'],
                     body: [
-                      [{ text: 'TIPO PLANILLA', style: 'tableHeader' }, { text: 'CAUSANTE', style: 'tableHeader' }, { text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
-                      ...data.flatMap((b: any) => {
-                        return [[
-                          { text: b.TIPO_PLANILLA },
-                          { text: b.CAUSANTE },
-                          { text: b.NOMBRE_BENEFICIO },
-                          { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
-                        ]];
-                      })
-                    ]
+                      // Encabezados
+                      [
+                        { text: 'TIPO PLANILLA', style: 'tableHeader' },
+                        { text: 'CAUSANTE', style: 'tableHeader' },
+                        { text: 'INGRESO', style: 'tableHeader' },
+                        { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] },
+                      ],
+                      // Datos agrupados y procesados
+                      ...this.agruparPorTipoPlanilla(data).flatMap(([tipoPlanilla, items]) => {
+                        return items.map((b, index) => {
+                          return [
+                            index === 0
+                              ? { text: tipoPlanilla, rowSpan: items.length } // Combinar celdas para TIPO_PLANILLA
+                              : {}, // Celdas vacías para las filas combinadas
+                            { text: b.CAUSANTE, alignment: 'center' },
+                            { text: b.NOMBRE_BENEFICIO },
+                            { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
+                          ];
+                        });
+                      }),
+                    ],
                   },
                   margin: [0, 5, 0, 0],
                   style: 'tableExample'
@@ -391,17 +430,7 @@ export class VoucherGeneralMensComponent {
                   },
                   style: 'tableExample'
                 },
-                {
-                  text: 'CÓDIGO QR DE VALIDACIÓN',
-                  style: 'subheader',
-                  alignment: 'center',
-                  margin: [0, 20, 0, 10],
-                },
-                {
-                  image: qrImage,
-                  width: 80, // Reducir el tamaño del QR
-                  alignment: 'center',
-                },
+
               ],
               margin: [0, 0, 0, 0]
             }
@@ -424,17 +453,17 @@ export class VoucherGeneralMensComponent {
           pageMargins: [50, 80, 50, 85],
           styles: {
             header: {
-              fontSize: 16,
+              fontSize: 13,
               bold: true,
               margin: [0, 0, 0, 0]
             },
             subheader: {
-              fontSize: 12,
+              fontSize: 10,
               bold: true
             },
             tableHeader: {
               bold: true,
-              fontSize: 13,
+              fontSize: 10,
               color: 'black'
             },
             tableExample: {
@@ -446,11 +475,11 @@ export class VoucherGeneralMensComponent {
             signatureTitle: {
               alignment: 'center',
               bold: true,
-              fontSize: 12,
+              fontSize: 9,
             }
           },
           defaultStyle: {
-            fontSize: 10
+            fontSize: 9
           },
           pageSize: 'LETTER',
           pageOrientation: 'portrait'
@@ -460,7 +489,20 @@ export class VoucherGeneralMensComponent {
         this.toastr.warning("No se ha encontrado el registro en el mes brindado")
       }
     }
-
   }
+
+  agruparPorTipoPlanilla(data: any[]) {
+    const agrupado: { [key: string]: any[] } = {};
+
+    data.forEach((item) => {
+      if (!agrupado[item.TIPO_PLANILLA]) {
+        agrupado[item.TIPO_PLANILLA] = [];
+      }
+      agrupado[item.TIPO_PLANILLA].push(item);
+    });
+
+    return Object.entries(agrupado); // Retorna un array de [TIPO_PLANILLA, items[]]
+  }
+
 
 }

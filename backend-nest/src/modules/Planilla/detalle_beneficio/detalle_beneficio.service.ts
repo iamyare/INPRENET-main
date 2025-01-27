@@ -480,8 +480,8 @@ export class DetalleBeneficioService {
               return detBeneBeneficia;
             }
           } else {
-            this.logger.error(`Ya existe el mismo beneficio para esta persona`);
-            throw new InternalServerErrorException('Ya existe el mismo beneficio para esta persona');
+            this.logger.error(`Ya existe el mismo beneficio con el mismo causante para esta persona`);
+            throw new InternalServerErrorException('Ya existe el mismo beneficio con el mismo causante para esta persona');
           }
         } else if (idPersonaPadre) {
           const detben = await manager.findOne(
@@ -582,8 +582,8 @@ export class DetalleBeneficioService {
           }
 
           else {
-            this.logger.error(`Ya existe el mismo beneficio para esta persona`);
-            throw new InternalServerErrorException('Ya existe el mismo beneficio para esta persona');
+            this.logger.error(`Ya existe el mismo beneficio con el mismo causante para esta persona`);
+            throw new InternalServerErrorException('Ya existe el mismo beneficio con el mismo causante para esta persona');
           }
         }
       } catch (error) {
@@ -1159,6 +1159,8 @@ export class DetalleBeneficioService {
         ultimo_dia_ultima_renta = null
       }
 
+      console.log(data);
+
       const dataEnv = {
         ID_DETALLE_PERSONA: data.ID_DETALLE_PERSONA,
         ID_PERSONA: data.ID_PERSONA,
@@ -1174,10 +1176,10 @@ export class DetalleBeneficioService {
         fecha_calculo: this.convertirCadenaAFechaPleca(data.fecha_calculo),
         periodo_finalizacion: this.convertirCadenaAFechaPleca(data.periodo_finalizacion),
 
-        monto_primera_cuota: monto_primera_cuota,
-        monto_por_periodo: monto_por_periodo,
-        monto_ultima_cuota: monto_ultima_cuota,
-        monto_total: monto_total,
+        monto_primera_cuota: isNaN(data.monto_primera_cuota) ? null : data.monto_primera_cuota,
+        monto_por_periodo: isNaN(data.monto_por_periodo) ? null : data.monto_por_periodo,
+        monto_ultima_cuota: isNaN(data.monto_ultima_cuota) ? null : data.monto_ultima_cuota,
+        monto_total: isNaN(data.monto_total) ? null : data.monto_total,
 
         num_rentas_pagar_primer_pago: num_rentas_pagar_primer_pago,
         ultimo_dia_ultima_renta: ultimo_dia_ultima_renta,

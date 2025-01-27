@@ -1156,7 +1156,7 @@ export class AfiliadoService {
         await this.detallePersonaRepository.save({
           ID_PERSONA: idPersona,
           ID_CAUSANTE: idPersona,
-          //ID_ESTADO_AFILIACION: estadoP.codigo,
+          //ID_ESTADO_AFILIACION: datosGenerales.fallecido ? 7 : null,,
           ID_TIPO_PERSONA: datosGenerales.tipo_persona || null,
           VOLUNTARIO: voluntario,
         });

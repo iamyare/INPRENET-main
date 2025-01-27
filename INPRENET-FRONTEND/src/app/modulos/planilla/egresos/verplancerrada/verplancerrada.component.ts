@@ -381,7 +381,7 @@ export class VerplancerradaComponent {
           sumaBeneficios += montoPorPeriodo;
 
           return {
-            CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
+            CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || '------------',
             NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
             MontoAPagar: montoPorPeriodo,
             METODO_PAGO: beneficio.metodo_pago,
@@ -1303,20 +1303,20 @@ export class VerplancerradaComponent {
       return;
     }
 
-    this.isLoading = true; 
-  
+    this.isLoading = true;
+
     try {
       const response: any = await firstValueFrom(
         this.planillaService.exportarDetallesCompletosExcel(this.idPlanilla, 2)
       );
-  
+
       const blob = new Blob([response], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
-  
+
       const nombreArchivo = `PlanillaCompleta_${this.idPlanilla}.xlsx`;
       saveAs(blob, nombreArchivo);
-  
+
       this.toastr.success('Archivo Excel completo generado y descargado con éxito');
     } catch (error) {
       console.error('Error al descargar el Excel completo:', error);
@@ -1325,6 +1325,6 @@ export class VerplancerradaComponent {
       this.isLoading = false;
     }
   }
-  
+
 
 }

@@ -23,7 +23,7 @@ export class Net_Consultas_Medicas {
   @Column({ name: 'TRIAGE', type: 'varchar2', length: 1000 })
   triage: string;
 
-  @Column({ name: 'DIAGNOSTICO_PRESUNTIVO', type: 'varchar2', length: 255 })
+  @Column({ name: 'DIAGNOSTICO_PRESUNTIVO', type: 'varchar2', length: 1000 })
   diagnostico_presuntivo: string;
 
   @Column({ name: 'DETALLE_ATENCION', type: 'varchar2', length: 1000, nullable: true })

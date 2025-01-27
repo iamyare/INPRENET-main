@@ -579,7 +579,7 @@ export class ConasaService {
     return {
       message: 'Proceso de registro de asistencias médicas completado.',
       totalExitosos: resultados.totalExitosos,
-      fallidos: resultados.fallidos,
+      fallidos: resultados.fallidos
     };
   }
   
@@ -637,59 +637,59 @@ export class ConasaService {
       const planillasPagadas = planillaPagadaResult[0]?.PAGADAS || 0;
       const query = `
         WITH planillas_filtradas AS (
-            SELECT
-                dpb.id_persona,
-                p.id_planilla,
-                tp.nombre_planilla,
-                p.periodo_inicio,
-                p.periodo_finalizacion
-            FROM
-                net_detalle_pago_beneficio dpb
-            INNER JOIN
-                net_planilla p ON dpb.id_planilla = p.id_planilla
-            INNER JOIN
-                net_tipo_planilla tp ON p.id_tipo_planilla = tp.id_tipo_planilla
-            WHERE
-                tp.nombre_planilla IN ('ORDINARIA DE JUBILADOS Y PENSIONADOS', 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS')
-        ),
-        mes_actual AS (
-            SELECT DISTINCT id_persona
-            FROM planillas_filtradas
-            WHERE TRUNC(periodo_inicio, 'MM') = TRUNC(SYSDATE, 'MM')
-        ),
-        mes_anterior_1 AS (
-            SELECT DISTINCT id_persona
-            FROM planillas_filtradas
-            WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1)
-        ),
-        mes_anterior_2 AS (
-            SELECT DISTINCT id_persona
-            FROM planillas_filtradas
-            WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -2)
-        ),
-        mes_anterior_3 AS (
-            SELECT DISTINCT id_persona
-            FROM planillas_filtradas
-            WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -3)
-        )
         SELECT
-            (SELECT COUNT(*) FROM mes_actual) AS total_mes_actual,
-            (SELECT COUNT(*) FROM mes_anterior_1) AS total_mes_anterior_1,
-            (SELECT COUNT(*) FROM mes_anterior_2) AS total_mes_anterior_2,
-            (SELECT COUNT(*) FROM mes_anterior_3) AS total_mes_anterior_3,
-            (SELECT COUNT(*) FROM mes_actual WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_1)) AS altas_mes_actual,
-            (SELECT COUNT(*) FROM mes_anterior_1 WHERE id_persona NOT IN (SELECT id_persona FROM mes_actual)) AS bajas_mes_actual,
-            (SELECT COUNT(*) FROM mes_anterior_1 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_2)) AS altas_mes_anterior_1,
-            (SELECT COUNT(*) FROM mes_anterior_2 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_1)) AS bajas_mes_anterior_1,
-            (SELECT COUNT(*) FROM mes_anterior_2 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_3)) AS altas_mes_anterior_2,
-            (SELECT COUNT(*) FROM mes_anterior_3 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_2)) AS bajas_mes_anterior_2
-        FROM DUAL
+            dpb.id_persona,
+            p.id_planilla,
+            tp.nombre_planilla,
+            p.periodo_inicio,
+            p.periodo_finalizacion
+        FROM
+            net_detalle_pago_beneficio dpb
+        INNER JOIN
+            net_planilla p ON dpb.id_planilla = p.id_planilla
+        INNER JOIN
+            net_tipo_planilla tp ON p.id_tipo_planilla = tp.id_tipo_planilla
+        INNER JOIN
+            net_persona_por_banco ppb ON dpb.id_persona = ppb.id_persona
+        WHERE
+            tp.nombre_planilla IN ('ORDINARIA DE JUBILADOS Y PENSIONADOS', 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS')
+            AND dpb.id_af_banco IS NOT NULL
+            AND dpb.estado = 'PAGADA'
+    ),
+    mes_actual AS (
+        SELECT DISTINCT id_persona
+        FROM planillas_filtradas
+        WHERE TRUNC(periodo_inicio, 'MM') = TRUNC(SYSDATE, 'MM')
+    ),
+    mes_anterior_1 AS (
+        SELECT DISTINCT id_persona
+        FROM planillas_filtradas
+        WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1)
+    ),
+    mes_anterior_2 AS (
+        SELECT DISTINCT id_persona
+        FROM planillas_filtradas
+        WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -2)
+    ),
+    mes_anterior_3 AS (
+        SELECT DISTINCT id_persona
+        FROM planillas_filtradas
+        WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -3)
+    )
+    SELECT
+        (SELECT COUNT(*) FROM mes_actual) AS total_mes_actual,
+        (SELECT COUNT(*) FROM mes_anterior_1) AS total_mes_anterior_1,
+        (SELECT COUNT(*) FROM mes_anterior_2) AS total_mes_anterior_2,
+        (SELECT COUNT(*) FROM mes_anterior_3) AS total_mes_anterior_3,
+        (SELECT COUNT(*) FROM mes_actual WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_1)) AS altas_mes_actual,
+        (SELECT COUNT(*) FROM mes_anterior_1 WHERE id_persona NOT IN (SELECT id_persona FROM mes_actual)) AS bajas_mes_actual,
+        (SELECT COUNT(*) FROM mes_anterior_1 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_2)) AS altas_mes_anterior_1,
+        (SELECT COUNT(*) FROM mes_anterior_2 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_1)) AS bajas_mes_anterior_1,
+        (SELECT COUNT(*) FROM mes_anterior_2 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_3)) AS altas_mes_anterior_2,
+        (SELECT COUNT(*) FROM mes_anterior_3 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_2)) AS bajas_mes_anterior_2
+    FROM DUAL
       `;
-    
       const result = await this.dataSource.query(query);
-      console.log(result);
-      
-    
       const {
         TOTAL_MES_ACTUAL,
         TOTAL_MES_ANTERIOR_1,

@@ -11,22 +11,22 @@ export class Net_Consultas_Medicas {
   @Column({ name: 'FECHA_CONSULTA', type: 'date' })
   fecha_consulta: string;
 
-  @Column({ name: 'MOTIVO_CONSULTA', type: 'varchar2', length: 1000 })
+  @Column({ name: 'MOTIVO_CONSULTA', type: 'varchar2', length: 2000 })
   motivo_consulta: string;
 
-  @Column({ name: 'TIEMPO_SINTOMAS', type: 'varchar2', length: 1000 })
+  @Column({ name: 'TIEMPO_SINTOMAS', type: 'varchar2', length: 2000 })
   tiempo_sintomas: string;
 
-  @Column({ name: 'TIPO_ATENCION', type: 'varchar2', length: 1000 })
+  @Column({ name: 'TIPO_ATENCION', type: 'varchar2', length: 2000 })
   tipo_atencion: string;
 
-  @Column({ name: 'TRIAGE', type: 'varchar2', length: 1000 })
+  @Column({ name: 'TRIAGE', type: 'varchar2', length: 2000 })
   triage: string;
 
-  @Column({ name: 'DIAGNOSTICO_PRESUNTIVO', type: 'varchar2', length: 1000 })
+  @Column({ name: 'DIAGNOSTICO_PRESUNTIVO', type: 'varchar2', length: 2000 })
   diagnostico_presuntivo: string;
 
-  @Column({ name: 'DETALLE_ATENCION', type: 'varchar2', length: 1000, nullable: true })
+  @Column({ name: 'DETALLE_ATENCION', type: 'varchar2', length: 2000, nullable: true })
   detalle_atencion: string;
 
   @Column({ name: 'FECHA_CIERRE', type: 'date', nullable: true })

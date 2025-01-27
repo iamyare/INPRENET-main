@@ -13,6 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 export class CargarbefDedComponent {
   @ViewChild('confirmarAsignacionModal') confirmarAsignacionModal!: TemplateRef<any>;
   @ViewChild('confirmarAsignacionBeneficiariosModal') confirmarAsignacionBeneficiariosModal!: TemplateRef<any>;
+  @ViewChild('confirmarCalculoPlanillaModal') confirmarCalculoPlanillaModal!: TemplateRef<any>;
   @ViewChild('confirmarAsignacionComplementariaModal') confirmarAsignacionComplementariaModal!: TemplateRef<any>;
   @ViewChild('confirmarAsignacionJubiladosModal') confirmarAsignacionJubiladosModal!: TemplateRef<any>;
 
@@ -85,6 +86,30 @@ export class CargarbefDedComponent {
         console.log('Asignación de beneficios cancelada');
       }
     });
+  }
+
+  confirmarCalculoPlanilla(): void {
+    const dialogRef = this.dialog.open(this.confirmarCalculoPlanillaModal);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirmar') {
+        console.log('Asignación de beneficios confirmada');
+        this.calculoPlanilla(); // Llama a tu método real
+      } else {
+        console.log('Asignación de beneficios cancelada');
+      }
+    });
+  }
+
+  calculoPlanilla() {
+    /* this.planillaService.generarPlanillaOrdinaria('BENEFICIARIO SIN CAUSANTE,BENEFICIARIO').subscribe({
+      next: () => {
+        this.toastr.success('Planilla ordinaria generada para Beneficiarios y Afiliados', 'Éxito');
+      },
+      error: err => {
+        this.toastr.error('Error al generar la planilla ordinaria para Beneficiarios y Afiliados', 'Error');
+      }
+    }); */
   }
 
   confirmarAsignacionComplementaria(): void {

@@ -101,6 +101,30 @@
         </div>
       </mat-tab>
 
+      <!-- <mat-tab label="Cálculo de Planilla">
+        <div>
+          <button
+          mat-raised-button
+          color="primary"
+          class="asignar-beneficios-btn"
+          (click)="confirmarAsignacionBeneficiarios()">
+          Cálculo de planilla, Quitar inconsistencias de negativos.
+          </button>
+
+          <ng-template #confirmarCalculoPlanillaModal>
+          <h2 mat-dialog-title>Confirmar cálculo de planilla</h2>
+          <mat-dialog-content>
+            <p>¿Estás seguro de ejecutar el procedimiento de calculo de planilla, para quitar valores negativos segun prioridad de las deducciones?</p>
+          </mat-dialog-content>
+          <mat-dialog-actions align="end">
+            <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+            <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+          </mat-dialog-actions>
+          </ng-template>
+
+        </div>
+      </mat-tab> -->
+
     </mat-tab-group>
 
   </div>

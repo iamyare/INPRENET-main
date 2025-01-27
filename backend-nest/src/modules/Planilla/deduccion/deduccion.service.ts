@@ -426,6 +426,8 @@ export class DeduccionService {
           return { error: `Deducción duplicada detectada`, processed: false };
         }
 
+        const activo = persona.personasPorBanco.find(persona => persona.estado === 'ACTIVO') || null;
+
         const detalleDeduccion = repositories.detalleDeduccionRepository.create({
           anio: parsedAnio,
           mes: parsedMes,
@@ -435,7 +437,7 @@ export class DeduccionService {
           persona: persona.id_persona,
           deduccion,
           planilla: { id_planilla: plan.id_planilla },
-          personaPorBanco: persona.personasPorBanco[0],
+          personaPorBanco: activo,
         });
 
         await repositories.detalleDeduccionRepository.save(detalleDeduccion);
@@ -475,6 +477,8 @@ export class DeduccionService {
           return { error: `Deducción duplicada detectada`, processed: false };
         }
 
+        const activo = persona.personasPorBanco.find(persona => persona.estado === 'ACTIVO') || null;
+
         const detalleDeduccion = repositories.detalleDeduccionRepository.create({
           anio: parsedAnio,
           mes: parsedMes,
@@ -484,7 +488,7 @@ export class DeduccionService {
           persona: persona.id_persona,
           deduccion,
           planilla: { id_planilla: plan.id_planilla },
-          personaPorBanco: persona.personasPorBanco[0],
+          personaPorBanco: activo,
         });
 
         await repositories.detalleDeduccionRepository.save(detalleDeduccion);

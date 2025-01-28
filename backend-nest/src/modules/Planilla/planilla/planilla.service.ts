@@ -84,7 +84,25 @@ export class PlanillaService {
       const beneficiosQuery = `
         SELECT DISTINCT
           np.n_identificacion AS "DNI",
-          np."PRIMER_APELLIDO" || ' ' || NVL(np."SEGUNDO_APELLIDO", '') || ' ' || np."PRIMER_NOMBRE" || ' ' || NVL(np."SEGUNDO_NOMBRE", '') AS "nombre_completo",
+          TRIM(
+              np.primer_apellido ||
+              CASE
+                  WHEN np.segundo_apellido IS NOT NULL THEN ' ' || np.segundo_apellido
+                  ELSE ''
+              END ||
+              CASE
+                  WHEN np.primer_nombre IS NOT NULL THEN ' ' || np.primer_nombre
+                  ELSE ''
+              END ||
+              CASE
+                  WHEN np.segundo_nombre IS NOT NULL THEN ' ' || np.segundo_nombre
+                  ELSE ''
+              END ||
+              CASE
+                  WHEN np.tercer_nombre IS NOT NULL THEN ' ' || np.tercer_nombre
+                  ELSE ''
+              END
+          ) AS "nombre_completo",
           pb.num_cuenta AS "NUMERO_CUENTA",
           nb.nombre_banco AS "NOMBRE_BANCO",
           b.id_beneficio AS "CODIGO_BENEFICIO",
@@ -102,7 +120,25 @@ export class PlanillaService {
       const deduccionesQuery = `
         SELECT DISTINCT
           np.n_identificacion AS "DNI",
-          np."PRIMER_APELLIDO" || ' ' || NVL(np."SEGUNDO_APELLIDO", '') || ' ' || np."PRIMER_NOMBRE" || ' ' || NVL(np."SEGUNDO_NOMBRE", '') AS "nombre_completo",
+          TRIM(
+              np.primer_apellido ||
+              CASE
+                  WHEN np.segundo_apellido IS NOT NULL THEN ' ' || np.segundo_apellido
+                  ELSE ''
+              END ||
+              CASE
+                  WHEN np.primer_nombre IS NOT NULL THEN ' ' || np.primer_nombre
+                  ELSE ''
+              END ||
+              CASE
+                  WHEN np.segundo_nombre IS NOT NULL THEN ' ' || np.segundo_nombre
+                  ELSE ''
+              END ||
+              CASE
+                  WHEN np.tercer_nombre IS NOT NULL THEN ' ' || np.tercer_nombre
+                  ELSE ''
+              END
+          ) AS "nombre_completo",
           pb.num_cuenta AS "NUMERO_CUENTA",
           nb.nombre_banco AS "NOMBRE_BANCO",
           d.id_deduccion,
@@ -3140,27 +3176,30 @@ GROUP BY
   async obtenerDetallePagoBeneficioPorPlanillaPreliminar(idPlanilla: number): Promise<any[]> {
     const beneficiosQuery = `
         SELECT
-            banco.codigo_ach AS "codigo_banco", 
+            banco.codigo_ach AS "codigo_banco",
             personaPorBanco.num_cuenta AS "numero_cuenta",
             SUM(detallePago.monto_a_pagar) AS "monto_a_pagar",
             TRIM(
-              persona.primer_apellido ||
-              CASE 
-                  WHEN persona.segundo_apellido IS NOT NULL THEN ' ' || persona.segundo_apellido 
-                  ELSE '' 
-              END || 
-              ' ' || persona.primer_nombre ||
-              CASE 
-                  WHEN persona.segundo_nombre IS NOT NULL THEN ' ' || persona.segundo_nombre 
-                  ELSE '' 
-              END ||
-              CASE
-                  WHEN persona.tercer_nombre IS NOT NULL THEN ' ' || persona.tercer_nombre
-                  ELSE ''
-              END
-          ) AS "nombre_completo",
+            persona.primer_apellido ||
+            CASE
+                WHEN persona.segundo_apellido IS NOT NULL THEN ' ' || persona.segundo_apellido
+                ELSE ''
+            END ||
+            CASE
+                WHEN persona.primer_nombre IS NOT NULL THEN ' ' || persona.primer_nombre
+                ELSE ''
+            END ||
+            CASE
+                WHEN persona.segundo_nombre IS NOT NULL THEN ' ' || persona.segundo_nombre
+                ELSE ''
+            END ||
+            CASE
+                WHEN persona.tercer_nombre IS NOT NULL THEN ' ' || persona.tercer_nombre
+                ELSE ''
+            END
+        ) AS "nombre_completo",
             persona.n_identificacion AS "n_identificacion",
-            persona.ID_PERSONA AS "ID_PERSONA" 
+            persona.ID_PERSONA AS "ID_PERSONA"
         FROM
             "NET_PLANILLA" planilla
         JOIN
@@ -3178,37 +3217,37 @@ GROUP BY
             banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, persona.tercer_nombre, persona.n_identificacion, persona.ID_PERSONA
     `;
     const deduccionesInpremaQuery = `
-        SELECT 
+        SELECT
             dd."ID_PERSONA",
             SUM(dd.MONTO_APLICADO) AS "deducciones_inprema"
-        FROM 
+        FROM
             "NET_PLANILLA" planilla
-        LEFT JOIN 
+        LEFT JOIN
             "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
-        LEFT JOIN 
+        LEFT JOIN
             "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-        WHERE 
+        WHERE
             planilla."ID_PLANILLA" = :idPlanilla
             AND dd."ESTADO_APLICACION" = 'EN PRELIMINAR'
             AND ded."ID_CENTRO_TRABAJO" = 1
-        GROUP BY 
+        GROUP BY
             dd."ID_PERSONA"
     `;
     const deduccionesTercerosQuery = `
-        SELECT 
+        SELECT
             dd."ID_PERSONA",
             SUM(dd.MONTO_APLICADO) AS "deducciones_terceros"
-        FROM 
+        FROM
             "NET_PLANILLA" planilla
-        LEFT JOIN 
+        LEFT JOIN
             "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
-        LEFT JOIN 
+        LEFT JOIN
             "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-        WHERE 
+        WHERE
             planilla."ID_PLANILLA" = :idPlanilla
             AND dd."ESTADO_APLICACION" = 'EN PRELIMINAR'
-            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
-        GROUP BY 
+            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51, 45)
+        GROUP BY
             dd."ID_PERSONA"
     `;
     try {

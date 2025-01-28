@@ -3247,11 +3247,7 @@ GROUP BY
             planilla."ID_PLANILLA" = :idPlanilla
             AND dd."ESTADO_APLICACION" = 'EN PRELIMINAR'
             AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51, 45)
-<<<<<<< HEAD
         GROUP BY
-=======
-        GROUP BY 
->>>>>>> 32bc617c368791ef1e574671a1a3366e5ed8cac0
             dd."ID_PERSONA"
     `;
     try {

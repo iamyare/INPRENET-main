@@ -26,6 +26,7 @@ import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import axios from 'axios';
 
+
 @Injectable()
 export class AfiliadoService {
 
@@ -300,6 +301,10 @@ export class AfiliadoService {
       DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.nombre_departamento,
       ID_CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.id_causa_fallecimiento,
       CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.nombre,
+      
+      FECHA_AFILIACION: persona.fecha_afiliacion,
+      ULTIMA_FECHA_ACTUALIZACION: persona.ultima_fecha_actualizacion,
+
       fallecido: persona.fallecido,
       fecha_reporte_fallecido: persona.fechaReporteFallecido,
       estadoAfiliacion: {
@@ -371,7 +376,11 @@ export class AfiliadoService {
         ESTADO_CIVIL: detallePer.persona.estado_civil,
         DIRECCION_RESIDENCIA: detallePer.persona.direccion_residencia,
         FECHA_NACIMIENTO: detallePer.persona.fecha_nacimiento,
-        TIPO_PERSONA: detallePer.tipoPersona.tipo_persona
+        TIPO_PERSONA: detallePer.tipoPersona.tipo_persona,
+        
+        FECHA_AFILIACION: detallePer.persona.fecha_afiliacion,
+        ULTIMA_FECHA_ACTUALIZACION: detallePer.persona.ultima_fecha_actualizacion,
+        
       };
 
       return result;
@@ -437,9 +446,11 @@ export class AfiliadoService {
         ESTADO_PERSONA: detallePer?.estadoAfiliacion?.nombre_estado,
         BENEFICIOS: detallePer.detalleBeneficio,
         VOLUNTARIO: detallePer.voluntario,
-        OBSERVACION: detallePer.observacion
+        OBSERVACION: detallePer.observacion,
 
-
+        FECHA_AFILIACION: detallePer.persona.fecha_afiliacion,
+        ULTIMA_FECHA_ACTUALIZACION: detallePer.persona.ultima_fecha_actualizacion
+        
         //fallecido: detallePer.persona.fallecido,
         //TIPO_PERSONA: detallePer.persona.detallePersona[0].tipoPersona.tipo_persona,
         //GRADO_ACADEMICO: detallePer.persona.grado_academico,
@@ -1167,7 +1178,6 @@ export class AfiliadoService {
     }
   }
 
-
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
     if (!existingPerf) {
@@ -1274,14 +1284,61 @@ export class AfiliadoService {
     }
   }
 
-
-
   private handleException(error: any): void {
-    this.logger.error(error);
+    this.logger.error('Error detallado:', JSON.stringify(error, null, 2));
+    
+    // Error específico de Oracle para número hexadecimal
+    if (error.message && error.message.includes('ORA-01465')) {
+        throw new BadRequestException('Error al procesar archivos binarios. Verifique el formato de los archivos.');
+    }
+    
+    // Error de clave única
     if (error.driverError && error.driverError.errorNum === 1) {
-      throw new BadRequestException('Algun dato clave ya existe');
-    } else {
-      throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
+        throw new BadRequestException('Algún dato clave ya existe');
+    }
+    
+    // Errores de tamaño de archivo
+    if (error.message && error.message.includes('exceeds')) {
+        throw new BadRequestException(error.message);
+    }
+    
+    // Otros errores de Oracle
+    if (error.driverError) {
+        this.logger.error(`Oracle Error ${error.driverError.errorNum}: ${error.message}`);
+        throw new BadRequestException(`Error de base de datos: ${error.message}`);
+    }
+
+    throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
+}
+
+// Agregar esta función auxiliar para validar archivos
+private validateFile(file: any, maxSize: number, fieldName: string): Buffer | null {
+    if (!file?.buffer) {
+        return null;
+    }
+
+    if (file.buffer.length > maxSize) {
+        throw new BadRequestException(`El archivo ${fieldName} excede el tamaño máximo permitido`);
+    }
+
+    try {
+        const buffer = Buffer.from(file.buffer);
+        return buffer.length > 0 ? buffer : null;
+    } catch (error) {
+        this.logger.error(`Error al procesar ${fieldName}:`, error);
+        throw new BadRequestException(`Error al procesar el archivo ${fieldName}`);
+    }
+}
+
+  async obtenerTodasLasProfesiones(): Promise<NET_PROFESIONES[]> {
+    try {
+      const profesiones = await this.profesionRepository.find();
+      return profesiones;
+    } catch (error) {
+      this.logger.error(`Error al obtener profesiones: ${error.message}`);
+      throw new InternalServerErrorException('Error al obtener profesiones');
     }
   }
+
+
 }

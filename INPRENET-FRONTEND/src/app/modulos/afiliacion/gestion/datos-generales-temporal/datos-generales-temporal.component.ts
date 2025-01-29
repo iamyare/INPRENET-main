@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl, FormArray } from '@angular/forms';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -23,6 +23,8 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   @Input() discapacidadSeleccionada!: boolean;
   @Output() newDatosGenerales = new EventEmitter<any>();
   @ViewChild(CamaraComponent, { static: false }) camaraComponent!: CamaraComponent;
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef<HTMLInputElement>;
+
 
   opcion: string = 'NO';
 
@@ -38,6 +40,7 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   nacionalidades: { value: number, label: string }[] = [];
   discapacidades: { label: string, value: number }[] = [];
   useCamera: boolean = true;
+  height: number = 0;
 
   constructor(private fb: FormBuilder,
     private direccionSer: DireccionService,
@@ -53,7 +56,7 @@ ngOnInit(): void {
 
   // Asegurar que el formGroup existe
   if (!this.formGroup) {
-      this.formGroup = this.fb.group({});
+    this.formGroup = this.fb.group({});
   }
 
   // Agregar campo fotoPerfil
@@ -62,22 +65,42 @@ ngOnInit(): void {
   // Agregar el control de discapacidad
   this.formGroup.addControl('discapacidad', new FormControl(false, Validators.required));
 
+  if (this.initialData && typeof this.initialData.discapacidad === 'boolean') {
+    this.formGroup.patchValue({
+      discapacidad: this.initialData.discapacidad
+    });
+  } else {
+    this.formGroup.patchValue({
+      discapacidad: false  // “NO” por defecto
+    });
+  }
+
+  // ===========================================
+  // NUEVO: Agregar el control archivo_identificacion como obligatorio
+  // ===========================================
+  if (!this.formGroup.contains('archivo_identificacion')) {
+    this.formGroup.addControl(
+      'archivo_identificacion',
+      new FormControl('', [Validators.required])
+    );
+  }
+
   // Resetear la cámara si el componente de cámara existe
   if (this.camaraComponent) {
-      this.camaraComponent.resetCamera();
+    this.camaraComponent.resetCamera();
   }
 
   // Limpiar la foto de perfil desde el servicio
   if (this.formStateService) {
-      this.formStateService.resetFotoPerfil();
-      this.formStateService.getFotoPerfil().subscribe((fotoPerfil) => {
-          this.formGroup.patchValue({ fotoPerfil });
-      });
+    this.formStateService.resetFotoPerfil();
+    this.formStateService.getFotoPerfil().subscribe((fotoPerfil) => {
+      this.formGroup.patchValue({ fotoPerfil });
+    });
   }
 
   // Suscripción a los cambios de discapacidad
-  this.formGroup.get('discapacidad')?.valueChanges.subscribe(value => {
-      this.onDiscapacidadChange({ value });
+  this.formGroup.get('discapacidad')?.valueChanges.subscribe((value) => {
+    this.onDiscapacidadChange({ value });
   });
 
   const noSpecialCharsPattern = '^[a-zA-Z\\s]*$';
@@ -86,140 +109,282 @@ ngOnInit(): void {
   // Inicializar controles adicionales del formulario
   this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
 
-  this.formGroup.get('id_tipo_identificacion')?.valueChanges.subscribe(value => {
-      this.onTipoIdentificacionChange(value);
+  this.formGroup.get('id_tipo_identificacion')?.valueChanges.subscribe((value) => {
+    this.onTipoIdentificacionChange(value);
   });
 
   this.setValidacionesIdentificacion(false);
 
   if (!this.formGroup) {
-      if (this.initialData) {
-          this.formGroup = this.fb.group({
-              peps: this.fb.array([]),
-              discapacidades: this.fb.array([]),
-              discapacidad: [false, Validators.required],
-              ...this.initialData
-          });
-          this.cargarDiscapacidades();
-      } else {
-          this.formGroup = this.fb.group({
-              peps: this.fb.array([]),
-              discapacidades: this.fb.array([]),
-              discapacidad: [false, Validators.required],
-              fotoPerfil: new FormControl(null, Validators.required)
-          });
-      }
-  } else {
-      this.formGroup.reset({
-          discapacidad: false,
-          fotoPerfil: null
+    if (this.initialData) {
+      this.formGroup = this.fb.group({
+        peps: this.fb.array([]),
+        discapacidades: this.fb.array([]),
+        discapacidad: [false, Validators.required],
+        ...this.initialData
       });
+      this.cargarDiscapacidades();
+    } else {
+      this.formGroup = this.fb.group({
+        peps: this.fb.array([]),
+        discapacidades: this.fb.array([]),
+        discapacidad: [false, Validators.required],
+        fotoPerfil: new FormControl(null, Validators.required)
+      });
+    }
+  } else {
+    this.formGroup.reset({
+      discapacidad: false,
+      fotoPerfil: null
+    });
   }
 
   // Llamada para cargar discapacidades
   this.cargarDiscapacidades();
 
   // Inicialización de controles adicionales
-  this.formGroup.addControl('n_identificacion', new FormControl('', [
+  this.formGroup.addControl(
+    'n_identificacion',
+    new FormControl('', [
       Validators.required,
       Validators.minLength(13),
       Validators.maxLength(15),
       Validators.pattern(/^[0-9]+$/)
-  ]));
+    ])
+  );
 
-  this.formGroup.addControl('primer_nombre', new FormControl('', [
+  this.formGroup.addControl(
+    'primer_nombre',
+    new FormControl('', [
       Validators.required,
       Validators.maxLength(40),
       Validators.minLength(1),
       Validators.pattern(noSpecialCharsPattern)
-  ]));
+    ])
+  );
 
-  this.formGroup.addControl('segundo_nombre', new FormControl('', [
+  this.formGroup.addControl(
+    'segundo_nombre',
+    new FormControl('', [
       Validators.maxLength(40),
       Validators.pattern(noSpecialCharsPattern)
-  ]));
+    ])
+  );
 
-  this.formGroup.addControl('tercer_nombre', new FormControl('', [
+  this.formGroup.addControl(
+    'tercer_nombre',
+    new FormControl('', [
       Validators.maxLength(40),
       Validators.pattern(noSpecialCharsPattern)
-  ]));
+    ])
+  );
 
-  this.formGroup.addControl('primer_apellido', new FormControl('', [
+  this.formGroup.addControl(
+    'primer_apellido',
+    new FormControl('', [
       Validators.required,
       Validators.maxLength(40),
       Validators.minLength(1),
       Validators.pattern(noSpecialCharsPattern)
-  ]));
+    ])
+  );
 
-  this.formGroup.addControl('segundo_apellido', new FormControl('', [Validators.maxLength(40)]));
+  this.formGroup.addControl(
+    'segundo_apellido',
+    new FormControl('', [Validators.maxLength(40)])
+  );
+
   this.formGroup.addControl('fecha_nacimiento', new FormControl('', [Validators.required]));
-  this.formGroup.addControl('cantidad_dependientes', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
-  this.formGroup.addControl('estado_civil', new FormControl('', [Validators.required, Validators.maxLength(40)]));
-  this.formGroup.addControl('representacion', new FormControl('', [Validators.required, Validators.maxLength(40)]));
-  this.formGroup.addControl('telefono_1', new FormControl('', [
+
+  this.formGroup.addControl(
+    'cantidad_dependientes',
+    new FormControl('', [
+      Validators.pattern('^[0-9]+$'),
+      Validators.required
+    ])
+  );
+
+  this.formGroup.addControl(
+    'estado_civil',
+    new FormControl('', [Validators.required, Validators.maxLength(40)])
+  );
+
+  this.formGroup.addControl(
+    'representacion',
+    new FormControl('', [Validators.required, Validators.maxLength(40)])
+  );
+
+  this.formGroup.addControl(
+    'telefono_1',
+    new FormControl('', [
       Validators.required,
       Validators.minLength(8),
       Validators.maxLength(12),
-      Validators.pattern("^[0-9]*$")
-  ]));
-  this.formGroup.addControl('telefono_2', new FormControl('', [
+      Validators.pattern('^[0-9]*$')
+    ])
+  );
+
+  this.formGroup.addControl(
+    'telefono_2',
+    new FormControl('', [
       Validators.minLength(8),
       Validators.maxLength(12),
-      Validators.pattern("^[0-9]*$")
-  ]));
-  this.formGroup.addControl('correo_1', new FormControl('', [Validators.required, Validators.maxLength(40), Validators.email]));
-  this.formGroup.addControl('correo_2', new FormControl('', [Validators.maxLength(40), Validators.email]));
-  this.formGroup.addControl('rtn', new FormControl('', [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]));
-  this.formGroup.addControl('genero', new FormControl('', [Validators.required, Validators.maxLength(30)]));
+      Validators.pattern('^[0-9]*$')
+    ])
+  );
+
+  this.formGroup.addControl(
+    'correo_1',
+    new FormControl('', [
+      Validators.required,
+      Validators.maxLength(40),
+      Validators.email
+    ])
+  );
+
+  this.formGroup.addControl(
+    'correo_2',
+    new FormControl('', [
+      Validators.maxLength(40),
+      Validators.email
+    ])
+  );
+
+  this.formGroup.addControl(
+    'rtn',
+    new FormControl('', [
+      Validators.required,
+      Validators.maxLength(14),
+      Validators.pattern(/^[0-9]{14}$/)
+    ])
+  );
+
+  this.formGroup.addControl(
+    'genero',
+    new FormControl('', [Validators.required, Validators.maxLength(30)])
+  );
+
   this.formGroup.addControl('id_profesion', new FormControl(''));
-  this.formGroup.addControl('id_departamento_residencia', new FormControl('', Validators.required));
-  this.formGroup.addControl('id_municipio_residencia', new FormControl('', Validators.required));
-  this.formGroup.addControl('id_departamento_nacimiento', new FormControl('', Validators.required));
-  this.formGroup.addControl('id_municipio_nacimiento', new FormControl('', Validators.required));
+
+  this.formGroup.addControl(
+    'id_departamento_residencia',
+    new FormControl('', Validators.required)
+  );
+
+  this.formGroup.addControl(
+    'id_municipio_residencia',
+    new FormControl('', Validators.required)
+  );
+
+  this.formGroup.addControl(
+    'id_departamento_nacimiento',
+    new FormControl('', Validators.required)
+  );
+
+  this.formGroup.addControl(
+    'id_municipio_nacimiento',
+    new FormControl('', Validators.required)
+  );
+
   this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
-  this.formGroup.addControl('id_pais', new FormControl('', Validators.required));
-  this.formGroup.addControl('grupo_etnico', new FormControl('', [Validators.required]));
-  this.formGroup.addControl('cantidad_hijos', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
-  this.formGroup.addControl('barrio_colonia', new FormControl('', [
+
+  this.formGroup.addControl(
+    'id_pais',
+    new FormControl('', Validators.required)
+  );
+
+  this.formGroup.addControl(
+    'grupo_etnico',
+    new FormControl('', [Validators.required])
+  );
+
+  this.formGroup.addControl(
+    'cantidad_hijos',
+    new FormControl('', [
+      Validators.pattern('^[0-9]+$'),
+      Validators.required
+    ])
+  );
+
+  this.formGroup.addControl(
+    'barrio_colonia',
+    new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-  ]));
-  this.formGroup.addControl('avenida', new FormControl('', [
+    ])
+  );
+
+  this.formGroup.addControl(
+    'avenida',
+    new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-  ]));
-  this.formGroup.addControl('calle', new FormControl('', [
+    ])
+  );
+
+  this.formGroup.addControl(
+    'calle',
+    new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-  ]));
-  this.formGroup.addControl('sector', new FormControl('', [
+    ])
+  );
+
+  this.formGroup.addControl(
+    'sector',
+    new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-  ]));
-  this.formGroup.addControl('bloque', new FormControl('', [
+    ])
+  );
+
+  this.formGroup.addControl(
+    'bloque',
+    new FormControl('', [
       Validators.maxLength(25),
       Validators.pattern(addressPattern)
-  ]));
-  this.formGroup.addControl('numero_casa', new FormControl('', [
+    ])
+  );
+
+  this.formGroup.addControl(
+    'numero_casa',
+    new FormControl('', [
       Validators.maxLength(25),
       Validators.pattern(addressPattern)
-  ]));
-  this.formGroup.addControl('color_casa', new FormControl('', [
+    ])
+  );
+
+  this.formGroup.addControl(
+    'color_casa',
+    new FormControl('', [
       Validators.maxLength(40),
       Validators.pattern(addressPattern)
-  ]));
-  this.formGroup.addControl('aldea', new FormControl('', [
+    ])
+  );
+
+  this.formGroup.addControl(
+    'aldea',
+    new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-  ]));
-  this.formGroup.addControl('caserio', new FormControl('', [
+    ])
+  );
+
+  this.formGroup.addControl(
+    'caserio',
+    new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-  ]));
-  this.formGroup.addControl('grado_academico', new FormControl('', [
+    ])
+  );
+
+  this.formGroup.addControl(
+    'grado_academico',
+    new FormControl('', [
       Validators.maxLength(75),
       Validators.required
-  ]));
+    ])
+  );
 
   // Cargar datos iniciales
   this.cargarDatosIniciales();
@@ -227,10 +392,14 @@ ngOnInit(): void {
   this.marcarCamposComoTocados();
 
   // Forzar detección de cambios
-  this.cdr.detectChanges();
-}
+  setTimeout(() => {
+    this.height =200// Actualizas la propiedad
 
-//-------------------------
+    this.cdr.detectChanges();
+  }, 0);
+  
+}
+//-----------------------------------------------------
   async cargarDatosIniciales() {
     this.cargarDepartamentos();
     this.cargarEstadoCivil();
@@ -444,6 +613,16 @@ ngOnInit(): void {
     this.formGroup.get('archivo_identificacion')?.setValue(event);
   }
 
+  removeArchivoIdentificacion() {
+    // Limpia el FormControl
+    this.formGroup.get('archivo_identificacion')?.setValue(null);
+  
+    // Limpia el valor del input file para que reaccione si suben el mismo archivo
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+  }
+
   onTipoIdentificacionChange(tipoIdentificacion: number) {
     if (tipoIdentificacion === 2) {
       this.setValidacionesIdentificacion(true);
@@ -509,5 +688,20 @@ ngOnInit(): void {
       }
     });
   }
-  
+ 
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.height = 200;
+    }, 0);
+  }  
 }
+
+const resizeObserverLoopErrSilencer = () => {
+  const resizeObserverErr = /ResizeObserver loop limit exceeded/;
+  window.addEventListener('error', (event) => {
+    if (resizeObserverErr.test(event.message)) {
+      event.stopImmediatePropagation();
+    }
+  });
+};
+resizeObserverLoopErrSilencer();

@@ -58,6 +58,10 @@ body {
   font-size: 14px; /* Ajusta el tamaño del ícono para ser más pequeño */
   margin-right: 6px; /* Ajusta el espacio */
 }
+.requerido {
+  color: red;
+  margin-left: 2px;
+}
 
 /* Contenedor principal con grid */
 .grid-container {

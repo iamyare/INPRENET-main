@@ -146,22 +146,30 @@ td {
     &:hover {
       background-color: #fafafa;
     }
+    margin-bottom: 0px !important; // Evitar espacio extra entre filas
+
   }
 
   /* Ajustes para mat-form-field dentro de la tabla */
   .mat-form-field {
     display: flex;
     align-items: center; // Centra verticalmente el contenido
+    margin-bottom: 4px; // Controla la separación entre cada campo de formulario
+
   }
 
   .mat-form-field-wrapper {
     height: 56px; // Misma altura que los select
+    padding-bottom: 0px; // Quita el padding del contenedor del campo de texto
+    margin-bottom: 0px; // Reducir márgenes extra
   }
-
+  
   .mat-input-element {
     height: 100%; // Para que el <textarea> o <input> ocupe toda la altura
-  }
+    margin-bottom: 8px; // Ajusta según lo que prefieras para el espaciado vertical
 
+  }
+  
   /* Ajustes específicos para la columna Observacion */
   .mat-column-Observacion .mat-form-field {
     margin-top: 0;
@@ -210,11 +218,12 @@ td {
     }
   }
 
-  mat-error {
-    color: #d32f2f;
-    font-size: 0.85rem;
-    margin-top: 8px;
+  .mat-error {
+    margin: 1px 0 !important; // Menos espacio arriba y abajo
+    line-height: 1.1;         // Reducir altura de línea
+    font-size: 12px;          // Ajustar el tamaño de fuente
   }
+  
 }
 
 /* Estilos reutilizables para títulos */
@@ -233,4 +242,10 @@ mat-card-title {
 
 .hidden-column {
   display: none;
+}
+
+button[disabled] {
+  background-color: #d3d3d3; // Color gris claro
+  cursor: not-allowed;
+  opacity: 0.6; // Reducir opacidad para dar un efecto visual de "bloqueo"
 }

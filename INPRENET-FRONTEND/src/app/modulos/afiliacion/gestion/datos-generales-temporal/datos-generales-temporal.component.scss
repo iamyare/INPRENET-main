@@ -90,3 +90,29 @@ body {
   margin-right: 8px;
   color: #d9534f;
 }
+
+/* Estilo para el botón de eliminar archivo */
+.delete-file-btn {
+  background-color: #e53935; /* Rojo intenso */
+  color: white; /* Texto en blanco */
+  border-radius: 8px; /* Bordes redondeados */
+  padding: 10px 15px; /* Espaciado interno */
+  display: flex; /* Flex para alinear ícono y texto */
+  align-items: center;
+  gap: 8px; /* Espacio entre el ícono y el texto */
+  font-weight: bold; /* Texto en negrita */
+  transition: background-color 0.3s ease; /* Transición suave para el hover */
+
+  mat-icon {
+    font-size: 20px;
+  }
+
+  &:hover {
+    background-color: #b71c1c; /* Rojo más oscuro al pasar el cursor */
+  }
+
+  &:active {
+    background-color: #d32f2f; /* Rojo intermedio al hacer clic */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
+  }
+}

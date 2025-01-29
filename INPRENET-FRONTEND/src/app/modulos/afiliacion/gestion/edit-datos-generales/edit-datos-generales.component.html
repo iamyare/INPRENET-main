@@ -5,146 +5,190 @@
 
   <div *ngIf="datos && !loading">
 
-    <!-- Formulario Reactivo -->
+    <!-- TARJETA: Estado y Tipo de Persona -->
+    <mat-card class="tabla-datos-persona">
+      <mat-card-title>Estado y Tipo De Persona</mat-card-title>
+      <mat-card-content>
+        <div class="responsive-table-container">
+          <table
+            mat-table
+            [dataSource]="tableData"
+            class="mat-elevation-z8 tabla-con-estilo"
+          >
+            <!-- Columnas ocultas -->
+            <ng-container matColumnDef="ID_PERSONA">
+              <mat-header-cell *matHeaderCellDef style="display: none;"
+                >ID PERSONA</mat-header-cell
+              >
+              <mat-cell *matCellDef="let element" style="display: none;">
+                {{ element.ID_PERSONA }}
+              </mat-cell>
+            </ng-container>
 
-      <mat-card class="tabla-datos-persona">
-        <mat-card-title>Estado y Tipo De Persona</mat-card-title>
-        <mat-card-content>
-          <div class="responsive-table-container">
-            <table mat-table [dataSource]="tableData" class="mat-elevation-z8 tabla-con-estilo">
+            <ng-container matColumnDef="ID_CAUSANTE">
+              <mat-header-cell *matHeaderCellDef style="display: none;"
+                >ID CAUSANTE</mat-header-cell
+              >
+              <mat-cell *matCellDef="let element" style="display: none;">
+                {{ element.ID_CAUSANTE }}
+              </mat-cell>
+            </ng-container>
 
-              <!-- ID_PERSONA (oculto) -->
-              <ng-container matColumnDef="ID_PERSONA">
-                <mat-header-cell *matHeaderCellDef style="display: none;">ID PERSONA</mat-header-cell>
-                <mat-cell *matCellDef="let element" style="display: none;">
-                  {{ element.ID_PERSONA }}
-                </mat-cell>
-              </ng-container>
+            <ng-container matColumnDef="ID_CAUSANTE_PADRE">
+              <mat-header-cell *matHeaderCellDef style="display: none;"
+                >ID CAUSANTE PADRE</mat-header-cell
+              >
+              <mat-cell *matCellDef="let element" style="display: none;">
+                {{ element.ID_CAUSANTE_PADRE }}
+              </mat-cell>
+            </ng-container>
 
-              <!-- ID_CAUSANTE (oculto) -->
-              <ng-container matColumnDef="ID_CAUSANTE">
-                <mat-header-cell *matHeaderCellDef style="display: none;">ID CAUSANTE</mat-header-cell>
-                <mat-cell *matCellDef="let element" style="display: none;">
-                  {{ element.ID_CAUSANTE }}
-                </mat-cell>
-              </ng-container>
+            <ng-container matColumnDef="ID_DETALLE_PERSONA">
+              <mat-header-cell *matHeaderCellDef style="display: none;"
+                >ID DETALLE PERSONA</mat-header-cell
+              >
+              <mat-cell *matCellDef="let element" style="display: none;">
+                {{ element.ID_DETALLE_PERSONA }}
+              </mat-cell>
+            </ng-container>
 
-              <!-- ID_CAUSANTE_PADRE (oculto) -->
-              <ng-container matColumnDef="ID_CAUSANTE_PADRE">
-                <mat-header-cell *matHeaderCellDef style="display: none;">ID CAUSANTE PADRE</mat-header-cell>
-                <mat-cell *matCellDef="let element" style="display: none;">
-                  {{ element.ID_CAUSANTE_PADRE }}
-                </mat-cell>
-              </ng-container>
+            <ng-container matColumnDef="ID_ESTADO_AFILIACION">
+              <mat-header-cell *matHeaderCellDef style="display: none;"
+                >ID ESTADO AFILIACION</mat-header-cell
+              >
+              <mat-cell *matCellDef="let element" style="display: none;">
+                {{ element.ID_ESTADO_AFILIACION }}
+              </mat-cell>
+            </ng-container>
 
-              <!-- ID_DETALLE_PERSONA (oculto) -->
-              <ng-container matColumnDef="ID_DETALLE_PERSONA">
-                <mat-header-cell *matHeaderCellDef style="display: none;">ID DETALLE PERSONA</mat-header-cell>
-                <mat-cell *matCellDef="let element" style="display: none;">
-                  {{ element.ID_DETALLE_PERSONA }}
-                </mat-cell>
-              </ng-container>
+            <!-- DNICausante -->
+            <ng-container matColumnDef="DNICausante">
+              <mat-header-cell *matHeaderCellDef>DNI del Causante</mat-header-cell>
+              <mat-cell *matCellDef="let element">
+                {{ element.dniCausante }}
+              </mat-cell>
+            </ng-container>
 
-              <!-- ID_ESTADO_AFILIACION (oculto) -->
-              <ng-container matColumnDef="ID_ESTADO_AFILIACION">
-                <mat-header-cell *matHeaderCellDef style="display: none;">ID ESTADO AFILIACION</mat-header-cell>
-                <mat-cell *matCellDef="let element" style="display: none;">
-                  {{ element.ID_ESTADO_AFILIACION }}
-                </mat-cell>
-              </ng-container>
-              <!-- DNICausante -->
-              <ng-container matColumnDef="DNICausante">
-                <mat-header-cell *matHeaderCellDef>DNI del Causante</mat-header-cell>
-                <mat-cell *matCellDef="let element">
-                  {{ element.dniCausante }}
-                </mat-cell>
-              </ng-container>
+            <!-- TipoPersona -->
+            <ng-container matColumnDef="TipoPersona">
+              <mat-header-cell *matHeaderCellDef>Tipo de Persona</mat-header-cell>
+              <mat-cell *matCellDef="let element">
+                <span>{{ element.tipoPersona || 'No disponible' }}</span>
+              </mat-cell>
+            </ng-container>
 
-              <!-- TipoPersona -->
-              <ng-container matColumnDef="TipoPersona">
-                <mat-header-cell *matHeaderCellDef>Tipo de Persona</mat-header-cell>
-                <mat-cell *matCellDef="let element">
-                  <span>{{ element.tipoPersona || 'No disponible' }}</span>
-                </mat-cell>
-              </ng-container>
-
-              <!-- EstadoAfiliacion (dropdown con ngModel standalone) -->
-              <ng-container matColumnDef="EstadoAfiliacion">
-                <mat-header-cell *matHeaderCellDef>Estado de Afiliación</mat-header-cell>
-                <mat-cell *matCellDef="let element; let i = index">
-                  <mat-form-field appearance="outline">
-                    <mat-select
-                      [(ngModel)]="element.estadoAfiliacion"
-                      [ngModelOptions]="{standalone: true}"
-                      name="estadoSelect_{{i}}"
-                    >
-                      <mat-option *ngFor="let e of estado" [value]="e.label">
-                        {{ e.label }}
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                </mat-cell>
-              </ng-container>
-
-              <!-- Observacion (textarea con ngModel standalone) -->
-              <ng-container matColumnDef="Observacion">
-                <mat-header-cell *matHeaderCellDef>Observación</mat-header-cell>
-                <mat-cell *matCellDef="let element; let i = index">
-                  <mat-form-field appearance="outline">
-                    <textarea
-                      matInput
-                      [(ngModel)]="element.observacion"
-                      [ngModelOptions]="{standalone: true}"
-                      name="observacion_{{i}}"
-                      rows="1"
-                    ></textarea>
-                  </mat-form-field>
-                </mat-cell>
-              </ng-container>
-
-              <!-- Nueva columna de acción -->
-              <ng-container matColumnDef="Acciones">
-                <mat-header-cell *matHeaderCellDef>Acción</mat-header-cell>
-                <mat-cell *matCellDef="let element">
-                  <button
-                    mat-icon-button
-                    color="primary"
-                    aria-label="Guardar"
-                    (click)="guardarEstadoAfiliacion(element)"
+            <!-- EstadoAfiliacion -->
+            <ng-container matColumnDef="EstadoAfiliacion">
+              <mat-header-cell *matHeaderCellDef>Estado de Afiliación</mat-header-cell>
+              <mat-cell *matCellDef="let element; let i = index">
+                <mat-form-field appearance="outline">
+                  <mat-select
+                    [(ngModel)]="element.estadoAfiliacion"
+                    [ngModelOptions]="{ standalone: true }"
+                    name="estadoSelect_{{ i }}"
                   >
-                    <mat-icon>save</mat-icon>
-                  </button>
-                </mat-cell>
-              </ng-container>
+                    <mat-option *ngFor="let e of estado" [value]="e.label">
+                      {{ e.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </mat-cell>
+            </ng-container>
 
-              <mat-header-row *matHeaderRowDef="displayedColumns.concat(['Acciones'])"></mat-header-row>
-              <mat-row *matRowDef="let row; columns: displayedColumns.concat(['Acciones']);"></mat-row>
-            </table>
-          </div>
-        </mat-card-content>
-      </mat-card>
+            <!-- Observacion -->
+            <ng-container matColumnDef="Observacion">
+              <mat-header-cell *matHeaderCellDef>Observación</mat-header-cell>
+              <mat-cell *matCellDef="let element; let i = index">
+                <mat-form-field appearance="outline">
+                  <textarea
+                    matInput
+                    [(ngModel)]="element.observacion"
+                    [ngModelOptions]="{ standalone: true }"
+                    name="observacion_{{ i }}"
+                    rows="1"
+                  ></textarea>
+                </mat-form-field>
+              </mat-cell>
+            </ng-container>
 
+            <!-- Nueva columna Acción -->
+            <ng-container matColumnDef="Acciones">
+              <mat-header-cell *matHeaderCellDef>Acción</mat-header-cell>
+              <mat-cell *matCellDef="let element">
+                <button
+                  mat-icon-button
+                  color="primary"
+                  aria-label="Guardar"
+                  (click)="guardarEstadoAfiliacion(element)"
+                >
+                  <mat-icon>save</mat-icon>
+                </button>
+              </mat-cell>
+            </ng-container>
 
+            <mat-header-row
+              *matHeaderRowDef="displayedColumns.concat(['Acciones'])"
+            ></mat-header-row>
+            <mat-row
+              *matRowDef="
+                let row;
+                columns: displayedColumns.concat(['Acciones']);
+              "
+            ></mat-row>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Componente Datos Generales (datos personales, etc.) -->
     <app-datos-generales
+    [formGroup]="datosGeneralesForm"
       [initialData]="initialData"
       [indicesSeleccionados]="indicesSeleccionados"
       [discapacidadSeleccionada]="true"
       (newDatosGenerales)="setDatosGenerales($event)"
-      (imageCaptured)="onImageCaptured($event)">
+      (imageCaptured)="onImageCaptured($event)"
+    >
     </app-datos-generales>
 
     <br>
+
+    <!-- Dirección Completa -->
     <mat-form-field class="example-full-width inputs" appearance="outline">
       <mat-label>Dirección Completa</mat-label>
       <textarea matInput [(ngModel)]="direccionCompleta" readonly></textarea>
     </mat-form-field>
 
-    <div class="pdf-preview">
-      <h4>Archivo de Identificación</h4>
-      <iframe *ngIf="archivoIdentificacionUrl" [src]="archivoIdentificacionUrl" width="100%" height="500px"></iframe>
-      <app-botonarchivos labelBoton="Archivo de Identificación" (setArchivo)="getArchivoIdentificacion($event)"></app-botonarchivos>
-    </div>
+    <!-- ARCHIVO DE IDENTIFICACIÓN -->
+   <!-- ARCHIVO DE IDENTIFICACIÓN -->
+<div class="pdf-preview">
+  <h4>Archivo de Identificación</h4>
+    <iframe
+      *ngIf="archivoIdentificacionUrl"
+      [src]="archivoIdentificacionUrl"
+      width="100%"
+      height="500px"
+    ></iframe>
+    <app-botonarchivos
+      labelBoton="Archivo de Identificación"
+      (setArchivo)="getArchivoIdentificacion($event)"
+    >
+    </app-botonarchivos>
 
+    <!-- Mensaje de error -->
+    <div
+      class="error"
+      *ngIf="
+        formDatosGenerales.get('archivo_identificacion')?.hasError('required') &&
+        (formDatosGenerales.get('archivo_identificacion')?.touched ||
+          formDatosGenerales.get('archivo_identificacion')?.dirty)
+      "
+    >
+      Se requiere adjuntar el archivo de identificación.
+    </div>
+  </div>
+
+    <!-- FORMULARIO DE FALLECIMIENTO (formGroup="form1") -->
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
       <mat-card>
         <mat-card-title class="custom-title">Datos de Fallecimiento</mat-card-title>
@@ -160,6 +204,7 @@
                   <mat-option value="SI">SI</mat-option>
                 </mat-select>
               </mat-form-field>
+              <!-- Mensajes de error para 'fallecido' -->
               <mat-error *ngFor="let error of getErrors('fallecido')">
                 {{ error }}
               </mat-error>
@@ -170,7 +215,10 @@
               <mat-form-field class="example-full-width inputs" appearance="outline">
                 <mat-label>Causa de Fallecimiento</mat-label>
                 <mat-select formControlName="causa_fallecimiento">
-                  <mat-option *ngFor="let p of CausaFallecimiento" [value]="p.value">
+                  <mat-option
+                    *ngFor="let p of CausaFallecimiento"
+                    [value]="p.value"
+                  >
                     {{ p.label }}
                   </mat-option>
                 </mat-select>
@@ -186,21 +234,14 @@
                 <mat-label>Fecha Defunción</mat-label>
                 <mat-datepicker-toggle matSuffix [for]="fechaDef"></mat-datepicker-toggle>
                 <mat-datepicker #fechaDef></mat-datepicker>
-                <input matInput formControlName="fecha_defuncion" [matDatepicker]="fechaDef" [max]="minDate">
+                <input
+                  matInput
+                  formControlName="fecha_defuncion"
+                  [matDatepicker]="fechaDef"
+                  [max]="minDate"
+                />
               </mat-form-field>
               <mat-error *ngFor="let error of getErrors('fecha_defuncion')">
-                {{ error }}
-              </mat-error>
-            </div>
-
-            <div class="col-lg-4 col-md-12">
-              <mat-form-field class="example-full-width inputs" appearance="outline">
-                <mat-label>Fecha Reporte Fallecido</mat-label>
-                <mat-datepicker-toggle matSuffix [for]="fecha_reporte_fallecido"></mat-datepicker-toggle>
-                <mat-datepicker #fecha_reporte_fallecido></mat-datepicker>
-                <input matInput formControlName="fecha_reporte_fallecido" [matDatepicker]="fecha_reporte_fallecido" [max]="minDate">
-              </mat-form-field>
-              <mat-error *ngFor="let error of getErrors('fecha_reporte_fallecido')">
                 {{ error }}
               </mat-error>
             </div>
@@ -210,13 +251,21 @@
               <mat-form-field class="example-full-width inputs" appearance="outline">
                 <mat-label>Departamento De Defunción</mat-label>
                 <mat-icon matPrefix>location_city</mat-icon>
-                <mat-select formControlName="id_departamento_defuncion" (selectionChange)="onDepartamentoChange($event)">
-                  <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+                <mat-select
+                  formControlName="id_departamento_defuncion"
+                  (selectionChange)="onDepartamentoChange($event)"
+                >
+                  <mat-option
+                    *ngFor="let departamento of departamentos"
+                    [value]="departamento.value"
+                  >
                     {{ departamento.label }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-              <mat-error *ngFor="let error of getErrors('id_departamento_defuncion')">
+              <mat-error
+                *ngFor="let error of getErrors('id_departamento_defuncion')"
+              >
                 {{ error }}
               </mat-error>
             </div>
@@ -227,72 +276,94 @@
                 <mat-label>Municipio De Defunción</mat-label>
                 <mat-icon matPrefix>location_city</mat-icon>
                 <mat-select formControlName="id_municipio_defuncion">
-                  <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
+                  <mat-option
+                    *ngFor="let municipio of municipios"
+                    [value]="municipio.value"
+                  >
                     {{ municipio.label }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-              <mat-error *ngFor="let error of getErrors('id_municipio_defuncion')">
+              <mat-error
+                *ngFor="let error of getErrors('id_municipio_defuncion')"
+              >
+                {{ error }}
+              </mat-error>
+            </div>
+
+            <!-- Fecha Reporte Fallecido (Solo requerido si fallecido='SI') -->
+            <div class="col-lg-6 col-md-12">
+              <mat-form-field class="example-full-width inputs" appearance="outline">
+                <mat-label>Fecha Reporte Fallecido</mat-label>
+                <mat-datepicker-toggle matSuffix [for]="fechaRepFall"></mat-datepicker-toggle>
+                <mat-datepicker #fechaRepFall></mat-datepicker>
+                <input
+                  matInput
+                  formControlName="fecha_reporte_fallecido"
+                  [matDatepicker]="fechaRepFall"
+                  [max]="minDate"
+                />
+              </mat-form-field>
+              <mat-error *ngFor="let error of getErrors('fecha_reporte_fallecido')">
+                {{ error }}
+              </mat-error>
+            </div>
+
+            <!-- Número Certificado Defunción (Solo requerido si fallecido='SI') -->
+            <div class="col-lg-6 col-md-12">
+              <mat-form-field class="example-full-width inputs" appearance="outline">
+                <mat-label>Número Certificado Defunción</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  formControlName="numero_certificado_defuncion"
+                />
+              </mat-form-field>
+              <mat-error
+                *ngFor="let error of getErrors('numero_certificado_defuncion')"
+              >
                 {{ error }}
               </mat-error>
             </div>
           </div>
         </mat-card-content>
 
+       <!-- CERTIFICADO DE DEFUNCIÓN -->
+<div class="pdf-container">
+  <div class="pdf-preview">
+    <h4>Certificado de Defunción</h4>
+    <iframe
+      *ngIf="certificadoDefuncionUrl"
+      [src]="certificadoDefuncionUrl"
+      width="100%"
+      height="500px"
+    ></iframe>
+    <app-botonarchivos
+      labelBoton="Certificado de Defunción"
+      (setArchivo)="getArchivoDef($event)"
+    >
+    </app-botonarchivos>
 
-          <div class="pdf-preview">
-            <h4>Certificado de Defunción</h4>
-            <iframe
-              *ngIf="certificadoDefuncionUrl"
-              [src]="certificadoDefuncionUrl"
-              width="100%"
-              height="500px"
-            ></iframe>
-
-            <!-- Botón para subir el Certificado de Defunción -->
-            <app-botonarchivos
-              labelBoton="Certificado de Defunción"
-              (setArchivo)="getArchivoDef($event)"
-            ></app-botonarchivos>
-
-            <!-- Mensaje de error si es requerido y fallecido = 'SI' -->
-            <!-- <mat-error
-              *ngIf="
-                formDatosGenerales.get('archivoCertDef')?.hasError('required') &&
-                form1.get('fallecido')?.value === 'SI'
-              "
-            >
-              Por favor, adjuntar el Certificado PDF de Defunción.
-              (Verificar que el archivo sea el correcto).
-            </mat-error> -->
-
-            <!-- Botón para eliminar el archivo si ya existe -->
-            <button
-              mat-raised-button
-              color="warn"
-              *ngIf="formDatosGenerales.get('archivoCertDef')?.value"
-              (click)="removeArchivoDefuncion()"
-              style="margin-top: 1rem;"
-            >
-              <mat-icon>delete</mat-icon>
-              Eliminar Archivo
-            </button>
-          </div>
-          </mat-card>
+    <!-- Mensaje de error -->
+    <div *ngIf="formDatosGenerales.get('archivoCertDef')?.invalid && formDatosGenerales.get('archivoCertDef')?.touched">
+      <span *ngIf="formDatosGenerales.get('archivoCertDef')?.hasError('required')">El certificado de defunción es obligatorio.</span>
+    </div>
+        
+  </div>
+</div>
+      </mat-card>
     </form>
 
-   <!-- Botón principal "Guardar" -->
-   <!-- ||
-   (form1.get('fallecido')?.value === 'SI' &&
-    !formDatosGenerales.get('archivoCertDef')?.value)" -->
-      <button
+    <!-- BOTÓN GUARDAR -->
+    <button
       mat-raised-button
       color="primary"
+      style="color: white; margin: 1% 0 1% 0"
       (click)="GuardarInformacion()"
-      [disabled]="form1.invalid || !mostrarBotonGuardar"
+      *ngIf="mostrarBotonGuardar"
     >
       Guardar
     </button>
-  
   </div>
 </div>
+

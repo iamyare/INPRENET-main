@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Section, MenuItem } from './menu-config';
 import { SidenavService } from 'src/app/services/sidenav.service';
 import { PermisosService } from 'src/app/services/permisos.service';
+import { PersonaService } from 'src/app/services/persona.service'; // <--- Importante
+import { Router } from '@angular/router'; // <--- Importante
 
 @Component({
   selector: 'app-layout',
@@ -14,7 +16,9 @@ export class LayoutComponent implements OnInit {
 
   constructor(
     private sidenavService: SidenavService,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private router: Router,                // <---
+    private personaService: PersonaService // <---
   ) { }
 
   ngOnInit(): void {
@@ -58,4 +62,16 @@ export class LayoutComponent implements OnInit {
   selectChild(panel: any): void {
     this.expandedPanel = panel;
   }
+  onMenuBuscarPersona() {
+    // 1) Limpia la persona en el servicio
+    this.personaService.changePersona(null);
+  
+    // 2) Navega a una ruta "dummy" para romper la ruta actual
+    this.router.navigateByUrl('/dummy', { skipLocationChange: true })
+      .then(() => {
+        // 3) Regresa a /home/afiliacion/buscar-persona y recarga el componente de búsqueda
+        this.router.navigateByUrl('/home/afiliacion/buscar-persona');
+      });
+  }
+  
 }

@@ -2,7 +2,9 @@ export interface MenuItem {
   title: string;
   icon: string;
   route?: string;
+  action?: string;
   children?: MenuItem[];
+  isCustomReset?: boolean;
 }
 
 export interface Section {
@@ -44,8 +46,13 @@ export const MENU_CONFIG: Section[] = [
         icon: 'person',
         children: [
           { title: 'Nueva Afiliación', route: 'afiliacion/nueva-afiliacion', icon: 'person_add' },
-          { title: 'Buscar Persona', route: 'afiliacion/buscar-persona', icon: 'person_search' },
-          { title: 'Constancias', route: 'afiliacion/constancias-afiliados', icon: 'description' },
+          {
+            title: 'Buscar Persona',
+            icon: 'person_search',
+            route: 'home/afiliacion/buscar-persona',
+            isCustomReset: true // <--- Agregas esta propiedad
+          },
+          { title: 'Constancias', route: 'afiliacion/constancias-afiliados', icon: 'description' }
         ],
       },
       {
@@ -157,3 +164,5 @@ export const MENU_CONFIG: Section[] = [
     ],
   },
 ];
+
+

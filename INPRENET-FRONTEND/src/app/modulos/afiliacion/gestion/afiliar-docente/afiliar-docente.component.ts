@@ -274,9 +274,8 @@ export class AfiliarDocenteComponent implements OnInit {
       //console.error('Errores del formulario:', this.formErrors);
       this.markAllAsTouched(this.formGroup);
       this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
-    }
   }
-
+}
 //-------------------------------------------------------------------
   getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
     userDetails.forEach(item => {
@@ -745,6 +744,12 @@ export class AfiliarDocenteComponent implements OnInit {
         }
       }
     }
+
+    if (this.datosGeneralesComponent) {
+      this.datosGeneralesComponent.formGroup.patchValue({
+        discapacidad: false,
+      });
+    }  
   }
   
   formatDiscapacidades(discapacidades: any): any[] {
@@ -827,6 +832,4 @@ export class AfiliarDocenteComponent implements OnInit {
       console.warn('No se encontró un token en sessionStorage.');
     }
   }
-  
-  
 }

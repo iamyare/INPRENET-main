@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl, FormArray } from '@angular/forms';
 import { format } from 'date-fns';
+import { lastValueFrom } from 'rxjs';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DireccionService } from 'src/app/services/direccion.service';
@@ -32,10 +33,37 @@ export class DatosGeneralesComponent implements OnInit {
   discapacidades: { label: string, value: number }[] = [];
   useCamera: boolean = true;
 
+  private camposRequeridosIniciales: string[] = [
+    'FotoPerfil',
+    'id_tipo_identificacion',
+    'n_identificacion',
+    'rtn',
+    'fecha_nacimiento',
+    'genero',
+    'primer_nombre',
+    'primer_apellido',
+    'telefono_1',
+    'correo_1',
+    'estado_civil',
+    'cantidad_hijos',
+    'cantidad_dependientes',
+    'grado_academico',
+    'representacion',
+    'id_pais',
+    'id_departamento_nacimiento',
+    'id_municipio_nacimiento',
+    'id_departamento_residencia',
+    'id_municipio_residencia',
+    'grupo_etnico',
+    'archivo_identificacion' // Campo para el archivo de identificación
+  ];
+
   constructor(private fb: FormBuilder,
     private direccionSer: DireccionService,
     private datosEstaticos: DatosEstaticosService,
-    private centroTrabajoService: CentroTrabajoService) { }
+    private centroTrabajoService: CentroTrabajoService, 
+    
+  ) { }
 
   ngOnInit(): void {
     const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
@@ -75,12 +103,8 @@ export class DatosGeneralesComponent implements OnInit {
       Validators.maxLength(15),
       Validators.pattern(/^[0-9]+$/)
     ]));
-    this.formGroup.addControl('primer_nombre', new FormControl('', [
-      Validators.required,
-      Validators.maxLength(40),
-      Validators.minLength(1),
-      Validators.pattern(noSpecialCharsPattern)
-    ]));
+    this.formGroup.addControl('primer_nombre', new FormControl('', [Validators.required, Validators.maxLength(40)]));
+
     this.formGroup.addControl('segundo_nombre', new FormControl('', [
       Validators.maxLength(40),
       Validators.pattern(noSpecialCharsPattern)
@@ -115,7 +139,7 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.addControl('correo_2', new FormControl('', [Validators.maxLength(40), Validators.email]));
     this.formGroup.addControl('rtn', new FormControl('', [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]));
     this.formGroup.addControl('genero', new FormControl('', [Validators.required, Validators.maxLength(30)]));
-    this.formGroup.addControl('id_profesion', new FormControl(''));
+    this.formGroup.addControl('id_profesion', new FormControl('', Validators.required));
     this.formGroup.addControl('id_departamento_residencia', new FormControl('', Validators.required));
     this.formGroup.addControl('id_municipio_residencia', new FormControl('', Validators.required));
     this.formGroup.addControl('id_departamento_nacimiento', new FormControl('', Validators.required));
@@ -124,53 +148,38 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.addControl('id_pais', new FormControl('', Validators.required));
     this.formGroup.addControl('grupo_etnico', new FormControl('', [Validators.required]));
     this.formGroup.addControl('cantidad_hijos', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
-    this.formGroup.addControl('barrio_colonia', new FormControl('', [
-      Validators.maxLength(75),
-      Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('avenida', new FormControl('', [
-      Validators.maxLength(75),
-      Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('calle', new FormControl('', [
-      Validators.maxLength(75),
-      Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('sector', new FormControl('', [
-      Validators.maxLength(75),
-      Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('bloque', new FormControl('', [
-      Validators.maxLength(25),
-      Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('numero_casa', new FormControl('', [
-      Validators.maxLength(25),
-      Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('color_casa', new FormControl('', [
-      Validators.maxLength(40),
-      Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('aldea', new FormControl('', [
-      Validators.maxLength(75),
-      Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('caserio', new FormControl('', [
-      Validators.maxLength(75),
-      Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('grado_academico', new FormControl('', [
-      Validators.maxLength(75)
-    ]));
+    this.formGroup.addControl('barrio_colonia', new FormControl('', [Validators.maxLength(75), Validators.pattern(addressPattern)]));
+    this.formGroup.addControl('avenida', new FormControl('', [Validators.maxLength(75),Validators.pattern(addressPattern)]));
+    this.formGroup.addControl('calle', new FormControl('', [Validators.maxLength(75),Validators.pattern(addressPattern)]));
+    this.formGroup.addControl('sector', new FormControl('', [Validators.maxLength(75),Validators.pattern(addressPattern)]));
+    this.formGroup.addControl('bloque', new FormControl('', [Validators.maxLength(25),Validators.pattern(addressPattern)]));
+    this.formGroup.addControl('numero_casa', new FormControl('', [Validators.maxLength(25),Validators.pattern(addressPattern)]));
+    this.formGroup.addControl('color_casa', new FormControl('', [Validators.maxLength(40),Validators.pattern(addressPattern)]));
+    this.formGroup.addControl('aldea', new FormControl('', [Validators.maxLength(75),Validators.pattern(addressPattern)]));
+    this.formGroup.addControl('caserio', new FormControl('', [Validators.maxLength(75),Validators.pattern(addressPattern)]));
+    this.formGroup.addControl('grado_academico', new FormControl('', [Validators.maxLength(75)]));
+
+     // Agregar el control para el archivo de identificación con Validators.required
+    this.formGroup.addControl('archivo_identificacion', new FormControl(null, Validators.required));
+
+    // Lista de campos que mostrarán errores desde el inicio
+    this.camposRequeridosIniciales.forEach(campo => {
+      const control = this.formGroup.get(campo);
+      if (control) {
+        control.markAsTouched();
+        control.updateValueAndValidity(); // Asegura que las validaciones se apliquen
+      }
+    });
+
+    this.formGroup.markAllAsTouched();
 
     this.cargarDatosIniciales();
+
 
     /* this.newDatosGenerales.emit(this.formGroup.value); */
     this.formGroup.valueChanges.subscribe(() => {
       this.onDatosGeneralesChange();
     });
-
   }
 
   async cargarDatosIniciales() {
@@ -190,12 +199,16 @@ export class DatosGeneralesComponent implements OnInit {
     await this.cargarNacionalidades();
   }
 
-  onDatosGeneralesChange() {
-    const data = { ...this.formGroup.value };
-    if (data.fecha_nacimiento) {
-      data.fecha_nacimiento = format(new Date(data.fecha_nacimiento), 'yyyy-MM-dd');
+  onDatosGeneralesChange(): void {
+    try {
+      const data = { ...this.formGroup.value };
+      if (data.fecha_nacimiento) {
+        data.fecha_nacimiento = format(new Date(data.fecha_nacimiento), 'yyyy-MM-dd');
+      }
+      this.newDatosGenerales.emit(data);
+    } catch (error) {
+      console.error('Error al procesar los datos:', error);
     }
-    this.newDatosGenerales.emit(data);
   }
 
   grupo_etnico = [
@@ -346,7 +359,6 @@ export class DatosGeneralesComponent implements OnInit {
     });
   }
   
-
   onDiscapacidadChange(event: any) {
     this.discapacidadSeleccionada = event.value === true && this.discapacidades.length > 0;
   
@@ -363,17 +375,17 @@ export class DatosGeneralesComponent implements OnInit {
 
   resetDiscapacidadesFormArray() {
     const discapacidadesGroup = this.fb.group({});
-
+    
     this.discapacidades.forEach(discapacidad => {
-      const match = this.indicesSeleccionados.some(
+      const isSelected = this.indicesSeleccionados.some(
         indice => indice.tipo === discapacidad.label
       );
-      discapacidadesGroup.addControl(discapacidad.label, new FormControl(match));
+      discapacidadesGroup.addControl(discapacidad.label, new FormControl(isSelected));
     });
-
+  
     this.formGroup.setControl('discapacidades', discapacidadesGroup);
   }
-
+  
   handleImageCaptured(image: string): void {
     this.formGroup.patchValue({ FotoPerfil: image });
     this.imageCaptured.emit(image);
@@ -384,11 +396,33 @@ export class DatosGeneralesComponent implements OnInit {
     return control ? control.invalid && (control.touched || control.dirty) : false;
   }
 
-  getArchivo(event: File): any {
-    if (!this.formGroup?.contains('archivo_identificacion')) {
+  //nuevo cambio
+  getArchivo(event: File): void {
+    if (this.formGroup && !this.formGroup.contains('archivo_identificacion')) {
       this.formGroup.addControl('archivo_identificacion', new FormControl('', []));
     }
-    this.formGroup.get('archivo_identificacion')?.setValue(event);
+    this.formGroup?.get('archivo_identificacion')?.setValue(event);
   }
 
+  //---------------------------------------------Adicion
+  getErrorMessage(controlName: string): string {
+    const control = this.formGroup.get(controlName);
+    if (!control) return '';
+    
+    if (control.hasError('required')) return `${controlName} es requerido`;
+    if (control.hasError('minlength')) return `${controlName} debe tener al menos ${control.errors?.['minlength'].requiredLength} caracteres`;
+    if (control.hasError('maxlength')) return `${controlName} no puede tener más de ${control.errors?.['maxlength'].requiredLength} caracteres`;
+    if (control.hasError('pattern')) return `${controlName} tiene formato incorrecto`;
+    if (control.hasError('email')) return `${controlName} debe ser un correo válido`;
+    
+    return '';
+  }
+  
+  guardar(): void {
+    if (this.formGroup.invalid) {
+      this.formGroup.markAllAsTouched();  // Marca todos los controles como "tocados"
+      return;
+    }
+    console.log('Formulario enviado:', this.formGroup.value);
+  }
 }

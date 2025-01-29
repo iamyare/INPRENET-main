@@ -1,9 +1,9 @@
 <ng-template #datosGeneralesTemplate>
   <app-datos-generales-temporal
-  #datosGeneralesComponent
-  [formGroup]="steps[0].formGroup"
-  (imageCaptured)="handleImageCaptured($event)">
-</app-datos-generales-temporal>
+    #datosGeneralesComponent
+    [formGroup]="steps[0].formGroup"
+    (imageCaptured)="handleImageCaptured($event)">
+  </app-datos-generales-temporal>
 
   <app-col-magisteriales #colMagisterialesComponent [formGroup]="steps[0].formGroup"></app-col-magisteriales>
   <app-peps #pepsComponent [parentForm]="steps[0].formGroup"></app-peps>

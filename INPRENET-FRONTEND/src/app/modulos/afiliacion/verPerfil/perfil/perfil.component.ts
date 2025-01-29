@@ -15,13 +15,26 @@ export class PerfilComponent implements OnInit {
   detallePersonaUnico: any[] = [];
   defaultFotoUrl = '../../../../../assets/images/AvatarDefecto.png';
 
+  // Variable para el mensaje cuando supera 2 años sin actualizar
+  mensajeSinActualizacion: string = '';
+
   constructor(private personaService: PersonaService, private datePipe: DatePipe) { }
 
   ngOnInit() {
     this.personaService.currentPersona.subscribe(persona => {
       this.persona = persona;
+
+      // Si trae "detallePersona", filtramos los tipos
       if (persona && persona.detallePersona) {
         this.detallePersonaUnico = this.filtrarDetallePersona(persona.detallePersona);
+      }
+
+      // Verificamos si existe ultima_fecha_actualizacion
+      if (this.persona?.ultima_fecha_actualizacion) {
+        this.verificarTiempoSinActualizacion(this.persona.ultima_fecha_actualizacion);
+      } else {
+        // Si no hay fecha, no mostramos mensaje
+        this.mensajeSinActualizacion = '';
       }
     });
   }
@@ -36,7 +49,6 @@ export class PerfilComponent implements OnInit {
       return false;
     });
   }
-
 
   trackByPerfil(index: number, perfil: any): any {
     return perfil.tipoPersona.tipo_persona;
@@ -72,5 +84,24 @@ export class PerfilComponent implements OnInit {
 
   isVoluntario(): boolean {
     return this.persona?.persona?.detallePersona?.some((detalle: any) => detalle.voluntario === 'SI');
+  }
+
+  /**
+   * Revisa cuántos años han pasado desde 'fechaUltima' hasta hoy.
+   * Si es mayor a 2, genera el mensaje correspondiente.
+   */
+  private verificarTiempoSinActualizacion(fechaUltima: string): void {
+    const hoy = new Date();
+    const ultima = new Date(fechaUltima);
+    const diffMs = hoy.getTime() - ultima.getTime(); // Diferencia en ms
+    const diffYears = diffMs / (1000 * 60 * 60 * 24 * 365.25); // Aproximado en años
+
+    if (diffYears > 2) {
+      const aniosEnteros = Math.floor(diffYears);
+      const mesesAprox = Math.floor((diffYears - aniosEnteros) * 12);
+      this.mensajeSinActualizacion = `Tiene ${aniosEnteros} año(s) y ${mesesAprox} mes(es) sin actualizar.`;
+    } else {
+      this.mensajeSinActualizacion = '';
+    }
   }
 }

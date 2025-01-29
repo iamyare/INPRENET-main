@@ -13,7 +13,6 @@
       Es obligatorio tomar una fotografía.
     </mat-error>
     
-
     <form [formGroup]="formGroup" style="margin: 1%;" (change)="onDatosGeneralesChange()">
       <div class="row">
         <div class="col-lg-4 col-md-12">
@@ -27,7 +26,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_tipo_identificacion')?.invalid && formGroup.get('id_tipo_identificacion')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerido.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -37,7 +36,7 @@
             <mat-icon matPrefix>credit_card</mat-icon>
             <input matInput formControlName="n_identificacion" (blur)="formGroup.get('n_identificacion')?.markAsTouched()">
             <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('required') && formGroup.get('n_identificacion')?.touched">
-              Es requerido.
+              Campo requerido.
             </mat-error>
             <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('minlength') && formGroup.get('n_identificacion')?.touched">
               Debe tener al menos {{ formGroup.get('id_tipo_identificacion')?.value === 2 ? 9 : 13 }} caracteres.
@@ -78,7 +77,7 @@
             <mat-hint>DD/MM/YYYY</mat-hint>
             <mat-error *ngIf="formGroup.get('fecha_nacimiento')?.invalid && formGroup.get('fecha_nacimiento')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerida.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -94,7 +93,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('genero')?.invalid && formGroup.get('genero')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerido.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -169,7 +168,7 @@
           <mat-icon matPrefix>phone</mat-icon>
           <input matInput formControlName="telefono_1">
           <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('required') && formGroup.get('telefono_1')?.touched">
-            Es requerido.
+            Campo requerido.
           </mat-error>
           <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('minlength') && formGroup.get('telefono_1')?.touched">
             Debe tener al menos 8 caracteres.
@@ -237,7 +236,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('estado_civil')?.invalid && formGroup.get('estado_civil')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerido.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -248,7 +247,7 @@
             <input matInput formControlName="cantidad_hijos" type="number">
             <mat-error *ngIf="formGroup.get('cantidad_hijos')?.invalid && formGroup.get('cantidad_hijos')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerida.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -277,7 +276,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('grado_academico')?.invalid && formGroup.get('grado_academico')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerido.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -292,7 +291,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_profesion')?.invalid && formGroup.get('id_profesion')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerida.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -307,7 +306,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('representacion')?.invalid && formGroup.get('representacion')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerida.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -325,7 +324,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_pais')?.invalid && formGroup.get('id_pais')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerida.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -340,7 +339,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_departamento_nacimiento')?.invalid && formGroup.get('id_departamento_nacimiento')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerido.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -355,7 +354,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_municipio_nacimiento')?.invalid && formGroup.get('id_municipio_nacimiento')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerido.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -373,7 +372,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_departamento_residencia')?.invalid && formGroup.get('id_departamento_residencia')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerido.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -388,7 +387,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('id_municipio_residencia')?.invalid && formGroup.get('id_municipio_residencia')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerido.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -403,7 +402,7 @@
             </mat-select>
             <mat-error *ngIf="formGroup.get('grupo_etnico')?.invalid && formGroup.get('grupo_etnico')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Es requerido.
+              Campo requerido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -548,7 +547,7 @@
         <mat-radio-group formControlName="discapacidad" (change)="onDiscapacidadChange($event)">
           <mat-radio-button [value]="true" class="radio-btn">Sí</mat-radio-button>
           <mat-radio-button [value]="false" class="radio-btn">No</mat-radio-button>
-        </mat-radio-group>
+        </mat-radio-group>        
       
         <div *ngIf="discapacidadSeleccionada" class="discapacidad-list">
           <label>Selecciona las discapacidades que aplican:</label>
@@ -559,13 +558,43 @@
           </div>
         </div>
       </div>
+
+      <div>
+        <!-- Componente que maneja la subida del archivo -->
+        <app-botonarchivos
+          labelBoton="Archivo de Identificación"
+          (setArchivo)="getArchivo($event)"
+        >
+        </app-botonarchivos>
       
-
-      <app-botonarchivos labelBoton="Archivo de Identificación"  (setArchivo)="getArchivo($event)"></app-botonarchivos>
-
+        <!-- Mensaje de error si no se ha adjuntado el archivo -->
+        <mat-error
+          *ngIf="
+            formGroup.get('archivo_identificacion')?.hasError('required') &&
+            !formGroup.get('archivo_identificacion')?.value
+          "
+        >
+          Por favor, adjuntar el Archivo PDF de Identificación. 
+          (Verificar que el archivo sea el correcto).
+        </mat-error>
+      
+        <!-- Botón estilizado para eliminar el archivo -->
+        <!-- (Se puede condicionar con *ngIf para solo mostrarlo si hay un archivo) -->
+        <button
+          mat-raised-button
+          color="warn"
+          class="delete-file-btn"
+          (click)="removeArchivoIdentificacion()"
+          *ngIf="formGroup.get('archivo_identificacion')?.value"
+        >
+          <mat-icon>delete</mat-icon>
+          Eliminar Archivo adjuntado.
+        </button>
+      </div>
+      
       <!-- <div class="col-md-12">
         <app-peps [parentForm]="formGroup"></app-peps>
       </div> -->
     </form>
   </div>
-</div>
+</div>    

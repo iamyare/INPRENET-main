@@ -65,7 +65,6 @@ export class BotonarchivosComponent implements OnInit {
     }
   }
 
-
   prueba(): any {
     this.setArchivo.emit(this.archivo);
     if (this.datos?.value?.Arch) {

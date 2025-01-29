@@ -12,6 +12,18 @@ export interface Section {
 
 export const MENU_CONFIG: Section[] = [
   {
+    name: 'DOCUMENTOS',
+    items: [
+      {
+        title: 'REPORTES',
+        icon: 'group',
+        children: [
+          { title: 'Menu', route: 'documentos/menu-documentos', icon: 'manage_accounts' }
+        ],
+      },
+    ],
+  },
+  {
     name: 'GESTIÓN DE PERSONAL',
     items: [
       {

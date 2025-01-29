@@ -132,6 +132,7 @@ export class DatPuestoTrabComponent implements OnInit {
     });
   
     this.trabajosArray.push(trabajoFormGroup);
+    this.markAllAsTouched(trabajoFormGroup);
   }
   
   
@@ -233,6 +234,17 @@ export class DatPuestoTrabComponent implements OnInit {
     this.formGroup.reset();
   }
   
+  private markAllAsTouched(control: FormGroup | FormArray): void {
+    if (control instanceof FormGroup || control instanceof FormArray) {
+      Object.values(control.controls).forEach(ctrl => {
+        ctrl.markAsTouched();
+        if (ctrl instanceof FormGroup || ctrl instanceof FormArray) {
+          this.markAllAsTouched(ctrl);
+        }
+      });
+    }
+  
+  }
 }
 
 

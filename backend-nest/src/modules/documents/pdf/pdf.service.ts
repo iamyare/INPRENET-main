@@ -11,6 +11,7 @@ import { validate } from 'class-validator';
 
 @Injectable()
 export class PdfService {
+  token: any;
   constructor(private readonly driveService: DriveService) {
     (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
   }
@@ -42,8 +43,6 @@ export class PdfService {
     const base64data = await this.getMembreteBase64();
     const firmaDigitalBase64 = await this.getFirmaDigitalBase64();
     const docDefinition = await templateFunction({ ...data, base64data, firmaDigitalBase64 }, includeQR);
-
-
     return new Promise((resolve, reject) => {
       const pdfDoc = pdfMake.createPdf(docDefinition);
       pdfDoc.getBuffer((buffer) => {
@@ -164,8 +163,7 @@ export class PdfService {
     };
   }
 
-  public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean) {
-    // Simulando la función de cálculo de edad
+  public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean, dto: EmpleadoDto) {
     const calcularEdad = (fecha: string) => {
       if (!fecha) return '';
       const hoy = new Date();
@@ -198,6 +196,16 @@ export class PdfService {
             {} as { [key: string]: string }
           )
         : {};
+
+        const currentDate = new Date(); // Obtiene la fecha actual
+        const formattedDate = currentDate.toLocaleDateString('es-HN', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        }); 
+
+        const municipio = dto.municipio;
+
   
     const content: Array<any> = [
       {
@@ -2053,11 +2061,6 @@ export class PdfService {
 
      content.push(
       {
-        text: 'Declaro solemnemente que la información antes proporcionada en está solicitud es veraz y objetiva y autorizo al INPREMA para que pueda ser revisada y confirmada en las Instituciones públicas y privadas.',
-        margin: [0, 20, 0, 20],
-        style: 'leyenda',
-      },
-      {
         table: {
           widths: ['33%', '33%', '34%'],
           body: [
@@ -2065,22 +2068,23 @@ export class PdfService {
               {
                 margin: [0, 50, 0, 0],
                 stack: [
-                  { text: 'Tegucigalpa, 10 de enero de 2025', style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
+                  { text: `${municipio}, ${formattedDate}`, style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
-                  { text: 'Lugar y Fecha', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
+                  { text: 'Lugar y Fecha', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] },
                 ],
                 border: [false, false, false, false],
               },
-              
               {
                 margin: [0, 50, 0, 0],
                 stack: [
+                  { text: ' ', style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
-                  { text: 'Firma del Docente', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
+                  { text: 'Firma del Docente', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] },
                 ],
                 border: [false, false, false, false],
               },
               {
+                margin: [0, 50, 0, 0], // Ajustado para que quede alineado con las demás firmas
                 stack: [
                   {
                     canvas: [
@@ -2130,26 +2134,29 @@ export class PdfService {
           body: [
             [
               {
-                margin: [0, 40, 0, 0],
+                margin: [0, 50, 0, 0], // Ajustado para alineación
                 stack: [
+                  { text: dto.nombreEmpleado || 'NOMBRE NO DISPONIBLE', style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
-                  { text: 'Nombre del empleado que atendió al docente', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
+                  { text: 'Nombre del empleado que atendió al docente', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] },
                 ],
                 border: [false, false, false, false],
               },
               {
-                margin: [0, 40, 0, 0],
+                margin: [0, 50, 0, 0], // Ajustado para alineación
                 stack: [
+                  { text: dto.numero_empleado || 'CÓDIGO NO DISPONIBLE', style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
-                  { text: 'Código de Empleado', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
+                  { text: 'Código de Empleado', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] },
                 ],
                 border: [false, false, false, false],
               },
               {
-                margin: [0, 40, 0, 0],
+                margin: [0, 50, 0, 0], // Alineado con las demás firmas
                 stack: [
+                  { text: ' ', style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
-                  { text: 'Firma del Empleado', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] }, // Ajuste de margen
+                  { text: 'Firma del Empleado', style: 'footer', alignment: 'center', margin: [0, 5, 0, 0] },
                 ],
                 border: [false, false, false, false],
               },
@@ -2159,6 +2166,8 @@ export class PdfService {
         layout: 'noBorders',
       }
     );
+    
+    
     
     return {
       pageSize: 'letter',
@@ -2229,8 +2238,10 @@ export class PdfService {
     );
   }
 
-  async generateConstanciaAfiliacion2(data: any, includeQR: boolean): Promise<Buffer> {
-    return this.generateConstancia(data, includeQR, this.generateConstanciaAfiliacionTemplate2);
+  async generateConstanciaAfiliacion2(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
+    return this.generateConstancia({ ...data, dto }, includeQR, (data, includeQR) =>
+       this.generateConstanciaAfiliacionTemplate2(data, includeQR, dto)
+    );
   }
 
   async generateAndUploadConstancia(data: any, dto: EmpleadoDto, type: string): Promise<string> {
@@ -2252,7 +2263,7 @@ export class PdfService {
         pdfBufferWithoutQR = await this.generateConstanciaAfiliacion(data, false, dto);
         break;
       case 'afiliacion2':
-        pdfBufferWithoutQR = await this.generateConstanciaAfiliacion2(data, false);
+        pdfBufferWithoutQR = await this.generateConstanciaAfiliacion2(data, false, dto);
         break;
       case 'renuncia-cap':
         pdfBufferWithoutQR = await this.generateConstanciaRenunciaCap(data, false);
@@ -2276,12 +2287,12 @@ export class PdfService {
     const fileId = await this.driveService.uploadFile(`${fileName}_sin_qr.pdf`, pdfBufferWithoutQR);
   
     let pdfBufferWithQR;
-    switch (type) {
+   /*  switch (type) {
       case 'afiliacion':
         pdfBufferWithQR = await this.generateConstanciaAfiliacion({ ...data, fileId }, true, dto);
         break;
       case 'afiliacion2':
-        pdfBufferWithQR = await this.generateConstanciaAfiliacion2({ ...data, dto, fileId }, true);
+        pdfBufferWithQR = await this.generateConstanciaAfiliacion2({ ...data, dto, fileId }, true, dto);
         break;
       case 'renuncia-cap':
         pdfBufferWithQR = await this.generateConstanciaRenunciaCap({ ...data, dto, fileId }, true);
@@ -2302,29 +2313,29 @@ export class PdfService {
         throw new Error('Invalid constancia type');
     }
   
-    fs.writeFileSync(`${fileName}_con_qr.pdf`, pdfBufferWithQR);
+    fs.writeFileSync(`${fileName}_con_qr.pdf`, pdfBufferWithQR); */
   
     return fileId;
   }
 
   async generateConstanciaWithQR(data: any, type: string, dto: EmpleadoDto): Promise<Buffer> {
       switch (type) {
-          case 'afiliacion':
-              return await this.generateConstanciaAfiliacion(data, true, dto);
-          case 'renuncia-cap':
-              return await this.generateConstanciaRenunciaCap(data, true);
-          case 'no-cotizar':
-              return await this.generateConstanciaNoCotizar(data, true);
-          case 'debitos':
-              return await this.generateConstanciaDebitos(data, true);
-          case 'tiempo-cotizar-con-monto':
-              return await this.generateConstanciaTiempoCotizarConMonto(data, true);
-          case 'afiliacion2':
-              return await this.generateConstanciaAfiliacion2(data, true);
-          case 'beneficios': 
-              return await this.generateConstanciaBeneficios(data, true, dto);
-          default:
-              throw new Error('Invalid constancia type');
+        case 'afiliacion':
+          return await this.generateConstanciaAfiliacion(data, true, dto);
+        case 'renuncia-cap':
+          return await this.generateConstanciaRenunciaCap(data, true);
+        case 'no-cotizar':
+          return await this.generateConstanciaNoCotizar(data, true);
+        case 'debitos':
+          return await this.generateConstanciaDebitos(data, true);
+        case 'tiempo-cotizar-con-monto':
+          return await this.generateConstanciaTiempoCotizarConMonto(data, true);
+        case 'afiliacion2':
+          return await this.generateConstanciaAfiliacion2(data, true, dto);
+        case 'beneficios':
+          return await this.generateConstanciaBeneficios(data, true, dto);
+        default:
+          throw new Error('Invalid constancia type');
       }
   }
 
@@ -2351,7 +2362,7 @@ export class PdfService {
         {
           text: [
             'Y para los fines que el interesado estime convenientes, se extiende la presente constancia en la ciudad de ',
-            { text: 'TEGUCIGALPA, FRANCISCO MORAZAN', bold: true },
+            { text: '', bold: true },
             ', a los ',
             { text: `${new Date().getDate()}`, bold: true },
             ' días del mes de ',

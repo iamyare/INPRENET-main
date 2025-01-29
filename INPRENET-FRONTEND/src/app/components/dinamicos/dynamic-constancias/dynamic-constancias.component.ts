@@ -6,13 +6,12 @@ import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, OnChange
   styleUrls: ['./dynamic-constancias.component.scss'],
 })
 export class DynamicConstanciasComponent implements OnInit, OnChanges {
-  @Input() buttons: { label: string; allowedTypes?: string[] }[] = []; 
+  @Input() buttons: { label: string; allowedTypes?: string[], params?: any }[] = []; 
   @Input() tipoPersona: any; 
-  @Output() buttonClick = new EventEmitter<string>();
+  @Output() buttonClick = new EventEmitter<{ label: string, params?: any }>();
 
   selectedConstancia: string | null = null;
-
-  filteredButtons: { label: string; allowedTypes?: string[] }[] = [];
+  filteredButtons: { label: string; allowedTypes?: string[], params?: any }[] = [];
 
   constructor() {}
 
@@ -37,8 +36,8 @@ export class DynamicConstanciasComponent implements OnInit, OnChanges {
     }
   }
 
-  onButtonClick(button: { label: string }): void {
+  onButtonClick(button: { label: string; params?: any }): void {
     this.selectedConstancia = button.label;
-    this.buttonClick.emit(button.label);
+    this.buttonClick.emit({ label: button.label, params: button.params });
   }
 }

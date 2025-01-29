@@ -4,19 +4,33 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 @Component({
   selector: 'app-dialog-suboptions',
   templateUrl: './dialog-suboptions.component.html',
-  styleUrl: './dialog-suboptions.component.scss'
+  styleUrls: ['./dialog-suboptions.component.scss']
 })
 export class DialogSuboptionsComponent {
+  dynamicParams: { key: string; label: string; type: string; value?: any }[] = [];
+
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { options: string[] },
+    @Inject(MAT_DIALOG_DATA) public data: { 
+      options?: string[], 
+      params?: { key: string; label: string; type: string }[] 
+    },
     private dialogRef: MatDialogRef<DialogSuboptionsComponent>
-  ) {}
+  ) {
+    if (data.params) {
+      this.dynamicParams = data.params.map(param => ({ ...param, value: '' }));
+    }
+  }
 
   onOptionClick(option: string): void {
-    this.dialogRef.close(option); // Envía la opción seleccionada al componente padre
+    const paramsValues = this.dynamicParams.reduce((acc, param) => {
+      acc[param.key] = param.value;
+      return acc;
+    }, {} as Record<string, any>);
+  
+    this.dialogRef.close({ selectedOption: option.trim(), params: paramsValues });
   }
 
   onClose(): void {
-    this.dialogRef.close(); // Cierra el dialog sin enviar nada
+    this.dialogRef.close();
   }
 }

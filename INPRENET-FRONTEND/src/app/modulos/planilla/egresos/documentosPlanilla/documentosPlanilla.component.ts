@@ -187,8 +187,6 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
       next: async (data) => {
-        console.log(data);
-
         const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
         const totalBeneficios = data.beneficios.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
@@ -1724,5 +1722,143 @@ export class DocumentosPlanillaComponent implements OnInit {
         }
       });
   }
+
+  /* async generarReporteJubiladosYPensionadosActivos() {
+    try {
+        const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
+
+        const numeroJubiladosYPensionados = 22194;
+
+        const docDefinition: any = {
+            pageSize: 'LETTER',
+            background: (currentPage: any, pageSize: any) => ({
+                image: base64Image,
+                width: pageSize.width,
+                height: pageSize.height,
+                absolutePosition: { x: 0, y: 0 }
+            }),
+            pageMargins: [40, 130, 40, 100],
+            header: {
+                text: 'INFORME DE JUBILADOS Y PENSIONADOS ACTIVOS EN PLANILLA',
+                style: 'header',
+                alignment: 'center',
+                margin: [50, 90, 50, 0]
+            },
+            content: [
+                {
+                    columns: [
+                        {
+                            width: '100%',
+                            text: [
+                                { text: 'NÚMERO TOTAL DE JUBILADOS Y PENSIONADOS ACTIVOS EN PLANILLA (DICIEMBRE 2024): ', bold: true },
+                                `${numeroJubiladosYPensionados.toLocaleString('en-US')}`
+                            ],
+                            alignment: 'center',
+                            fontSize: 14,
+                            margin: [0, 20, 0, 20]
+                        }
+                    ]
+                },
+                {
+                    text: 'El INPREMA informa que el número total de jubilados y pensionados activos en planilla correspondiente al mes de diciembre de 2024 es el que se detalla en este informe.',
+                    alignment: 'center',
+                    fontSize: 12,
+                    italics: true,
+                    margin: [0, 30, 0, 40]
+                },
+                {
+                    columns: [
+                        {
+                            width: '33%',
+                            canvas: [
+                                {
+                                    type: 'line',
+                                    x1: 0, y1: 0,
+                                    x2: 150, y2: 0,
+                                    lineWidth: 1.5
+                                }
+                            ],
+                            alignment: 'center',
+                            margin: [0, 270, 0, 5]
+                        },
+                        {
+                            width: '33%',
+                            canvas: [
+                                {
+                                    type: 'line',
+                                    x1: 0, y1: 0,
+                                    x2: 150, y2: 0,
+                                    lineWidth: 1.5
+                                }
+                            ],
+                            alignment: 'center',
+                            margin: [0, 270, 0, 5]
+                        },
+                        {
+                            width: '33%',
+                            canvas: [
+                                {
+                                    type: 'line',
+                                    x1: 0, y1: 0,
+                                    x2: 150, y2: 0,
+                                    lineWidth: 1.5
+                                }
+                            ],
+                            alignment: 'center',
+                            margin: [0, 270, 0, 5]
+                        }
+                    ]
+                },
+                {
+                    columns: [
+                        {
+                            width: '33%',
+                            text: 'ELABORÓ',
+                            style: 'signature',
+                            alignment: 'center',
+                            margin: [0, 5, 0, 20]
+                        },
+                        {
+                            width: '33%',
+                            text: 'REVISÓ',
+                            style: 'signature',
+                            alignment: 'center',
+                            margin: [0, 5, 0, 20]
+                        },
+                        {
+                            width: '33%',
+                            text: 'AUTORIZÓ',
+                            style: 'signature',
+                            alignment: 'center',
+                            margin: [0, 5, 0, 20]
+                        }
+                    ]
+                }
+            ],
+            styles: {
+                header: { fontSize: 16, bold: true },
+                signature: { fontSize: 10, bold: true }
+            },
+            footer: (currentPage: any, pageCount: any) => ({
+                table: {
+                    widths: ['*', '*', '*'],
+                    body: [
+                        [
+                            { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
+                            { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false] },
+                            { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
+                        ]
+                    ]
+                },
+                margin: [20, 0, 20, 20]
+            }),
+            defaultStyle: { fontSize: 10 }
+        };
+
+        pdfMake.createPdf(docDefinition).download('Informe_Jubilados_Y_Pensionados_Activos.pdf');
+    } catch (error) {
+        console.error('Error al generar el reporte:', error);
+    }
+} */
 
 }

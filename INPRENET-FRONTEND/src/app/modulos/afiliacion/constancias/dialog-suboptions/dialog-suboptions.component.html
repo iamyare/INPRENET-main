@@ -1,5 +1,15 @@
-<h2 mat-dialog-title class="dialog-title">Seleccione un tipo de beneficio</h2>
+<h2 mat-dialog-title class="dialog-title">Seleccione una opción</h2>
+
 <mat-dialog-content>
+  <div *ngIf="dynamicParams.length" class="params-container">
+    <div *ngFor="let param of dynamicParams" class="param-item">
+      <label>{{ param.label }}</label>
+      <input *ngIf="param.type === 'number'" type="number" [(ngModel)]="param.value" class="param-input" />
+      <input *ngIf="param.type === 'text'" type="text" [(ngModel)]="param.value" class="param-input" />
+      <input *ngIf="param.type === 'date'" type="date" [(ngModel)]="param.value" class="param-input" />
+    </div>
+  </div>
+
   <div class="options-container">
     <button
       mat-raised-button
@@ -12,6 +22,8 @@
     </button>
   </div>
 </mat-dialog-content>
+
+
 <mat-dialog-actions align="end">
   <button mat-button class="close-button" (click)="onClose()">Cerrar</button>
 </mat-dialog-actions>

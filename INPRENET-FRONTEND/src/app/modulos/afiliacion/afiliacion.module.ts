@@ -72,7 +72,6 @@ import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-fam
 import { DatosGeneralesTemporalComponent } from './gestion/datos-generales-temporal/datos-generales-temporal.component';
 import { BeneficiarioSinCausanteComponent } from './verPerfil/beneficiario-sin-causante/beneficiario-sin-causante.component';
 import { DesignadoComponent } from './verPerfil/designado/designado.component';
-import { ReporteFallecidosComponent } from './reporte-fallecidos/reporte-fallecidos.component';
 import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
 import { DialogSuboptionsComponent } from './constancias/dialog-suboptions/dialog-suboptions.component';
 
@@ -146,7 +145,6 @@ import { DialogSuboptionsComponent } from './constancias/dialog-suboptions/dialo
     BeneficiarioSinCausanteComponent,
     DesignadoComponent,
     ContanciasAfiliadosComponent,
-    ReporteFallecidosComponent,
     DialogSuboptionsComponent
   ],
   imports: [

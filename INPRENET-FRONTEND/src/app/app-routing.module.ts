@@ -61,7 +61,10 @@ const routes: Routes = [
         path: 'conasa',
         loadChildren: () => import('./modulos/conasa/conasa.module').then(m => m.ConasaModule),
       },
-
+      {
+        path: 'documentos',
+        loadChildren: () => import('./modulos/documentos/documentos.module').then(m => m.DocumentosModule),
+      },
       { path: 'usuario/editar', component: EditarPerfilComponent },
     ]
   },

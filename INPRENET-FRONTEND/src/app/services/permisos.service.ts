@@ -10,6 +10,16 @@ export class PermisosService {
   private static permisosPorModulo: Record<string, {
     rutas: Record<string, { title: string; permisos: { role: string; module: string, permiso?: string }[] }>;
   }> = {
+    DOCUMENTOS: {
+      rutas: {
+        'documentos/menu-documentos': {
+          title: 'Menu',
+          permisos: [
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA'},
+          ]
+        }
+      }
+    },
     MANTENIMIENTO: {
       rutas: {
         'afiliacion/mantenimiento': {

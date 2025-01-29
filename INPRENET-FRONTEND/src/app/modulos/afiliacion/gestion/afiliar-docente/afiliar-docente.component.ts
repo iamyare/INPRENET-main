@@ -19,6 +19,7 @@ import { CamaraComponent} from '../../../../components/camara/camara.component';
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { AfiliadoService } from '../../../../services/afiliado.service';
 import { PersonaService } from '../../../../services/persona.service';
+import { AuthService } from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-afiliar-docente',
@@ -27,7 +28,7 @@ import { PersonaService } from '../../../../services/persona.service';
 })
 export class AfiliarDocenteComponent implements OnInit {
   backgroundImageBase64: string = '';
-  useCamera: boolean = true; // Propiedad que controla el uso de la cámara
+  useCamera: boolean = true;
 
   @ViewChild('datosGeneralesTemplate', { static: true }) datosGeneralesTemplate!: TemplateRef<any>;
   @ViewChild('referenciasPersonalesTemplate', { static: true }) referenciasPersonalesTemplate!: TemplateRef<any>;
@@ -52,10 +53,18 @@ export class AfiliarDocenteComponent implements OnInit {
   formGroup!: FormGroup;
   fotoPerfil: string = '';
   formErrors: any = null;
+  usuarioToken: {
+    correo: string;
+    numero_empleado: string;
+    departamento: string;
+    municipio: string;
+    nombrePuesto: string;
+    nombreEmpleado: string;
+  } | null = null;
 
   constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private datosEstaticosService: DatosEstaticosService, 
     private toastr: ToastrService,  private formStateService: FormStateService, private http: HttpClient, private afiliadoService: AfiliadoService,
-    private personaService: PersonaService) {
+    private personaService: PersonaService,private authService: AuthService) {
     this.convertirImagenABase64('../assets/images/membratadoFinal.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
     }).catch(error => {
@@ -68,6 +77,7 @@ export class AfiliarDocenteComponent implements OnInit {
 
   ngOnInit(): void {
     this.formGroup = this.fb.group({});
+    this.obtenerDatosDesdeToken();
 
     this.steps = [
       {
@@ -118,6 +128,7 @@ export class AfiliarDocenteComponent implements OnInit {
       });
     }
   }
+  
   isStepInvalid(formGroup: FormGroup): boolean {
     return formGroup.invalid && (formGroup.touched || formGroup.dirty);
   }
@@ -230,9 +241,11 @@ export class AfiliarDocenteComponent implements OnInit {
                 console.error('No se encontró la persona luego de crear la afiliación.');
                 return;
               }
-
-              this.afiliadoService.generarConstanciaAfiliacion2(personaActualizada).subscribe(() => {
-                this.afiliadoService.generarConstanciaQR(personaActualizada, personaActualizada, 'afiliacion2').subscribe((blob: Blob) => {
+                this.afiliadoService.generarConstanciaQR(
+                  personaActualizada, 
+                  this.usuarioToken,
+                  'afiliacion2'
+                ).subscribe((blob: Blob) => {
                   const downloadURL = window.URL.createObjectURL(blob);
                   const link = document.createElement('a');
                   link.href = downloadURL;
@@ -240,7 +253,6 @@ export class AfiliarDocenteComponent implements OnInit {
                   link.click();
                   window.URL.revokeObjectURL(downloadURL);
                 });
-              });
             },
             (err) => {
               console.error('Error al consultar persona por DNI:', err);
@@ -798,5 +810,23 @@ export class AfiliarDocenteComponent implements OnInit {
     const fechaActual = new Date().toISOString().split('T')[0];
     return `${nombreCompleto}_${fechaActual}_constancia_${tipo}.pdf`;
   }
+
+  private obtenerDatosDesdeToken(): void {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      const dataToken = this.authService.decodeToken(token);
+      this.usuarioToken = {
+        correo: dataToken.correo,
+        numero_empleado: dataToken.numero_empleado,
+        departamento: dataToken.departamento,
+        municipio: dataToken.municipio,
+        nombrePuesto: dataToken.nombrePuesto,
+        nombreEmpleado: dataToken.nombreEmpleado,
+      };
+    } else {
+      console.warn('No se encontró un token en sessionStorage.');
+    }
+  }
+  
   
 }

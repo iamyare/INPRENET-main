@@ -106,7 +106,10 @@ export class ContanciasAfiliadosComponent implements OnInit {
     );
   }
 
-  onConstanciaClick(selectedConstanciaLabel: string): void {
+  onConstanciaClick(event: { label: string; params?: any }): void {
+    const selectedConstanciaLabel = event.label;
+    const params = event.params;
+  
     if (selectedConstanciaLabel === 'Generar Constancia de Beneficio') {
       if (this.beneficios.length > 0) {
         this.openSubOptionsDialog(this.beneficios);
@@ -118,10 +121,9 @@ export class ContanciasAfiliadosComponent implements OnInit {
       }
     } else if (selectedConstanciaLabel === 'Generar Constancia de Afiliación') {
       this.generarConstanciaAfiliacion();
-    } else {
     }
   }
-
+  
   private generarNombreArchivo(persona: any, tipo: string): string {
     const nombreCompleto = `${persona.PRIMER_NOMBRE}_${persona.PRIMER_APELLIDO}_${persona.N_IDENTIFICACION}`;
     const fechaActual = new Date().toISOString().split('T')[0];
@@ -183,29 +185,38 @@ export class ContanciasAfiliadosComponent implements OnInit {
     });
   }
 
-  generateConstanciaBeneficio(beneficio: string): void {
+  generateConstanciaBeneficio(beneficio: any): void {
+    if (typeof beneficio === 'object' && beneficio?.selectedOption) {
+      beneficio = beneficio.selectedOption;
+    }
+  
+    if (typeof beneficio !== 'string') {
+      console.error('El valor de beneficio no es una cadena:', beneficio);
+      return;
+    }
+  
+    const beneficioClean = beneficio.trim().toUpperCase();
     const departamentoId = this.persona?.id_departamento_residencia;
   
-    if (!departamentoId) {
-      //console.warn('El ID del departamento no está definido en la persona. Se usará un valor predeterminado.');
-    }
     this.direccionService.getAllDepartments().subscribe(
       (departamentos: { id_departamento: number; nombre_departamento: string }[]) => {
         const departamento = departamentoId
           ? departamentos.find(dep => dep.id_departamento === departamentoId)
-          : { nombre_departamento: 'NO DEFINIDO' }; 
+          : { nombre_departamento: 'NO DEFINIDO' };
   
-        if (!departamento) {
-          console.warn('No se encontró el departamento con el ID proporcionado. Se usará un valor predeterminado.');
-        }
         this.beneficiosService.GetAllBeneficios(this.persona.N_IDENTIFICACION).subscribe(
           (response) => {
+            if (!response || !response.detBen) {
+              console.error('Error: La respuesta del servicio de beneficios es inválida', response);
+              return;
+            }
+  
             const beneficioEncontrado = response.detBen.find(
-              (item: any) => item.beneficio?.nombre_beneficio === beneficio
+              (item: any) => item.beneficio?.nombre_beneficio.trim().toUpperCase() === beneficioClean
             );
   
             if (!beneficioEncontrado) {
-              console.error('No se encontró el beneficio seleccionado en el response.');
+              console.error(`No se encontró el beneficio seleccionado (${beneficioClean}) en el response.`, response.detBen);
               return;
             }
   
@@ -215,8 +226,8 @@ export class ContanciasAfiliadosComponent implements OnInit {
             const data = {
               nombre_completo: `${this.persona.PRIMER_NOMBRE} ${this.persona.SEGUNDO_NOMBRE || ''} ${this.persona.PRIMER_APELLIDO} ${this.persona.SEGUNDO_APELLIDO || ''}`.trim(),
               n_identificacion: this.persona.N_IDENTIFICACION,
-              beneficio: beneficio,
-              departamento: departamento?.nombre_departamento || 'NO DEFINIDO', // Usar predeterminado si está vacío
+              beneficio: beneficioEncontrado.beneficio?.nombre_beneficio,
+              departamento: departamento?.nombre_departamento || 'NO DEFINIDO',
               monto: monto,
               monto_letras: this.convertirNumeroALetrasConCentavos(monto),
               fecha_inicio: this.convertirFechaAPalabras(fechaInicio),

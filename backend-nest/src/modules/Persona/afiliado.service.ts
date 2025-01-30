@@ -1011,6 +1011,7 @@ export class AfiliadoService {
         }
       }
 
+
       /* // Obtención del estado de afiliación
       const estadoP = await this.estadoAfiliacionRepository.findOne({
         where: { codigo: datosGenerales.estado },
@@ -1020,6 +1021,11 @@ export class AfiliadoService {
       } */
 
       // Obtención de la causa de fallecimiento (solo si no es null)
+
+        // Validar que el archivo de certificado de defunción sea obligatorio si FALLECIDO es SI
+    if (datosGenerales.fallecido === 'SI' && !arch_cert_def?.buffer) {
+      throw new BadRequestException('El certificado de defunción es obligatorio cuando el afiliado está marcado como fallecido.');
+    }
       const causaFallecimiento = datosGenerales.causa_fallecimiento
         ? await this.causasFallecimientoRepository.findOne({
           where: { id_causa_fallecimiento: datosGenerales.causa_fallecimiento },
@@ -1133,6 +1139,9 @@ export class AfiliadoService {
         tipoIdentificacion: tipoIdentificacion,
       };
 
+      if (datosGenerales.fallecido === 'NO') {
+      data.certificado_defuncion = null; // Eliminar el archivo adjunto
+    }  
       if (fileIdent?.buffer) {
         data.archivo_identificacion = Buffer.from(fileIdent.buffer);
       }

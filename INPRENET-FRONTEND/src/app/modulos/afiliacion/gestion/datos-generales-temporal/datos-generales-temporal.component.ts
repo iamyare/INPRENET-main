@@ -25,7 +25,6 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   @ViewChild(CamaraComponent, { static: false }) camaraComponent!: CamaraComponent;
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef<HTMLInputElement>;
 
-
   opcion: string = 'NO';
 
   departamentos: { value: number, label: string }[] = [];
@@ -606,10 +605,19 @@ ngOnInit(): void {
     return control ? control.invalid && (control.touched || control.dirty) : false;
   }
 
-  getArchivo(event: File): any {
-    if (!this.formGroup?.contains('archivo_identificacion')) {
-      this.formGroup.addControl('archivo_identificacion', new FormControl('', []));
+  // Función modificada: getArchivo()
+  getArchivo(event: File): void {
+    // Validar tipo y tamaño
+    if (event.type !== 'application/pdf') {
+      this.formGroup.get('archivo_identificacion')?.setErrors({ invalidType: true });
+      return;
     }
+
+    if (event.size > 5 * 1024 * 1024) { // 5MB
+      this.formGroup.get('archivo_identificacion')?.setErrors({ maxSize: true });
+      return;
+    }
+
     this.formGroup.get('archivo_identificacion')?.setValue(event);
   }
 
@@ -695,6 +703,16 @@ ngOnInit(): void {
     }, 0);
   }  
 }
+
+const observer = new ResizeObserver(entries => {
+  try {
+    entries.forEach(entry => {
+      // Lógica de manejo de cambios...
+    });
+  } catch (error) {
+    console.error("Error en ResizeObserver:", error);
+  }
+});
 
 const resizeObserverLoopErrSilencer = () => {
   const resizeObserverErr = /ResizeObserver loop limit exceeded/;

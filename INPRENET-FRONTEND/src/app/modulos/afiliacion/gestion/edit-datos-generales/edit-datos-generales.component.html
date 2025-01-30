@@ -142,7 +142,7 @@
 
     <!-- Componente Datos Generales (datos personales, etc.) -->
     <app-datos-generales
-    [formGroup]="datosGeneralesForm"
+      [formGroup]="datosGeneralesForm"
       [initialData]="initialData"
       [indicesSeleccionados]="indicesSeleccionados"
       [discapacidadSeleccionada]="true"
@@ -159,37 +159,34 @@
       <textarea matInput [(ngModel)]="direccionCompleta" readonly></textarea>
     </mat-form-field>
 
-  <!-- ARCHIVO DE IDENTIFICACIÓN -->
-  <div class="pdf-preview">
-    <h4>Archivo de Identificación</h4>
-    <iframe
-      *ngIf="archivoIdentificacionUrl"
-      [src]="archivoIdentificacionUrl"
-      width="100%"
-      height="500px"
-    ></iframe>
-    <app-botonarchivos
-      labelBoton="Archivo de Identificación"
-      (setArchivo)="getArchivoIdentificacion($event)"
-    >
-    </app-botonarchivos>
+    <!-- Sección Archivo de Identificación -->
+    <div class="pdf-preview">
+      <h4>Archivo de Identificación</h4>
+      
+      <!-- Mostrar nombre del archivo existente -->
+      <div *ngIf="archivoIdentificacionUrl && !formDatosGenerales.get('archivo_identificacion')?.value">
+      </div>
+      
+      <iframe
+        *ngIf="archivoIdentificacionUrl"
+        [src]="archivoIdentificacionUrl"
+        width="100%"
+        height="500px"
+      ></iframe>
+      
+      <app-botonarchivos
+        labelBoton="Actualizar Archivo"
+        (setArchivo)="getArchivoIdentificacion($event)"
+      ></app-botonarchivos>
 
-    <!-- Mensaje de error corregido -->
-    <div
-      class="error-message"
-      *ngIf="
-        !archivoIdentificacionUrl &&
-        !formDatosGenerales.get('archivo_identificacion')?.value &&
-        formDatosGenerales.get('archivo_identificacion')?.hasError('required') &&
-        (formDatosGenerales.get('archivo_identificacion')?.touched ||
-          formDatosGenerales.get('archivo_identificacion')?.dirty)
-      "
-    >
-      Se requiere adjuntar el archivo de identificación.
+      <!-- Mensajes de error -->
+      <div class="error-message" 
+          *ngIf="formDatosGenerales.get('archivo_identificacion')?.hasError('required') && 
+                (formDatosGenerales.get('archivo_identificacion')?.touched || 
+                  formDatosGenerales.get('archivo_identificacion')?.dirty)">
+        Se requiere adjuntar el archivo de identificación.
+      </div>
     </div>
-
-  </div>
-
 
     <!-- FORMULARIO DE FALLECIMIENTO (formGroup="form1") -->
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
@@ -331,29 +328,42 @@
           </div>
         </mat-card-content>
 
-       <!-- CERTIFICADO DE DEFUNCIÓN -->
-<div class="pdf-container">
-  <div class="pdf-preview">
-    <h4>Certificado de Defunción</h4>
-    <iframe
-      *ngIf="certificadoDefuncionUrl"
-      [src]="certificadoDefuncionUrl"
-      width="100%"
-      height="500px"
-    ></iframe>
-    <app-botonarchivos
-      labelBoton="Certificado de Defunción"
-      (setArchivo)="getArchivoDef($event)"
-    >
-    </app-botonarchivos>
+        <!-- CERTIFICADO DE DEFUNCIÓN -->
+        <div class="pdf-container">
+          <div class="pdf-preview">
+            <h4>Certificado de Defunción</h4>
+            <iframe
+              *ngIf="certificadoDefuncionUrl"
+              [src]="certificadoDefuncionUrl"
+              width="100%"
+              height="500px"
+            ></iframe>
+            <app-botonarchivos
+              labelBoton="Certificado de Defunción"
+              (setArchivo)="getArchivoDef($event)"
+              [disabled]="form1.get('fallecido')?.value === 'NO'"
+            >
+            </app-botonarchivos>
 
-    <!-- Mensaje de error -->
-    <div *ngIf="formDatosGenerales.get('archivoCertDef')?.invalid && formDatosGenerales.get('archivoCertDef')?.touched">
-      <span class="error-message" *ngIf="formDatosGenerales.get('archivoCertDef')?.hasError('required')">El certificado de defunción es obligatorio.</span>
-    </div>
-        
-  </div>
-</div>
+            <!-- Botón para eliminar el archivo adjunto -->
+            <button
+              *ngIf="form1.get('fallecido')?.value === 'SI' && certificadoDefuncionUrl"
+              mat-raised-button
+              color="warn"
+              (click)="eliminarCertificadoDefuncion()"
+              style="margin-top: 10px;"
+            >
+              Eliminar Certificado
+            </button>
+
+            <!-- Mensaje de error -->
+            <div *ngIf="formDatosGenerales.get('archivoCertDef')?.invalid && formDatosGenerales.get('archivoCertDef')?.touched">
+              <span class="error-message" *ngIf="formDatosGenerales.get('archivoCertDef')?.hasError('required')">
+                El certificado de defunción es obligatorio.
+              </span>
+            </div>
+          </div>
+        </div>
       </mat-card>
     </form>
 
@@ -369,4 +379,3 @@
     </button>
   </div>
 </div>
-

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectorRef  } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from '../../../../../../src/app/services/afiliado.service';
@@ -25,7 +25,8 @@ export class EditDatosGeneralesComponent implements OnInit {
   unirNombres: any = unirNombres;
   CausaFallecimiento: any[] = [];
   estado: any[] = [];
-  public mostrarBotonGuardar: boolean = false;
+  //public mostrarBotonGuardar: boolean = false;
+  mostrarBotonGuardar: boolean = false;
   image: any;
   datos!: any;
   form: any;
@@ -43,6 +44,8 @@ export class EditDatosGeneralesComponent implements OnInit {
   certificadoDefuncionUrl: SafeResourceUrl | null = null;
   archivoIdentificacionUrl: SafeResourceUrl | null = null;
 
+  certificadoDefuncionFile: File | null = null; // Variable para almacenar el archivo adjunto
+  
   initialData = {};
   indicesSeleccionados: any[] = [];
   discapacidadSeleccionada!: boolean;
@@ -138,7 +141,8 @@ export class EditDatosGeneralesComponent implements OnInit {
     public direccionSer: DireccionService,
     private datosEstaticosService: DatosEstaticosService,
     private permisosService: PermisosService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef
   ) {
     const currentYear = new Date();
     this.minDate = new Date(
@@ -197,13 +201,17 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   ngOnInit(): void {
     // Permisos
-    
-    this.mostrarBotonGuardar = this.permisosService.userHasPermission(
-      'AFILIACIONES',
-      'afiliacion/buscar-persona',
-      'editar'
-    );
 
+    
+    setTimeout(() => {
+      this.mostrarBotonGuardar = this.permisosService.userHasPermission(
+        'AFILIACIONES',
+        'afiliacion/buscar-persona',
+        'editar'
+      );
+      this.cdr.detectChanges(); // Forzar la detección de cambios
+    }, 0);
+    
     if (this.dniCausante) {
       // this.cargarDesignadosOBeneficiarios(this.dniCausante);
     }
@@ -238,43 +246,35 @@ export class EditDatosGeneralesComponent implements OnInit {
           fecha_reporte_fallecido: '',
           numero_certificado_defuncion: ''
         });
-
-        // Deshabilitamos
+    
+        // Deshabilitar campos relacionados con fallecimiento
         this.form1.get('causa_fallecimiento')?.disable();
         this.form1.get('fecha_defuncion')?.disable();
         this.form1.get('id_departamento_defuncion')?.disable();
         this.form1.get('id_municipio_defuncion')?.disable();
         this.form1.get('fecha_reporte_fallecido')?.disable();
         this.form1.get('numero_certificado_defuncion')?.disable();
-
-        // Si quieres que el certificado defunción (archivo) sea solo obligado con SI:
+    
+        // Eliminar el archivo adjunto si existe
+        this.eliminarCertificadoDefuncion();
+    
+        // Deshabilitar y limpiar validadores del campo de archivo de certificado de defunción
+        this.formDatosGenerales.get('archivoCertDef')?.disable();
         this.formDatosGenerales.get('archivoCertDef')?.clearValidators();
         this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
-
-        this.formDatosGenerales.get('archivo_identificacion')?.setValidators([]);
-
-      if (this.datos?.archivo_identificacion) {
-          this.formDatosGenerales.patchValue({ archivo_identificacion: this.datos.archivo_identificacion });
-          this.formDatosGenerales.get('archivo_identificacion')?.clearValidators();
-          this.formDatosGenerales.get('archivo_identificacion')?.updateValueAndValidity();
       } else {
-          this.formDatosGenerales.get('archivo_identificacion')?.setValidators([Validators.required]);
-          this.formDatosGenerales.get('archivo_identificacion')?.updateValueAndValidity();
-      }
-
-      } else {
-        // Habilitar
+        // Habilitar campos relacionados con fallecimiento
         this.form1.get('causa_fallecimiento')?.enable();
         this.form1.get('fecha_defuncion')?.enable();
         this.form1.get('id_departamento_defuncion')?.enable();
         this.form1.get('id_municipio_defuncion')?.enable();
         this.form1.get('fecha_reporte_fallecido')?.enable();
         this.form1.get('numero_certificado_defuncion')?.enable();
-
-        // Si quieres que el archivo defunción sea obligatorio cuando fallecido=SI
+    
+        // Habilitar y agregar validadores al campo de archivo de certificado de defunción
+        this.formDatosGenerales.get('archivoCertDef')?.enable();
         this.formDatosGenerales.get('archivoCertDef')?.setValidators([Validators.required]);
         this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
-
       }
     });
 
@@ -613,7 +613,8 @@ export class EditDatosGeneralesComponent implements OnInit {
                 const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
                 refpersArray.clear();
                 refpersArray.push(this.createRefpersGroup(result));
-
+                
+                this.cdr.detectChanges(); // <-- Añadir esta línea
                 this.loading = false;
             },
             (error) => {
@@ -671,11 +672,18 @@ export class EditDatosGeneralesComponent implements OnInit {
     // Obtener el archivo de identificación del formulario
     let archivoIdentificacion = this.formDatosGenerales.get('archivo_identificacion')?.value;
 
-    // Si no se ha subido un nuevo archivo, mantener el que ya estaba en result
-    if (!archivoIdentificacion && this.datos?.archivo_identificacion) {
-        archivoIdentificacion = this.datos.archivo_identificacion;
+  // Si no hay archivo nuevo pero existe uno registrado
+  if (!archivoIdentificacion && this.datos?.archivo_identificacion) {
+    // Convertir base64 a File usando función existente
+    const base64Data = this.datos.archivo_identificacion;
+    const blob = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
+    
+    if (blob) {
+      archivoIdentificacion = new File([blob], 'identificacion_existente.pdf', {
+        type: 'application/pdf'
+      });
     }
-
+  }
     // Construcción del objeto a enviar
     const datosActualizados: any = {
         ...refpersData,
@@ -714,7 +722,6 @@ export class EditDatosGeneralesComponent implements OnInit {
             }
         );
   }
-
 
   guardarEstadoAfiliacion(element: any) {
     const payload = {
@@ -843,6 +850,26 @@ export class EditDatosGeneralesComponent implements OnInit {
   
     if (archivoIdentificacion?.invalid) {
       console.log('El archivo "Identificación" es inválido:', archivoIdentificacion.errors);
+    }
+  }
+ 
+  eliminarCertificadoDefuncion(): void {
+    this.certificadoDefuncionFile = null;
+    this.formDatosGenerales.get('archivoCertDef')?.setValue(null); // Limpiar el valor del control
+    this.formDatosGenerales.get('archivoCertDef')?.markAsTouched(); // Marcar como tocado
+    this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity(); // Forzar la validación
+    this.certificadoDefuncionUrl = null; // Limpiar la URL de previsualización
+  }
+
+  onCertificadoDefuncionChange(event: Event): void {
+    const input = event.target as HTMLInputElement; // Obtener el input de archivo
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0]; // Obtener el archivo seleccionado
+      this.certificadoDefuncionFile = file;
+      this.formDatosGenerales.get('archivoCertDef')?.setValue(file); // Actualizar el valor del control
+      this.formDatosGenerales.get('archivoCertDef')?.markAsTouched(); // Marcar como tocado
+      this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity(); // Forzar la validación
+      this.certificadoDefuncionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(file));
     }
   }
 }

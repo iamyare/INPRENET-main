@@ -262,6 +262,7 @@ export class AfiliadoService {
 
     // Construye el resultado con valores por defecto en caso de que no haya `detallePersona`
     const result = {
+      ID_TIPO_IDENTIFICACION: persona.tipoIdentificacion.id_identificacion,
       N_IDENTIFICACION: persona.n_identificacion,
       ID_PERSONA: persona.id_persona,
       PRIMER_NOMBRE: persona.primer_nombre,

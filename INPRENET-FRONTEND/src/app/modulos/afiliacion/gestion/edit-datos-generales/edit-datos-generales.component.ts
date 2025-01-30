@@ -1,12 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { AfiliadoService } from '../../../../../../src/app/services/afiliado.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
-import { PermisosService } from 'src/app/services/permisos.service';
+import { PermisosService } from '../../../../../../src/app/services/permisos.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
@@ -496,7 +496,6 @@ export class EditDatosGeneralesComponent implements OnInit {
           this.formDatosGenerales.markAllAsTouched();
           this.form1.markAllAsTouched();
           this.formDatosGenerales.markAllAsTouched();
-
           // Llenar initialData con datos globales
           this.initialData = {
             ...this.initialData,

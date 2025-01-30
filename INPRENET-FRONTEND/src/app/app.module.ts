@@ -17,6 +17,7 @@ import { TokenInterceptor } from './interceptors/token.interceptor';
 import { EscalafonModule } from './modulos/escalafon/escalafon.module';
 import { ConasaModule } from './modulos/conasa/conasa.module';
 import { DocumentosModule } from './modulos/documentos/documentos.module';
+
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 

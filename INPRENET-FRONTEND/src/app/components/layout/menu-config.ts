@@ -48,9 +48,9 @@ export const MENU_CONFIG: Section[] = [
           { title: 'Nueva Afiliación', route: 'afiliacion/nueva-afiliacion', icon: 'person_add' },
           {
             title: 'Buscar Persona',
+            route: 'afiliacion/buscar-persona',
             icon: 'person_search',
-            route: 'home/afiliacion/buscar-persona',
-            isCustomReset: true // <--- Agregas esta propiedad
+            isCustomReset: true
           },
           { title: 'Constancias', route: 'afiliacion/constancias-afiliados', icon: 'description' }
         ],

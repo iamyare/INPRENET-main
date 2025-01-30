@@ -55,7 +55,7 @@ export class DatosGeneralesComponent implements OnInit {
     'id_departamento_residencia',
     'id_municipio_residencia',
     'grupo_etnico',
-    'archivo_identificacion' // Campo para el archivo de identificación
+    'archivo_identificacion' 
   ];
 
   constructor(private fb: FormBuilder,
@@ -68,6 +68,8 @@ export class DatosGeneralesComponent implements OnInit {
   ngOnInit(): void {
     const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
     const addressPattern = /^[a-zA-Z0-9\s.]*$/;
+    console.log(this.initialData);
+    
 
     if (!this.formGroup) {
       if (this.initialData) {
@@ -167,7 +169,7 @@ export class DatosGeneralesComponent implements OnInit {
       const control = this.formGroup.get(campo);
       if (control) {
         control.markAsTouched();
-        control.updateValueAndValidity(); // Asegura que las validaciones se apliquen
+        control.updateValueAndValidity();
       }
     });
 
@@ -184,21 +186,41 @@ export class DatosGeneralesComponent implements OnInit {
 
   async cargarDatosIniciales() {
     await this.cargarDepartamentos();
-    if (this.formGroup.get('id_departamento_residencia')?.value) {
-      this.cargarMunicipios(this.formGroup.get('id_departamento_residencia')?.value);
-    }
     if (this.formGroup.get('id_departamento_nacimiento')?.value) {
       this.cargarMunicipiosNacimiento(this.formGroup.get('id_departamento_nacimiento')?.value);
     }
-
+    if (this.formGroup.get('id_departamento_residencia')?.value) {
+      this.cargarMunicipios(this.formGroup.get('id_departamento_residencia')?.value);
+    }
+  
     this.cargarEstadoCivil();
     await this.cargarProfesiones();
     this.cargarRepresentacion();
     await this.cargarTiposIdentificacion();
     this.cargarGenero();
     await this.cargarNacionalidades();
+    
+    this.formGroup.patchValue({
+      id_profesion: this.initialData?.id_profesion || '',
+      id_tipo_identificacion: this.initialData?.id_tipo_identificacion || '',
+      id_municipio_nacimiento: this.initialData?.id_municipio_nacimiento || '',
+      segundo_nombre: this.initialData?.segundo_nombre || '',
+      tercer_nombre: this.initialData?.tercer_nombre || '',
+      segundo_apellido: this.initialData?.segundo_apellido || '',
+      aldea: this.initialData?.aldea || '',
+      avenida: this.initialData?.avenida || '',
+      barrio_colonia: this.initialData?.barrio_colonia || '',
+      bloque: this.initialData?.bloque || '',
+      calle: this.initialData?.calle || '',
+      caserio: this.initialData?.caserio || '',
+      color_casa: this.initialData?.color_casa || '',
+      numero_casa: this.initialData?.numero_casa || '',
+      sector: this.initialData?.sector || '',
+      correo_2: this.initialData?.correo_2 || '',
+      telefono_2: this.initialData?.telefono_2 || '',
+    });
   }
-
+  
   onDatosGeneralesChange(): void {
     try {
       const data = { ...this.formGroup.value };
@@ -303,6 +325,9 @@ export class DatosGeneralesComponent implements OnInit {
         label: profesion.descripcion,
         value: profesion.id_profesion
       }));
+      if (this.initialData?.id_profesion) {
+        this.formGroup.patchValue({ id_profesion: this.initialData.id_profesion });
+      }
     } catch (error) {
       console.error('Error al obtener las profesiones', error);
       this.profesiones = [];
@@ -340,6 +365,9 @@ export class DatosGeneralesComponent implements OnInit {
     try {
       const response = await this.datosEstaticos.gettipoIdent();
       this.tipoIdent = response;
+      if (this.initialData?.id_tipo_identificacion) {
+        this.formGroup.patchValue({ id_tipo_identificacion: this.initialData.id_tipo_identificacion });
+      }
     } catch (error) {
       console.error('Error al obtener los tipos de identificación', error);
     }

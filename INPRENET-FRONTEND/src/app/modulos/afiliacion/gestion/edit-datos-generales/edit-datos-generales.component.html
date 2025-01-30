@@ -159,10 +159,9 @@
       <textarea matInput [(ngModel)]="direccionCompleta" readonly></textarea>
     </mat-form-field>
 
-    <!-- ARCHIVO DE IDENTIFICACIÓN -->
-   <!-- ARCHIVO DE IDENTIFICACIÓN -->
-<div class="pdf-preview">
-  <h4>Archivo de Identificación</h4>
+  <!-- ARCHIVO DE IDENTIFICACIÓN -->
+  <div class="pdf-preview">
+    <h4>Archivo de Identificación</h4>
     <iframe
       *ngIf="archivoIdentificacionUrl"
       [src]="archivoIdentificacionUrl"
@@ -175,10 +174,12 @@
     >
     </app-botonarchivos>
 
-    <!-- Mensaje de error -->
+    <!-- Mensaje de error corregido -->
     <div
-      class="error"
+      class="error-message"
       *ngIf="
+        !archivoIdentificacionUrl &&
+        !formDatosGenerales.get('archivo_identificacion')?.value &&
         formDatosGenerales.get('archivo_identificacion')?.hasError('required') &&
         (formDatosGenerales.get('archivo_identificacion')?.touched ||
           formDatosGenerales.get('archivo_identificacion')?.dirty)
@@ -186,7 +187,9 @@
     >
       Se requiere adjuntar el archivo de identificación.
     </div>
+
   </div>
+
 
     <!-- FORMULARIO DE FALLECIMIENTO (formGroup="form1") -->
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
@@ -346,7 +349,7 @@
 
     <!-- Mensaje de error -->
     <div *ngIf="formDatosGenerales.get('archivoCertDef')?.invalid && formDatosGenerales.get('archivoCertDef')?.touched">
-      <span *ngIf="formDatosGenerales.get('archivoCertDef')?.hasError('required')">El certificado de defunción es obligatorio.</span>
+      <span class="error-message" *ngIf="formDatosGenerales.get('archivoCertDef')?.hasError('required')">El certificado de defunción es obligatorio.</span>
     </div>
         
   </div>

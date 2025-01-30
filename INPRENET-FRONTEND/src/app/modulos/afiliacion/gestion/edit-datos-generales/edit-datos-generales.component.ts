@@ -251,8 +251,16 @@ export class EditDatosGeneralesComponent implements OnInit {
         this.formDatosGenerales.get('archivoCertDef')?.clearValidators();
         this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
 
-        this.formDatosGenerales.get('archivo_identificacion')?.setValidators([Validators.required]);
-        this.formDatosGenerales.get('archivo_identificacion')?.updateValueAndValidity();
+        this.formDatosGenerales.get('archivo_identificacion')?.setValidators([]);
+
+      if (this.datos?.archivo_identificacion) {
+          this.formDatosGenerales.patchValue({ archivo_identificacion: this.datos.archivo_identificacion });
+          this.formDatosGenerales.get('archivo_identificacion')?.clearValidators();
+          this.formDatosGenerales.get('archivo_identificacion')?.updateValueAndValidity();
+      } else {
+          this.formDatosGenerales.get('archivo_identificacion')?.setValidators([Validators.required]);
+          this.formDatosGenerales.get('archivo_identificacion')?.updateValueAndValidity();
+      }
 
       } else {
         // Habilitar
@@ -435,178 +443,187 @@ export class EditDatosGeneralesComponent implements OnInit {
   // ---------------------------------------------
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
-      this.loading = true;
-  
-      // 1) Llamar primero a getAfilByParam(...) para obtener la data principal
-      this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
-        (result) => {
-          this.datos = result;
-          this.Afiliado = result;
-  
-          // Manejo PDFs
-          this.certificadoDefuncionUrl = this.datos?.certificado_defuncion
-            ? this.sanitizer.bypassSecurityTrustResourceUrl(
-                `data:application/pdf;base64,${this.datos.certificado_defuncion}`
-              )
-            : null;
-  
-          this.archivoIdentificacionUrl = this.datos?.archivo_identificacion
-            ? this.sanitizer.bypassSecurityTrustResourceUrl(
-                `data:application/pdf;base64,${this.datos.archivo_identificacion}`
-              )
-            : null;
-  
-          // Otras propiedades globales
-          this.estadoAfiliacion = result.estadoAfiliacion;
-          this.fallecido = result.fallecido;
-  
-          // Imagen de perfil
-          if (result.FOTO_PERFIL) {
-            this.image = this.dataURItoBlob(
-              `data:image/jpeg;base64,${result.FOTO_PERFIL}`
-            );
-          }
-  
-          // Direccion estructurada
-          if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
-            const jsonObj = result.DIRECCION_RESIDENCIA_ESTRUCTURADA
-              .split(',')
-              .reduce((acc: any, curr: any) => {
-                const [key, value] = curr.split(':').map((s: string) => s.trim());
-                acc[key] = value;
-                return acc;
-              }, {});
-  
-            this.initialData = {
-              ...this.initialData,
-              avenida: jsonObj.AVENIDA || '',
-              calle: jsonObj.CALLE || '',
-              sector: jsonObj.SECTOR || '',
-              bloque: jsonObj.BLOQUE || '',
-              aldea: jsonObj.ALDEA || '',
-              caserio: jsonObj.CASERIO || '',
-              barrio_colonia: jsonObj['BARRIO_COLONIA'] || '',
-              numero_casa: jsonObj['N° DE CASA'] || '',
-              color_casa: jsonObj['COLOR CASA'] || ''
-            };
-          } else {
-            this.direccionCompleta = result.DIRECCION_RESIDENCIA?.trim();
-          }
-          
-          this.formDatosGenerales.markAllAsTouched();
-          this.form1.markAllAsTouched();
-          this.formDatosGenerales.markAllAsTouched();
-          // Llenar initialData con datos globales
-          this.initialData = {
-            ...this.initialData,
-            id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION,
-            n_identificacion: result?.N_IDENTIFICACION,
-            primer_nombre: result?.PRIMER_NOMBRE,
-            segundo_nombre: result?.SEGUNDO_NOMBRE,
-            tercer_nombre: result?.TERCER_NOMBRE,
-            primer_apellido: result?.PRIMER_APELLIDO,
-            segundo_apellido: result?.SEGUNDO_APELLIDO,
-            fecha_nacimiento: result?.FECHA_NACIMIENTO,
-            fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
-            cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
-            representacion: result?.REPRESENTACION,
-            telefono_1: result?.TELEFONO_1,
-            telefono_2: result?.TELEFONO_2,
-            correo_1: result?.CORREO_1,
-            correo_2: result?.CORREO_2,
-            rtn: result?.RTN,
-            genero: result?.GENERO,
-            grupo_etnico: result?.GRUPO_ETNICO,
-            grado_academico: result?.GRADO_ACADEMICO,
-            estado_civil: result?.ESTADO_CIVIL,
-            cantidad_hijos: result?.CANTIDAD_HIJOS,
-            id_profesion: result?.ID_PROFESION,
-            id_pais: result?.ID_PAIS,
-            id_departamento_residencia: result?.id_departamento_residencia,
-            id_municipio_residencia: result?.ID_MUNICIPIO,
-            id_departamento_nacimiento: result?.id_departamento_nacimiento,
-            id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
-            discapacidad: result?.discapacidades?.length > 0 ? true : false,
-          };
-  
-          // Discapacidades
-          if (result?.discapacidades?.length > 0) {
-            this.discapacidadSeleccionada = true;
-            this.indicesSeleccionados = result?.discapacidades;
-          }
-  
-          // Rellenar valores de form1
-          this.form1.get('fallecido')?.setValue(result?.fallecido);
-          this.form1.get('fecha_defuncion')?.setValue(result?.fecha_defuncion);
-          this.form1.get('causa_fallecimiento')?.setValue(result?.ID_CAUSA_FALLECIMIENTO);
-          this.form1.get('id_departamento_defuncion')?.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
-          this.form1.get('id_municipio_defuncion')?.setValue(result?.ID_MUNICIPIO_DEFUNCION);
-          this.form1.get('tipo_persona')?.setValue(result?.ID_TIPO_PERSONA);
-          this.form1.get('estado')?.setValue(result?.estadoAfiliacion?.codigo);
-          this.form1.get('voluntario')?.setValue(result?.VOLUNTARIO || 'NO');
-          // Campos nuevos o adicionales
-          this.form1.get('numero_certificado_defuncion')?.setValue(result?.NUMERO_CERTIFICADO_DEFUNCION);
-          this.form1.get('fecha_reporte_fallecido')?.setValue(result?.FECHA_REPORTE_FALLECIDO);
-  
-          // Parchar el FormGroup con los datos recibidos
-          this.datosGeneralesForm.patchValue({
-            FotoPerfil: result?.FOTO_PERFIL ? `data:image/jpeg;base64,${result.FOTO_PERFIL}` : null,
-            id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION,
-            n_identificacion: result?.N_IDENTIFICACION,
-            primer_nombre: result?.PRIMER_NOMBRE,
-            segundo_nombre: result?.SEGUNDO_NOMBRE,
-            tercer_nombre: result?.TERCER_NOMBRE,
-            primer_apellido: result?.PRIMER_APELLIDO,
-            segundo_apellido: result?.SEGUNDO_APELLIDO,
-            fecha_nacimiento: result?.FECHA_NACIMIENTO,
-            fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
-            cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
-            representacion: result?.REPRESENTACION,
-            telefono_1: result?.TELEFONO_1,
-            telefono_2: result?.TELEFONO_2,
-            correo_1: result?.CORREO_1,
-            correo_2: result?.CORREO_2,
-            rtn: result?.RTN,
-            genero: result?.GENERO,
-            grupo_etnico: result?.GRUPO_ETNICO,
-            grado_academico: result?.GRADO_ACADEMICO,
-            estado_civil: result?.ESTADO_CIVIL,
-            cantidad_hijos: result?.CANTIDAD_HIJOS,
-            id_profesion: result?.ID_PROFESION,
-            id_pais: result?.ID_PAIS,
-            id_departamento_residencia: result?.id_departamento_residencia,
-            id_municipio_residencia: result?.ID_MUNICIPIO,
-            id_departamento_nacimiento: result?.id_departamento_nacimiento,
-            id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
-            discapacidad: result?.discapacidades?.length > 0 ? true : false,
-            archivoIdentificacionUrl: result?.archivo_identificacion
-          });
-  
-          // Manejo de la dirección completa
-          if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
-            // Ya se ha manejado anteriormente
-          } else {
-            this.direccionCompleta = result.DIRECCION_RESIDENCIA?.trim() || '';
-          }
-  
-          // Marcar todos los controles como tocados para mostrar errores
-          this.datosGeneralesForm.markAllAsTouched();
-          this.form1.markAllAsTouched();
-          this.formDatosGenerales.markAllAsTouched();
+        this.loading = true;
 
-          const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
-          refpersArray.clear();
-          refpersArray.push(this.createRefpersGroup(result));
+        // 1) Llamar primero a getAfilByParam(...) para obtener la data principal
+        this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
+            (result) => {
+              console.log(result);
+              
+                this.datos = result;
+                this.Afiliado = result;
 
-          this.loading = false;
-        },
-        (error) => {
-          this.toastr.error(`Error: ${error.error.message}`);
-          this.loading = false;
-        }
-      );
+                // Manejo PDFs
+                this.certificadoDefuncionUrl = this.datos?.certificado_defuncion
+                    ? this.sanitizer.bypassSecurityTrustResourceUrl(
+                        `data:application/pdf;base64,${this.datos.certificado_defuncion}`
+                    )
+                    : null;
+
+                this.archivoIdentificacionUrl = this.datos?.archivo_identificacion
+                    ? this.sanitizer.bypassSecurityTrustResourceUrl(
+                        `data:application/pdf;base64,${this.datos.archivo_identificacion}`
+                    )
+                    : null;
+
+                // Validación dinámica del archivo de identificación
+                const archivoIdentificacionControl = this.formDatosGenerales.get('archivo_identificacion');
+                
+
+                  if (result?.archivo_identificacion) {
+                      archivoIdentificacionControl?.clearValidators();
+                      archivoIdentificacionControl?.updateValueAndValidity();
+                      this.formDatosGenerales.patchValue({ archivo_identificacion: result.archivo_identificacion });
+                  } else {
+                      archivoIdentificacionControl?.setValidators([Validators.required]);
+                      archivoIdentificacionControl?.updateValueAndValidity();
+                  }
+
+                // Otras propiedades globales
+                this.estadoAfiliacion = result.estadoAfiliacion;
+                this.fallecido = result.fallecido;
+
+                // Imagen de perfil
+                if (result.FOTO_PERFIL) {
+                    this.image = this.dataURItoBlob(
+                        `data:image/jpeg;base64,${result.FOTO_PERFIL}`
+                    );
+                }
+
+                // Dirección estructurada
+                if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
+                    const jsonObj = result.DIRECCION_RESIDENCIA_ESTRUCTURADA
+                        .split(',')
+                        .reduce((acc: any, curr: any) => {
+                            const [key, value] = curr.split(':').map((s: string) => s.trim());
+                            acc[key] = value;
+                            return acc;
+                        }, {});
+
+                    this.initialData = {
+                        ...this.initialData,
+                        avenida: jsonObj.AVENIDA || '',
+                        calle: jsonObj.CALLE || '',
+                        sector: jsonObj.SECTOR || '',
+                        bloque: jsonObj.BLOQUE || '',
+                        aldea: jsonObj.ALDEA || '',
+                        caserio: jsonObj.CASERIO || '',
+                        barrio_colonia: jsonObj['BARRIO_COLONIA'] || '',
+                        numero_casa: jsonObj['N° DE CASA'] || '',
+                        color_casa: jsonObj['COLOR CASA'] || ''
+                    };
+                } else {
+                    this.direccionCompleta = result.DIRECCION_RESIDENCIA?.trim();
+                }
+
+                this.formDatosGenerales.markAllAsTouched();
+                this.form1.markAllAsTouched();
+
+                // Llenar initialData con datos globales
+                this.initialData = {
+                    ...this.initialData,
+                    id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION,
+                    n_identificacion: result?.N_IDENTIFICACION,
+                    primer_nombre: result?.PRIMER_NOMBRE,
+                    segundo_nombre: result?.SEGUNDO_NOMBRE,
+                    tercer_nombre: result?.TERCER_NOMBRE,
+                    primer_apellido: result?.PRIMER_APELLIDO,
+                    segundo_apellido: result?.SEGUNDO_APELLIDO,
+                    fecha_nacimiento: result?.FECHA_NACIMIENTO,
+                    fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
+                    cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
+                    representacion: result?.REPRESENTACION,
+                    telefono_1: result?.TELEFONO_1,
+                    telefono_2: result?.TELEFONO_2,
+                    correo_1: result?.CORREO_1,
+                    correo_2: result?.CORREO_2,
+                    rtn: result?.RTN,
+                    genero: result?.GENERO,
+                    grupo_etnico: result?.GRUPO_ETNICO,
+                    grado_academico: result?.GRADO_ACADEMICO,
+                    estado_civil: result?.ESTADO_CIVIL,
+                    cantidad_hijos: result?.CANTIDAD_HIJOS,
+                    id_profesion: result?.ID_PROFESION,
+                    id_pais: result?.ID_PAIS,
+                    id_departamento_residencia: result?.id_departamento_residencia,
+                    id_municipio_residencia: result?.ID_MUNICIPIO,
+                    id_departamento_nacimiento: result?.id_departamento_nacimiento,
+                    id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
+                    discapacidad: result?.discapacidades?.length > 0 ? true : false,
+                };
+
+                // Discapacidades
+                if (result?.discapacidades?.length > 0) {
+                    this.discapacidadSeleccionada = true;
+                    this.indicesSeleccionados = result?.discapacidades;
+                }
+
+                // Rellenar valores de form1
+                this.form1.patchValue({
+                    fallecido: result?.fallecido,
+                    fecha_defuncion: result?.fecha_defuncion,
+                    causa_fallecimiento: result?.ID_CAUSA_FALLECIMIENTO,
+                    id_departamento_defuncion: result?.ID_DEPARTAMENTO_DEFUNCION,
+                    id_municipio_defuncion: result?.ID_MUNICIPIO_DEFUNCION,
+                    tipo_persona: result?.ID_TIPO_PERSONA,
+                    estado: result?.estadoAfiliacion?.codigo,
+                    voluntario: result?.VOLUNTARIO || 'NO',
+                    numero_certificado_defuncion: result?.NUMERO_CERTIFICADO_DEFUNCION,
+                    fecha_reporte_fallecido: result?.FECHA_REPORTE_FALLECIDO
+                });
+
+                // Parchar el FormGroup con los datos recibidos
+                this.datosGeneralesForm.patchValue({
+                    FotoPerfil: result?.FOTO_PERFIL ? `data:image/jpeg;base64,${result.FOTO_PERFIL}` : null,
+                    id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION,
+                    n_identificacion: result?.N_IDENTIFICACION,
+                    primer_nombre: result?.PRIMER_NOMBRE,
+                    segundo_nombre: result?.SEGUNDO_NOMBRE,
+                    tercer_nombre: result?.TERCER_NOMBRE,
+                    primer_apellido: result?.PRIMER_APELLIDO,
+                    segundo_apellido: result?.SEGUNDO_APELLIDO,
+                    fecha_nacimiento: result?.FECHA_NACIMIENTO,
+                    fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
+                    cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
+                    representacion: result?.REPRESENTACION,
+                    telefono_1: result?.TELEFONO_1,
+                    telefono_2: result?.TELEFONO_2,
+                    correo_1: result?.CORREO_1,
+                    correo_2: result?.CORREO_2,
+                    rtn: result?.RTN,
+                    genero: result?.GENERO,
+                    grupo_etnico: result?.GRUPO_ETNICO,
+                    grado_academico: result?.GRADO_ACADEMICO,
+                    estado_civil: result?.ESTADO_CIVIL,
+                    cantidad_hijos: result?.CANTIDAD_HIJOS,
+                    id_profesion: result?.ID_PROFESION,
+                    id_pais: result?.ID_PAIS,
+                    id_departamento_residencia: result?.id_departamento_residencia,
+                    id_municipio_residencia: result?.ID_MUNICIPIO,
+                    id_departamento_nacimiento: result?.id_departamento_nacimiento,
+                    id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
+                    discapacidad: result?.discapacidades?.length > 0 ? true : false,
+                    archivoIdentificacionUrl: result?.archivo_identificacion
+                });
+
+                // Marcar todos los controles como tocados para mostrar errores
+                this.datosGeneralesForm.markAllAsTouched();
+                this.form1.markAllAsTouched();
+
+                const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
+                refpersArray.clear();
+                refpersArray.push(this.createRefpersGroup(result));
+
+                this.loading = false;
+            },
+            (error) => {
+                this.toastr.error(`Error: ${error.error.message}`);
+                this.loading = false;
+            }
+        );
     }
-  }
+}
+
   
   // ---------------------------------------------
   // Manejo de discapacidades
@@ -637,64 +654,67 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.datosGeneralesForm.markAllAsTouched();
     this.form1.markAllAsTouched();
     this.formDatosGenerales.markAllAsTouched();
-  // Validar ambos formularios
-  if (this.formDatosGenerales.invalid || this.form1.invalid) {
-    this.checkFormErrors(); // Añade esta línea
-    this.formDatosGenerales.markAllAsTouched();
-    this.form1.markAllAsTouched();
-    this.toastr.error('Por favor complete los campos requeridos');
-    return;
-  }
-  
+
+    // Validar ambos formularios
+    if (this.formDatosGenerales.invalid || this.form1.invalid) {
+        this.checkFormErrors();
+        this.toastr.error('Por favor complete los campos requeridos');
+        return;
+    }
+
     // Extraer data del primer array en formDatosGenerales
     const refpersData = this.formDatosGenerales.get('refpers')?.value?.[0] || {};
-  
-    // Extraer el "value" de form1 (no genera conflicto TS)
+
+    // Extraer valores del form1
     const formValues = this.form1.value;
-  
-    // Construir el objeto final para enviar
+
+    // Obtener el archivo de identificación del formulario
+    let archivoIdentificacion = this.formDatosGenerales.get('archivo_identificacion')?.value;
+
+    // Si no se ha subido un nuevo archivo, mantener el que ya estaba en result
+    if (!archivoIdentificacion && this.datos?.archivo_identificacion) {
+        archivoIdentificacion = this.datos.archivo_identificacion;
+    }
+
+    // Construcción del objeto a enviar
     const datosActualizados: any = {
-      ...refpersData,
-  
-      // Aquí sustituimos el acceso directo a controls:
-      fallecido: this.form1.get('fallecido')?.value,
-  
-      // El resto lo tomamos de formValues (o podrías usar también this.form1.get('...')?.value)
-      causa_fallecimiento: formValues.causa_fallecimiento,
-      fecha_defuncion: convertirFechaInputs(formValues.fecha_defuncion),
-      id_departamento_defuncion: formValues.id_departamento_defuncion,
-      id_municipio_defuncion: formValues.id_municipio_defuncion,
-      estado: formValues.estado,
-      tipo_persona: formValues.tipo_persona,
-      voluntario: formValues.voluntario,
-  
-      // Campos adicionales
-      numero_certificado_defuncion: formValues.numero_certificado_defuncion,
-      fecha_reporte_fallecido: convertirFechaInputs(formValues.fecha_reporte_fallecido),
-  
-      // Archivos
-      certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
-      archivo_identificacion: this.formDatosGenerales.value.archivo_identificacion,
-  
-      // Foto perfil
-      FotoPerfil: this.image ? this.image : undefined,
-  
-      // Tabla o detalles adicionales
-      detalles: this.tableData
+        ...refpersData,
+        fallecido: formValues.fallecido,
+        causa_fallecimiento: formValues.causa_fallecimiento,
+        fecha_defuncion: convertirFechaInputs(formValues.fecha_defuncion),
+        id_departamento_defuncion: formValues.id_departamento_defuncion,
+        id_municipio_defuncion: formValues.id_municipio_defuncion,
+        estado: formValues.estado,
+        tipo_persona: formValues.tipo_persona,
+        voluntario: formValues.voluntario,
+        numero_certificado_defuncion: formValues.numero_certificado_defuncion,
+        fecha_reporte_fallecido: convertirFechaInputs(formValues.fecha_reporte_fallecido),
+
+        // Archivos
+        certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
+        archivo_identificacion: archivoIdentificacion, // Aquí se asigna el archivo correcto
+
+        // Foto perfil
+        FotoPerfil: this.image ? this.image : undefined,
+
+        // Tabla o detalles adicionales
+        detalles: this.tableData
     };
+
     console.log('Payload a enviar =>', datosActualizados);
-  
+
     // Llamada al servicio para actualizar
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, datosActualizados)
-      .subscribe(
-        async (result) => {
-          this.toastr.success('Datos generales modificados correctamente');
-        },
-        (error) => {
-          this.toastr.error(`Error: ${error.error.message}`);
-        }
-      );
+        .subscribe(
+            async (result) => {
+                this.toastr.success('Datos generales modificados correctamente');
+            },
+            (error) => {
+                this.toastr.error(`Error: ${error.error.message}`);
+            }
+        );
   }
+
 
   guardarEstadoAfiliacion(element: any) {
     const payload = {

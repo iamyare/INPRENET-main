@@ -55,7 +55,8 @@ export class DatosGeneralesComponent implements OnInit {
     'id_departamento_residencia',
     'id_municipio_residencia',
     'grupo_etnico',
-    'archivo_identificacion' 
+    'archivo_identificacion',
+    'fecha_afiliacion'
   ];
 
   constructor(private fb: FormBuilder,
@@ -66,9 +67,8 @@ export class DatosGeneralesComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
+    const noSpecialCharsPattern = '^[a-zA-ZñÑáéíóúÁÉÍÓÚ\\s]*$';
     const addressPattern = /^[a-zA-Z0-9\s.]*$/;
-    console.log(this.initialData);
 
     if (!this.formGroup) {
         if (this.initialData) {
@@ -81,6 +81,10 @@ export class DatosGeneralesComponent implements OnInit {
                 const fechaNacimiento = new Date(this.initialData.fecha_nacimiento + 'T00:00:00');
                 this.formGroup.patchValue({ fecha_nacimiento: fechaNacimiento });
             }
+            if (this.initialData.fecha_afiliacion) {
+              const fechaNacimiento = new Date(this.initialData.fecha_afiliacion + 'T00:00:00');
+              this.formGroup.patchValue({ fecha_afiliacion: fechaNacimiento });
+          }
         } else {
             this.formGroup = this.fb.group({
                 discapacidades: this.fb.array([]),
@@ -128,6 +132,7 @@ export class DatosGeneralesComponent implements OnInit {
     ]));
     this.formGroup.addControl('segundo_apellido', new FormControl('', [Validators.maxLength(40)]));
     this.formGroup.addControl('fecha_nacimiento', new FormControl('', [Validators.required]));
+    this.formGroup.addControl('fecha_afiliacion', new FormControl('', [Validators.required]));
     this.formGroup.addControl('cantidad_dependientes', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
     this.formGroup.addControl('estado_civil', new FormControl('', [Validators.required, Validators.maxLength(40)]));
     this.formGroup.addControl('representacion', new FormControl('', [Validators.required, Validators.maxLength(40)]));
@@ -227,8 +232,12 @@ export class DatosGeneralesComponent implements OnInit {
   onDatosGeneralesChange(): void {
     try {
       const data = { ...this.formGroup.value };
+      
       if (data.fecha_nacimiento) {
         data.fecha_nacimiento = format(new Date(data.fecha_nacimiento), 'yyyy-MM-dd');
+      }
+      if (data.fecha_afiliacion) {
+        data.fecha_afiliacion = format(new Date(data.fecha_afiliacion), 'yyyy-MM-dd');
       }
       this.newDatosGenerales.emit(data);
     } catch (error) {

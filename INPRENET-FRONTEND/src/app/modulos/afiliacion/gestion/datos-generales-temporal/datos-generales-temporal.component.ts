@@ -50,8 +50,30 @@ export class DatosGeneralesTemporalComponent implements OnInit {
     private centroTrabajoService: CentroTrabajoService) { }
     
 //-----------------------------------
+
+validarMayorDe18Anios(): Validators {
+  return (control: FormControl) => {
+    if (!control.value) return null;
+
+    const fechaNacimiento = new Date(control.value);
+    const today = new Date();
+    const age = today.getFullYear() - fechaNacimiento.getFullYear();
+    const monthDiff = today.getMonth() - fechaNacimiento.getMonth();
+    const dayDiff = today.getDate() - fechaNacimiento.getDate();
+
+    if (age < 18 || (age === 18 && (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)))) {
+      return { menorDeEdad: true };
+    }
+    return null;
+  };
+}
+
+
 ngOnInit(): void {
   this.opcion = 'NO';
+  const today = new Date();
+  this.minDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+
 
   // Asegurar que el formGroup existe
   if (!this.formGroup) {
@@ -102,7 +124,7 @@ ngOnInit(): void {
     this.onDiscapacidadChange({ value });
   });
 
-  const noSpecialCharsPattern = '^[a-zA-Z\\s]*$';
+  const noSpecialCharsPattern = '^[a-zA-ZñÑáéíóúÁÉÍÓÚ\\s]*$';
   const addressPattern = /^[a-zA-Z0-9\s.]*$/;
 
   // Inicializar controles adicionales del formulario
@@ -192,8 +214,16 @@ ngOnInit(): void {
     'segundo_apellido',
     new FormControl('', [Validators.maxLength(40)])
   );
-
-  this.formGroup.addControl('fecha_nacimiento', new FormControl('', [Validators.required]));
+  
+  this.formGroup.addControl(
+    'fecha_nacimiento',
+    new FormControl('', {
+      validators: [
+        Validators.required,
+        this.validarMayorDe18Anios()
+      ]
+    } as any) // Agregar 'as any' si sigue marcando error
+  );
 
   this.formGroup.addControl(
     'cantidad_dependientes',

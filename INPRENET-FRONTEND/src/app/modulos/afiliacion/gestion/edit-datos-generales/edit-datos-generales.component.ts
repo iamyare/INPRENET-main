@@ -8,6 +8,7 @@ import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { PermisosService } from '../../../../../../src/app/services/permisos.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { AfiliacionService } from '../../../../services/afiliacion.service';
 
 @Component({
   selector: 'app-edit-datos-generales',
@@ -53,6 +54,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   tiposPersona: any[] = [
     { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' }
   ];
+  tipoPersonaSeleccionada: number | null = null;
 
   tiposIdentificacion: any[] = [];
   profesiones: any[] = [];
@@ -142,7 +144,8 @@ export class EditDatosGeneralesComponent implements OnInit {
     private datosEstaticosService: DatosEstaticosService,
     private permisosService: PermisosService,
     private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private afiliacionService: AfiliacionService
   ) {
     const currentYear = new Date();
     this.minDate = new Date(
@@ -164,6 +167,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   
       // Datos personales
       fecha_nacimiento: ['', Validators.required],
+      fecha_afiliacion: ['', Validators.required],
       genero: ['', Validators.required],
       primer_nombre: ['', [ Validators.required, Validators.maxLength(40)]],
       primer_apellido: ['', [ Validators.required, Validators.maxLength(40), Validators.minLength(1), Validators.pattern('^[a-zA-Z0-9\\s]*$')]],
@@ -223,6 +227,7 @@ export class EditDatosGeneralesComponent implements OnInit {
 
     this.svcAfiliado.buscarDetPersona(this.Afiliado.n_identificacion).subscribe(
       (detalles: any[]) => {
+        
         this.tableData = detalles;
         this.loading = false;
       },
@@ -410,6 +415,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       primer_apellido: [dato?.PRIMER_APELLIDO, Validators.required],
       segundo_apellido: [dato?.SEGUNDO_APELLIDO],
       fecha_nacimiento: [dato?.FECHA_NACIMIENTO, Validators.required],
+      fecha_afiliacion: [dato?.FECHA_AFILIACION, Validators.required],
       cantidad_dependientes: [dato?.CANTIDAD_DEPENDIENTES],
       cantidad_hijos: [dato?.CANTIDAD_HIJOS],
       telefono_1: [dato?.TELEFONO_1],
@@ -448,8 +454,6 @@ export class EditDatosGeneralesComponent implements OnInit {
         // 1) Llamar primero a getAfilByParam(...) para obtener la data principal
         this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
             (result) => {
-              console.log(result);
-              
                 this.datos = result;
                 this.Afiliado = result;
 
@@ -518,7 +522,7 @@ export class EditDatosGeneralesComponent implements OnInit {
 
                 this.formDatosGenerales.markAllAsTouched();
                 this.form1.markAllAsTouched();
-
+                
                 // Llenar initialData con datos globales
                 this.initialData = {
                     ...this.initialData,
@@ -550,6 +554,7 @@ export class EditDatosGeneralesComponent implements OnInit {
                     id_departamento_nacimiento: result?.id_departamento_nacimiento,
                     id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
                     discapacidad: result?.discapacidades?.length > 0 ? true : false,
+                    fecha_afiliacion: result?.FECHA_AFILIACION,
                 };
 
                 // Discapacidades
@@ -603,7 +608,8 @@ export class EditDatosGeneralesComponent implements OnInit {
                     id_departamento_nacimiento: result?.id_departamento_nacimiento,
                     id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
                     discapacidad: result?.discapacidades?.length > 0 ? true : false,
-                    archivoIdentificacionUrl: result?.archivo_identificacion
+                    archivoIdentificacionUrl: result?.archivo_identificacion,
+                    fecha_afiliacion: result?.FECHA_AFILIACION,
                 });
 
                 // Marcar todos los controles como tocados para mostrar errores
@@ -624,7 +630,6 @@ export class EditDatosGeneralesComponent implements OnInit {
         );
     }
 }
-
   
   // ---------------------------------------------
   // Manejo de discapacidades
@@ -656,20 +661,16 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.form1.markAllAsTouched();
     this.formDatosGenerales.markAllAsTouched();
 
-    // Validar ambos formularios
     if (this.formDatosGenerales.invalid || this.form1.invalid) {
         this.checkFormErrors();
         this.toastr.error('Por favor complete los campos requeridos');
         return;
     }
 
-    // Extraer data del primer array en formDatosGenerales
     const refpersData = this.formDatosGenerales.get('refpers')?.value?.[0] || {};
 
-    // Extraer valores del form1
     const formValues = this.form1.value;
 
-    // Obtener el archivo de identificación del formulario
     let archivoIdentificacion = this.formDatosGenerales.get('archivo_identificacion')?.value;
 
   // Si no hay archivo nuevo pero existe uno registrado
@@ -697,10 +698,10 @@ export class EditDatosGeneralesComponent implements OnInit {
         voluntario: formValues.voluntario,
         numero_certificado_defuncion: formValues.numero_certificado_defuncion,
         fecha_reporte_fallecido: convertirFechaInputs(formValues.fecha_reporte_fallecido),
-
+        fecha_afiliacion: convertirFechaInputs(refpersData.fecha_afiliacion) ,
         // Archivos
         certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
-        archivo_identificacion: archivoIdentificacion, // Aquí se asigna el archivo correcto
+        archivo_identificacion: archivoIdentificacion,
 
         // Foto perfil
         FotoPerfil: this.image ? this.image : undefined,
@@ -722,6 +723,20 @@ export class EditDatosGeneralesComponent implements OnInit {
             }
         );
   }
+
+  formatFechaYYYYMMDD(fecha: any): string {
+    if (!fecha) return '';
+
+    const date = fecha instanceof Date ? fecha : new Date(fecha);
+    if (isNaN(date.getTime())) return ''; // Verifica que la fecha sea válida
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Asegura 2 dígitos en el mes
+    const day = String(date.getDate()).padStart(2, '0'); // Asegura 2 dígitos en el día
+
+    return `${year}-${month}-${day}`;
+}
+
 
   guardarEstadoAfiliacion(element: any) {
     const payload = {
@@ -872,4 +887,52 @@ export class EditDatosGeneralesComponent implements OnInit {
       this.certificadoDefuncionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(file));
     }
   }
+  
+  tieneTipoPersona(): boolean {
+    if (!this.tableData || this.tableData.length === 0) {
+      return false;
+    }
+  
+    const tiposPermitidos = ["BENEFICIARIO", "BENEFICIARIO SIN CAUSANTE", "DESIGNADO"];
+  
+    const tieneOtroTipo = this.tableData.some(item => !tiposPermitidos.includes(item.tipoPersona));
+  
+    return tieneOtroTipo;
+  }
+  
+
+  obtenerNombreTipoPersona(): string {
+    const tipo = this.tiposPersona.find(tp => tp.ID_TIPO_PERSONA === this.tipoPersonaSeleccionada);
+    return tipo ? tipo.TIPO_PERSONA : 'AFILIADO';
+  }
+  
+
+  convertirEnAfiliado() {
+    if (!this.tipoPersonaSeleccionada || !this.Afiliado?.ID_PERSONA) {
+      this.toastr.warning('Debe seleccionar un tipo de persona antes de continuar.');
+      return;
+    }
+  
+    const payload = {
+      idPersona: this.Afiliado.ID_PERSONA, 
+      idTipoPersona: this.tipoPersonaSeleccionada
+    };
+  
+    this.afiliacionService.convertirEnAfiliado(payload).subscribe({
+      next: (response) => {
+        this.toastr.success(response.message || 'Persona convertida exitosamente.');
+        this.tieneTipoPersona = () => true;
+        this.svcAfiliado.buscarDetPersona(this.Afiliado.n_identificacion).subscribe(
+          (detalles: any[]) => {
+            this.tableData = detalles;
+          }
+        );
+      },
+      error: (error) => {
+        this.toastr.error(error.message || 'Error al convertir en afiliado.');
+      }
+    });
+  }
+  
+  
 }

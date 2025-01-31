@@ -65,7 +65,7 @@
 
       <div class="row">
         <div class="col-lg-4 col-md-12">
-          <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
             <mat-label>Fecha de Nacimiento</mat-label>
             <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
             <mat-datepicker #picker1></mat-datepicker>
@@ -75,12 +75,17 @@
                    (keydown)="blockManualInput($event)"
                    (input)="clearManualInput($event)">
             <mat-hint>DD/MM/YYYY</mat-hint>
-            <mat-error *ngIf="formGroup.get('fecha_nacimiento')?.invalid && formGroup.get('fecha_nacimiento')?.touched">
+            <mat-error *ngIf="formGroup.get('fecha_nacimiento')?.hasError('required')">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               Campo requerido.
             </mat-error>
+            <mat-error *ngIf="formGroup.get('fecha_nacimiento')?.hasError('menorDeEdad')">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Debe ser mayor de 18 años.
+            </mat-error>
           </mat-form-field>
         </div>
+        
 
         <div class="col-lg-4 col-md-12">
           <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">

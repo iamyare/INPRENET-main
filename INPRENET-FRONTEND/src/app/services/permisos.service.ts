@@ -15,7 +15,7 @@ export class PermisosService {
         'documentos/menu-documentos': {
           title: 'Menu',
           permisos: [
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA'},
+            //{ role: 'OFICIAL DE PLANILLA', module: 'PLANILLA'},
           ]
         }
       }

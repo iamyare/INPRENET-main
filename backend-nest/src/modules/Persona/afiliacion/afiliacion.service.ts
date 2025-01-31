@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { Net_Tipo_Persona } from '../entities/net_tipo_persona.entity';
 import { net_persona } from '../entities/net_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, EntityManager, Like, Raw, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { CrearPersonaDto } from './dtos/crear-persona.dto';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Tipo_Identificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
@@ -74,6 +74,35 @@ export class AfiliacionService {
     private readonly otraFuenteIngresoRepository: Repository<net_otra_fuente_ingreso>,
     private readonly entityManager: EntityManager,
   ) { }
+
+  async convertirEnAfiliado(idPersona: number, idTipoPersona: number): Promise<{ message: string }> {
+    const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
+    if (!persona) {
+        throw new NotFoundException(`La persona con ID ${idPersona} no existe.`);
+    }
+    const detalleExistente = await this.detallePersonaRepository.findOne({
+        where: { ID_PERSONA: idPersona },
+    });
+
+    if (detalleExistente) {
+        throw new ConflictException(`La persona con ID ${idPersona} ya tiene un tipo de persona asignado.`);
+    }
+
+    const nuevoDetallePersona = this.detallePersonaRepository.create({
+        persona: { id_persona: idPersona } as net_persona, 
+        ID_PERSONA: idPersona, 
+        ID_CAUSANTE: idPersona,
+        ID_TIPO_PERSONA: idTipoPersona,
+        voluntario: 'NO',
+        ID_ESTADO_AFILIACION: 1,
+        eliminado: 'NO'  
+    });
+    await this.detallePersonaRepository.save(nuevoDetallePersona);
+
+    return { message: `Persona con ID ${idPersona} convertida a afiliado correctamente.` };
+  }
+
+
 
   async obtenerFallecidosPorMes(mes: number, anio: number): Promise<any[]> {
     try {

@@ -27,6 +27,14 @@ export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
 
+  @Post('convertir-afiliado')
+  async convertirEnAfiliado(
+    @Body() body: { idPersona: number; idTipoPersona: number }
+  ) {
+    const { idPersona, idTipoPersona } = body;
+    return this.afiliacionService.convertirEnAfiliado(idPersona, idTipoPersona);
+  }
+
   @Get('fallecidos-reportados')
 async obtenerFallecidos(@Query('mes') mes: number, @Query('anio') anio: number) {
   try {

@@ -256,3 +256,75 @@ button[disabled] {
   font-weight: bold;
   margin-top: 5px;
 }
+
+.tipo-persona-container {
+  display: flex;
+  align-items: center; /* Alinear verticalmente */
+  justify-content: center; /* Centrar horizontalmente */
+  gap: 15px; /* Espaciado entre el select y el botón */
+  margin-bottom: 1.5rem;
+  padding: 12px 18px;
+  background-color: #f5f8fa; /* Fondo suave */
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Ajuste del mat-form-field */
+.custom-select {
+  flex: 1; /* Se adapta automáticamente */
+  min-width: 250px;
+  max-width: 300px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0px; /* Elimina espacios innecesarios */
+}
+
+/* Ajusta la estructura interna del mat-form-field */
+.custom-select .mat-form-field-flex {
+  align-items: center !important;
+  height: 50px; /* Igualar altura al botón */
+}
+
+/* Ajusta el mat-select dentro del mat-form-field */
+.custom-select .mat-form-field-wrapper {
+  padding-bottom: 0px !important;
+  height: 50px; /* Mantener altura uniforme */
+  display: flex;
+  align-items: center;
+}
+
+/* Ajusta el input del mat-select */
+.custom-select .mat-select {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Estilización del botón */
+.custom-button {
+  height: 50px; /* Igualar altura al mat-select */
+  padding: 10px 20px;
+  background-color: #229e92 !important; /* Color primario */
+  color: white !important;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.custom-button:hover {
+  background-color: #1a8375 !important;
+}
+
+button[disabled] {
+  background-color: #d3d3d3 !important;
+  cursor: not-allowed;
+  box-shadow: none;
+}

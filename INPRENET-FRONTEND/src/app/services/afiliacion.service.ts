@@ -10,6 +10,16 @@ export class AfiliacionService {
 
   constructor(private http: HttpClient) { }
 
+  convertirEnAfiliado(payload: { idPersona: number, idTipoPersona: number }): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/convertir-afiliado`;
+    return this.http.post<any>(url, payload).pipe(
+      catchError((error) => {
+        console.error('Error al convertir a afiliado:', error);
+        return throwError(() => new Error('No se pudo convertir a afiliado. Intente de nuevo.'));
+      })
+    );
+  }
+
   obtenerFallecidosPorMes(mes: number, anio: number): Observable<any> {
     const url = `${environment.API_URL}/api/afiliacion/fallecidos-reportados`;
     return this.http.get<any>(url, { params: { mes: mes.toString(), anio: anio.toString() } }).pipe(

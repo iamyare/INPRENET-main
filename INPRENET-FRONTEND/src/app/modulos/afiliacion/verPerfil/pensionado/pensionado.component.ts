@@ -11,8 +11,6 @@ export class PensionadoComponent {
   currentStepIndex = 0;
 
   constructor(){
-    console.log(this,this.persona);
-    
   }
 
   steps = [

@@ -1103,9 +1103,17 @@ export class AfiliadoService {
       }
 
       // Definir formato de entrada y salida
-      const formatoEntrada = 'yyyy-MM-dd';  // Formato de fecha que recibes
-      const formatoSalida = 'yyyy-MM-dd';   // Formato de fecha que necesitas
+      const formatoEntrada = 'yyyy-MM-dd';
+      const formatoSalida = 'yyyy-MM-dd'; 
+      
+        const fechaAfiliacion = temp.fecha_afiliacion
+        ? format(parse(temp.fecha_afiliacion, formatoEntrada, new Date()), formatoSalida)
+        : temp.fecha_defuncion
+          ? format(parse(temp.fecha_defuncion, formatoEntrada, new Date()), formatoSalida)
+          : null;
 
+      const fechaAfiliacionDate = fechaAfiliacion ? new Date(fechaAfiliacion + 'T00:00:00') : null;
+    
       // Convierte la fecha de defunción y la fecha de reporte de fallecido
       const fechaDefuncion = datosGenerales.fecha_defuncion
         ? format(parse(datosGenerales.fecha_defuncion, formatoEntrada, new Date()), formatoSalida)
@@ -1133,10 +1141,11 @@ export class AfiliadoService {
         municipio_defuncion: datosGenerales.id_municipio_defuncion || null,
         causa_fallecimiento: causaFallecimiento,
         profesion: profesion,
-        fecha_defuncion: fechaDefuncionDate,  // Ahora con la hora ajustada a las 00:00
-        fechaReporteFallecido: fechaReporteFallecidoDate,  // Ahora con la hora ajustada a las 00:00
+        fecha_defuncion: fechaDefuncionDate,
+        fechaReporteFallecido: fechaReporteFallecidoDate,
         pais: pais,
         tipoIdentificacion: tipoIdentificacion,
+        fecha_afiliacion: fechaAfiliacionDate,
       };
 
       if (datosGenerales.fallecido === 'NO') {

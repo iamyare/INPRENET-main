@@ -6,7 +6,8 @@
   <div *ngIf="datos && !loading">
 
     <!-- TARJETA: Estado y Tipo de Persona -->
-    <mat-card class="tabla-datos-persona">
+    <!-- Mostrar la tarjeta solo si hay al menos un elemento con TipoPersona -->
+    <mat-card class="tabla-datos-persona" *ngIf="tieneTipoPersona()">
       <mat-card-title>Estado y Tipo De Persona</mat-card-title>
       <mat-card-content>
         <div class="responsive-table-container">
@@ -15,116 +16,116 @@
             [dataSource]="tableData"
             class="mat-elevation-z8 tabla-con-estilo"
           >
-            <!-- Columnas ocultas -->
-            <ng-container matColumnDef="ID_PERSONA">
-              <mat-header-cell *matHeaderCellDef style="display: none;"
-                >ID PERSONA</mat-header-cell
-              >
-              <mat-cell *matCellDef="let element" style="display: none;">
-                {{ element.ID_PERSONA }}
-              </mat-cell>
-            </ng-container>
 
-            <ng-container matColumnDef="ID_CAUSANTE">
-              <mat-header-cell *matHeaderCellDef style="display: none;"
-                >ID CAUSANTE</mat-header-cell
-              >
-              <mat-cell *matCellDef="let element" style="display: none;">
-                {{ element.ID_CAUSANTE }}
-              </mat-cell>
-            </ng-container>
+          <ng-container matColumnDef="ID_PERSONA">
+            <mat-header-cell *matHeaderCellDef style="display: none;"
+              >ID PERSONA</mat-header-cell
+            >
+            <mat-cell *matCellDef="let element" style="display: none;">
+              {{ element.ID_PERSONA }}
+            </mat-cell>
+          </ng-container>
 
-            <ng-container matColumnDef="ID_CAUSANTE_PADRE">
-              <mat-header-cell *matHeaderCellDef style="display: none;"
-                >ID CAUSANTE PADRE</mat-header-cell
-              >
-              <mat-cell *matCellDef="let element" style="display: none;">
-                {{ element.ID_CAUSANTE_PADRE }}
-              </mat-cell>
-            </ng-container>
+          <ng-container matColumnDef="ID_CAUSANTE">
+            <mat-header-cell *matHeaderCellDef style="display: none;"
+              >ID CAUSANTE</mat-header-cell
+            >
+            <mat-cell *matCellDef="let element" style="display: none;">
+              {{ element.ID_CAUSANTE }}
+            </mat-cell>
+          </ng-container>
 
-            <ng-container matColumnDef="ID_DETALLE_PERSONA">
-              <mat-header-cell *matHeaderCellDef style="display: none;"
-                >ID DETALLE PERSONA</mat-header-cell
-              >
-              <mat-cell *matCellDef="let element" style="display: none;">
-                {{ element.ID_DETALLE_PERSONA }}
-              </mat-cell>
-            </ng-container>
+          <ng-container matColumnDef="ID_CAUSANTE_PADRE">
+            <mat-header-cell *matHeaderCellDef style="display: none;"
+              >ID CAUSANTE PADRE</mat-header-cell
+            >
+            <mat-cell *matCellDef="let element" style="display: none;">
+              {{ element.ID_CAUSANTE_PADRE }}
+            </mat-cell>
+          </ng-container>
 
-            <ng-container matColumnDef="ID_ESTADO_AFILIACION">
-              <mat-header-cell *matHeaderCellDef style="display: none;"
-                >ID ESTADO AFILIACION</mat-header-cell
-              >
-              <mat-cell *matCellDef="let element" style="display: none;">
-                {{ element.ID_ESTADO_AFILIACION }}
-              </mat-cell>
-            </ng-container>
+          <ng-container matColumnDef="ID_DETALLE_PERSONA">
+            <mat-header-cell *matHeaderCellDef style="display: none;"
+              >ID DETALLE PERSONA</mat-header-cell
+            >
+            <mat-cell *matCellDef="let element" style="display: none;">
+              {{ element.ID_DETALLE_PERSONA }}
+            </mat-cell>
+          </ng-container>
 
-            <!-- DNICausante -->
-            <ng-container matColumnDef="DNICausante">
-              <mat-header-cell *matHeaderCellDef>DNI del Causante</mat-header-cell>
-              <mat-cell *matCellDef="let element">
-                {{ element.dniCausante }}
-              </mat-cell>
-            </ng-container>
+          <ng-container matColumnDef="ID_ESTADO_AFILIACION">
+            <mat-header-cell *matHeaderCellDef style="display: none;"
+              >ID ESTADO AFILIACION</mat-header-cell
+            >
+            <mat-cell *matCellDef="let element" style="display: none;">
+              {{ element.ID_ESTADO_AFILIACION }}
+            </mat-cell>
+          </ng-container>
 
-            <!-- TipoPersona -->
-            <ng-container matColumnDef="TipoPersona">
-              <mat-header-cell *matHeaderCellDef>Tipo de Persona</mat-header-cell>
-              <mat-cell *matCellDef="let element">
-                <span>{{ element.tipoPersona || 'No disponible' }}</span>
-              </mat-cell>
-            </ng-container>
+          <!-- DNICausante -->
+          <ng-container matColumnDef="DNICausante">
+            <mat-header-cell *matHeaderCellDef>DNI del Causante</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              {{ element.dniCausante }}
+            </mat-cell>
+          </ng-container>
 
-            <!-- EstadoAfiliacion -->
-            <ng-container matColumnDef="EstadoAfiliacion">
-              <mat-header-cell *matHeaderCellDef>Estado de Afiliación</mat-header-cell>
-              <mat-cell *matCellDef="let element; let i = index">
-                <mat-form-field appearance="outline">
-                  <mat-select
-                    [(ngModel)]="element.estadoAfiliacion"
-                    [ngModelOptions]="{ standalone: true }"
-                    name="estadoSelect_{{ i }}"
-                  >
-                    <mat-option *ngFor="let e of estado" [value]="e.label">
-                      {{ e.label }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </mat-cell>
-            </ng-container>
+          <!-- TipoPersona -->
+          <ng-container matColumnDef="TipoPersona">
+            <mat-header-cell *matHeaderCellDef>Tipo de Persona</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              <span>{{ element.tipoPersona || 'No disponible' }}</span>
+            </mat-cell>
+          </ng-container>
 
-            <!-- Observacion -->
-            <ng-container matColumnDef="Observacion">
-              <mat-header-cell *matHeaderCellDef>Observación</mat-header-cell>
-              <mat-cell *matCellDef="let element; let i = index">
-                <mat-form-field appearance="outline">
-                  <textarea
-                    matInput
-                    [(ngModel)]="element.observacion"
-                    [ngModelOptions]="{ standalone: true }"
-                    name="observacion_{{ i }}"
-                    rows="1"
-                  ></textarea>
-                </mat-form-field>
-              </mat-cell>
-            </ng-container>
-
-            <!-- Nueva columna Acción -->
-            <ng-container matColumnDef="Acciones">
-              <mat-header-cell *matHeaderCellDef>Acción</mat-header-cell>
-              <mat-cell *matCellDef="let element">
-                <button
-                  mat-icon-button
-                  color="primary"
-                  aria-label="Guardar"
-                  (click)="guardarEstadoAfiliacion(element)"
+          <!-- EstadoAfiliacion -->
+          <ng-container matColumnDef="EstadoAfiliacion">
+            <mat-header-cell *matHeaderCellDef>Estado de Afiliación</mat-header-cell>
+            <mat-cell *matCellDef="let element; let i = index">
+              <mat-form-field appearance="outline">
+                <mat-select
+                  [(ngModel)]="element.estadoAfiliacion"
+                  [ngModelOptions]="{ standalone: true }"
+                  name="estadoSelect_{{ i }}"
                 >
-                  <mat-icon>save</mat-icon>
-                </button>
-              </mat-cell>
-            </ng-container>
+                  <mat-option *ngFor="let e of estado" [value]="e.label">
+                    {{ e.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Observacion -->
+          <ng-container matColumnDef="Observacion">
+            <mat-header-cell *matHeaderCellDef>Observación</mat-header-cell>
+            <mat-cell *matCellDef="let element; let i = index">
+              <mat-form-field appearance="outline">
+                <textarea
+                  matInput
+                  [(ngModel)]="element.observacion"
+                  [ngModelOptions]="{ standalone: true }"
+                  name="observacion_{{ i }}"
+                  rows="1"
+                ></textarea>
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Nueva columna Acción -->
+          <ng-container matColumnDef="Acciones">
+            <mat-header-cell *matHeaderCellDef>Acción</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              <button
+                mat-icon-button
+                color="primary"
+                aria-label="Guardar"
+                (click)="guardarEstadoAfiliacion(element)"
+              >
+                <mat-icon>save</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
 
             <mat-header-row
               *matHeaderRowDef="displayedColumns.concat(['Acciones'])"
@@ -140,6 +141,28 @@
       </mat-card-content>
     </mat-card>
 
+    <!-- Mostrar mensaje alternativo si no hay datos -->
+    <div *ngIf="!tieneTipoPersona()" class="tipo-persona-container">
+      <mat-form-field class="custom-select" appearance="outline">
+        <mat-label>Seleccionar Tipo de Persona</mat-label>
+        <mat-select [(ngModel)]="tipoPersonaSeleccionada" name="tipoPersona">
+          <mat-option *ngFor="let tipo of tiposPersona" [value]="tipo.ID_TIPO_PERSONA">
+            {{ tipo.TIPO_PERSONA }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    
+      <!-- Botón para convertir a afiliado -->
+      <button 
+        mat-raised-button 
+        class="custom-button"
+        color="primary" 
+        (click)="convertirEnAfiliado()" 
+        [disabled]="!tipoPersonaSeleccionada">
+        Convertir a {{ obtenerNombreTipoPersona() }}
+      </button>
+    </div>
+    
     <!-- Componente Datos Generales (datos personales, etc.) -->
     <app-datos-generales
       [formGroup]="datosGeneralesForm"

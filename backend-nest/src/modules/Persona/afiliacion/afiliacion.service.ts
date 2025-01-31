@@ -99,7 +99,7 @@ export class AfiliacionService {
     });
     await this.detallePersonaRepository.save(nuevoDetallePersona);
 
-    return { message: `Persona con ID ${idPersona} convertida a afiliado correctamente.` };
+    return { message: `Afiliado ingresado correctamente.` };
   }
 
 

@@ -84,9 +84,9 @@ export class AfiliacionService {
         where: { ID_PERSONA: idPersona },
     });
 
-    if (detalleExistente) {
+    /* if (detalleExistente) {
         throw new ConflictException(`La persona con ID ${idPersona} ya tiene un tipo de persona asignado.`);
-    }
+    } */
 
     const nuevoDetallePersona = this.detallePersonaRepository.create({
         persona: { id_persona: idPersona } as net_persona, 
@@ -211,60 +211,77 @@ export class AfiliacionService {
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion },
       relations: [
-        'tipoIdentificacion',
-        'pais',
-        'municipio',
-        'municipio.departamento',
-        'municipio_defuncion',
-        'municipio_nacimiento',
-        'municipio_nacimiento.departamento',
-        'profesion',
-        'detallePersona',
-        'peps',
-        'peps.cargo_publico',
-        'detallePersona.tipoPersona',
-        'detallePersona.estadoAfiliacion',
-        'referencias',
-        'personasPorBanco',
-        'personasPorBanco.banco',
-        'detalleDeduccion',
-        'perfPersCentTrabs',
-        'perfPersCentTrabs.centroTrabajo',
-        'perfPersCentTrabs.centroTrabajo.municipio',
-        'perfPersCentTrabs.centroTrabajo.municipio.departamento',
-        'cuentas',
-        'detallePlanIngreso',
-        'colegiosMagisteriales',
-        'otra_fuente_ingreso',
+          'tipoIdentificacion',
+          'pais',
+          'municipio',
+          'municipio.departamento',
+          'municipio_defuncion',
+          'municipio_nacimiento',
+          'municipio_nacimiento.departamento',
+          'profesion',
+          'detallePersona',
+          'peps',
+          'peps.cargo_publico',
+          'detallePersona.tipoPersona',
+          'detallePersona.estadoAfiliacion',
+          'referencias',
+          'personasPorBanco',
+          'personasPorBanco.banco',
+          'detalleDeduccion',
+          'perfPersCentTrabs',
+          'perfPersCentTrabs.centroTrabajo',
+          'perfPersCentTrabs.centroTrabajo.municipio',
+          'perfPersCentTrabs.centroTrabajo.municipio.departamento',
+          'cuentas',
+          'detallePlanIngreso',
+          'colegiosMagisteriales',
+          'otra_fuente_ingreso',
+          'familiares',
+          'familiares.referenciada',
+          'otra_fuente_ingreso',
       ],
-    });
+  });
 
-    if (!persona) {
+  if (!persona) {
       throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
-    }
+  }
 
-    // Buscar el cónyuge en la tabla Net_Familia
-    const conyuge = await this.familiaRepository.findOne({
-      where: { persona: { id_persona: persona.id_persona }, parentesco: 'CÓNYUGE' },
-      relations: ['referenciada'], // Relación para obtener los datos del cónyuge
-    });
+  // Buscar el cónyuge en la tabla Net_Familia
+  const conyuge = persona.familiares.find(familiar => familiar.parentesco === 'CÓNYUGE');
 
-    // Verificar si el cónyuge es afiliado
-    const esAfiliado = conyuge && conyuge.referenciada
+  // Verificar si el cónyuge es afiliado
+  const esAfiliado = conyuge && conyuge.referenciada
       ? await this.verificarSiEsAfiliado(conyuge.referenciada.n_identificacion)
       : "NO";
 
-    // Agregar la información del cónyuge, incluyendo si trabaja y si es afiliado
-    return {
+  // Mapear los familiares en el formato adecuado
+  const familiares = persona.familiares.map(familiar => ({
+      id_familia: familiar.id_familia,
+      parentesco: familiar.parentesco,
+      trabaja: familiar.trabaja,
+      referenciada: familiar.referenciada
+          ? {
+              id_persona: familiar.referenciada.id_persona,
+              primer_nombre: familiar.referenciada.primer_nombre,
+              segundo_nombre: familiar.referenciada.segundo_nombre,
+              primer_apellido: familiar.referenciada.primer_apellido,
+              segundo_apellido: familiar.referenciada.segundo_apellido,
+              n_identificacion: familiar.referenciada.n_identificacion,
+          }
+          : null
+  }));
+
+  return {
       ...persona,
       conyuge: conyuge
-        ? {
-          ...conyuge.referenciada,
-          trabaja: conyuge.trabaja,
-          esAfiliado: esAfiliado
-        }
-        : null,
-    };
+          ? {
+              ...conyuge.referenciada,
+              trabaja: conyuge.trabaja,
+              esAfiliado: esAfiliado
+          }
+          : null,
+      familiares,
+  };
   }
 
   async verificarSiEsAfiliado(n_identificacion: string): Promise<string> {

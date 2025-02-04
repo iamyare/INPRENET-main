@@ -12,6 +12,17 @@ export class ConasaService {
 
   constructor(private http: HttpClient) { }
 
+  obtenerAfiliadosMesAnterior(): Observable<any> {
+    const url = `${this.baseUrl}/afiliados-mes-anterior`;
+    
+    return this.http.get<any>(url).pipe(
+      catchError((error) => {
+        console.error('Error al obtener afiliados del mes anterior', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   subirFactura(tipoFactura: number, periodoFactura: string, archivoPdf: File): Observable<any> {
     const url = `${this.baseUrl}/subir-factura`;
     const formData = new FormData();

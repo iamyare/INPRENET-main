@@ -259,7 +259,7 @@ export class AfiliadoService {
     const tiposPersona = persona.detallePersona
       ? persona.detallePersona.map((detalle) => detalle.tipoPersona?.tipo_persona).filter(Boolean)
       : [];
-
+      
     // Construye el resultado con valores por defecto en caso de que no haya `detallePersona`
     const result = {
       ID_TIPO_IDENTIFICACION: persona.tipoIdentificacion.id_identificacion,
@@ -301,6 +301,8 @@ export class AfiliadoService {
       ID_DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.id_departamento,
       DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.nombre_departamento,
       ID_CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.id_causa_fallecimiento,
+      NUMERO_CERTIFICADO_DEFUNCION: persona?.numero_certificado_defuncion,
+      FECHA_REPORTE_FALLECIDO: persona?.fechaReporteFallecido,
       CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.nombre,
       
       FECHA_AFILIACION: persona.fecha_afiliacion,
@@ -1146,6 +1148,7 @@ export class AfiliadoService {
         pais: pais,
         tipoIdentificacion: tipoIdentificacion,
         fecha_afiliacion: fechaAfiliacionDate,
+        numero_certificado_defuncion: datosGenerales.numero_certificado_defuncion || null,
       };
 
       if (datosGenerales.fallecido === 'NO') {

@@ -88,11 +88,6 @@ export class PdfService {
         { text: '\n\n\n' }
     );
 
-    /* if (includeQR) {
-        const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
-        content.push({ image: qrCode, width: 100, alignment: 'center' });
-    } */
-
     return {
         pageSize: 'A4',
         pageMargins: [40, 120, 40, 85],
@@ -109,9 +104,9 @@ export class PdfService {
                     widths: ['*', '*', '*'],
                     body: [
                         [
-                            { text: `Fecha y Hora: ${new Date().toLocaleString()}`, alignment: 'left', border: [false, false, false, false], style: { fontSize: 8 }, },
-                            { text: `Generó: ${user}`, alignment: 'center', border: [false, false, false, false], style: { fontSize: 8 }, },
-                            { text: `Página: ${currentPage} de ${pageCount}`, alignment: 'right', border: [false, false, false, false], style: { fontSize: 8 }, }
+                            { text: `Fecha y Hora: ${new Date().toLocaleString()}`, alignment: 'left', border: [false, false, false, false], style: 'footer' },
+                            { text: `Generó: ${user}`, alignment: 'center', border: [false, false, false, false], style: 'footer' },
+                            { text: `Página: ${currentPage} de ${pageCount}`, alignment: 'right', border: [false, false, false, false], style: 'footer' }
                         ]
                     ]
                 },
@@ -123,27 +118,31 @@ export class PdfService {
                 fontSize: 18,
                 bold: true,
                 alignment: 'center',
-                margin: [0, 20, 0, 20],
+                margin: [0, 20, 0, 20]
             },
             subheader: {
                 fontSize: 11,
                 alignment: 'left',
-                margin: [40, 10, 40, 5]
+                margin: [40, 10, 40, 5],
+                lineHeight: 1.8
             },
             name: {
                 fontSize: 14,
                 bold: true,
                 alignment: 'center',
-                margin: [40, 10, 40, 5]
+                margin: [40, 10, 40, 5],
+                lineHeight: 1.8
             },
             body: {
                 fontSize: 11,
                 alignment: 'left',
-                margin: [40, 10, 40, 5]
+                margin: [40, 10, 40, 5],
+                lineHeight: 1.8
             },
             dni: {
                 fontSize: 11,
-                bold: true
+                bold: true,
+                lineHeight: 1.8
             },
             signature: {
                 fontSize: 12,
@@ -161,7 +160,7 @@ export class PdfService {
             }
         }
     };
-  }
+}
 
   public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean, dto: EmpleadoDto) {
     const calcularEdad = (fecha: string) => {
@@ -184,6 +183,28 @@ export class PdfService {
       ? persona.peps.flatMap((peps: any) => peps.cargo_publico || [])
       : [];
     let conyuge = data?.conyuge;
+
+    const detallePersonaFiltrado = data.detallePersona?.find(
+      (detalle: any) => [1, 2, 3].includes(detalle.tipoPersona.id_tipo_persona)
+  );
+
+  // Si no hay un tipo válido, no generamos la constancia
+  if (!detallePersonaFiltrado) {
+      console.error('No se encontró un tipo de persona válido para la constancia.');
+      return;
+  }
+
+  // Obtener la clase cliente
+  let claseCliente = detallePersonaFiltrado.tipoPersona.tipo_persona;
+
+  // Si el tipo de persona es "AFILIADO", establecerlo como "ACTIVO"
+  if (claseCliente === 'AFILIADO') {
+      claseCliente = 'ACTIVO';
+  }
+
+  // Obtener el tipo de formulario
+  const tipoFormulario = data.tipoFormulario || 'NO DISPONIBLE'
+    
   
     const jsonObj: any =
       typeof persona?.direccion_residencia_estructurada === 'string'
@@ -208,6 +229,18 @@ export class PdfService {
 
   
     const content: Array<any> = [
+      {
+        text: `CLASE CLIENTE: ${claseCliente}`,
+        style: 'infoHeader',
+        alignment: 'left',
+        margin: [0, 0, 0, 5], 
+    },
+    {
+        text: `TIPO DE FORMULARIO: ${tipoFormulario}`,
+        style: 'infoHeader',
+        alignment: 'left',
+        margin: [0, 0, 0, 10], 
+    },
       {
         table: {
           widths: ['14%', '14%', '14%', '14%', '14%', '14%', '14%'],
@@ -254,11 +287,11 @@ export class PdfService {
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: [
-                  persona?.primer_apellido,
-                  persona?.segundo_apellido,
                   persona?.primer_nombre,
                   persona?.segundo_nombre,
                   persona?.tercer_nombre,
+                  persona?.primer_apellido,
+                  persona?.segundo_apellido,
                 ]
                   .filter((name) => name && name.trim() !== "")
                   .join(" "),
@@ -337,10 +370,21 @@ export class PdfService {
                 text: persona?.cantidad_dependientes || '',
                 alignment: 'left',
                 style: 'smallCell',
-                colSpan: 3,
+                colSpan: 2,
               },
               {},
-              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CANTIDAD DE HIJOS',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.cantidad_hijos || '',
+                alignment: 'left',
+                style: 'smallCell',
+              },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: 'PROFESIÓN',
@@ -351,10 +395,7 @@ export class PdfService {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: persona?.profesion?.descripcion || '',
                 alignment: 'left',
-                style: 'smallCell',
-                colSpan: 2,
               },
-              {},
             ],
             [
               {
@@ -466,7 +507,7 @@ export class PdfService {
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'Edad',
+                text: 'EDAD',
                 alignment: 'left',
                 style: ['subheader'],
               },
@@ -610,6 +651,190 @@ export class PdfService {
                 ];
               }
             })(),
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'EN CASO AFIRMATIVO: INDIQUE EL NOMBRE DE SUS FAMILIARES HASTA EL SEGUNDO GRADO DE CONSANGUINIDAD Y SEGUNDO DE AFINIDAD COMO SER: (PADRES, CONYUGUE, HIJOS, ABUELOS, HERMANOS, NIETOS, SUEGROS, CUÑADOS, YERNOS NUERAS).',
+                alignment: 'center',
+                colSpan: 7,
+                style: ['header'],
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'NOMBRES Y APELLIDOS',
+                alignment: 'center',
+                style: ['subheader'],
+                colSpan: 3,
+              },
+              {},
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'NÚMERO DE IDENTIFICACIÓN',
+                alignment: 'center',
+                style: ['subheader'],
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'PARENTESCO',
+                alignment: 'center',
+                style: ['subheader'],
+                colSpan: 2,
+              },
+              {},
+            ],
+            ...(() => {
+              if (persona?.familiares?.length > 0) {
+                return persona.familiares.flatMap((familiar: any) => {
+                  return [
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: [
+                          familiar?.referenciada?.primer_nombre,
+                          familiar?.referenciada?.segundo_nombre,
+                          familiar?.referenciada?.tercer_nombre,
+                          familiar?.referenciada?.primer_apellido,
+                          familiar?.referenciada?.segundo_apellido,
+                        ]
+                          .filter((name) => name && name.trim() !== "")
+                          .join(" "),
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 3,
+                      },
+                      {},
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: familiar?.referenciada?.n_identificacion || 'N/A',
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 2,
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: familiar?.parentesco || 'N/A',
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 2,
+                      },
+                      {},
+                    ],
+                  ];
+                });
+              } else {
+                // Sección vacía si no hay familiares
+                return [
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'NO HAY REGISTRO DE FAMILIARES',
+                      alignment: 'center',
+                      colSpan: 7,
+                      style: 'smallCell',
+                    },
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                    {},
+                  ],
+                ];
+              }
+            })(),
+            // Sección de OTRAS FUENTES DE INGRESO (Mismo estilo que familiares)
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'OTRAS FUENTES DE INGRESO',
+                alignment: 'center',
+                colSpan: 7, // Asegurar que usa las 7 columnas de la tabla
+                style: ['header'],
+              },
+              {}, {}, {}, {}, {}, {},
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'ACTIVIDAD ECONÓMICA',
+                alignment: 'center',
+                style: ['subheader'],
+                colSpan: 3,
+              },
+              {}, {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'MONTO INGRESO',
+                alignment: 'center',
+                style: ['subheader'],
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'OBSERVACIÓN',
+                alignment: 'center',
+                style: ['subheader'],
+                colSpan: 2,
+              },
+              {},
+            ],
+            ...(
+              persona?.otra_fuente_ingreso?.length > 0 
+                ? persona.otra_fuente_ingreso.flatMap((fuente: any) => [
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: fuente.actividad_economica || 'N/A',
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 3,
+                      },
+                      {}, {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: fuente.monto_ingreso ? `L. ${fuente.monto_ingreso}` : 'N/A',
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 2,
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: fuente.observacion || 'N/A',
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 2,
+                      },
+                      {},
+                    ],
+                  ])
+                : [
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'No hay otras fuentes de ingreso registradas',
+                        colSpan: 7,
+                        alignment: 'center',
+                        style: 'smallCell',
+                      },
+                      {}, {}, {}, {}, {}, {},
+                    ],
+                  ]
+            ),
             [
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -2217,6 +2442,11 @@ export class PdfService {
         signatureTitle: {
           fontSize: 12,
           alignment: 'center',
+        },
+        infoHeader: {
+          fontSize: 10,
+          bold: true,
+          alignment: 'left',
         },
         footer: {
           fontSize: 10,

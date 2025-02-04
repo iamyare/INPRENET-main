@@ -11,6 +11,25 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class ConasaController {
   constructor(private readonly conasaService: ConasaService) {}
 
+  @Get('afiliados-mes-anterior')
+  async obtenerAfiliadosMesAnterior(@Res() res) {
+    try {
+      const afiliados = await this.conasaService.obtenerAfiliadosMesAnterior();
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'Lista de afiliados del mes anterior obtenida exitosamente.',
+        data: afiliados,
+      });
+    } catch (error) {
+      console.error('Error al obtener afiliados del mes anterior:', error.message);
+      return res.status(500).json({
+        statusCode: 500,
+        message: 'Error interno del servidor.',
+        error: error.message,
+      });
+    }
+  }
+
   @Post('subir-factura')
   @UseInterceptors(FileInterceptor('archivo_pdf'))
   async subirFactura(

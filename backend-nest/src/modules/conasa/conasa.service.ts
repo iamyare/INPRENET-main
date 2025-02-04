@@ -43,6 +43,50 @@ export class ConasaService {
     private readonly facturasRepository: Repository<Net_Facturas_Conasa>,
   ) {}
 
+  async obtenerAfiliadosMesAnterior() {
+    return this.dataSource.query(`
+      WITH planillas_filtradas AS (
+          SELECT
+              dpb.id_persona,
+              p.id_planilla,
+              tp.nombre_planilla,
+              p.periodo_inicio,
+              p.fecha_cierre
+          FROM
+              net_detalle_pago_beneficio dpb
+          INNER JOIN
+              net_planilla p ON dpb.id_planilla = p.id_planilla
+          INNER JOIN
+              net_tipo_planilla tp ON p.id_tipo_planilla = tp.id_tipo_planilla
+          INNER JOIN
+              net_persona_por_banco ppb ON dpb.id_persona = ppb.id_persona
+          WHERE
+              tp.nombre_planilla IN ('ORDINARIA DE JUBILADOS Y PENSIONADOS')
+              AND dpb.id_af_banco IS NOT NULL
+              AND dpb.estado = 'PAGADA'
+      ),
+      mes_anterior_1 AS (
+          SELECT DISTINCT id_persona
+          FROM planillas_filtradas
+          WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1)
+      )
+      SELECT 
+          np.n_identificacion,
+          REGEXP_REPLACE(
+              TRIM(
+                  COALESCE(np.primer_nombre, '') || ' ' ||
+                  COALESCE(np.segundo_nombre, '') || ' ' ||
+                  COALESCE(np.tercer_nombre, '') || ' ' ||
+                  COALESCE(np.primer_apellido, '') || ' ' ||
+                  COALESCE(np.segundo_apellido, '')
+              ),
+              '\\s+', ' '
+          ) AS nombre_completo
+      FROM mes_anterior_1 ma
+      INNER JOIN net_persona np ON ma.id_persona = np.id_persona
+    `);
+  }
+
   async guardarFactura(data: {
     tipo_factura: number;
     periodo_factura: string;

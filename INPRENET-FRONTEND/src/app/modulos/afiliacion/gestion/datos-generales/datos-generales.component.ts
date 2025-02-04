@@ -461,6 +461,5 @@ export class DatosGeneralesComponent implements OnInit {
       this.formGroup.markAllAsTouched();  // Marca todos los controles como "tocados"
       return;
     }
-    console.log('Formulario enviado:', this.formGroup.value);
   }
 }

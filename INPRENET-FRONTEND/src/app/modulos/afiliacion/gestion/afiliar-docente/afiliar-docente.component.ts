@@ -64,7 +64,7 @@ export class AfiliarDocenteComponent implements OnInit {
 
   constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private datosEstaticosService: DatosEstaticosService, 
     private toastr: ToastrService,  private formStateService: FormStateService, private http: HttpClient, private afiliadoService: AfiliadoService,
-    private personaService: PersonaService,private authService: AuthService) {
+    private personaService: PersonaService, private authService: AuthService) {
     this.convertirImagenABase64('../assets/images/membratadoFinal.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
     }).catch(error => {
@@ -176,6 +176,7 @@ export class AfiliarDocenteComponent implements OnInit {
           segundo_apellido: datosGenerales.segundo_apellido?.toUpperCase(),
           genero: datosGenerales.genero?.toUpperCase(),
           cantidad_hijos: datosGenerales.cantidad_hijos,
+          cantidad_dependientes: datosGenerales.cantidad_dependientes,
           representacion: datosGenerales.representacion?.toUpperCase(),
           grado_academico: datosGenerales.grado_academico?.toUpperCase(),
           telefono_1: datosGenerales.telefono_1,
@@ -241,6 +242,7 @@ export class AfiliarDocenteComponent implements OnInit {
                 console.error('No se encontró la persona luego de crear la afiliación.');
                 return;
               }
+                personaActualizada.tipoFormulario = 'NUEVA AFILIACION';
                 this.afiliadoService.generarConstanciaQR(
                   personaActualizada, 
                   this.usuarioToken,

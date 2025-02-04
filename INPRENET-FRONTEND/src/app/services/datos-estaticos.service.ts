@@ -5,10 +5,8 @@ import { BancosService } from './bancos.service';
 import { TipoIdentificacionService } from './tipo-identificacion.service';
 import { ColegiosMagisterialesService } from './colegios-magisteriales.service';
 import { CentroTrabajoService } from './centro-trabajo.service';
-import { HttpClient } from '@angular/common/http';
 import { TransaccionesService } from './transacciones.service';
-import { AuthService } from './auth.service';
-import { catchError, firstValueFrom, map, Observable } from 'rxjs';
+import { firstValueFrom, map, Observable } from 'rxjs';
 import { AfiliacionService } from './afiliacion.service';
 import { MantenimientoAfiliacionService } from './mantenimiento-afiliacion.service';
 
@@ -347,10 +345,7 @@ export class DatosEstaticosService {
     },
     {
       "value": "FEMENINO", "label": "FEMENINO"
-    },
-    {
-      "value": "OTRO", "label": "OTRO"
-    },
+    }
   ];
 
   sexo = [
@@ -359,9 +354,6 @@ export class DatosEstaticosService {
     },
     {
       "value": "F", "label": "FEMENINO"
-    },
-    {
-      "value": "OTRO", "label": "OTRO"
     }
   ];
 

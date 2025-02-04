@@ -34,19 +34,11 @@
         </div>
     
         <div class="action-buttons">
-          <button mat-button color="warn" (click)="eliminarBanco(i)">
+          <button mat-button color="warn" (click)="eliminarBanco(i)" *ngIf="bancosArray.length > 1">
             <mat-icon>delete</mat-icon> Eliminar Banco
           </button>
         </div>
       </div>
     </div>
-    
-
-    <div class="action-buttons" *ngIf="bancosArray.length === 0">
-      <button mat-button color="primary" (click)="agregarBanco()">
-        <mat-icon>add</mat-icon> Agregar Cuenta De Banco
-      </button>
-    </div>
-    
   </div>
 </div>

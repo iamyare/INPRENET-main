@@ -20,7 +20,13 @@ export class BancosComponent implements OnInit {
     if (!this.formGroup.get('bancos')) {
       this.formGroup.addControl('bancos', this.fb.array([]));
     }
+
     this.loadBancos();
+
+    // Asegurar que siempre haya al menos un banco en el formulario
+    if (this.bancosArray.length === 0) {
+      this.agregarBanco();
+    }
   }
 
   private loadBancos() {
@@ -34,40 +40,25 @@ export class BancosComponent implements OnInit {
   }
 
   agregarBanco(): void {
-    if (this.bancosArray.length >= 1) {
-      return;
-    }
-  
     const bancoForm = this.fb.group({
       id_banco: ['', Validators.required],
       num_cuenta: ['', [Validators.required, Validators.minLength(8), Validators.pattern('^[0-9]*$')]],
       estado: ['ACTIVO', Validators.required]
     });
-  
+
     this.bancosArray.push(bancoForm);
     this.markAllAsTouched(bancoForm);
     this.formGroup.markAsTouched();
   }
-  
-  
+
   eliminarBanco(index: number): void {
-    if (this.bancosArray.length > 0) {
+    if (this.bancosArray.length > 1) { // Solo permite eliminar si hay más de un banco
       this.bancosArray.removeAt(index);
     }
   }
 
-  onCuentaPrincipalChange(index: number): void {
-    this.bancosArray.controls.forEach((group, i) => {
-      if (i === index) {
-        group.get('estado')?.setValue('ACTIVO', { emitEvent: false });
-      } else {
-        group.get('estado')?.setValue('INACTIVO', { emitEvent: false });
-      }
-    });
-  }
-
   getErrors(i: number, fieldName: string): string[] {
-    const control:any = this.bancosArray.at(i).get(fieldName);
+    const control: any = this.bancosArray.at(i).get(fieldName);
     if (control && control.errors) {
       return Object.keys(control.errors).map(key => this.getErrorMessage(key, control.errors[key]));
     }
@@ -78,7 +69,6 @@ export class BancosComponent implements OnInit {
     const errorMessages: any = {
       required: 'Este campo es requerido.',
       minlength: `Debe tener al menos ${errorValue.requiredLength} caracteres.`,
-      maxlength: `No puede tener más de ${errorValue.requiredLength} caracteres.`,
       pattern: 'El formato no es válido.'
     };
     return errorMessages[errorType] || 'Error desconocido.';
@@ -94,11 +84,11 @@ export class BancosComponent implements OnInit {
       });
     }
   }
-  
+
   reset(): void {
-    // Limpia todos los bancos del FormArray
+    // Siempre debe haber un banco presente, así que en lugar de limpiar, lo reiniciamos
     this.bancosArray.clear();
-    // Reinicia el formulario padre
-    this.formGroup.reset();
+    this.agregarBanco();
+    this.formGroup.markAsUntouched();
   }
 }

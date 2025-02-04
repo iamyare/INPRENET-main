@@ -3,7 +3,6 @@ import { FormGroup, FormBuilder, Validators, FormControl, FormArray } from '@ang
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DireccionService } from 'src/app/services/direccion.service';
-import { ValidationService } from 'src/app/shared/services/validation.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { CamaraComponent } from 'src/app/components/camara/camara.component';
 import { FormStateService } from 'src/app/services/form-state.service'; // Importar el servicio
@@ -459,10 +458,10 @@ ngOnInit(): void {
   ];
 
   grado_academico = [
-    { "label": "PRIMARIA", "value": "PRIMARIA" },
-    { "label": "EDUCACIÓN MEDIA", "value": "EDUCACIÓN MEDIA" },
-    { "label": "PRE-GRADO", "value": "PRE-GRADO" },
-    { "label": "POST-GRADO", "value": "POST-GRADO" },
+    { "label": "MAESTRO DE EDUCACION PRIMARIA", "value": "MAESTRO DE EDUCACION PRIMARIA" },
+    { "label": "MAESTRO DE EDUCACION SECUNDARIA", "value": "MAESTRO DE EDUCACION SECUNDARIA" },
+    { "label": "MAESTRO DE EDUCACION SUPERIOR", "value": "MAESTRO DE EDUCACION SUPERIOR" },
+    { "label": "LICENCIATURA EN EDUCACION SUPERIOR", "value": "LICENCIATURA EN EDUCACION SUPERIOR" },
   ];
 
   onDepartamentoChange(event: any) {

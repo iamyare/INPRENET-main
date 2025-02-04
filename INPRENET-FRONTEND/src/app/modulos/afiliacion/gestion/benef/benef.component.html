@@ -206,7 +206,7 @@
 
           <!-- Botón para eliminar beneficiario -->
           <div class="action-buttons">
-            <button mat-button color="warn" (click)="eliminarBeneficiario(i)">
+            <button mat-button color="warn" (click)="eliminarBeneficiario(i)" *ngIf="beneficiarios.length > 1">
               <mat-icon>remove</mat-icon> Eliminar Beneficiario
             </button>
           </div>

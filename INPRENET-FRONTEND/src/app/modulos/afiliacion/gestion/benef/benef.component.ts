@@ -51,6 +51,10 @@ export class BenefComponent implements OnInit {
     if (!this.parentesco.some((item: { value: string }) => item.value === nuevoParentesco.value)) {
       this.parentesco.push(nuevoParentesco);
     }
+
+    if (this.beneficiarios.length === 0) {
+      this.agregarBeneficiario();
+    }
   }
 
   // Getter para obtener el FormArray de beneficiarios
@@ -81,11 +85,11 @@ export class BenefComponent implements OnInit {
       correo_1: new FormControl(''),
       correo_2: new FormControl(''),
       fecha_nacimiento: new FormControl('', [Validators.required]),
-      direccion_residencia: new FormControl(''),
-      id_municipio_residencia: new FormControl(null),
-      id_departamento_residencia: new FormControl(null),
-      id_departamento_nacimiento: new FormControl(null),
-      id_municipio_nacimiento: new FormControl(null),
+      direccion_residencia: new FormControl('',[Validators.required]),
+      id_municipio_residencia: new FormControl(null,[Validators.required]),
+      id_departamento_residencia: new FormControl(null,[Validators.required]),
+      id_departamento_nacimiento: new FormControl(null,[Validators.required]),
+      id_municipio_nacimiento: new FormControl(null,[Validators.required]),
       porcentaje: new FormControl('', [
         Validators.required,
         Validators.min(1),
@@ -157,7 +161,7 @@ export class BenefComponent implements OnInit {
 
   // Función para eliminar un beneficiario
   eliminarBeneficiario(index: number): void {
-    if (this.beneficiarios.length > 0) {
+    if (this.beneficiarios.length > 1) { // Solo permite eliminar si hay más de un beneficiario
       this.beneficiarios.removeAt(index);
     }
   }
@@ -368,6 +372,7 @@ export class BenefComponent implements OnInit {
     this.cargarDepartamentos();
     this.cargarDepartamentosNacimiento();
     this.loadDiscapacidades();
+    this.agregarBeneficiario();
   }
 
   verificarAfiliadoBeneficiario(n_identificacion: string, beneficiarioForm: FormGroup): void {

@@ -45,11 +45,11 @@
               <mat-icon matSuffix>exposure_plus_1</mat-icon> Agregar Familiar
             </button>
           </div>
-          <div class="col-md-6" *ngIf="familiares.length > 0">
+          <div class="col-md-6" *ngIf="familiares.length > 1">
             <button mat-button color="warn" type="button" (click)="removeFamiliar(familiares.length - 1)">
               <mat-icon matSuffix>exposure_neg_1</mat-icon> Eliminar Familiar
             </button>
-          </div>
+          </div>          
         </div>
       </form>
     </div>

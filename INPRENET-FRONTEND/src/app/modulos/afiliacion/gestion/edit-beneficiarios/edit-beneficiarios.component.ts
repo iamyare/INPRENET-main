@@ -14,8 +14,11 @@ import { AgregarBenefCompComponent } from '../agregar-benef-comp/agregar-benef-c
 import { PermisosService } from 'src/app/services/permisos.service';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { AuthService } from 'src/app/services/auth.service';
 import { GestionarDiscapacidadDialogComponent } from 'src/app/components/dinamicos/gestionar-discapacidad-dialog/gestionar-discapacidad-dialog.component';
-
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 @Component({
   selector: 'app-edit-beneficiarios',
   templateUrl: './edit-beneficiarios.component.html',
@@ -47,7 +50,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     private permisosService: PermisosService,
     private afiliacionServicio: AfiliacionService,
     private datosEstaticosService: DatosEstaticosService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -95,6 +99,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
   async getFilas() {
     if (this.persona) {
+      console.log(this.persona);
+      
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
@@ -297,5 +303,133 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       });
     });
   }
+  
+  generarPDF() {
+    const beneficiarios = this.filas.map((b, index) => [
+        { text: `${index + 1}`, alignment: 'center' }, // Índice
+        { text: b.n_identificacion, alignment: 'center' }, // Identificación
+        { text: `${b.nombres} ${b.apellidos}`, alignment: 'center' }, // Nombre completo
+        { text: b.parentesco, alignment: 'center' }, // Parentesco
+        { text: `${b.porcentaje}`, alignment: 'center' } // Porcentaje con el signo %
+    ]);
+
+    const token = sessionStorage.getItem('token');
+    let dataToken;
+    let user = 'Desconocido'; // Valor por defecto si no hay usuario
+
+    if (token) {
+        dataToken = this.authService.decodeToken(token);
+        user = dataToken.correo.split("@")[0]; // Extraer el nombre de usuario del correo
+    }
+
+    this.getBase64ImageFromURL('/../../../../../assets/images/membratadoFinal.jpg').then((base64Image) => {
+        const docDefinition: any = {
+            pageSize: 'LETTER',
+            pageMargins: [40, 100, 40, 80], // **Ajuste de margen inferior**
+            background: [
+                {
+                    image: base64Image,
+                    width: 600, // Ajusta el ancho del membrete
+                    absolutePosition: { x: 0, y: 0 } // Ubicación exacta en la hoja
+                }
+            ],
+            content: [
+                {
+                    text: 'DESIGNACIÓN DE BENEFICIARIOS',
+                    style: 'header',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 10] // Margen reducido para subir el título
+                },
+                {
+                    text: `${this.persona.primer_nombre} ${this.persona.segundo_nombre || ''} ${this.persona.primer_apellido} ${this.persona.segundo_apellido || ''}`,
+                    style: 'subheader',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 5]
+                },
+                {
+                    text: `Número de Identificación: ${this.persona.n_identificacion}`,
+                    style: 'subheader',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 20]
+                },
+
+                // Tabla de beneficiarios
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: ['10%', '25%', '35%', '20%', '10%'], // Ancho de columnas
+                        body: [
+                            [
+                                { text: 'N°', style: 'tableHeader', alignment: 'center' },
+                                { text: 'Identificación', style: 'tableHeader', alignment: 'center' },
+                                { text: 'Beneficiario', style: 'tableHeader', alignment: 'center' },
+                                { text: 'Parentesco', style: 'tableHeader', alignment: 'center' },
+                                { text: '%', style: 'tableHeader', alignment: 'center' }
+                            ],
+                            ...beneficiarios
+                        ]
+                    },
+                    layout: {
+                        hLineWidth: (i: any, node: any) => (i === 0 || i === node.table.body.length ? 1.5 : 0.5),
+                        vLineWidth: () => 0.5,
+                        hLineColor: () => '#AAAAAA',
+                        vLineColor: () => '#AAAAAA',
+                        paddingLeft: () => 5,
+                        paddingRight: () => 5,
+                        paddingTop: () => 3,
+                        paddingBottom: () => 3
+                    }
+                }
+            ],
+            footer: function (currentPage: number, pageCount: number) {
+                return {
+                    margin: [20, -20, 20, 30], // **Moviendo el footer más arriba**
+                    table: {
+                        widths: ['*', '*', '*'],
+                        body: [
+                            [
+                                { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], style: { fontSize: 8 } },
+                                { text: `Generó: ${user}`, alignment: 'left', border: [false, false, false, false], style: { fontSize: 8 } },
+                                { text: 'Página: ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: { fontSize: 8 } }
+                            ]
+                        ]
+                    }
+                };
+            },
+            styles: {
+                header: { fontSize: 18, bold: true, margin: [0, 10, 0, 5] },
+                subheader: { fontSize: 14, italics: true, margin: [0, 0, 0, 10] },
+                tableHeader: { bold: true, fontSize: 12, fillColor: '#DDDDDD' }
+            }
+        };
+
+        pdfMake.createPdf(docDefinition).download('Beneficiarios.pdf');
+    }).catch(error => {
+        console.error("Error al cargar la imagen del membrete:", error);
+        this.toastr.error("No se pudo cargar la imagen del membrete");
+    });
+}
+
+
+
+  // Método para convertir imagen a Base64
+  getBase64ImageFromURL(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      let img = new Image();
+      img.crossOrigin = 'Anonymous'; // Para evitar problemas de CORS si la imagen está en otro dominio
+      img.src = url;
+      img.onload = () => {
+        let canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        let ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0);
+        let dataURL = canvas.toDataURL('image/png'); // Convertir a Base64
+        resolve(dataURL);
+      };
+      img.onerror = (error) => reject(error);
+    });
+  }
+  
 
 }

@@ -9,6 +9,8 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { PermisosService } from '../../../../../../src/app/services/permisos.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AfiliacionService } from '../../../../services/afiliacion.service';
+import { AuthService } from '../../../../services/auth.service';
+import { PersonaService } from '../../../../services/persona.service';
 
 @Component({
   selector: 'app-edit-datos-generales',
@@ -32,6 +34,16 @@ export class EditDatosGeneralesComponent implements OnInit {
   datos!: any;
   form: any;
   datosGeneralesForm: FormGroup;
+
+  usuarioToken: {
+    correo: string;
+    numero_empleado: string;
+    departamento: string;
+    municipio: string;
+    nombrePuesto: string;
+    nombreEmpleado: string;
+  } | null = null;
+
 
   estadoAfiliacion: any;
   fallecido: any;
@@ -145,7 +157,9 @@ export class EditDatosGeneralesComponent implements OnInit {
     private permisosService: PermisosService,
     private sanitizer: DomSanitizer,
     private cdr: ChangeDetectorRef,
-    private afiliacionService: AfiliacionService
+    private afiliacionService: AfiliacionService,
+    private authService: AuthService,
+    private personaService: PersonaService,
   ) {
     const currentYear = new Date();
     this.minDate = new Date(
@@ -204,6 +218,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.obtenerDatosDesdeToken();
     // Permisos
 
     
@@ -449,6 +464,8 @@ export class EditDatosGeneralesComponent implements OnInit {
   // ---------------------------------------------
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
+      
+      
         this.loading = true;
 
         // 1) Llamar primero a getAfilByParam(...) para obtener la data principal
@@ -456,6 +473,10 @@ export class EditDatosGeneralesComponent implements OnInit {
             (result) => {
                 this.datos = result;
                 this.Afiliado = result;
+
+                if (result?.ID_DEPARTAMENTO_DEFUNCION) {
+                  this.cargarMunicipiosDefuncion(result.ID_DEPARTAMENTO_DEFUNCION);
+                }
 
                 // Manejo PDFs
                 this.certificadoDefuncionUrl = this.datos?.certificado_defuncion
@@ -934,5 +955,77 @@ export class EditDatosGeneralesComponent implements OnInit {
     });
   }
   
+  cargarMunicipiosDefuncion(departamentoId: number) {
+    this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
+      next: (data) => {
+        this.municipios = data;
+        
+        // Si ya hay un municipio de defunción, asignarlo después de cargar los municipios
+        if (this.form1.get('id_municipio_defuncion')?.value) {
+          this.form1.patchValue({
+            id_municipio_defuncion: this.form1.get('id_municipio_defuncion')?.value
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios de defunción:', error);
+      }
+    });
+  }
+
+  onDepartamentoDefuncionChange(event: any) {
+    const departamentoId = event.value;
+    this.cargarMunicipiosDefuncion(departamentoId);
+  }
+
+  private obtenerDatosDesdeToken(): void {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      const dataToken = this.authService.decodeToken(token);
+      this.usuarioToken = {
+        correo: dataToken.correo,
+        numero_empleado: dataToken.numero_empleado,
+        departamento: dataToken.departamento,
+        municipio: dataToken.municipio,
+        nombrePuesto: dataToken.nombrePuesto,
+        nombreEmpleado: dataToken.nombreEmpleado,
+      };
+    } else {
+      console.warn('No se encontró un token en sessionStorage.');
+    }
+  }
+
+  generarConstanciaAfiliacion() {
+    this.personaService.getPersonaByDni(this.Afiliado.N_IDENTIFICACION).subscribe(
+      (personaActualizada: any) => {
+        if (!personaActualizada) {
+          
+          console.error('No se encontró la persona luego de crear la afiliación.');
+          return;
+        }
+        personaActualizada.tipoFormulario = 'ACTUALIZACION';
+          this.svcAfiliado.generarConstanciaQR(
+            personaActualizada, 
+            this.usuarioToken,
+            'afiliacion2'
+          ).subscribe((blob: Blob) => {
+            const downloadURL = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadURL;
+            link.download = this.generarNombreArchivo(personaActualizada, 'afiliacion2');
+            link.click();
+            window.URL.revokeObjectURL(downloadURL);
+          });
+      },
+      (err) => {
+        console.error('Error al consultar persona por DNI:', err);
+      }
+    );
+  }
   
+  generarNombreArchivo(persona: any, tipo: string): string {
+    const nombreCompleto = `${persona.primer_nombre}_${persona.primer_apellido}`;
+    const fechaActual = new Date().toISOString().split('T')[0];
+    return `${nombreCompleto}_${fechaActual}_constancia_${tipo}.pdf`;
+  }
 }

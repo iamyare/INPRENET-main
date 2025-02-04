@@ -119,18 +119,26 @@ export class DatPuestoTrabComponent implements OnInit {
       }
     });
     trabajoFormGroup.get('nombre_centro_trabajo')?.valueChanges.subscribe((value: any) => {
-      const selectedCentro = this.centrosTrabajo.find((centro) => centro.nombreCentro === value || centro.nombreCentro === value?.nombreCentro);
+      const selectedCentro = this.centrosTrabajo.find(
+        (centro) => centro.nombreCentro === value || centro.nombreCentro === value?.nombreCentro
+      );
+    
       if (selectedCentro) {
-        trabajoFormGroup.patchValue({
-          id_centro_trabajo: selectedCentro,
-          nombreCentro: selectedCentro.nombreCentro,
-          direccionCentro: selectedCentro.direccion,
-          sectorEconomico: selectedCentro.sector,
-          showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO'
-        }, { emitEvent: false });
+        trabajoFormGroup.patchValue(
+          {
+            id_centro_trabajo: selectedCentro,
+            nombreCentro: selectedCentro.nombreCentro,
+            direccionCentro: selectedCentro.direccion,
+            sectorEconomico: selectedCentro.sector,
+            showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO',
+          },
+          { emitEvent: false }
+        );
+    
+        // **Actualizamos la validación cuando se elige el centro por nombre**
+        this.configurarValidacionesNumeroAcuerdo(trabajoFormGroup, selectedCentro.sector);
       }
     });
-  
     this.trabajosArray.push(trabajoFormGroup);
     this.markAllAsTouched(trabajoFormGroup);
   }

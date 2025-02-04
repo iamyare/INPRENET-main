@@ -22,10 +22,21 @@ export class PepsComponent implements OnInit {
   fields: FieldArrays[] = [
     {
       name: 'pep_cargo_desempenado',
-      label: 'Cargo Desempeñado',
-      type: 'text',
+      label: 'Cargo Público Desempeñado',
+      type: 'select',
       icon: 'work',
-      value: '',
+      options: [
+        { value: 'VICE ALCALDE', label: 'VICE ALCALDE' },
+        { value: 'REGIDOR', label: 'REGIDOR' },
+        { value: 'ASAMBLEA APA', label: 'ASAMBLEA APA' },
+        { value: 'MILITAR', label: 'MILITAR' },
+        { value: 'ALCALDE', label: 'ALCALDE' },
+        { value: 'REGIDOR', label: 'REGIDOR' },
+        { value: 'FUNCIONARIO', label: 'FUNCIONARIO' },
+        { value: 'DIPUTADO', label: 'DIPUTADO' },
+        { value: 'MINISTRO', label: 'MINISTRO' },
+        { value: 'DIRECTOR DEPARTAMENTAL', label: 'DIRECTOR DEPARTAMENTAL' },
+      ],
       validations: [Validators.required],
       layout: { row: 1, col: 6 }
     },
@@ -114,7 +125,7 @@ export class PepsComponent implements OnInit {
         this.parentForm.addControl('peps', this.fb.array([]));
       }
       if (!this.parentForm.contains('familiares')) {
-        this.parentForm.addControl('familiares', this.fb.array([]));
+        this.parentForm.addControl('familiares', this.fb.array([], this.atLeastOneFamiliarValidator()));
       }
     }
 
@@ -141,8 +152,29 @@ export class PepsComponent implements OnInit {
       endDate: new FormControl(null, Validators.required),
       pep_cargo_desempenado: new FormControl('', Validators.required),
     });
+  
     this.peps.push(referenciaGroup);
+  
+    // Si no hay familiares, agregar uno automáticamente
+    if (this.familiares.length === 0) {
+      this.addFamiliar();
+    }
+  
+    // Forzar la validación
+    this.familiares.updateValueAndValidity();
   }
+
+  atLeastOneFamiliarValidator(): ValidatorFn {
+    return (formArray: AbstractControl): ValidationErrors | null => {
+      const familiares = formArray as FormArray;
+      if (this.peps.length > 0 && familiares.length === 0) {
+        return { atLeastOneFamiliarRequired: true };
+      }
+      return null;
+    };
+  }
+  
+  
 
   removeReferencia(index: number): void {
     this.peps.removeAt(index);

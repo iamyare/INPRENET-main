@@ -1512,9 +1512,9 @@ export class DocumentosPlanillaComponent implements OnInit {
           "PENSION POR VIUDEZ (TEMPORAL)": "611.02.02",
           "AUXILIO POR INVALIDEZ (PAGO UNICO)": "611.02.01",
           "SEPARACION DEL SISTEMA VOLUNTARIO": "613.99.02",
-
+          "PENSION MODALIDAD RENTA ACTUARIAL": "611.01.04",
+          "REINTEGRO DE COTIZACIONES": "613.99.02"
         };
-        console.log(cuentaContableMap);
 
         const partidaDiarioData = data.beneficios.map((beneficio: any) => ({
           cuentaContable: cuentaContableMap[beneficio.NOMBRE_BENEFICIO] || 'N/A',
@@ -1559,11 +1559,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             },
             this.crearTablaPartidaDiario(partidaDiarioData, totalDeduccionesInprema, totalDeduccionesTerceros),
             {
-              text: '',
-              pageBreak: 'before',  // Fuerza que la siguiente sección inicie en una página nueva
-              margin: [0, 10, 0, 0] // Añade un margen superior amplio en la nueva página
-            },
-            {
+              margin: [0, 80, 0, 20], // Aumentado el espacio antes de las firmas
               columns: [
                 {
                   width: '50%',
@@ -1575,8 +1571,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                       lineWidth: 1.5
                     }
                   ],
-                  alignment: 'center',
-                  margin: [0, 80, 0, 5] // Ajustar margen superior
+                  alignment: 'center'
                 },
                 {
                   width: '50%',
@@ -1588,8 +1583,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                       lineWidth: 1.5
                     }
                   ],
-                  alignment: 'center',
-                  margin: [0, 80, 0, 5] // Ajustar margen superior
+                  alignment: 'center'
                 }
               ]
             },
@@ -1600,25 +1594,25 @@ export class DocumentosPlanillaComponent implements OnInit {
                   text: 'ELABORADO POR',
                   style: 'signature',
                   alignment: 'center',
-                  margin: [0, 5, 0, 40] // Espaciado entre línea y texto
+                  margin: [0, 10, 0, 0] // Espaciado ajustado
                 },
                 {
                   width: '50%',
                   text: 'VERIFICADO POR',
                   style: 'signature',
                   alignment: 'center',
-                  margin: [0, 5, 0, 40] // Espaciado entre línea y texto
+                  margin: [0, 10, 0, 0] // Espaciado ajustado
                 }
               ]
             }
-
           ],
           styles: {
             header: { fontSize: 16, bold: true },
             tableHeader: { bold: true, fontSize: 12, color: 'black' },
             tableBody: { fontSize: 10, color: 'black' },
             tableTotal: { bold: true, fontSize: 12, color: 'black', alignment: 'right' },
-            tableHeaderBold: { bold: true, fontSize: 12, color: 'black' }
+            tableHeaderBold: { bold: true, fontSize: 12, color: 'black' },
+            signature: { fontSize: 12, bold: true, margin: [0, 15, 0, 0] } // Ajustado el margen para más separación
           },
           footer: (currentPage, pageCount) => ({
             table: {
@@ -1642,7 +1636,8 @@ export class DocumentosPlanillaComponent implements OnInit {
         console.error('Error al generar el reporte de partida de diario:', error);
       }
     });
-  }
+}
+
 
   async exportarExcelDetallePorPeriodo() {
     const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();

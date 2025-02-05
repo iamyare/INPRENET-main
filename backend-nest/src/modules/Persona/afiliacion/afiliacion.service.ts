@@ -489,30 +489,63 @@ export class AfiliacionService {
     crearPersonaCentrosTrabajoDtos: CrearPersonaCentroTrabajoDto[],
     idPersona: number,
     entityManager: EntityManager,
-  ): Promise<Net_perf_pers_cent_trab[]> {
-    const resultados: Net_perf_pers_cent_trab[] = [];
-
+  ): Promise<any[]> {
+    const resultados: any[] = [];
+  
     for (const crearPersonaCentrosTrabajoDto of crearPersonaCentrosTrabajoDtos) {
-      const centroTrabajo = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: crearPersonaCentrosTrabajoDto.id_centro_trabajo } });
+      const centroTrabajo = await this.centroTrabajoRepository.findOne({
+        where: { id_centro_trabajo: crearPersonaCentrosTrabajoDto.id_centro_trabajo },
+        relations: ['municipio', 'municipio.departamento'], // 🔹 Cargar municipio y departamento
+      });
+  
       if (!centroTrabajo) {
         throw new NotFoundException(`Centro de trabajo con ID ${crearPersonaCentrosTrabajoDto.id_centro_trabajo} no encontrado`);
       }
+  
+      // Obtener datos del municipio y departamento
+      const municipio = centroTrabajo.municipio;
+      const departamento = municipio?.departamento;
+  
+      // Crear la relación persona-centro de trabajo en la BD
       const personaCentroTrabajo = entityManager.create(Net_perf_pers_cent_trab, {
         persona: { id_persona: idPersona },
         centroTrabajo,
         jornada: crearPersonaCentrosTrabajoDto.jornada,
         tipo_jornada: crearPersonaCentrosTrabajoDto.tipo_jornada,
         cargo: crearPersonaCentrosTrabajoDto.cargo,
+        fecha_pago: crearPersonaCentrosTrabajoDto.fecha_pago,
         numero_acuerdo: crearPersonaCentrosTrabajoDto.numero_acuerdo,
         salario_base: crearPersonaCentrosTrabajoDto.salario_base,
         fecha_ingreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_ingreso),
         fecha_egreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_egreso),
         estado: "ACTIVO",
       });
-      resultados.push(await entityManager.save(Net_perf_pers_cent_trab, personaCentroTrabajo));
+  
+      await entityManager.save(Net_perf_pers_cent_trab, personaCentroTrabajo);
+  
+      // Crear respuesta personalizada con el nombre del departamento
+      resultados.push({
+        id_centro_trabajo: centroTrabajo.id_centro_trabajo,
+        nombre_centro_trabajo: centroTrabajo.nombre_centro_trabajo,
+        id_municipio: municipio?.id_municipio || 0,
+        nombre_municipio: municipio?.nombre_municipio || "Desconocido",
+        id_departamento: departamento?.id_departamento || 0,
+        nombre_departamento: departamento?.nombre_departamento || "Desconocido",
+        jornada: personaCentroTrabajo.jornada,
+        tipo_jornada: personaCentroTrabajo.tipo_jornada,
+        cargo: personaCentroTrabajo.cargo,
+        fecha_pago: personaCentroTrabajo.fecha_pago,
+        numero_acuerdo: personaCentroTrabajo.numero_acuerdo,
+        salario_base: personaCentroTrabajo.salario_base,
+        fecha_ingreso: personaCentroTrabajo.fecha_ingreso,
+        fecha_egreso: personaCentroTrabajo.fecha_egreso,
+        estado: personaCentroTrabajo.estado,
+      });
     }
+  
     return resultados;
   }
+  
 
   async crearOtrasFuentesIngreso(
     crearOtrasFuentesIngresoDtos: CrearOtraFuenteIngresoDto[] | undefined,
@@ -704,67 +737,74 @@ export class AfiliacionService {
     fotoPerfil: Express.Multer.File,
     fileIdent: Express.Multer.File,
     files: any
-  ): Promise<any> {
+): Promise<any> {
     return await this.personaRepository.manager.transaction(async (transactionalEntityManager) => {
-      try {
-        const resultados = [];
-        const personasCreadasMap = new Map<string, net_persona>();
+        try {
+            const resultados: any[] = [];
+            const personasCreadasMap = new Map<string, net_persona>();
 
-        // Crear la persona
-        const persona = await this.crearPersona(crearDatosDto.persona, fotoPerfil, fileIdent, transactionalEntityManager);
-        resultados.push(persona);
+            // Crear la persona
+            const persona = await this.crearPersona(crearDatosDto.persona, fotoPerfil, fileIdent, transactionalEntityManager);
+            resultados.push(persona);
 
-        // Crear el detalle de la persona
-        const detallePersona = await this.crearDetallePersona(crearDatosDto.detallePersona, persona.id_persona, transactionalEntityManager);
-        resultados.push(detallePersona);
+            // Crear el detalle de la persona
+            const detallePersona = await this.crearDetallePersona(crearDatosDto.detallePersona, persona.id_persona, transactionalEntityManager);
+            resultados.push(detallePersona);
 
-        // Crear las relaciones de la persona con los colegios magisteriales
-        const personaColegios = await this.crearPersonaColegios(crearDatosDto.colegiosMagisteriales, persona.id_persona, transactionalEntityManager);
-        resultados.push(...personaColegios);
+            // Crear las relaciones de la persona con los colegios magisteriales
+            const personaColegios = await this.crearPersonaColegios(crearDatosDto.colegiosMagisteriales, persona.id_persona, transactionalEntityManager);
+            resultados.push(...personaColegios);
 
-        // Crear las relaciones de la persona con los bancos
-        const personaBancos = await this.crearPersonaBancos(crearDatosDto.bancos, persona.id_persona, transactionalEntityManager);
-        resultados.push(...personaBancos);
+            // Crear las relaciones de la persona con los bancos
+            const personaBancos = await this.crearPersonaBancos(crearDatosDto.bancos, persona.id_persona, transactionalEntityManager);
+            resultados.push(...personaBancos);
 
-        // Crear las relaciones de la persona con los centros de trabajo
-        const personaCentrosTrabajo = await this.crearPersonaCentrosTrabajo(crearDatosDto.centrosTrabajo, persona.id_persona, transactionalEntityManager);
-        resultados.push(...personaCentrosTrabajo);
+            // Crear las relaciones de la persona con los centros de trabajo
+            const personaCentrosTrabajo = await this.crearPersonaCentrosTrabajo(crearDatosDto.centrosTrabajo, persona.id_persona, transactionalEntityManager);
 
-        // Crear las relaciones de la persona con las otras fuentes de ingreso
-        const otrasFuentesIngreso = await this.crearOtrasFuentesIngreso(crearDatosDto.otrasFuentesIngreso, persona.id_persona, transactionalEntityManager);
-        resultados.push(...otrasFuentesIngreso);
+            // Asegurar que `personaCentrosTrabajo` esté en la posición 3
+            if (resultados.length >= 3) {
+                resultados.splice(3, 0, ...personaCentrosTrabajo);
+            } else {
+                resultados[3] = personaCentrosTrabajo;
+            }
 
-        // Crear las referencias de la persona
-        const referencias = await this.crearReferencias(crearDatosDto.referencias, persona.id_persona, transactionalEntityManager);
-        resultados.push(...referencias);
+            // Crear las relaciones de la persona con las otras fuentes de ingreso
+            const otrasFuentesIngreso = await this.crearOtrasFuentesIngreso(crearDatosDto.otrasFuentesIngreso, persona.id_persona, transactionalEntityManager);
+            resultados.push(...otrasFuentesIngreso);
 
-        // Crear los beneficiarios de la persona
-        const beneficiarios = await this.crearBeneficiarios(crearDatosDto.beneficiarios, persona.id_persona, detallePersona.ID_DETALLE_PERSONA, transactionalEntityManager, files, personasCreadasMap);
-        resultados.push(...beneficiarios);
+            // Crear las referencias de la persona
+            const referencias = await this.crearReferencias(crearDatosDto.referencias, persona.id_persona, transactionalEntityManager);
+            resultados.push(...referencias);
 
-        // Crear las discapacidades de la persona, si existen
-        if (crearDatosDto.persona.discapacidades && crearDatosDto.persona.discapacidades.length > 0) {
-          await this.crearDiscapacidades(crearDatosDto.persona.discapacidades, persona.id_persona, transactionalEntityManager);
+            // Crear los beneficiarios de la persona
+            const beneficiarios = await this.crearBeneficiarios(crearDatosDto.beneficiarios, persona.id_persona, detallePersona.ID_DETALLE_PERSONA, transactionalEntityManager, files, personasCreadasMap);
+            resultados.push(...beneficiarios);
+
+            // Crear las discapacidades de la persona, si existen
+            if (crearDatosDto.persona.discapacidades && crearDatosDto.persona.discapacidades.length > 0) {
+                await this.crearDiscapacidades(crearDatosDto.persona.discapacidades, persona.id_persona, transactionalEntityManager);
+            }
+
+            // Crear la familia de la persona, si existen
+            if (crearDatosDto.familiares && crearDatosDto.familiares.length > 0) {
+                await this.crearFamilia(crearDatosDto.familiares, persona.id_persona, transactionalEntityManager, personasCreadasMap);
+            }
+
+            // Crear los registros PEPs de la persona, si existen
+            if (crearDatosDto.peps && crearDatosDto.peps.length > 0) {
+                const peps = await this.crearPeps(crearDatosDto.peps, persona.id_persona, transactionalEntityManager);
+                resultados.push(...peps);
+            }
+
+            return resultados;
+        } catch (error) {
+            console.error('Error al crear los datos:', error);
+            throw new Error(`Error al crear los datos: ${error.message}`);
         }
-
-        // Crear la familia de la persona, si existen
-        if (crearDatosDto.familiares && crearDatosDto.familiares.length > 0) {
-          await this.crearFamilia(crearDatosDto.familiares, persona.id_persona, transactionalEntityManager, personasCreadasMap);
-        }
-
-        // Crear los registros PEPs de la persona, si existen
-        if (crearDatosDto.peps && crearDatosDto.peps.length > 0) {
-          const peps = await this.crearPeps(crearDatosDto.peps, persona.id_persona, transactionalEntityManager);
-          resultados.push(...peps);
-        }
-
-        return resultados;
-      } catch (error) {
-        console.error('Error al crear los datos:', error);
-        throw new Error(`Error al crear los datos: ${error.message}`);
-      }
     });
-  }
+}
+
 
   async crearOObtenerPersona(
     crearPersonaDto: CrearPersonaDto,

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsNumber, IsDateString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsDateString, IsOptional, Min, Max } from 'class-validator';
 
 export class CrearPersonaCentroTrabajoDto {
   @IsNotEmpty()
@@ -16,6 +16,12 @@ export class CrearPersonaCentroTrabajoDto {
   @IsOptional()
   @IsNumber()
   salario_base?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(31)
+  fecha_pago?: number;
 
   @IsOptional()
   @IsDateString()
@@ -36,4 +42,12 @@ export class CrearPersonaCentroTrabajoDto {
   @IsOptional()
   @IsString()
   jornada?: string;
+
+  @IsOptional()
+  @IsString()
+  direccionCentro?: string;
+
+  @IsOptional()
+  @IsNumber()
+  id_municipio?: number;
 }

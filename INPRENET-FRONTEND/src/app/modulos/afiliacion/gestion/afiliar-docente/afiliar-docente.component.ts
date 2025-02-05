@@ -133,151 +133,144 @@ export class AfiliarDocenteComponent implements OnInit {
     return formGroup.invalid && (formGroup.touched || formGroup.dirty);
   }
 //-----------------------------------------------
-  onSubmit(): void {
-    const datosGenerales = this.formGroup.get('datosGenerales')?.value;
+onSubmit(): void {
+  const datosGenerales = this.formGroup.get('datosGenerales')?.value;
 
-    // Validar que la foto de perfil esté presente
-    if (!datosGenerales?.fotoPerfil) {
-      this.toastr.warning('Por favor, capture una fotografía antes de enviar.', 'Advertencia');
-      return; // Detener el envío si falta la foto
+  // Validar que la foto de perfil esté presente
+  if (!datosGenerales?.fotoPerfil) {
+    this.toastr.warning('Por favor, capture una fotografía antes de enviar.', 'Advertencia');
+    return; // Detener el envío si falta la foto
+  }
+
+  if (this.formGroup.valid) {
+    // Recoger los datos de otros pasos
+    const referenciasPersonales = this.formGroup.get('referenciasPersonales')?.value;
+    const bancos = this.formGroup.get('bancos')?.value;
+    const centrosTrabajo = this.formGroup.get('centrosTrabajo')?.value;
+    const colegiosMagisteriales = datosGenerales.ColMags || [];
+    const beneficiarios = this.formGroup.get('beneficiarios')?.value.beneficiario || [];
+
+    // Construir el objeto que enviarás al backend
+    const formattedData = {
+      persona: {
+        id_tipo_identificacion: datosGenerales.id_tipo_identificacion,
+        id_pais_nacionalidad: datosGenerales.id_pais,
+        n_identificacion: datosGenerales.n_identificacion,
+        rtn: datosGenerales.rtn,
+        grupo_etnico: datosGenerales.grupo_etnico,
+        estado_civil: datosGenerales.estado_civil?.toUpperCase(),
+        primer_nombre: datosGenerales.primer_nombre?.toUpperCase(),
+        segundo_nombre: datosGenerales.segundo_nombre?.toUpperCase(),
+        tercer_nombre: datosGenerales.tercer_nombre?.toUpperCase(),
+        primer_apellido: datosGenerales.primer_apellido?.toUpperCase(),
+        segundo_apellido: datosGenerales.segundo_apellido?.toUpperCase(),
+        genero: datosGenerales.genero?.toUpperCase(),
+        cantidad_hijos: datosGenerales.cantidad_hijos,
+        cantidad_dependientes: datosGenerales.cantidad_dependientes,
+        representacion: datosGenerales.representacion?.toUpperCase(),
+        grado_academico: datosGenerales.grado_academico?.toUpperCase(),
+        telefono_1: datosGenerales.telefono_1,
+        telefono_2: datosGenerales.telefono_2,
+        correo_1: datosGenerales.correo_1,
+        correo_2: datosGenerales.correo_2,
+        fecha_nacimiento: datosGenerales.fecha_nacimiento,
+        direccion_residencia_estructurada: this.formatDireccion(datosGenerales).toUpperCase(),
+        id_municipio_residencia: datosGenerales.id_municipio_residencia,
+        id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
+        id_profesion: datosGenerales.id_profesion,
+        discapacidades: this.formatDiscapacidades(datosGenerales.discapacidades) || [],
+        fecha_afiliacion: new Date().toISOString()
+      },
+      familiares: this.formatFamiliares(datosGenerales, referenciasPersonales),
+      peps: this.formatPeps(datosGenerales.peps || []),
+      detallePersona: {
+        eliminado: 'NO',
+        tipo_persona: 'AFILIADO',
+        nombre_estado: 'ACTIVO'
+      },
+      colegiosMagisteriales: colegiosMagisteriales.map((col: any) => ({
+        id_colegio: col.id_colegio
+      })),
+      bancos: this.formatBancos(bancos.bancos || []),
+      centrosTrabajo: this.formatCentrosTrabajo(centrosTrabajo.trabajo || []),
+      otrasFuentesIngreso: this.formatOtrasFuentesIngreso(centrosTrabajo.otrasFuentesIngreso || []),
+      referencias: this.formatReferencias(referenciasPersonales.refpers || []),
+      beneficiarios: this.formatBeneficiarios(beneficiarios || []),
+    };
+
+    // Convertir foto de perfil base64 a File (si existe)
+    const fotoPerfilBase64 = datosGenerales?.fotoPerfil || '';
+    let fileFoto: any;
+    if (fotoPerfilBase64) {
+      const fotoBlob = this.dataURItoBlob(fotoPerfilBase64);
+      fileFoto = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
     }
 
-    if (this.formGroup.valid) {
-      // Recoger los datos de otros pasos
-      const referenciasPersonales = this.formGroup.get('referenciasPersonales')?.value;
-      const bancos = this.formGroup.get('bancos')?.value;
-      const centrosTrabajo = this.formGroup.get('centrosTrabajo')?.value;
-      const colegiosMagisteriales = datosGenerales.ColMags || [];
-      const beneficiarios = this.formGroup.get('beneficiarios')?.value.beneficiario || [];
+    // Archivo de identificación (ej. escaneo de cédula)
+    const fileIdent = datosGenerales?.archivo_identificacion;
 
-      // (Opcional) Generar PDF de beneficiarios si existen
-      if (beneficiarios && beneficiarios.length > 0) {
-        const documentDefinition = this.getDocumentDefinition(
-          beneficiarios, 
-          datosGenerales, 
-          this.backgroundImageBase64
-        );
-        pdfMake.createPdf(documentDefinition).download('beneficiarios.pdf');
-      }
+    // Llamar al servicio para crear afiliación
+    this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
+      (response: any) => {
+        console.log('Datos enviados con éxito:', response);
+        this.toastr.success('Datos enviados con éxito', 'Éxito');
 
-      // Construir el objeto que enviarás al backend
-      const formattedData = {
-        persona: {
-          id_tipo_identificacion: datosGenerales.id_tipo_identificacion,
-          id_pais_nacionalidad: datosGenerales.id_pais,
-          n_identificacion: datosGenerales.n_identificacion,
-          rtn: datosGenerales.rtn,
-          grupo_etnico: datosGenerales.grupo_etnico,
-          estado_civil: datosGenerales.estado_civil?.toUpperCase(),
-          primer_nombre: datosGenerales.primer_nombre?.toUpperCase(),
-          segundo_nombre: datosGenerales.segundo_nombre?.toUpperCase(),
-          tercer_nombre: datosGenerales.tercer_nombre?.toUpperCase(),
-          primer_apellido: datosGenerales.primer_apellido?.toUpperCase(),
-          segundo_apellido: datosGenerales.segundo_apellido?.toUpperCase(),
-          genero: datosGenerales.genero?.toUpperCase(),
-          cantidad_hijos: datosGenerales.cantidad_hijos,
-          cantidad_dependientes: datosGenerales.cantidad_dependientes,
-          representacion: datosGenerales.representacion?.toUpperCase(),
-          grado_academico: datosGenerales.grado_academico?.toUpperCase(),
-          telefono_1: datosGenerales.telefono_1,
-          telefono_2: datosGenerales.telefono_2,
-          correo_1: datosGenerales.correo_1,
-          correo_2: datosGenerales.correo_2,
-          fecha_nacimiento: datosGenerales.fecha_nacimiento,
-          direccion_residencia_estructurada: this.formatDireccion(datosGenerales).toUpperCase(),
-          id_municipio_residencia: datosGenerales.id_municipio_residencia,
-          id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
-          id_profesion: datosGenerales.id_profesion,
-          discapacidades: this.formatDiscapacidades(datosGenerales.discapacidades) || [],
-          fecha_afiliacion: new Date().toISOString()
-        },
-        familiares: this.formatFamiliares(datosGenerales, referenciasPersonales),
-        peps: this.formatPeps(datosGenerales.peps || []),
-        detallePersona: {
-          eliminado: 'NO',
-          tipo_persona: 'AFILIADO',
-          nombre_estado: 'ACTIVO'
-        },
-        colegiosMagisteriales: colegiosMagisteriales.map((col: any) => ({
-          id_colegio: col.id_colegio
-        })),
-        bancos: this.formatBancos(bancos.bancos || []),
-        centrosTrabajo: this.formatCentrosTrabajo(centrosTrabajo.trabajo || []),
-        otrasFuentesIngreso: this.formatOtrasFuentesIngreso(centrosTrabajo.otrasFuentesIngreso || []),
-        referencias: this.formatReferencias(referenciasPersonales.refpers || []),
-        beneficiarios: this.formatBeneficiarios(beneficiarios || []),
-      };
-
-      // Convertir foto de perfil base64 a File (si existe)
-      const fotoPerfilBase64 = datosGenerales?.fotoPerfil || '';
-      
-      let fileFoto: any;
-
-      if (fotoPerfilBase64) {
-        const fotoBlob = this.dataURItoBlob(fotoPerfilBase64);
-        fileFoto = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
-      }
-
-      // Archivo de identificación (ej. escaneo de cédula)
-      const fileIdent = datosGenerales?.archivo_identificacion;
-
-      console.log(formattedData);
-      
-
-      // Llamar al servicio para crear afiliación
-      this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
-        (response: any) => {
-          console.log('Datos enviados con éxito:', response);
-          this.toastr.success('Datos enviados con éxito', 'Éxito');
-          
-          const dniAfiliado = response[0].n_identificacion; 
-          if (!dniAfiliado) {
-            console.warn('No se recibió un n_identificacion en la respuesta.');
-            return;
-          }
-          
-          this.personaService.getPersonaByDni(dniAfiliado).subscribe(
-            (personaActualizada: any) => {
-              if (!personaActualizada) {
-                console.error('No se encontró la persona luego de crear la afiliación.');
-                return;
-              }
-                personaActualizada.tipoFormulario = 'NUEVA AFILIACION';
-                this.afiliadoService.generarConstanciaQR(
-                  personaActualizada, 
-                  this.usuarioToken,
-                  'afiliacion2'
-                ).subscribe((blob: Blob) => {
-                  const downloadURL = window.URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = downloadURL;
-                  link.download = this.generarNombreArchivo(personaActualizada, 'afiliacion2');
-                  link.click();
-                  window.URL.revokeObjectURL(downloadURL);
-                });
-            },
-            (err) => {
-              console.error('Error al consultar persona por DNI:', err);
-            }
-          );
-
-          this.resetForm();
-          this.formStateService.resetFotoPerfil();
-        },
-        (error: any) => {
-          console.error('Error al enviar los datos:', error);
-          const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
-          this.toastr.error(errorMessage, 'Error');
+        const dniAfiliado = response[0].n_identificacion;
+        if (!dniAfiliado) {
+          console.warn('No se recibió un n_identificacion en la respuesta.');
+          return;
         }
-      );
-    } else {
-      // Formulario inválido
-      this.formErrors = this.generateFormErrors(this.formGroup);
-      //console.error('Errores del formulario:', this.formErrors);
-      this.markAllAsTouched(this.formGroup);
-      this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
+
+        this.personaService.getPersonaByDni(dniAfiliado).subscribe(
+          (personaActualizada: any) => {
+            if (!personaActualizada) {
+              console.error('No se encontró la persona luego de crear la afiliación.');
+              return;
+            }
+
+            personaActualizada.tipoFormulario = 'NUEVA AFILIACION';
+            const documentDefinition = this.getDocumentDefinition(
+              beneficiarios,
+              response,
+              this.backgroundImageBase64
+            );
+            pdfMake.createPdf(documentDefinition).download('beneficiarios.pdf');
+
+            // Generar constancia QR
+            this.afiliadoService.generarConstanciaQR(
+              personaActualizada,
+              this.usuarioToken,
+              'afiliacion2'
+            ).subscribe((blob: Blob) => {
+              const downloadURL = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = downloadURL;
+              link.download = this.generarNombreArchivo(personaActualizada, 'afiliacion2');
+              link.click();
+              window.URL.revokeObjectURL(downloadURL);
+            });
+
+            this.resetForm();
+            this.formStateService.resetFotoPerfil();
+          },
+          (err) => {
+            console.error('Error al consultar persona por DNI:', err);
+          }
+        );
+      },
+      (error: any) => {
+        console.error('Error al enviar los datos:', error);
+        const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
+        this.toastr.error(errorMessage, 'Error');
+      }
+    );
+  } else {
+    this.formErrors = this.generateFormErrors(this.formGroup);
+    this.markAllAsTouched(this.formGroup);
+    this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
   }
 }
+
 //-------------------------------------------------------------------
   getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
     userDetails.forEach(item => {
@@ -290,12 +283,12 @@ export class AfiliarDocenteComponent implements OnInit {
       item.telefono_1 = item.telefono_1 || 'N/A';
     });
     // Detalles del usuario
-    beneficiarios.nombre = `${beneficiarios.primer_nombre} ${beneficiarios.segundo_nombre || ''} ${beneficiarios.primer_apellido} ${beneficiarios.segundo_apellido || ''}` || 'N/A';
-    beneficiarios.grado_academico = beneficiarios.grado_academico || 'N/A';
-    beneficiarios.centroEducativo = beneficiarios.centroEducativo || 'N/A';
-    beneficiarios.municipioResidencia = beneficiarios.id_municipio_residencia || 'N/A';
-    beneficiarios.departamentoResidencia = beneficiarios.id_departamento_residencia || 'N/A';
-    beneficiarios.n_identificacion = beneficiarios.n_identificacion || 'N/A';
+    beneficiarios.nombre = `${beneficiarios[0].primer_nombre} ${beneficiarios[0].segundo_nombre || ''} ${beneficiarios[0].primer_apellido} ${beneficiarios[0].segundo_apellido || ''}` || 'N/A';
+    beneficiarios.grado_academico = beneficiarios[0].grado_academico || 'N/A';
+    beneficiarios.centroEducativo = beneficiarios[3].nombre_centro_trabajo || 'N/A';
+    beneficiarios.municipioResidencia = beneficiarios[3].nombre_municipio || 'N/A';
+    beneficiarios.departamentoResidencia = beneficiarios[3].nombre_departamento || 'N/A';
+    beneficiarios.n_identificacion = beneficiarios[0].n_identificacion || 'N/A';
 
     interface TableCell {
       text?: string;
@@ -363,7 +356,7 @@ export class AfiliarDocenteComponent implements OnInit {
             ', mayor de edad, laborando como docente en el nivel ',
             { text: beneficiarios.grado_academico, bold: true },
             ', del Centro Educativo ',
-            { text: beneficiarios.centroEducativo, bold: true },
+            { text: beneficiarios.centroEducativo || 'NOMBRE NO DISPONIBLE', bold: true }, 
             ', ubicado en el Municipio ',
             { text: beneficiarios.municipioResidencia, bold: true },
             ' del Departamento ',
@@ -563,9 +556,12 @@ export class AfiliarDocenteComponent implements OnInit {
       salario_base: trabajo.salario_base,
       fecha_ingreso: trabajo.fecha_ingreso,
       fecha_egreso: trabajo.fecha_egreso,
+      fecha_pago: Number(trabajo.fecha_pago),
       estado: trabajo.estado,
       jornada: trabajo.jornada,
-      tipo_jornada: trabajo.tipo_jornada
+      tipo_jornada: trabajo.tipo_jornada,
+      direccionCentro: trabajo.direccionCentro,
+      id_municipio: trabajo.id_municipio
     }));
   }
   
@@ -596,7 +592,6 @@ export class AfiliarDocenteComponent implements OnInit {
 
   private formatBeneficiarios(beneficiarios: any[]): any[] {
     return beneficiarios.map(beneficiario => {
-      console.log(beneficiario);
       
       const discapacidades = this.mapDiscapacidades(beneficiario.discapacidades);
       return {
@@ -622,8 +617,6 @@ export class AfiliarDocenteComponent implements OnInit {
   }
 
   private formatFamiliares(datosGenerales: any, referenciasPersonales: any): any[] {
-    console.log(datosGenerales.familiares);
-    
     const familiares = datosGenerales.familiares || [];
     return [
       ...familiares.map((familiar: any) => ({

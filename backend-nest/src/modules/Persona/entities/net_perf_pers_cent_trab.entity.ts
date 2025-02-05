@@ -22,8 +22,8 @@ export class Net_perf_pers_cent_trab {
     @Column('date', { nullable: true, name: 'FECHA_EGRESO' })
     fecha_egreso: string;
 
-    @Column('date', { nullable: true, name: 'FECHA_PAGO' })
-    fecha_pago: string;
+    @Column('number', { nullable: true, name: 'FECHA_PAGO' })
+    fecha_pago: number;
 
     @Column('varchar2', { length: 20, nullable: true, default: 'ACTIVO', name: 'ESTADO' })
     estado: string;

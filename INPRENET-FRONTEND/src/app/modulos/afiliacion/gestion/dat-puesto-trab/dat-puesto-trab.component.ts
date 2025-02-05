@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { startWith } from 'rxjs/operators';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
+import { DireccionService } from '../../../../services/direccion.service';
 
 @Component({
   selector: 'app-dat-puesto-trab',
@@ -17,10 +18,13 @@ export class DatPuestoTrabComponent implements OnInit {
   tiposJornada: any[];
   minDate: Date;
   filteredCentrosTrabajo: any[] = [];
+  departamentos: any[] = [];
+  municipios: any[] = [];
 
   constructor(
     private fb: FormBuilder,
-    private centrosTrabSVC: CentroTrabajoService
+    private centrosTrabSVC: CentroTrabajoService,
+    private direccionService: DireccionService
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
@@ -40,7 +44,12 @@ export class DatPuestoTrabComponent implements OnInit {
       this.formGroup.addControl('trabajo', this.fb.array([]));
     }
     this.loadCentrosTrabajo();
+    this.loadDepartamentos();
     this.setupFilterListener();
+
+    if (this.trabajosArray.length === 0) {
+      this.agregarTrabajo();
+    }
   }
 
   private loadCentrosTrabajo() {
@@ -52,6 +61,7 @@ export class DatPuestoTrabComponent implements OnInit {
           nombreCentro: item.nombre_centro_trabajo,
           direccion: item.direccion_1 || item.direccion_2,
           sector: item.sector_economico,
+          telefono_1: item.telefono_1,
         }));
         this.filteredCentrosTrabajo = [...this.centrosTrabajo];
       },
@@ -93,59 +103,108 @@ export class DatPuestoTrabComponent implements OnInit {
         Validators.maxLength(40),
         Validators.pattern('^[a-zA-ZÀ-ÿ\u00f1\u00d1 ]+$')
       ]],
+      telefono_1: [{ value: '', disabled: true }, [Validators.required, Validators.pattern('^[0-9]+$')]],
       numero_acuerdo: ['', Validators.maxLength(40)],
       salario_base: ['', [Validators.required, Validators.min(0), Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)]],
       fecha_ingreso: ['', Validators.required],
       fecha_egreso: [''],
+      fecha_pago: [[Validators.required, Validators.min(1), Validators.max(31), Validators.pattern('^[0-9]+$')]],
       sectorEconomico: [{ value: '', disabled: true }],
       estado: ['', Validators.maxLength(40)],
       nombreCentro: [{ value: '', disabled: true }],
-      direccionCentro: [{ value: '', disabled: true }],
+      direccionCentro: ['', Validators.required], // Permitir edición manual
       showNumeroAcuerdo: [true],
       jornada: ['', Validators.required],
+      id_departamento: ['', Validators.required],
+      id_municipio: ['', Validators.required],
       tipo_jornada: ['', Validators.required]
     }, { validators: this.fechasValidator });
+  
+    // Suscripción a cambios en id_centro_trabajo
     trabajoFormGroup.get('id_centro_trabajo')?.valueChanges.subscribe((value: any) => {
-      const selectedCentro = this.centrosTrabajo.find((centro) => centro.label === value || centro.label === value?.label);
+      const selectedCentro = this.centrosTrabajo.find(
+        (centro) => centro.label === value || centro.label === value?.label
+      );
+      
       if (selectedCentro) {
+        // Limpiar dirección antes de actualizar
         trabajoFormGroup.patchValue({
+          direccionCentro: '',
           nombre_centro_trabajo: selectedCentro,
           nombreCentro: selectedCentro.nombreCentro,
-          direccionCentro: selectedCentro.direccion,
           sectorEconomico: selectedCentro.sector,
+          telefono_1: selectedCentro.telefono_1,
+          id_departamento: selectedCentro.municipio?.id_departamento || null, // 🔹 Llenar departamento
+          id_municipio: selectedCentro.municipio?.id_municipio || null,
           showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO'
         }, { emitEvent: false });
+      
+        if (selectedCentro.municipio?.id_departamento) {
+          this.loadMunicipios(selectedCentro.municipio.id_departamento, this.trabajosArray.length);
+        }
+        // Solo actualizar la dirección si el usuario no la ha modificado manualmente
+        if (!trabajoFormGroup.get('direccionCentro')?.dirty) {
+          trabajoFormGroup.patchValue({
+            direccionCentro: selectedCentro.direccion,
+          }, { emitEvent: false });
+        }
+  
         this.configurarValidacionesNumeroAcuerdo(trabajoFormGroup, selectedCentro.sector);
+      } else {
+        // Si no se encuentra el centro, limpiar valores dependientes
+        trabajoFormGroup.patchValue({
+          direccionCentro: '',
+          sectorEconomico: '',
+          telefono_1: '',
+          id_departamento: null,
+          id_municipio: null,
+          showNumeroAcuerdo: false
+        }, { emitEvent: false });
       }
     });
+  
+    // Suscripción a cambios en nombre_centro_trabajo
     trabajoFormGroup.get('nombre_centro_trabajo')?.valueChanges.subscribe((value: any) => {
       const selectedCentro = this.centrosTrabajo.find(
         (centro) => centro.nombreCentro === value || centro.nombreCentro === value?.nombreCentro
       );
-    
+  
       if (selectedCentro) {
-        trabajoFormGroup.patchValue(
-          {
-            id_centro_trabajo: selectedCentro,
-            nombreCentro: selectedCentro.nombreCentro,
+        // Limpiar dirección antes de actualizar
+        trabajoFormGroup.patchValue({
+          direccionCentro: '',
+          id_centro_trabajo: selectedCentro,
+          nombreCentro: selectedCentro.nombreCentro,
+          sectorEconomico: selectedCentro.sector,
+          telefono_1: selectedCentro.telefono_1,
+          showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO',
+        }, { emitEvent: false });
+  
+        // Solo actualizar la dirección si el usuario no la ha modificado manualmente
+        if (!trabajoFormGroup.get('direccionCentro')?.dirty) {
+          trabajoFormGroup.patchValue({
             direccionCentro: selectedCentro.direccion,
-            sectorEconomico: selectedCentro.sector,
-            showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO',
-          },
-          { emitEvent: false }
-        );
-    
-        // **Actualizamos la validación cuando se elige el centro por nombre**
+          }, { emitEvent: false });
+        }
+  
         this.configurarValidacionesNumeroAcuerdo(trabajoFormGroup, selectedCentro.sector);
+      } else {
+        // Si no se encuentra el centro, limpiar valores dependientes
+        trabajoFormGroup.patchValue({
+          direccionCentro: '',
+          sectorEconomico: '',
+          telefono_1: '',
+          showNumeroAcuerdo: false
+        }, { emitEvent: false });
       }
     });
+  
     this.trabajosArray.push(trabajoFormGroup);
     this.markAllAsTouched(trabajoFormGroup);
   }
   
-  
   eliminarTrabajo(index: number): void {
-    if (this.trabajosArray.length > 0) {
+    if (this.trabajosArray.length > 1) {
       this.trabajosArray.removeAt(index);
     }
   }
@@ -161,6 +220,7 @@ export class DatPuestoTrabComponent implements OnInit {
   fechasValidator(control: AbstractControl): ValidationErrors | null {
     const fechaIngreso = control.get('fecha_ingreso')?.value;
     const fechaEgreso = control.get('fecha_egreso')?.value;
+    const fechaPago = control.get('fecha_pago')?.value;
   
     if (fechaIngreso && fechaEgreso && new Date(fechaIngreso) > new Date(fechaEgreso)) {
       control.get('fecha_egreso')?.setErrors({ fechaIncorrecta: true });
@@ -239,6 +299,7 @@ export class DatPuestoTrabComponent implements OnInit {
   
   reset(): void {
     this.trabajosArray.clear();
+    this.agregarTrabajo();
     this.formGroup.reset();
   }
   
@@ -251,7 +312,44 @@ export class DatPuestoTrabComponent implements OnInit {
         }
       });
     }
+  }
+
+  private loadDepartamentos() {
+    this.direccionService.getAllDepartments().subscribe({
+      next: (data) => {
+        this.departamentos = data.map((dep:any) => ({ value: dep.id_departamento, label: dep.nombre_departamento }));
+      },
+      error: (error) => console.error('Error al cargar departamentos:', error)
+    });
+  }
+
+  private loadMunicipios(departamentoId: number, index: number) {
+    this.direccionService.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
+      next: (data) => {
+        const municipios = data.map((mun: any) => ({
+          value: mun.value,
+          label: mun.label
+        }));
   
+        const trabajoFormGroup = this.trabajosArray.at(index) as FormGroup;
+        if (trabajoFormGroup) {
+          trabajoFormGroup.patchValue({ id_municipio: null }); 
+          trabajoFormGroup.setControl('listaMunicipios', new FormControl(municipios));
+        }
+      },
+      error: (error) => console.error('Error al cargar municipios:', error)
+    });
+  }
+
+  onDepartamentoChange(event: any, index: number) {
+    const departamentoId = event.value;
+  
+    if (!departamentoId) {
+      return;
+    }
+  
+    this.loadMunicipios(departamentoId, index);
+    this.trabajosArray.at(index).patchValue({ id_municipio: null });
   }
 }
 

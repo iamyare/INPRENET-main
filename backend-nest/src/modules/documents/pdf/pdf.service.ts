@@ -89,8 +89,8 @@ export class PdfService {
     );
 
     return {
-        pageSize: 'A4',
-        pageMargins: [40, 120, 40, 85],
+        pageSize: 'letter',
+        pageMargins: [20, 100, 20, 60],
         background: {
             image: data.base64data,
             width: 595.28,
@@ -98,7 +98,7 @@ export class PdfService {
         },
         content: content,
         footer: function (currentPage, pageCount) {
-            const user = dto.correo.split('@')[0]; // Cortamos el correo antes de la arroba
+            const user = dto.correo.split('@')[0]; 
             return {
                 table: {
                     widths: ['*', '*', '*'],
@@ -130,13 +130,13 @@ export class PdfService {
                 fontSize: 14,
                 bold: true,
                 alignment: 'center',
-                margin: [40, 10, 40, 5],
+                margin: [20, 10, 20, 5],
                 lineHeight: 1.8
             },
             body: {
                 fontSize: 11,
                 alignment: 'left',
-                margin: [40, 10, 40, 5],
+                margin: [20, 10, 20, 5],
                 lineHeight: 1.8
             },
             dni: {
@@ -755,7 +755,6 @@ export class PdfService {
                 ];
               }
             })(),
-            // Sección de OTRAS FUENTES DE INGRESO (Mismo estilo que familiares)
             [
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -772,15 +771,7 @@ export class PdfService {
                 text: 'ACTIVIDAD ECONÓMICA',
                 alignment: 'center',
                 style: ['subheader'],
-                colSpan: 3,
-              },
-              {}, {},
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'MONTO INGRESO',
-                alignment: 'center',
-                style: ['subheader'],
-                colSpan: 2,
+                colSpan: 2, // Ajustado para evitar _span issues
               },
               {},
               {
@@ -788,7 +779,15 @@ export class PdfService {
                 text: 'OBSERVACIÓN',
                 alignment: 'center',
                 style: ['subheader'],
-                colSpan: 2,
+                colSpan: 3, // Ajustado para evitar _span issues
+              },
+              {}, {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'MONTO INGRESO',
+                alignment: 'center',
+                style: ['subheader'],
+                colSpan: 2, // Ajustado para evitar _span issues
               },
               {},
             ],
@@ -801,20 +800,21 @@ export class PdfService {
                         text: fuente.actividad_economica || 'N/A',
                         alignment: 'center',
                         style: 'smallCell',
-                        colSpan: 3,
-                      },
-                      {}, {},
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: fuente.monto_ingreso ? `L. ${fuente.monto_ingreso}` : 'N/A',
-                        alignment: 'center',
-                        style: 'smallCell',
                         colSpan: 2,
                       },
                       {},
                       {
                         borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                         text: fuente.observacion || 'N/A',
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 3,
+                      },
+                      {},
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: fuente.monto_ingreso ? `L. ${fuente.monto_ingreso}` : 'N/A',
                         alignment: 'center',
                         style: 'smallCell',
                         colSpan: 2,
@@ -835,6 +835,7 @@ export class PdfService {
                     ],
                   ]
             ),
+
             [
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1153,7 +1154,6 @@ export class PdfService {
                   ];
                 });
               } else {
-                // Sección vacía si no hay cuentas bancarias
                 return [
                   [
                     {

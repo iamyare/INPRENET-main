@@ -60,14 +60,49 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
+            
+          </div>
+          <div class="form-row">
+            <!-- Departamento -->
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Departamento</mat-label>
+              <mat-icon matPrefix>location_on</mat-icon>
+              <mat-select formControlName="id_departamento" (selectionChange)="onDepartamentoChange($event, i)">
+                <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+                  {{ departamento.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="trabajo.get('id_departamento')?.invalid">
+                <mat-icon>error</mat-icon> Departamento es requerido
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Municipio -->
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Municipio</mat-label>
+              <mat-icon matPrefix>location_city</mat-icon>
+              <mat-select formControlName="id_municipio">
+                <mat-option *ngFor="let municipio of trabajo.get('listaMunicipios')?.value || []" [value]="municipio.value">
+                  {{ municipio.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="trabajo.get('id_municipio')?.invalid">
+                <mat-icon>error</mat-icon> Municipio es requerido
+              </mat-error>
+            </mat-form-field>
           </div>
 
           <div class="form-row">
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Telefono</mat-label>
+              <mat-icon matPrefix>home</mat-icon>
+              <input matInput formControlName="telefono_1" readonly>
+            </mat-form-field>
             <!-- Dirección del Centro -->
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Dirección del Centro</mat-label>
               <mat-icon matPrefix>home</mat-icon>
-              <input matInput formControlName="direccionCentro" readonly>
+              <input matInput formControlName="direccionCentro">
             </mat-form-field>
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Sector Económico</mat-label>
@@ -82,6 +117,18 @@
               <mat-icon matPrefix>money</mat-icon>
               <input matInput formControlName="salario_base">
               <mat-error *ngFor="let error of getErrors(i, 'salario_base')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Día de Pago</mat-label>
+              <mat-icon matPrefix>calendar_today</mat-icon>
+              <mat-select formControlName="fecha_pago">
+                <mat-option *ngFor="let dia of [].constructor(31); let i = index" [value]="i + 1">
+                  {{ i + 1 }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngFor="let error of getErrors(i, 'fecha_pago')">
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>

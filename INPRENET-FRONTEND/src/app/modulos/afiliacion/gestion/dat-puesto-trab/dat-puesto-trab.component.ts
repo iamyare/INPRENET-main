@@ -257,9 +257,9 @@ export class DatPuestoTrabComponent implements OnInit {
     const trabajoControl = this.trabajosArray.at(index);
     const value = trabajoControl.get('nombre_centro_trabajo')?.value;
   
-    const filterValue = typeof value === 'string' ? value.toLowerCase() : '';
+    const filterValue = typeof value === 'string' ? value : '';
     return this.centrosTrabajo.filter((centro) =>
-      centro.nombreCentro.toLowerCase().includes(filterValue)
+      centro.nombreCentro.includes(filterValue)
     );
   }
 
@@ -267,9 +267,9 @@ export class DatPuestoTrabComponent implements OnInit {
     const trabajoControl = this.trabajosArray.at(index);
     const value = trabajoControl.get('id_centro_trabajo')?.value;
   
-    const filterValue = typeof value === 'string' ? value.toLowerCase() : '';
+    const filterValue = typeof value === 'string' ? value : '';
     return this.centrosTrabajo.filter((centro) =>
-      centro.label.toLowerCase().includes(filterValue)
+      centro.label.includes(filterValue)
     );
   }
   

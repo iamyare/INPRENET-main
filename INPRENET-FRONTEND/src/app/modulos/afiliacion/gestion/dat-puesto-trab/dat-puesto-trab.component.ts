@@ -255,23 +255,33 @@ export class DatPuestoTrabComponent implements OnInit {
   
   getFilteredCentrosTrabajo(index: number): any[] {
     const trabajoControl = this.trabajosArray.at(index);
-    const value = trabajoControl.get('nombre_centro_trabajo')?.value;
+    if (!trabajoControl) {
+      return [];
+    }
   
-    const filterValue = typeof value === 'string' ? value : '';
+    const value = trabajoControl.get('nombre_centro_trabajo')?.value;
+    const filterValue = value ? value.toString().toUpperCase() : '';
+  
     return this.centrosTrabajo.filter((centro) =>
-      centro.nombreCentro.includes(filterValue)
+      centro.nombreCentro?.toUpperCase().includes(filterValue)
     );
   }
+  
 
   getFilteredCodigosTrabajo(index: number): any[] {
     const trabajoControl = this.trabajosArray.at(index);
-    const value = trabajoControl.get('id_centro_trabajo')?.value;
+    if (!trabajoControl) {
+      return [];
+    }
   
-    const filterValue = typeof value === 'string' ? value : '';
+    const value = trabajoControl.get('id_centro_trabajo')?.value;
+    const filterValue = value ? value.toString().toUpperCase() : '';
+  
     return this.centrosTrabajo.filter((centro) =>
-      centro.label.includes(filterValue)
+      centro.label?.toUpperCase().includes(filterValue)
     );
   }
+  
   
   
   displayNombre(value: any): string {

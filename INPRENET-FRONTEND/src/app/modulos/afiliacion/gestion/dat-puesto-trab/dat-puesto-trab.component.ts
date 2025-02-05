@@ -78,7 +78,7 @@ export class DatPuestoTrabComponent implements OnInit {
         nombreCentroControl.valueChanges.pipe(startWith('')).subscribe((value) => {
           (control as FormGroup).patchValue({
             filteredCentrosTrabajo: this.centrosTrabajo.filter((centro) =>
-              centro.nombreCentro.toLowerCase().includes(value.toLowerCase())
+              centro.nombreCentro.includes(value)
             ),
           });
         });

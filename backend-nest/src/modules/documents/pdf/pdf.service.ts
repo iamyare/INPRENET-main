@@ -52,7 +52,6 @@ export class PdfService {
   }
 
   async generateConstanciaAfiliacionTemplate(data: any, includeQR: boolean, dto: EmpleadoDto) {
-    
     const content: Array<any> = [
         { text: 'A QUIEN INTERESE', style: 'header' },
         {
@@ -1205,327 +1204,20 @@ export class PdfService {
             {},
             {},
           ],
-
-// Sección de centros educativos:
-        ...(() => {
-          if (dataCentTrab?.length > 0) {
-            // CUANDO SÍ HAY CENTROS
-            return dataCentTrab.flatMap((b: any, index: number) => {
-              // Ejemplo: parseamos dirección si la guardamos en "direccionCentro"
-                  const direccionCentro =
-                    typeof b.centroTrabajo?.direccion_1 === 'string'
-                      ? b.centroTrabajo.direccion_1.split(',').reduce((acc: any, curr: any) => {
-                          const [key, value] = curr.split(':').map((s: string) => s.trim());
-                          acc[key] = value;
-                          return acc;
-                        }, {} as { [key: string]: string })
-                      : {};
-
-                  return [
-                    // Fila 1: título "CENTRO EDUCATIVO #..."
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: `CENTRO EDUCATIVO #${index + 1}`,
-                        alignment: 'center',
-                        colSpan: 7,
-                        style: ['subheader'],
-                      },
-                      {},
-                      {},
-                      {},
-                      {},
-                      {},
-                      {},
-                    ],
-                    // Fila 2: Nombre del centro, Sector
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'NOMBRE DEL CENTRO EDUCATIVO',
-                        alignment: 'left',
-                        style: ['subheader'],
-                        colSpan: 3,
-                      },
-                      {},
-                      {},
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'SECTOR',
-                        alignment: 'center',
-                        colSpan: 4,
-                        style: ['subheader'],
-                      },
-                      {},
-                      {},
-                      {},
-                    ],
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.centroTrabajo?.nombre_centro_trabajo || '\n',
-                        alignment: 'left',
-                        style: 'smallCell',
-                        colSpan: 3,
-                      },
-                      {},
-                      {},
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.centroTrabajo?.sector_economico || '\n',
-                        alignment: 'left',
-                        style: 'smallCell',
-                        colSpan: 4,
-                      },
-                      {},
-                      {},
-                      {},
-                    ],
-                    // Fila 3: Cargo
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'CARGO',
-                        alignment: 'left',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.cargo || '',
-                        alignment: 'left',
-                        style: 'smallCell',
-                        colSpan: 6,
-                      },
-                      {},
-                      {},
-                      {},
-                      {},
-                      {},
-                    ],
-                    // Fila 4: Fecha de Ingreso, Fecha de Pago
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'FECHA DE INGRESO',
-                        alignment: 'left',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.fecha_ingreso || '',
-                        alignment: 'left',
-                        style: 'smallCell',
-                        colSpan: 2,
-                      },
-                      {},
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'FECHA DE PAGO',
-                        alignment: 'left',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.fecha_pago || '',
-                        alignment: 'left',
-                        style: 'smallCell',
-                        colSpan: 3,
-                      },
-                      {},
-                      {},
-                    ],
-                    // Fila 5: Ingreso / Salario Mensual
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'INGRESO / SALARIO MENSUAL',
-                        alignment: 'left',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.salario_base ? `L. ${b?.salario_base}` : '',
-                        alignment: 'left',
-                        style: 'smallCell',
-                        colSpan: 6,
-                      },
-                      {},
-                      {},
-                      {},
-                      {},
-                      {},
-                    ],
-                    // Fila 6: Título dirección
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'DIRECCIÓN DEL CENTRO EDUCATIVO',
-                        alignment: 'center',
-                        colSpan: 7,
-                        style: ['subheader'],
-                      },
-                      {},
-                      {},
-                      {},
-                      {},
-                      {},
-                      {},
-                    ],
-                    // Fila 7: 7 columnas - DEPARTAMENTO, MUNICIPIO, CIUDAD, ALDEA, BARRIO O COLONIA, AVENIDA/CALLE, SECTOR
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'DEPARTAMENTO',
-                        alignment: 'center',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'MUNICIPIO',
-                        alignment: 'center',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'CIUDAD',
-                        alignment: 'center',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'ALDEA',
-                        alignment: 'center',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'BARRIO O COLONIA',
-                        alignment: 'center',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'AVENIDA / CALLE',
-                        alignment: 'center',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'SECTOR',
-                        alignment: 'center',
-                        style: ['subheader'],
-                      },
-                    ],
-                    // Fila 8: 7 columnas con data real (o vacía)
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.centroTrabajo?.municipio?.departamento?.nombre_departamento || '',
-                        alignment: 'center',
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.centroTrabajo?.municipio?.nombre_municipio || '',
-                        alignment: 'center',
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: '', // Llena con lo que parsees para "CIUDAD"
-                        alignment: 'center',
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: '', // Llena con lo que parsees para "ALDEA"
-                        alignment: 'center',
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: '', // Llena con lo que parsees para "BARRIO O COLONIA"
-                        alignment: 'center',
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: '', // Llena con lo que parsees para "AVENIDA / CALLE"
-                        alignment: 'center',
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: '', // Llena con lo que parsees para "SECTOR"
-                        alignment: 'center',
-                      },
-                    ],
-                    // Fila 9: Teléfonos
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'TELÉFONO 1',
-                        alignment: 'center',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.centroTrabajo?.celular_1 || '',
-                        alignment: 'center',
-                        style: 'smallCell',
-                        colSpan: 2,
-                      },
-                      {},
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'TELÉFONO 2',
-                        alignment: 'center',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.centroTrabajo?.celular_2 || '',
-                        alignment: 'center',
-                        style: 'smallCell',
-                        colSpan: 3,
-                      },
-                      {},
-                      {},
-                    ],
-                    // Fila 10: Otros puntos de referencia
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'OTROS PUNTOS DE REFERENCIA',
-                        alignment: 'left',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: b?.centroTrabajo?.direccion_2 || '',
-                        alignment: 'left',
-                        style: 'smallCell',
-                        colSpan: 6,
-                      },
-                      {},
-                      {},
-                      {},
-                      {},
-                      {},
-                    ],
-                  ];
-                });
-              } else {
-                // CUANDO NO HAY CENTROS (dataCentTrab es vacío o no existe)
+          // Sección de centros educativos:
+          ...(() => {
+            if (dataCentTrab?.length > 0) {
+              return dataCentTrab.flatMap((b: any, index: number) => {
                 return [
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: 'CENTRO EDUCATIVO #1',
+                      text: `CENTRO EDUCATIVO #${index + 1}`,
                       alignment: 'center',
                       colSpan: 7,
                       style: ['subheader'],
                     },
-                    {},
-                    {},
-                    {},
-                    {},
-                    {},
-                    {},
+                    {}, {}, {}, {}, {}, {},
                   ],
                   [
                     {
@@ -1535,8 +1227,7 @@ export class PdfService {
                       style: ['subheader'],
                       colSpan: 3,
                     },
-                    {},
-                    {},
+                    {}, {},
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                       text: 'SECTOR',
@@ -1544,31 +1235,27 @@ export class PdfService {
                       colSpan: 4,
                       style: ['subheader'],
                     },
-                    {},
-                    {},
-                    {},
+                    {}, {}, {},
                   ],
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.centroTrabajo?.nombre_centro_trabajo || '\n',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 3,
                     },
-                    {},
-                    {},
+                    {}, {},
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.centroTrabajo?.sector_economico || '\n',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 4,
                     },
-                    {},
-                    {},
-                    {},
+                    {}, {}, {},
                   ],
+                  // Fila 3: Cargo
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1578,17 +1265,14 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.cargo || '',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 6,
                     },
-                    {},
-                    {},
-                    {},
-                    {},
-                    {},
+                    {}, {}, {}, {}, {},
                   ],
+                  // Fila 4: Fecha de Ingreso, Fecha de Pago
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1598,7 +1282,7 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.fecha_ingreso || '',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 2,
@@ -1612,14 +1296,14 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.fecha_pago || '',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 3,
                     },
-                    {},
-                    {},
+                    {}, {},
                   ],
+                  // Fila 5: Ingreso / Salario Mensual
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1629,17 +1313,14 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.salario_base ? `L. ${b?.salario_base}` : '',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 6,
                     },
-                    {},
-                    {},
-                    {},
-                    {},
-                    {},
+                    {}, {}, {}, {}, {},
                   ],
+                  // Fila 6: Título dirección
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1648,14 +1329,9 @@ export class PdfService {
                       colSpan: 7,
                       style: ['subheader'],
                     },
-                    {},
-                    {},
-                    {},
-                    {},
-                    {},
-                    {},
+                    {}, {}, {}, {}, {}, {},
                   ],
-                  // Aquí nuevamente las 7 columnas: Departamento, Municipio, Ciudad, Aldea, Barrio/Colonia, Avenida/Calle, Sector
+                  // Fila 7: 3 columnas - DEPARTAMENTO, MUNICIPIO, DIRECCIÓN COMPLETA
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1671,72 +1347,37 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: 'CIUDAD',
+                      text: 'DIRECCIÓN COMPLETA',
                       alignment: 'center',
                       style: ['subheader'],
+                      colSpan: 5,
                     },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: 'ALDEA',
-                      alignment: 'center',
-                      style: ['subheader'],
-                    },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: 'BARRIO O COLONIA',
-                      alignment: 'center',
-                      style: ['subheader'],
-                    },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: 'AVENIDA / CALLE',
-                      alignment: 'center',
-                      style: ['subheader'],
-                    },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: 'SECTOR',
-                      alignment: 'center',
-                      style: ['subheader'],
-                    },
+                    {}, {}, {}, {},
                   ],
+                  // Fila 8: Datos de dirección
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.centroTrabajo?.municipio?.departamento?.nombre_departamento || '',
+                      style: 'smallCell',
                       alignment: 'center',
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.centroTrabajo?.municipio?.nombre_municipio || '',
+                      style: 'smallCell',
                       alignment: 'center',
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.centroTrabajo?.direccion_1 || '',
+                      style: 'smallCell',
                       alignment: 'center',
+                      colSpan: 5,
                     },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
-                      alignment: 'center',
-                    },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
-                      alignment: 'center',
-                    },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
-                      alignment: 'center',
-                    },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
-                      alignment: 'center',
-                    },
+                    {}, {}, {}, {},
                   ],
+                  // Fila 9: Teléfonos
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1746,7 +1387,7 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.centroTrabajo?.celular_1 || '',
                       alignment: 'center',
                       style: 'smallCell',
                       colSpan: 2,
@@ -1760,37 +1401,209 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
+                      text: b?.centroTrabajo?.celular_2 || '',
                       alignment: 'center',
                       style: 'smallCell',
                       colSpan: 3,
                     },
-                    {},
-                    {},
-                  ],
-                  [
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: 'OTROS PUNTOS DE REFERENCIA',
-                      alignment: 'left',
-                      style: ['subheader'],
-                    },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
-                      alignment: 'left',
-                      style: 'smallCell',
-                      colSpan: 6,
-                    },
-                    {},
-                    {},
-                    {},
-                    {},
-                    {},
-                  ],
+                    {}, {},
+                  ]
                 ];
-              }
-            })(),
+              });
+            } else {
+              return [
+                [
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'CENTRO EDUCATIVO #1',
+                    alignment: 'center',
+                    colSpan: 7,
+                    style: ['subheader'],
+                  },
+                  {}, {}, {}, {}, {}, {},
+                ],
+                [
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'NOMBRE DEL CENTRO EDUCATIVO',
+                    alignment: 'left',
+                    style: ['subheader'],
+                    colSpan: 3,
+                  },
+                  {}, {},
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'SECTOR',
+                    alignment: 'center',
+                    colSpan: 4,
+                    style: ['subheader'],
+                  },
+                  {}, {}, {},
+                ],
+                [
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'left',
+                    style: 'smallCell',
+                    colSpan: 3,
+                  },
+                  {}, {},
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'left',
+                    style: 'smallCell',
+                    colSpan: 4,
+                  },
+                  {}, {}, {},
+                ],
+                [
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'CARGO',
+                    alignment: 'left',
+                    style: ['subheader'],
+                  },
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'left',
+                    style: 'smallCell',
+                    colSpan: 6,
+                  },
+                  {}, {}, {}, {}, {},
+                ],
+                [
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'FECHA DE INGRESO',
+                    alignment: 'left',
+                    style: ['subheader'],
+                  },
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'left',
+                    style: 'smallCell',
+                    colSpan: 2,
+                  },
+                  {},
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'FECHA DE PAGO',
+                    alignment: 'left',
+                    style: ['subheader'],
+                  },
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'left',
+                    style: 'smallCell',
+                    colSpan: 3,
+                  },
+                  {}, {},
+                ],
+                [
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'INGRESO / SALARIO MENSUAL',
+                    alignment: 'left',
+                    style: ['subheader'],
+                  },
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'left',
+                    style: 'smallCell',
+                    colSpan: 6,
+                  },
+                  {}, {}, {}, {}, {},
+                ],
+                [
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'DIRECCIÓN DEL CENTRO EDUCATIVO',
+                    alignment: 'center',
+                    colSpan: 7,
+                    style: ['subheader'],
+                  },
+                  {}, {}, {}, {}, {}, {},
+                ],
+                [
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'DEPARTAMENTO',
+                    alignment: 'center',
+                    style: ['subheader'],
+                  },
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'MUNICIPIO',
+                    alignment: 'center',
+                    style: ['subheader'],
+                  },
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'DIRECCIÓN COMPLETA',
+                    alignment: 'center',
+                    style: ['subheader'],
+                    colSpan: 5,
+                  },
+                  {}, {}, {}, {},
+                ],
+                [
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'center',
+                  },
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'center',
+                  },
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'center',
+                    colSpan: 5,
+                  },
+                  {}, {}, {}, {},
+                ],
+                [
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'TELÉFONO 1',
+                    alignment: 'center',
+                    style: ['subheader'],
+                  },
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'center',
+                    style: 'smallCell',
+                    colSpan: 2,
+                  },
+                  {},
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'TELÉFONO 2',
+                    alignment: 'center',
+                    style: ['subheader'],
+                  },
+                  {
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'center',
+                    style: 'smallCell',
+                    colSpan: 3,
+                  },
+                  {}, {},
+                ]
+              ];
+            }
+          })(),
 
             [
               {

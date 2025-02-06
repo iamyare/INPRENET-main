@@ -31,4 +31,10 @@
   </app-dynamic-table>
 </div>
 
-<button mat-raised-button color="primary" (click)="generarPDF()">Generar PDF</button>
+<button 
+  mat-raised-button 
+  color="primary" 
+  (click)="generarPDF()" 
+  *ngIf="mostrarBotonGenerarPDF">
+  Generar PDF
+</button>

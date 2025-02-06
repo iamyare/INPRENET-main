@@ -8,100 +8,134 @@
     <form [formGroup]="formGroup" class="form-container" (ngModelChange)="onDatosRefPerChange()">
       <div formGroupName="conyuge">
         <h4 class="reference-title">Datos de Cónyuge</h4>
-
+      
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Número de Identificación</mat-label>
-            <input matInput 
-                   type="text" 
-                   formControlName="n_identificacion" 
-                   (blur)="verificarAfiliadoBlur()">
-            <mat-error
-              *ngIf="formGroup.get('conyuge')?.get('n_identificacion')?.invalid 
-                     && formGroup.get('conyuge')?.get('n_identificacion')?.touched">
-              <mat-icon>error</mat-icon> 
-              {{ getErrorMessageForConyugeIdentificacion() }}
-            </mat-error>
-          </mat-form-field>
-                       
-          <mat-form-field class="half-width" appearance="outline">
-            <mat-label>Primer Nombre</mat-label>
-            <input matInput type="text" formControlName="primer_nombre" [readonly]="formGroup.get('conyuge')?.disabled">
-            <mat-error *ngIf="formGroup.get('conyuge')?.get('primer_nombre')?.hasError('required') && formGroup.get('conyuge')?.get('primer_nombre')?.touched">
-              <mat-icon>error</mat-icon> Este campo es obligatorio.
+            <input matInput type="text" formControlName="n_identificacion" (blur)="verificarAfiliadoBlur()">
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('n_identificacion')?.invalid 
+                                && formGroup.get('conyuge')?.get('n_identificacion')?.touched">
+              <mat-icon>error</mat-icon> {{ getErrorMessageForConyugeIdentificacion() }}
             </mat-error>
           </mat-form-field>
           
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Primer Nombre</mat-label>
+            <input matInput type="text" formControlName="primer_nombre">
+            
+            <!-- Siempre mostrar el mensaje de campo obligatorio si está vacío -->
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('primer_nombre')?.hasError('required')">
+              <mat-icon>error</mat-icon> Este campo es obligatorio.
+            </mat-error>
+      
+            <!-- Mostrar mensaje de error si el usuario escribe caracteres inválidos -->
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('primer_nombre')?.hasError('pattern')">
+              <mat-icon>error</mat-icon> Solo se permiten letras.
+            </mat-error>
+          </mat-form-field>
         </div>
+      
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Segundo Nombre</mat-label>
             <input matInput type="text" formControlName="segundo_nombre">
+        
+            <!-- Mensaje de error si se ingresan caracteres no permitidos -->
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('segundo_nombre')?.hasError('pattern')">
+              <mat-icon>error</mat-icon> Solo se permiten letras.
+            </mat-error>
           </mat-form-field>
-
+      
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Tercer Nombre</mat-label>
             <input matInput type="text" formControlName="tercer_nombre">
+        
+            <!-- Mensaje de error si se ingresan caracteres no permitidos -->
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('tercer_nombre')?.hasError('pattern')">
+              <mat-icon>error</mat-icon> Solo se permiten letras.
+            </mat-error>
           </mat-form-field>
         </div>
-
+      
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Primer Apellido</mat-label>
             <input matInput type="text" formControlName="primer_apellido">
-            <mat-error *ngIf="formGroup.get('conyuge')?.get('primer_apellido')?.hasError('required') && formGroup.get('conyuge')?.get('primer_apellido')?.touched">
+            
+            <!-- Mensajes de error -->
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('primer_apellido')?.hasError('required')">
               <mat-icon>error</mat-icon> Este campo es obligatorio.
             </mat-error>
+      
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('primer_apellido')?.hasError('pattern')">
+              <mat-icon>error</mat-icon> Solo se permiten letras.
+            </mat-error>
           </mat-form-field>
-
+      
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Segundo Apellido</mat-label>
             <input matInput type="text" formControlName="segundo_apellido">
+        
+            <!-- Mensaje de error si se ingresan caracteres no permitidos -->
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('segundo_apellido')?.hasError('pattern')">
+              <mat-icon>error</mat-icon> Solo se permiten letras.
+            </mat-error>
           </mat-form-field>
         </div>
-
+      
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Fecha de Nacimiento</mat-label>
             <input matInput [matDatepicker]="picker" formControlName="fecha_nacimiento" [max]="maxDate" (keydown)="blockManualInput($event)">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
+            
+            <!-- Mensaje de error si el campo es obligatorio -->
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('fecha_nacimiento')?.hasError('required')">
+              <mat-icon>error</mat-icon> Este campo es obligatorio.
+            </mat-error>
           </mat-form-field>          
-
+      
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Teléfono de Casa</mat-label>
             <input matInput type="text" formControlName="telefono_domicilio">
-            <mat-error *ngIf="formGroup.get('conyuge')?.get('telefono_domicilio')?.hasError('pattern') && formGroup.get('conyuge')?.touched">
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('telefono_domicilio')?.hasError('pattern')">
               <mat-icon>error</mat-icon> Solo se permiten números.
             </mat-error>
           </mat-form-field>
         </div>
-
+      
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Teléfono Celular</mat-label>
             <input matInput type="text" formControlName="telefono_celular">
-            <mat-error *ngIf="formGroup.get('conyuge')?.get('telefono_celular')?.hasError('pattern') && formGroup.get('conyuge')?.touched">
+            
+            <!-- Mensaje de error si es obligatorio -->
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('telefono_celular')?.hasError('required')">
+              <mat-icon>error</mat-icon> Este campo es obligatorio.
+            </mat-error>
+      
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('telefono_celular')?.hasError('pattern')">
               <mat-icon>error</mat-icon> Solo se permiten números.
             </mat-error>
           </mat-form-field>
-
+      
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Teléfono de Trabajo</mat-label>
             <input matInput type="text" formControlName="telefono_trabajo">
-            <mat-error *ngIf="formGroup.get('conyuge')?.get('telefono_trabajo')?.hasError('pattern') && formGroup.get('conyuge')?.touched">
+            <mat-error *ngIf="formGroup.get('conyuge')?.get('telefono_trabajo')?.hasError('pattern')">
               <mat-icon>error</mat-icon> Solo se permiten números.
             </mat-error>
           </mat-form-field>
         </div>
-
+      
         <div class="form-row">
           <mat-radio-group formControlName="trabaja" aria-label="Seleccione si trabaja" class="radio-group">
             <label>¿TRABAJA?</label>
             <mat-radio-button value="SÍ">SÍ</mat-radio-button>
             <mat-radio-button value="NO">NO</mat-radio-button>
           </mat-radio-group>
-
+      
           <div class="half-width afiliado-container">
             <label class="afiliado-label">¿ES AFILIADO?</label>
             <div [ngClass]="{'text-success': esAfiliadoText === 'SÍ', 'text-danger': esAfiliadoText === 'NO'}">
@@ -110,6 +144,7 @@
           </div>
         </div>
       </div>
+      
       <br>
       <div formArrayName="refpers">
         <div *ngFor="let ref of referencias.controls; index as i" [formGroupName]="i" class="reference-group">

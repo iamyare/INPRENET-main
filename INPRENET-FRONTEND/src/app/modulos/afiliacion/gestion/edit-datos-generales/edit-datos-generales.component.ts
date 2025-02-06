@@ -34,6 +34,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   datos!: any;
   form: any;
   datosGeneralesForm: FormGroup;
+  mostrarBotonGenerar: boolean = false;
 
   usuarioToken: {
     correo: string;
@@ -460,11 +461,37 @@ export class EditDatosGeneralesComponent implements OnInit {
       )
     });
   }
+  
+  tieneTipoAfiliado(): boolean {
+    console.log("Verificando tipoPersona en Afiliado...", this.Afiliado);
+  
+    if (!this.Afiliado) {
+      console.log("No hay datos en Afiliado.");
+      return false;
+    }
+  
+    const tiposPermitidos = ["AFILIADO", "PENSIONADO", "JUBILADO"];
+  
+    if (this.Afiliado.TIPO_PERSONA && tiposPermitidos.includes(this.Afiliado.TIPO_PERSONA)) {
+      console.log("✅ Tipo persona válido en TIPO_PERSONA:", this.Afiliado.TIPO_PERSONA);
+      return true;
+    }
+  
+    if (Array.isArray(this.Afiliado.TIPOS_PERSONA) && this.Afiliado.TIPOS_PERSONA.some((tipo:any) => tiposPermitidos.includes(tipo))) {
+      console.log("✅ Tipo persona válido en TIPOS_PERSONA:", this.Afiliado.TIPOS_PERSONA);
+      return true;
+    }
+  
+    console.log("⛔ No se encontró un tipo permitido.");
+    return false;
+  }
+  
+  
   // previsualizarInfoAfil
   // ---------------------------------------------
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
-      
+      console.log(this.Afiliado);
       
         this.loading = true;
 
@@ -473,6 +500,8 @@ export class EditDatosGeneralesComponent implements OnInit {
             (result) => {
                 this.datos = result;
                 this.Afiliado = result;
+                this.mostrarBotonGenerar = this.tieneTipoAfiliado();
+                this.cdr.detectChanges();
 
                 if (result?.ID_DEPARTAMENTO_DEFUNCION) {
                   this.cargarMunicipiosDefuncion(result.ID_DEPARTAMENTO_DEFUNCION);

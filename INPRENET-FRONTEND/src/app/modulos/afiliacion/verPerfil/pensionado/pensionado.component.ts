@@ -19,8 +19,8 @@ export class PensionadoComponent {
     { label: 'Colegios Magisteriales', isActive: true },
     { label: 'Referencias Personales', isActive: true },
     { label: 'Detalles de pagos', isActive: false },
-    { label: 'Todos los pagos', isActive: false },
-    { label: 'Constancias', isActive: true },
+    //{ label: 'Todos los pagos', isActive: false },
+    //{ label: 'Constancias', isActive: true },
   ];
 
   onStepChange(index: number) {

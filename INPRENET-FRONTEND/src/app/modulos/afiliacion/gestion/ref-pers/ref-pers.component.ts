@@ -58,12 +58,27 @@ export class RefPersComponent implements OnInit {
 
   // Inicializa el formGroup de Cónyuge.
   private initFormConyuge(): FormGroup {
-    return this.fb.group({
-      primer_nombre: ['', []],
-      segundo_nombre: [''],
-      tercer_nombre: [''],
-      primer_apellido: ['', []],
-      segundo_apellido: [''],
+    const form = this.fb.group({
+      primer_nombre: [
+        '',
+        [Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)]
+      ],
+      segundo_nombre: [
+        '',
+        [Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)]
+      ],
+      tercer_nombre: [
+        '',
+        [Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)]
+      ],
+      primer_apellido: [
+        '',
+        [Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)]
+      ],
+      segundo_apellido: [
+        '',
+        [Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)]
+      ],
       n_identificacion: [
         '',
         [
@@ -86,10 +101,64 @@ export class RefPersComponent implements OnInit {
         '',
         [Validators.pattern(/^[0-9]*$/), Validators.maxLength(12)]
       ],
-      trabaja: ['', []],
+      trabaja: ['NO'],
       es_afiliado: ['', []]
     });
+  
+    form.get('n_identificacion')?.valueChanges.subscribe(value => {
+      if (value && value.length === 13) {
+        this.setConyugeFieldsRequired(form);
+        if (!form.get('trabaja')?.value) {
+          form.get('trabaja')?.setValue('NO', { emitEvent: false });
+        }
+      } else {
+        this.clearConyugeFieldsValidation(form);
+        form.get('trabaja')?.setValue('', { emitEvent: false }); 
+      }
+    });
+  
+    return form;
   }
+
+  // Función para hacer que los campos sean requeridos
+  private setConyugeFieldsRequired(form: FormGroup): void {
+    form.get('primer_nombre')?.setValidators([Validators.required, Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)]);
+    form.get('primer_apellido')?.setValidators([Validators.required, Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)]);
+    form.get('fecha_nacimiento')?.setValidators([Validators.required]);
+    form.get('telefono_celular')?.setValidators([Validators.required, Validators.pattern(/^[0-9]*$/), Validators.maxLength(12)]);
+  
+    // Marcar como tocados para que aparezcan los errores inmediatamente
+    form.get('primer_nombre')?.markAsTouched();
+    form.get('primer_apellido')?.markAsTouched();
+    form.get('fecha_nacimiento')?.markAsTouched();
+    form.get('telefono_celular')?.markAsTouched();
+  
+    // Actualizar validaciones
+    form.get('primer_nombre')?.updateValueAndValidity();
+    form.get('primer_apellido')?.updateValueAndValidity();
+    form.get('fecha_nacimiento')?.updateValueAndValidity();
+    form.get('telefono_celular')?.updateValueAndValidity();
+  }
+  
+
+// Función para remover la validación de obligatorio
+private clearConyugeFieldsValidation(form: FormGroup): void {
+  form.get('primer_nombre')?.clearValidators();
+  form.get('primer_apellido')?.clearValidators();
+  form.get('fecha_nacimiento')?.clearValidators();
+  form.get('telefono_celular')?.clearValidators();
+
+  // Mantener otros validadores si es necesario
+  form.get('telefono_celular')?.setValidators([Validators.pattern(/^[0-9]*$/), Validators.maxLength(12)]);
+
+  // Actualizar el estado de los controles
+  form.get('primer_nombre')?.updateValueAndValidity();
+  form.get('primer_apellido')?.updateValueAndValidity();
+  form.get('fecha_nacimiento')?.updateValueAndValidity();
+  form.get('telefono_celular')?.updateValueAndValidity();
+}
+
+  
 
   verificarAfiliadoBlur(): void {
     const nIdentificacionControl =

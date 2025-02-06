@@ -41,6 +41,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   public mostrarBotonEditar: boolean = false;
   public mostrarBotonEliminar: boolean = false;
   public mostrarBotonAgregarDiscapacidad: boolean = false;
+  public mostrarBotonGenerarPDF: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -56,11 +57,22 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editar');
-    this.mostrarBotonEditar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editar');
-    this.mostrarBotonEliminar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editar');
-    this.mostrarBotonAgregarDiscapacidad = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editar')
+  
+    // Verifica si el usuario tiene al menos uno de los permisos requeridos
+    this.mostrarBotonAgregar = this.tienePermiso();
+    this.mostrarBotonEditar = this.tienePermiso();
+    this.mostrarBotonEliminar = this.tienePermiso();
+    this.mostrarBotonAgregarDiscapacidad = this.tienePermiso();
   }
+  
+  // Función para verificar si tiene al menos uno de los permisos
+  private tienePermiso(): boolean {
+    return (
+      this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editar') ||
+      this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editarDos')
+    );
+  }
+  
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['persona'] && this.persona) {
@@ -99,12 +111,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
   async getFilas() {
     if (this.persona) {
-      console.log(this.persona);
-      
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
-          console.log(item);
           
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
@@ -135,6 +144,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
           };
           return respData;
         });
+        this.mostrarBotonGenerarPDF = this.filas.length > 1;
         this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');

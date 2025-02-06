@@ -41,6 +41,10 @@
              : 'No definido' }}
         </span>
       </p>
+      
+      <p *ngIf="persona.fallecido === 'SI'" class="alerta-fallecido">
+        <strong>ESTADO:</strong> FALLECIDO
+      </p>
 
       <!-- MENSAJE si pasó más de 2 años sin actualizar -->
       <p *ngIf="mensajeSinActualizacion" class="alerta-actualizacion">

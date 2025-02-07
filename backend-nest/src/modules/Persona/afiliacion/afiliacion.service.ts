@@ -489,63 +489,84 @@ export class AfiliacionService {
     crearPersonaCentrosTrabajoDtos: CrearPersonaCentroTrabajoDto[],
     idPersona: number,
     entityManager: EntityManager,
-  ): Promise<any[]> {
+): Promise<any[]> {
     const resultados: any[] = [];
-  
+
     for (const crearPersonaCentrosTrabajoDto of crearPersonaCentrosTrabajoDtos) {
-      const centroTrabajo = await this.centroTrabajoRepository.findOne({
-        where: { id_centro_trabajo: crearPersonaCentrosTrabajoDto.id_centro_trabajo },
-        relations: ['municipio', 'municipio.departamento'], // 🔹 Cargar municipio y departamento
-      });
-  
-      if (!centroTrabajo) {
-        throw new NotFoundException(`Centro de trabajo con ID ${crearPersonaCentrosTrabajoDto.id_centro_trabajo} no encontrado`);
-      }
-  
-      // Obtener datos del municipio y departamento
-      const municipio = centroTrabajo.municipio;
-      const departamento = municipio?.departamento;
-  
-      // Crear la relación persona-centro de trabajo en la BD
-      const personaCentroTrabajo = entityManager.create(Net_perf_pers_cent_trab, {
-        persona: { id_persona: idPersona },
-        centroTrabajo,
-        jornada: crearPersonaCentrosTrabajoDto.jornada,
-        tipo_jornada: crearPersonaCentrosTrabajoDto.tipo_jornada,
-        cargo: crearPersonaCentrosTrabajoDto.cargo,
-        fecha_pago: crearPersonaCentrosTrabajoDto.fecha_pago,
-        numero_acuerdo: crearPersonaCentrosTrabajoDto.numero_acuerdo,
-        salario_base: crearPersonaCentrosTrabajoDto.salario_base,
-        fecha_ingreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_ingreso),
-        fecha_egreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_egreso),
-        estado: "ACTIVO",
-      });
-  
-      await entityManager.save(Net_perf_pers_cent_trab, personaCentroTrabajo);
-  
-      // Crear respuesta personalizada con el nombre del departamento
-      resultados.push({
-        id_centro_trabajo: centroTrabajo.id_centro_trabajo,
-        nombre_centro_trabajo: centroTrabajo.nombre_centro_trabajo,
-        id_municipio: municipio?.id_municipio || 0,
-        nombre_municipio: municipio?.nombre_municipio || "Desconocido",
-        id_departamento: departamento?.id_departamento || 0,
-        nombre_departamento: departamento?.nombre_departamento || "Desconocido",
-        jornada: personaCentroTrabajo.jornada,
-        tipo_jornada: personaCentroTrabajo.tipo_jornada,
-        cargo: personaCentroTrabajo.cargo,
-        fecha_pago: personaCentroTrabajo.fecha_pago,
-        numero_acuerdo: personaCentroTrabajo.numero_acuerdo,
-        salario_base: personaCentroTrabajo.salario_base,
-        fecha_ingreso: personaCentroTrabajo.fecha_ingreso,
-        fecha_egreso: personaCentroTrabajo.fecha_egreso,
-        estado: personaCentroTrabajo.estado,
-      });
+        // Buscar el centro de trabajo
+        const centroTrabajo = await this.centroTrabajoRepository.findOne({
+            where: { id_centro_trabajo: crearPersonaCentrosTrabajoDto.id_centro_trabajo },
+            relations: ['municipio'], // Asegura que cargue el municipio
+        });
+
+        if (!centroTrabajo) {
+            throw new NotFoundException(`Centro de trabajo con ID ${crearPersonaCentrosTrabajoDto.id_centro_trabajo} no encontrado`);
+        }
+
+        // Actualizar dirección si se proporciona en la solicitud
+        if (crearPersonaCentrosTrabajoDto.direccionCentro) {
+            centroTrabajo.direccion_1 = crearPersonaCentrosTrabajoDto.direccionCentro;
+        }
+
+        // Actualizar municipio si se proporciona en la solicitud
+        if (crearPersonaCentrosTrabajoDto.id_municipio) {
+            const municipio = await entityManager.findOne(Net_Municipio, { 
+                where: { id_municipio: crearPersonaCentrosTrabajoDto.id_municipio }
+            });
+
+            if (!municipio) {
+                throw new NotFoundException(`Municipio con ID ${crearPersonaCentrosTrabajoDto.id_municipio} no encontrado`);
+            }
+
+            centroTrabajo.municipio = municipio; // Relación con la entidad Net_Municipio
+        }
+
+        // Guardar cambios en el centro de trabajo
+        if (crearPersonaCentrosTrabajoDto.direccionCentro || crearPersonaCentrosTrabajoDto.id_municipio) {
+            await entityManager.save(Net_Centro_Trabajo, centroTrabajo);
+        }
+
+        // Crear la relación persona-centro de trabajo
+        const personaCentroTrabajo = entityManager.create(Net_perf_pers_cent_trab, {
+            persona: { id_persona: idPersona },
+            centroTrabajo,
+            jornada: crearPersonaCentrosTrabajoDto.jornada,
+            tipo_jornada: crearPersonaCentrosTrabajoDto.tipo_jornada,
+            cargo: crearPersonaCentrosTrabajoDto.cargo,
+            fecha_pago: crearPersonaCentrosTrabajoDto.fecha_pago,
+            numero_acuerdo: crearPersonaCentrosTrabajoDto.numero_acuerdo,
+            salario_base: crearPersonaCentrosTrabajoDto.salario_base,
+            fecha_ingreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_ingreso),
+            fecha_egreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_egreso),
+            estado: "ACTIVO",
+        });
+
+        await entityManager.save(Net_perf_pers_cent_trab, personaCentroTrabajo);
+
+        // Agregar resultado con información actualizada
+        resultados.push({
+            id_centro_trabajo: centroTrabajo.id_centro_trabajo,
+            nombre_centro_trabajo: centroTrabajo.nombre_centro_trabajo,
+            direccion_1: centroTrabajo.direccion_1,
+            id_municipio: centroTrabajo.municipio?.id_municipio,
+            nombre_municipio: centroTrabajo.municipio?.nombre_municipio || "Desconocido",
+            jornada: personaCentroTrabajo.jornada,
+            tipo_jornada: personaCentroTrabajo.tipo_jornada,
+            cargo: personaCentroTrabajo.cargo,
+            fecha_pago: personaCentroTrabajo.fecha_pago,
+            numero_acuerdo: personaCentroTrabajo.numero_acuerdo,
+            salario_base: personaCentroTrabajo.salario_base,
+            fecha_ingreso: personaCentroTrabajo.fecha_ingreso,
+            fecha_egreso: personaCentroTrabajo.fecha_egreso,
+            estado: personaCentroTrabajo.estado,
+        });
     }
-  
+
     return resultados;
-  }
-  
+}
+
+
+
 
   async crearOtrasFuentesIngreso(
     crearOtrasFuentesIngresoDtos: CrearOtraFuenteIngresoDto[] | undefined,

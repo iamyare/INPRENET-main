@@ -162,6 +162,8 @@ export class PdfService {
 }
 
   public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean, dto: EmpleadoDto) {
+    console.log(data?.perfPersCentTrabs);
+    
     const calcularEdad = (fecha: string) => {
       if (!fecha) return '';
       const hoy = new Date();

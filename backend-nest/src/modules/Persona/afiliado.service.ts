@@ -1152,7 +1152,7 @@ export class AfiliadoService {
       };
 
       if (datosGenerales.fallecido === 'NO') {
-      data.certificado_defuncion = null; // Eliminar el archivo adjunto
+      data.certificado_defuncion = null;
     }  
       if (fileIdent?.buffer) {
         data.archivo_identificacion = Buffer.from(fileIdent.buffer);
@@ -1173,9 +1173,9 @@ export class AfiliadoService {
       const existingDetalle = await this.detallePersonaRepository.findOne({
         where: { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
       });
-
+      
       const voluntario = datosGenerales?.voluntario ?? 'NO';
-
+      
       if (existingDetalle) {
         await this.detallePersonaRepository.update(
           { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },

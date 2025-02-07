@@ -274,8 +274,9 @@ onSubmit(): void {
 //-------------------------------------------------------------------
   getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
     userDetails.forEach(item => {
-      item.nombre = `${item.primer_nombre || 'N/A'} ${item.segundo_nombre || ''} ${item.primer_apellido || 'N/A'} ${item.segundo_apellido || ''}`;
-      item.fechaNacimiento = item.fecha_nacimiento || 'N/A';
+      item.nombre = [item.primer_nombre, item.segundo_nombre, item.primer_apellido, item.segundo_apellido]
+      .filter(name => name && name.trim() !== '') // Filtra los valores vacíos
+      .join(' ') || 'N/A';item.fechaNacimiento = item.fecha_nacimiento || 'N/A';
       item.identidad = item.n_identificacion || 'N/A';
       item.parentesco = item.parentesco || 'N/A';
       item.porcentaje = item.porcentaje || 'N/A';
@@ -283,7 +284,12 @@ onSubmit(): void {
       item.telefono_1 = item.telefono_1 || 'N/A';
     });
     // Detalles del usuario
-    beneficiarios.nombre = `${beneficiarios[0].primer_nombre} ${beneficiarios[0].segundo_nombre || ''} ${beneficiarios[0].primer_apellido} ${beneficiarios[0].segundo_apellido || ''}` || 'N/A';
+    beneficiarios.nombre = [
+      beneficiarios[0].primer_nombre, 
+      beneficiarios[0].segundo_nombre, 
+      beneficiarios[0].primer_apellido, 
+      beneficiarios[0].segundo_apellido
+    ].filter(name => name && name.trim() !== '').join(' ') || 'N/A'
     beneficiarios.grado_academico = beneficiarios[0].grado_academico || 'N/A';
     beneficiarios.centroEducativo = beneficiarios[3].nombre_centro_trabajo || 'N/A';
     beneficiarios.municipioResidencia = beneficiarios[3].nombre_municipio || 'N/A';
@@ -448,8 +454,8 @@ onSubmit(): void {
                         {
                           width: '50%',
                           stack: [
-                            { text: '________________________________', alignment: 'right', margin: [0, 10] },
-                            { text: 'Firma', alignment: 'center', margin: [0, 10] }
+                            { text: '________________________________', alignment: 'center', margin: [0, 10, 0, 0] },
+                            { text: 'Firma', alignment: 'center', margin: [-10, 0, 0, 0] }
                           ],
                           style: 'subHeader'
                         }

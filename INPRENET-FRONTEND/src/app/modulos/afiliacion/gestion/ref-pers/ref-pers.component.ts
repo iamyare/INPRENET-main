@@ -282,7 +282,7 @@ private clearConyugeFieldsValidation(form: FormGroup): void {
       ],
       telefono_personal: [
         datos?.telefono_personal || '',
-        [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]
+        [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]
       ],
       parentesco: [
         datos?.parentesco || '',

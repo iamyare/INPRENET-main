@@ -250,9 +250,19 @@
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Teléfono Personal</mat-label>
               <input matInput type="text" formControlName="telefono_personal">
-              <mat-error *ngFor="let error of getErrors(i, 'telefono_personal')">
-                <mat-icon>error</mat-icon> {{ error }}
+              <mat-error *ngIf="referencias.at(i).get('telefono_personal')?.hasError('required')">
+                <mat-icon>error</mat-icon> Este campo es obligatorio.
               </mat-error>
+              <mat-error *ngIf="referencias.at(i).get('telefono_personal')?.hasError('minlength')">
+                <mat-icon>error</mat-icon> Debe tener al menos 8 dígitos.
+              </mat-error>
+              <mat-error *ngIf="referencias.at(i).get('telefono_personal')?.hasError('maxlength')">
+                <mat-icon>error</mat-icon> No puede tener más de 12 dígitos.
+              </mat-error>
+              <mat-error *ngIf="referencias.at(i).get('telefono_personal')?.hasError('pattern')">
+                <mat-icon>error</mat-icon> Solo se permiten números.
+              </mat-error>
+              
             </mat-form-field>
           </div>
 

@@ -95,6 +95,20 @@ export class DatosGeneralesComponent implements OnInit {
         this.formGroup.addControl('FotoPerfil', new FormControl(null, Validators.required));
     }
 
+    this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
+
+  // 📌 Se suscribe a los cambios en el tipo de identificación para aplicar las validaciones correspondientes
+  this.formGroup.get('id_tipo_identificacion')?.valueChanges.subscribe((value) => {
+    this.onTipoIdentificacionChange(value);
+  });
+
+  this.formGroup.addControl('n_identificacion', new FormControl('', [
+      Validators.required,
+      Validators.minLength(13),
+      Validators.maxLength(15),
+      Validators.pattern(/^[0-9]+$/)
+  ]));
+
     this.formGroup.addControl('discapacidad', new FormControl(false, Validators.required));
 
     // Si la persona tiene discapacidades, marcar el campo de discapacidad en true
@@ -265,6 +279,72 @@ export class DatosGeneralesComponent implements OnInit {
     { "label": "PRE-GRADO", "value": "PRE-GRADO" },
     { "label": "POST-GRADO", "value": "POST-GRADO" },
   ];
+
+  onTipoIdentificacionChange(tipoIdentificacion: number) {
+    const control = this.formGroup.get('n_identificacion');
+  
+    if (!control) return;
+  
+    if (tipoIdentificacion === 2) {
+      // Pasaporte: permite letras y números, mínimo 9 caracteres
+      control.setValidators([
+        Validators.required,
+        Validators.minLength(9),
+        Validators.maxLength(15),
+        Validators.pattern(/^[a-zA-Z0-9]+$/)
+      ]);
+    } else if (tipoIdentificacion === 1) {
+      // DNI: solo números, exactamente 13 caracteres
+      control.setValidators([
+        Validators.required,
+        Validators.minLength(13),
+        Validators.maxLength(13),
+        Validators.pattern(/^[0-9]+$/)
+      ]);
+    } else {
+      // Otro tipo: valores predeterminados (solo números, 13-15 caracteres)
+      control.setValidators([
+        Validators.required,
+        Validators.minLength(13),
+        Validators.maxLength(15),
+        Validators.pattern(/^[0-9]+$/)
+      ]);
+    }
+  
+    control.updateValueAndValidity(); // ⚠️ Importante: actualizar el estado del campo
+  }
+  
+
+  setValidacionesIdentificacion(permitirLetras: boolean) {
+    const control = this.formGroup.get('n_identificacion');
+    if (permitirLetras) {
+      control?.setValidators([
+        Validators.required,
+        Validators.minLength(9),
+        Validators.maxLength(15),
+        Validators.pattern(/^[a-zA-Z0-9]+$/)
+      ]);
+    } else {
+      control?.setValidators([
+        Validators.required,
+        Validators.minLength(13),
+        Validators.maxLength(15),
+        Validators.pattern(/^[0-9]+$/)
+      ]);
+    }
+    control?.updateValueAndValidity();
+  }
+  
+  setValidacionesDNI() {
+    const control = this.formGroup.get('n_identificacion');
+    control?.setValidators([
+      Validators.required,
+      Validators.minLength(13),
+      Validators.maxLength(13),
+      Validators.pattern(/^[0-9]+$/)
+    ]);
+    control?.updateValueAndValidity();
+  }
 
   onDepartamentoChange(event: any) {
     const departamentoId = event.value;

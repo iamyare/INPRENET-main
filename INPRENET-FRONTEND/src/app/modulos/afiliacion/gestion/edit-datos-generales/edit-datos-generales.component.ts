@@ -34,7 +34,6 @@ export class EditDatosGeneralesComponent implements OnInit {
   datos!: any;
   form: any;
   datosGeneralesForm: FormGroup;
-  mostrarBotonGenerar: boolean = false;
 
   usuarioToken: {
     correo: string;
@@ -50,6 +49,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   fallecido: any;
   minDate: Date;
   public loading: boolean = false;
+  mostrarBotonGenerar: boolean = false;
 
   // -------------------------------------------
   // FORMULARIOS
@@ -58,7 +58,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   certificadoDefuncionUrl: SafeResourceUrl | null = null;
   archivoIdentificacionUrl: SafeResourceUrl | null = null;
 
-  certificadoDefuncionFile: File | null = null; // Variable para almacenar el archivo adjunto
+  certificadoDefuncionFile: File | null = null;
   
   initialData = {};
   indicesSeleccionados: any[] = [];
@@ -258,7 +258,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     // --------------------------------
     this.form1.get('fallecido')?.valueChanges.subscribe((value) => {
       if (value === 'NO') {
-        // Limpiar campos de fallecimiento
         this.form1.patchValue({
           causa_fallecimiento: '',
           fecha_defuncion: '',
@@ -268,7 +267,6 @@ export class EditDatosGeneralesComponent implements OnInit {
           numero_certificado_defuncion: ''
         });
     
-        // Deshabilitar campos relacionados con fallecimiento
         this.form1.get('causa_fallecimiento')?.disable();
         this.form1.get('fecha_defuncion')?.disable();
         this.form1.get('id_departamento_defuncion')?.disable();
@@ -276,15 +274,11 @@ export class EditDatosGeneralesComponent implements OnInit {
         this.form1.get('fecha_reporte_fallecido')?.disable();
         this.form1.get('numero_certificado_defuncion')?.disable();
     
-        // Eliminar el archivo adjunto si existe
-        this.eliminarCertificadoDefuncion();
-    
-        // Deshabilitar y limpiar validadores del campo de archivo de certificado de defunción
-        this.formDatosGenerales.get('archivoCertDef')?.disable();
-        this.formDatosGenerales.get('archivoCertDef')?.clearValidators();
-        this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
+        if (!this.datos?.certificado_defuncion) {
+          this.formDatosGenerales.get('archivoCertDef')?.disable();
+          this.formDatosGenerales.get('archivoCertDef')?.clearValidators();
+        }
       } else {
-        // Habilitar campos relacionados con fallecimiento
         this.form1.get('causa_fallecimiento')?.enable();
         this.form1.get('fecha_defuncion')?.enable();
         this.form1.get('id_departamento_defuncion')?.enable();
@@ -292,11 +286,12 @@ export class EditDatosGeneralesComponent implements OnInit {
         this.form1.get('fecha_reporte_fallecido')?.enable();
         this.form1.get('numero_certificado_defuncion')?.enable();
     
-        // Habilitar y agregar validadores al campo de archivo de certificado de defunción
         this.formDatosGenerales.get('archivoCertDef')?.enable();
-        this.formDatosGenerales.get('archivoCertDef')?.setValidators([Validators.required]);
-        this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
+        if (!this.datos?.certificado_defuncion) {
+          this.formDatosGenerales.get('archivoCertDef')?.setValidators([Validators.required]);
+        }
       }
+      this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
     });
 
     // Importante: Si inicias con "NO", deshabilita al cargar
@@ -405,7 +400,9 @@ export class EditDatosGeneralesComponent implements OnInit {
 
     if (!this.formDatosGenerales) {
       this.formDatosGenerales = this.fb.group({
-        refpers: this.fb.array([])
+        refpers: this.fb.array([], [Validators.required]),
+        archivoCertDef: [this.datos?.certificado_defuncion ? this.datos.certificado_defuncion : null],
+        archivo_identificacion: [this.datos?.archivo_identificacion ? this.datos.archivo_identificacion : null]
       });
     }
 
@@ -461,37 +458,11 @@ export class EditDatosGeneralesComponent implements OnInit {
       )
     });
   }
-  
-  tieneTipoAfiliado(): boolean {
-    console.log("Verificando tipoPersona en Afiliado...", this.Afiliado);
-  
-    if (!this.Afiliado) {
-      console.log("No hay datos en Afiliado.");
-      return false;
-    }
-  
-    const tiposPermitidos = ["AFILIADO", "PENSIONADO", "JUBILADO"];
-  
-    if (this.Afiliado.TIPO_PERSONA && tiposPermitidos.includes(this.Afiliado.TIPO_PERSONA)) {
-      console.log("✅ Tipo persona válido en TIPO_PERSONA:", this.Afiliado.TIPO_PERSONA);
-      return true;
-    }
-  
-    if (Array.isArray(this.Afiliado.TIPOS_PERSONA) && this.Afiliado.TIPOS_PERSONA.some((tipo:any) => tiposPermitidos.includes(tipo))) {
-      console.log("✅ Tipo persona válido en TIPOS_PERSONA:", this.Afiliado.TIPOS_PERSONA);
-      return true;
-    }
-  
-    console.log("⛔ No se encontró un tipo permitido.");
-    return false;
-  }
-  
-  
   // previsualizarInfoAfil
   // ---------------------------------------------
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
-      console.log(this.Afiliado);
+      
       
         this.loading = true;
 
@@ -501,18 +472,15 @@ export class EditDatosGeneralesComponent implements OnInit {
                 this.datos = result;
                 this.Afiliado = result;
                 this.mostrarBotonGenerar = this.tieneTipoAfiliado();
-                this.cdr.detectChanges();
 
                 if (result?.ID_DEPARTAMENTO_DEFUNCION) {
                   this.cargarMunicipiosDefuncion(result.ID_DEPARTAMENTO_DEFUNCION);
                 }
 
                 // Manejo PDFs
-                this.certificadoDefuncionUrl = this.datos?.certificado_defuncion
-                    ? this.sanitizer.bypassSecurityTrustResourceUrl(
-                        `data:application/pdf;base64,${this.datos.certificado_defuncion}`
-                    )
-                    : null;
+                this.certificadoDefuncionUrl = result?.certificado_defuncion
+          ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${result.certificado_defuncion}`)
+          : null;
 
                 this.archivoIdentificacionUrl = this.datos?.archivo_identificacion
                     ? this.sanitizer.bypassSecurityTrustResourceUrl(
@@ -531,6 +499,22 @@ export class EditDatosGeneralesComponent implements OnInit {
                   } else {
                       archivoIdentificacionControl?.setValidators([Validators.required]);
                       archivoIdentificacionControl?.updateValueAndValidity();
+                  }
+
+                  const archivoCertDefControl = this.formDatosGenerales.get('archivoCertDef');
+
+                  if (result?.certificado_defuncion) {
+                    this.certificadoDefuncionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+                      `data:application/pdf;base64,${result.certificado_defuncion}`
+                    );
+                  
+                    // Establecer el archivo en el formulario
+                    archivoCertDefControl?.setValue(result.certificado_defuncion);
+                    archivoCertDefControl?.clearValidators();
+                    archivoCertDefControl?.updateValueAndValidity();
+                  } else {
+                    archivoCertDefControl?.setValidators([Validators.required]);
+                    archivoCertDefControl?.updateValueAndValidity();
                   }
 
                 // Otras propiedades globales
@@ -722,6 +706,23 @@ export class EditDatosGeneralesComponent implements OnInit {
     const formValues = this.form1.value;
 
     let archivoIdentificacion = this.formDatosGenerales.get('archivo_identificacion')?.value;
+    
+
+    if (!archivoIdentificacion && this.datos?.archivo_identificacion) {
+      const base64Data = this.datos.archivo_identificacion;
+      const blob:any = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
+      archivoIdentificacion = new File([blob], 'identificacion_existente.pdf', { type: 'application/pdf' });
+    }
+
+    let certificadoDefuncion = this.formDatosGenerales.get('archivoCertDef')?.value;
+
+if (!certificadoDefuncion && this.datos?.certificado_defuncion) {
+  const base64Data = this.datos.certificado_defuncion;
+  const blob:any = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
+  certificadoDefuncion = new File([blob], 'certificado_defuncion_existente.pdf', { type: 'application/pdf' });
+}
+  
+
 
   // Si no hay archivo nuevo pero existe uno registrado
   if (!archivoIdentificacion && this.datos?.archivo_identificacion) {
@@ -750,7 +751,7 @@ export class EditDatosGeneralesComponent implements OnInit {
         fecha_reporte_fallecido: convertirFechaInputs(formValues.fecha_reporte_fallecido),
         fecha_afiliacion: convertirFechaInputs(refpersData.fecha_afiliacion) ,
         // Archivos
-        certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
+        certificado_defuncion: certificadoDefuncion,
         archivo_identificacion: archivoIdentificacion,
 
         // Foto perfil
@@ -1057,4 +1058,24 @@ export class EditDatosGeneralesComponent implements OnInit {
     const fechaActual = new Date().toISOString().split('T')[0];
     return `${nombreCompleto}_${fechaActual}_constancia_${tipo}.pdf`;
   }
+
+  tieneTipoAfiliado(): boolean {
+  
+    if (!this.Afiliado) {
+      return false;
+    }
+  
+    const tiposPermitidos = ["AFILIADO", "PENSIONADO", "JUBILADO"];
+  
+    if (this.Afiliado.TIPO_PERSONA && tiposPermitidos.includes(this.Afiliado.TIPO_PERSONA)) {
+      return true;
+    }
+  
+    if (Array.isArray(this.Afiliado.TIPOS_PERSONA) && this.Afiliado.TIPOS_PERSONA.some((tipo:any) => tiposPermitidos.includes(tipo))) {
+      return true;
+    }
+    return false;
+  }
+  
+  
 }

@@ -343,19 +343,14 @@
         <div class="pdf-container">
           <div class="pdf-preview">
             <h4>Certificado de Defunción</h4>
-            <iframe
-              *ngIf="certificadoDefuncionUrl"
-              [src]="certificadoDefuncionUrl"
-              width="100%"
-              height="500px"
-            ></iframe>
+            <iframe *ngIf="certificadoDefuncionUrl" [src]="certificadoDefuncionUrl" width="100%" height="500px"></iframe>
+            
             <app-botonarchivos
               labelBoton="Certificado de Defunción"
               (setArchivo)="getArchivoDef($event)"
               [disabled]="form1.get('fallecido')?.value === 'NO'"
-            >
-            </app-botonarchivos>
-
+            ></app-botonarchivos>
+          
             <!-- Botón para eliminar el archivo adjunto -->
             <button
               *ngIf="form1.get('fallecido')?.value === 'SI' && certificadoDefuncionUrl"
@@ -366,14 +361,13 @@
             >
               Eliminar Certificado
             </button>
-
-            <!-- Mensaje de error -->
-            <div *ngIf="formDatosGenerales.get('archivoCertDef')?.invalid && formDatosGenerales.get('archivoCertDef')?.touched">
-              <span class="error-message" *ngIf="formDatosGenerales.get('archivoCertDef')?.hasError('required')">
-                El certificado de defunción es obligatorio.
-              </span>
+          
+            <!-- Mensaje de error solo si NO hay un certificado existente -->
+            <div *ngIf="!certificadoDefuncionUrl && formDatosGenerales.get('archivoCertDef')?.invalid && formDatosGenerales.get('archivoCertDef')?.touched">
+              <span class="error-message">El certificado de defunción es obligatorio.</span>
             </div>
           </div>
+          
         </div>
       </mat-card>
     </form>

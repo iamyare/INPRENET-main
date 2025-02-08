@@ -16,8 +16,8 @@ async function bootstrap() {
 
   // Lee los archivos del certificado y la clave privada --PRODUCCION--
   /* const httpsOptions = {
-    pfx: fs.readFileSync(process.env.CERTIFICATE),
-    passphrase: process.env.PASSPHRASE,
+    pfx: fs.readFileSync(process.env.CERTIFICATE || ''),
+    passphrase: process.env.PASSPHRASE || '',
   }; */
 
   // Crea la aplicación con HTTPS

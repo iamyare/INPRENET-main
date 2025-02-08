@@ -50,4 +50,8 @@ export class CrearPersonaCentroTrabajoDto {
   @IsOptional()
   @IsNumber()
   id_municipio?: number;
+
+  @IsOptional()
+  @IsString()
+  telefono_1?: string;
 }

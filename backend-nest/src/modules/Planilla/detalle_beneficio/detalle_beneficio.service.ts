@@ -184,46 +184,61 @@ export class DetalleBeneficioService {
     const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });
 
     if (!beneficiario) {
-      throw new Error('Beneficiario no encontrado');
+        throw new Error('Beneficiario no encontrado');
     }
+
     const tiposPersona = await this.tipoPersonaRepos.find({
-      where: { tipo_persona: In(['BENEFICIARIO', 'BENEFICIARIO SIN CAUSANTE', 'DESIGNADO']) }
+        where: { tipo_persona: In(['BENEFICIARIO', 'BENEFICIARIO SIN CAUSANTE', 'DESIGNADO']) }
     });
 
     if (tiposPersona.length === 0) {
-      throw new Error('Tipos de persona "BENEFICIARIO", "BENEFICIARIO SIN CAUSANTE" o "DESIGNADO" no encontrados');
+        throw new Error('Tipos de persona "BENEFICIARIO", "BENEFICIARIO SIN CAUSANTE" o "DESIGNADO" no encontrados');
     }
 
     const detalles = beneficiario.detallePersona.filter(d => tiposPersona.some(tp => tp.id_tipo_persona === d.ID_TIPO_PERSONA));
 
     if (detalles.length === 0) {
-      throw new Error('Detalle de beneficiario no encontrado');
+        throw new Error('Detalle de beneficiario no encontrado');
     }
 
-    const beneficiosPorCausante = await Promise.all(detalles.map(async (detalle) => {
-      const causante = await this.personaRepository.findOne({ where: { id_persona: detalle.ID_CAUSANTE } });
+    // Map para almacenar causantes y sus beneficios únicos
+    const causantesMap = new Map<number, { causante: { nombres: string, apellidos: string, n_identificacion: string }, beneficios: Net_Detalle_Beneficio_Afiliado[] }>();
 
-      if (!causante) {
-        throw new Error(`Causante con ID ${detalle.ID_CAUSANTE} no encontrado`);
-      }
+    for (const detalle of detalles) {
+        const causante = await this.personaRepository.findOne({ where: { id_persona: detalle.ID_CAUSANTE } });
 
-      const beneficios = await this.detalleBeneficioAfiliadoRepository.find({
-        where: { ID_CAUSANTE: causante.id_persona },
-        relations: ['beneficio']
-      });
+        if (!causante) {
+            throw new Error(`Causante con ID ${detalle.ID_CAUSANTE} no encontrado`);
+        }
 
-      return {
-        causante: {
-          nombres: `${causante.primer_nombre || ''} ${causante.segundo_nombre || ''}`.trim(),
-          apellidos: `${causante.primer_apellido || ''} ${causante.segundo_apellido || ''}`.trim(),
-          n_identificacion: causante.n_identificacion || ''
-        },
-        beneficios
-      };
-    }));
+        // Si el causante aún no ha sido procesado, agregarlo
+        if (!causantesMap.has(causante.id_persona)) {
+            const beneficios = await this.detalleBeneficioAfiliadoRepository.find({
+                where: { ID_CAUSANTE: causante.id_persona },
+                relations: ['beneficio']
+            });
 
-    return beneficiosPorCausante;
-  }
+            // Eliminar beneficios duplicados dentro del mismo causante
+            const beneficiosUnicos = beneficios.filter(
+                (beneficio, index, self) =>
+                    index === self.findIndex((b) => b.ID_BENEFICIO === beneficio.ID_BENEFICIO)
+            );
+
+            causantesMap.set(causante.id_persona, {
+                causante: {
+                    nombres: `${causante.primer_nombre || ''} ${causante.segundo_nombre || ''}`.trim(),
+                    apellidos: `${causante.primer_apellido || ''} ${causante.segundo_apellido || ''}`.trim(),
+                    n_identificacion: causante.n_identificacion || '',
+                },
+                beneficios: beneficiosUnicos
+            });
+        }
+    }
+
+    return Array.from(causantesMap.values());
+}
+
+
 
 
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {

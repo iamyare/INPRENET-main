@@ -30,4 +30,12 @@ export class CreatePreRegistroDto {
   @Min(1)
   @IsOptional()
   idModulo?: number;
+
+  @IsString()
+  @IsNotEmpty()
+  municipio: string;
+
+  @IsString()
+  @IsNotEmpty()
+  departamento: string;
 }

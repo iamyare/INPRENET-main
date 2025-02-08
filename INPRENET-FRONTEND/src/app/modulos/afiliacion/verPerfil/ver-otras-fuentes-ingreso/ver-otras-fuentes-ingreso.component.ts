@@ -55,9 +55,21 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
   ) { }
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonFuente = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/nueva-afiliacion', 'editar');
-    this.mostrarBotonEditar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/nueva-afiliacion', 'editar');
-    this.mostrarBotonEliminar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/nueva-afiliacion', 'editar');
+    this.mostrarBotonFuente = this.permisosService.userHasPermission(
+      'AFILIACIONES', 
+      'afiliacion/nueva-afiliacion', 
+      ['editar', 'editarDos']
+    );
+    this.mostrarBotonEditar = this.permisosService.userHasPermission(
+      'AFILIACIONES', 
+      'afiliacion/nueva-afiliacion', 
+      ['editar', 'editarDos']
+    );
+    this.mostrarBotonEliminar = this.permisosService.userHasPermission(
+      'AFILIACIONES', 
+      'afiliacion/nueva-afiliacion', 
+      ['editar', 'editarDos']
+    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {

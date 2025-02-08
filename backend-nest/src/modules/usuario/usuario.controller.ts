@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, Req, UseInterceptors, ParseIntPipe, Res, Put, UploadedFiles, NotFoundException, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, Req, UseInterceptors, ParseIntPipe, Res, Put, UploadedFiles, NotFoundException, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
@@ -17,6 +17,12 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 export class UsuarioController {
   private readonly logger = new Logger(UsuarioController.name);
   constructor(private readonly usuarioService: UsuarioService) { }
+
+  @Post('preregistro-masivo')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  async preRegistroMasivo(@Body() createPreRegistroDtos: CreatePreRegistroDto[]): Promise<void> {
+    return this.usuarioService.preRegistroMasivo(createPreRegistroDtos);
+  }
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {

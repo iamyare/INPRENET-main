@@ -285,7 +285,9 @@ export class UsuarioService {
   }
 
   async preRegistro(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
-    const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole } = createPreRegistroDto;
+    const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole, municipio, departamento } = createPreRegistroDto;
+
+    // Verificar si el usuario ya existe
     const usuarioExistente = await this.usuarioEmpresaRepository.findOne({
       relations: ['empleadoCentroTrabajo'],
       where: {
@@ -294,46 +296,66 @@ export class UsuarioService {
         },
       },
     });
+
     if (usuarioExistente) {
       throw new BadRequestException('El correo ya está registrado');
     }
+
+    // Buscar el rol asociado
     const rol = await this.rolModuloRepository.findOne({
       where: { id_rol_modulo: idRole },
       relations: ['modulo', 'modulo.centroTrabajo'],
     });
+
     if (!rol) {
       throw new BadRequestException('El rol especificado no existe');
     }
-    const nuevoEmpleado = this.empleadoRepository.create({
-      nombreEmpleado,
-    });
+
+    // Crear y guardar el nuevo empleado
+    const nuevoEmpleado = this.empleadoRepository.create({ nombreEmpleado });
     const empleado = await this.empleadoRepository.save(nuevoEmpleado);
+
+    // Crear y guardar la relación empleado-centro de trabajo con municipio y departamento
     const nuevoEmpleadoCentroTrabajo = this.empleadoCentroTrabajoRepository.create({
       empleado,
       correo_1: correo,
       numeroEmpleado,
       nombrePuesto,
       centroTrabajo: rol.modulo.centroTrabajo,
+      municipio,   // Agregado
+      departamento // Agregado
     });
+
     const empleadoCentroTrabajo = await this.empleadoCentroTrabajoRepository.save(nuevoEmpleadoCentroTrabajo);
+
+    // Crear y guardar el usuario
     const nuevoUsuario = this.usuarioEmpresaRepository.create({
       estado: 'PENDIENTE',
       contrasena: await bcrypt.hash('temporal', 10),
-      empleadoCentroTrabajo: empleadoCentroTrabajo,
+      empleadoCentroTrabajo,
     });
+
     const usuarioGuardado = await this.usuarioEmpresaRepository.save(nuevoUsuario);
+
+    // Crear y guardar la relación usuario-módulo
     const usuarioModulo = this.usuarioModuloRepository.create({
       usuarioEmpresa: usuarioGuardado,
       rolModulo: rol,
     });
+
     await this.usuarioModuloRepository.save(usuarioModulo);
+
+    // Generar token y enviar correo
     const token = this.jwtService.sign({ correo });
+
     const logoPath = path.join(process.cwd(), 'assets', 'images', 'LOGO-INPRENET.png');
     if (!fs.existsSync(logoPath)) {
       this.logger.error('El archivo LOGO-INPRENET.png no se encontró en la ruta: ' + logoPath);
       throw new InternalServerErrorException('Error: El archivo LOGO-INPRENET.png no se encuentra en la ruta especificada.');
     }
+
     const verificationUrl = `${process.env.HOST_FRONTEND}/register?token=${token}`;
+
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2 style="color: #13776B;">¡Bienvenido a 
@@ -361,10 +383,126 @@ export class UsuarioService {
         cid: 'logoInprema'
       }
     ]);
+}
 
+async preRegistroMasivo(createPreRegistroDtos: CreatePreRegistroDto[]): Promise<void> {
+  const usuariosAGuardar = [];
+  const usuariosModuloAGuardar = [];
+  const correosRegistrados: string[] = [];
 
+  for (const createPreRegistroDto of createPreRegistroDtos) {
+      const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole, municipio, departamento } = createPreRegistroDto;
 
+      // Verificar si el usuario ya existe
+      const usuarioExistente = await this.usuarioEmpresaRepository.findOne({
+          relations: ['empleadoCentroTrabajo'],
+          where: {
+              empleadoCentroTrabajo: {
+                  correo_1: correo,
+              },
+          },
+      });
+
+      if (usuarioExistente) {
+          correosRegistrados.push(correo);
+          continue; // Saltar este registro
+      }
+
+      // Buscar el rol asociado
+      const rol = await this.rolModuloRepository.findOne({
+          where: { id_rol_modulo: idRole },
+          relations: ['modulo', 'modulo.centroTrabajo'],
+      });
+
+      if (!rol) {
+          throw new BadRequestException(`El rol especificado (${idRole}) no existe`);
+      }
+
+      // Crear y guardar el nuevo empleado
+      const nuevoEmpleado = this.empleadoRepository.create({ nombreEmpleado });
+      const empleado = await this.empleadoRepository.save(nuevoEmpleado);
+
+      // Crear y guardar la relación empleado-centro de trabajo con municipio y departamento
+      const nuevoEmpleadoCentroTrabajo = this.empleadoCentroTrabajoRepository.create({
+          empleado,
+          correo_1: correo,
+          numeroEmpleado,
+          nombrePuesto,
+          centroTrabajo: rol.modulo.centroTrabajo,
+          municipio,
+          departamento,
+      });
+
+      const empleadoCentroTrabajo = await this.empleadoCentroTrabajoRepository.save(nuevoEmpleadoCentroTrabajo);
+
+      // Crear usuario pero no guardarlo aún
+      const nuevoUsuario = this.usuarioEmpresaRepository.create({
+          estado: 'PENDIENTE',
+          contrasena: await bcrypt.hash('temporal', 10),
+          empleadoCentroTrabajo,
+      });
+
+      usuariosAGuardar.push(nuevoUsuario);
+
+      // Crear la relación usuario-módulo
+      const usuarioModulo = this.usuarioModuloRepository.create({
+          usuarioEmpresa: nuevoUsuario,
+          rolModulo: rol,
+      });
+
+      usuariosModuloAGuardar.push(usuarioModulo);
   }
+
+  // Guardar todos los usuarios en una sola transacción para mejorar rendimiento
+  const usuariosGuardados = await this.usuarioEmpresaRepository.save(usuariosAGuardar);
+
+  // Asociar cada usuario guardado con su respectivo módulo
+  for (let i = 0; i < usuariosGuardados.length; i++) {
+      usuariosModuloAGuardar[i].usuarioEmpresa = usuariosGuardados[i];
+  }
+
+  await this.usuarioModuloRepository.save(usuariosModuloAGuardar);
+
+  // Enviar correos solo a los usuarios nuevos
+  for (const usuario of usuariosGuardados) {
+      const token = this.jwtService.sign({ correo: usuario.empleadoCentroTrabajo.correo_1 });
+      const verificationUrl = `${process.env.HOST_FRONTEND}/register?token=${token}`;
+
+      const htmlContent = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+          <h2 style="color: #13776B;">¡Bienvenido a 
+          <span style="color: #14776B;">INPRE</span><span style="color: #33E4DC;">NET</span>!
+          </h2>
+          <p>Hola ${usuario.empleadoCentroTrabajo.empleado.nombreEmpleado},</p>
+          <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
+          <div style="text-align: center;">
+          <img src="cid:logoInprema" alt="Logo INPREMA" style="width: 250px; height: auto; margin-bottom: 10px;">
+          <p>Para empezar, necesitamos que completes tu registro. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
+          <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
+          <div style="text-align: center; margin: 20px 0;">
+              <a href="${verificationUrl}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Completar Registro</a>
+          </div>
+          <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+          <p>¡Gracias por unirte a nosotros!</p>
+          <p>El equipo de INPRENET</p>
+          </div>
+      </div>`;
+
+      await this.mailService.sendMail(usuario.empleadoCentroTrabajo.correo_1, 'Completa tu registro', '', htmlContent, [
+          {
+              filename: 'LOGO-INPRENET.png',
+              path: path.join(process.cwd(), 'assets', 'images', 'LOGO-INPRENET.png'),
+              cid: 'logoInprema'
+          }
+      ]);
+  }
+
+  if (correosRegistrados.length > 0) {
+      throw new BadRequestException(`Los siguientes correos ya estaban registrados: ${correosRegistrados.join(', ')}`);
+  }
+}
+
+
 
   async completarRegistro(
     token: string,

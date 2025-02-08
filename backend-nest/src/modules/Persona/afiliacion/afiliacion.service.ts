@@ -493,10 +493,10 @@ export class AfiliacionService {
     const resultados: any[] = [];
 
     for (const crearPersonaCentrosTrabajoDto of crearPersonaCentrosTrabajoDtos) {
-        // Buscar el centro de trabajo
+        // Buscar el centro de trabajo con su municipio y departamento
         const centroTrabajo = await this.centroTrabajoRepository.findOne({
             where: { id_centro_trabajo: crearPersonaCentrosTrabajoDto.id_centro_trabajo },
-            relations: ['municipio'], // Asegura que cargue el municipio
+            relations: ['municipio', 'municipio.departamento'], // 🔹 Cargar municipio y su departamento
         });
 
         if (!centroTrabajo) {
@@ -511,7 +511,8 @@ export class AfiliacionService {
         // Actualizar municipio si se proporciona en la solicitud
         if (crearPersonaCentrosTrabajoDto.id_municipio) {
             const municipio = await entityManager.findOne(Net_Municipio, { 
-                where: { id_municipio: crearPersonaCentrosTrabajoDto.id_municipio }
+                where: { id_municipio: crearPersonaCentrosTrabajoDto.id_municipio },
+                relations: ['departamento'], // 🔹 Asegurar que cargue el departamento
             });
 
             if (!municipio) {
@@ -521,10 +522,18 @@ export class AfiliacionService {
             centroTrabajo.municipio = municipio; // Relación con la entidad Net_Municipio
         }
 
-        // Guardar cambios en el centro de trabajo
-        if (crearPersonaCentrosTrabajoDto.direccionCentro || crearPersonaCentrosTrabajoDto.id_municipio) {
+        // Actualizar teléfono si se proporciona en la solicitud
+        if (crearPersonaCentrosTrabajoDto.telefono_1) {
+            centroTrabajo.telefono_1 = crearPersonaCentrosTrabajoDto.telefono_1;
+        }
+
+        // Guardar cambios en el centro de trabajo si se modificó algún campo
+        if (crearPersonaCentrosTrabajoDto.direccionCentro || crearPersonaCentrosTrabajoDto.id_municipio || crearPersonaCentrosTrabajoDto.telefono_1) {
             await entityManager.save(Net_Centro_Trabajo, centroTrabajo);
         }
+
+        // Obtener nombre del departamento
+        const nombreDepartamento = centroTrabajo.municipio?.departamento?.nombre_departamento || "Desconocido";
 
         // Crear la relación persona-centro de trabajo
         const personaCentroTrabajo = entityManager.create(Net_perf_pers_cent_trab, {
@@ -548,8 +557,11 @@ export class AfiliacionService {
             id_centro_trabajo: centroTrabajo.id_centro_trabajo,
             nombre_centro_trabajo: centroTrabajo.nombre_centro_trabajo,
             direccion_1: centroTrabajo.direccion_1,
+            telefono_1: centroTrabajo.telefono_1,
             id_municipio: centroTrabajo.municipio?.id_municipio,
             nombre_municipio: centroTrabajo.municipio?.nombre_municipio || "Desconocido",
+            id_departamento: centroTrabajo.municipio?.departamento?.id_departamento || 0,
+            nombre_departamento: nombreDepartamento,
             jornada: personaCentroTrabajo.jornada,
             tipo_jornada: personaCentroTrabajo.tipo_jornada,
             cargo: personaCentroTrabajo.cargo,
@@ -563,10 +575,7 @@ export class AfiliacionService {
     }
 
     return resultados;
-}
-
-
-
+  }
 
   async crearOtrasFuentesIngreso(
     crearOtrasFuentesIngresoDtos: CrearOtraFuenteIngresoDto[] | undefined,

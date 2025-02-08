@@ -347,6 +347,7 @@ export class AfiliadoController {
 
   @Put('updateEstadoAfiliacion')
   async updateEstadoAfiliacion(@Body() payload: any) {
+    
     // Implementación del servicio
     await this.afiliadoService.updateEstadoAfil(payload,);
     return { message: 'Estado actualizado correctamente' };

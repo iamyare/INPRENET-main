@@ -1262,13 +1262,20 @@ export class AfiliadoService {
 
   async updateEstadoAfil(payload: { idPersona: number, idCausante: number, idCausantePadre: number, idDetallePersona: number, idEstadoAfiliacion: number, dniCausante: string; estadoAfiliacion: string; observacion: string }): Promise<{ codigo: number; mensaje: string }> {
     try {
-
+  
       const estadoAfiliacion = await this.estadoAfiliacionRepository
         .createQueryBuilder('estadoAfiliacion')
-        .where('TRIM(estadoAfiliacion.NOMBRE_ESTADO) = :estadoAfiliacion', { estadoAfiliacion: payload.estadoAfiliacion.trim() })
+        .where('estadoAfiliacion.codigo = :idEstadoAfiliacion', { idEstadoAfiliacion: payload.idEstadoAfiliacion })
         .getOne();
-
-      // Buscar el registro
+  
+      if (!estadoAfiliacion) {
+        return {
+          codigo: 404,
+          mensaje: `No se encontró el estado de afiliación con ID ${payload.idEstadoAfiliacion}.`
+        };
+      }
+  
+      // Buscar el registro en NET_DETALLE_PERSONA
       const detallePersona = await this.detallePersonaRepository
         .createQueryBuilder('detalle')
         .where('detalle.ID_CAUSANTE = :idCausante', { idCausante: payload.idCausante })
@@ -1276,35 +1283,35 @@ export class AfiliadoService {
         .andWhere('detalle.ID_PERSONA = :idPersona', { idPersona: payload.idPersona })
         .orWhere('detalle.ID_CAUSANTE_PADRE = :idCausantePadre', { idCausantePadre: payload.idCausantePadre })
         .getOne();
-
+  
       if (!detallePersona) {
         return {
           codigo: 404,
           mensaje: `No se encontró el registro con ID_CAUSANTE ${payload.idCausante}, ID_PERSONA ${payload.idPersona}.`,
         };
       }
-
-      // Actualizar los valores
-      detallePersona.ID_ESTADO_AFILIACION = estadoAfiliacion.codigo
+  
+      // ✅ Actualizar el estado de afiliación correctamente
+      detallePersona.ID_ESTADO_AFILIACION = estadoAfiliacion.codigo;
       detallePersona.observacion = payload.observacion;
-
+  
       // Guardar los cambios
       await this.detallePersonaRepository.save(detallePersona);
-
+  
       return {
         codigo: 200,
         mensaje: 'Registro actualizado correctamente',
       };
     } catch (error) {
-      // Manejo de errores
       console.error('Error al actualizar el registro:', error);
-
+  
       return {
         codigo: 500,
         mensaje: 'Error interno al intentar actualizar el registro',
       };
     }
   }
+  
 
   private handleException(error: any): void {
     this.logger.error('Error detallado:', JSON.stringify(error, null, 2));

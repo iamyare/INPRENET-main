@@ -79,22 +79,26 @@
           </ng-container>
 
           <!-- EstadoAfiliacion -->
-          <ng-container matColumnDef="EstadoAfiliacion">
-            <mat-header-cell *matHeaderCellDef>Estado de Afiliación</mat-header-cell>
-            <mat-cell *matCellDef="let element; let i = index">
-              <mat-form-field appearance="outline">
-                <mat-select
-                  [(ngModel)]="element.estadoAfiliacion"
-                  [ngModelOptions]="{ standalone: true }"
-                  name="estadoSelect_{{ i }}"
-                >
-                  <mat-option *ngFor="let e of estado" [value]="e.label">
-                    {{ e.label }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </mat-cell>
-          </ng-container>
+          <!-- EstadoAfiliacion -->
+<ng-container matColumnDef="EstadoAfiliacion">
+  <mat-header-cell *matHeaderCellDef>Estado de Afiliación</mat-header-cell>
+  <mat-cell *matCellDef="let element; let i = index">
+    <mat-form-field appearance="outline">
+      <mat-select
+  [(ngModel)]="element.estadoAfiliacion"
+  [compareWith]="compararEstados"
+  [ngModelOptions]="{ standalone: true }"
+  name="estadoSelect_{{ i }}"
+>
+  <mat-option *ngFor="let e of element.estadosDisponibles" [value]="e.value">
+    {{ e.label }}
+  </mat-option>
+</mat-select>
+    </mat-form-field>
+    
+  </mat-cell>
+</ng-container>
+
 
           <!-- Observacion -->
           <ng-container matColumnDef="Observacion">

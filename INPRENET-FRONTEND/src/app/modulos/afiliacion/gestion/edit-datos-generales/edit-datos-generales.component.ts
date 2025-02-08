@@ -44,6 +44,15 @@ export class EditDatosGeneralesComponent implements OnInit {
     nombreEmpleado: string;
   } | null = null;
 
+  
+  estadosPermitidosPorTipoPersona: Record<string, number[]> = {
+    BENEFICIARIO: [1, 2, 13], // ACTIVO, INACTIVO, NO COTIZA, SUSPENSO POR OFICIO
+    "BENEFICIARIO SIN CAUSANTE": [1, 2, 13], // ACTIVO, NO COTIZA
+    DESIGNADO: [7,14], // ACTIVO, INACTIVO, NO COTIZA, SUSPENSO VOLUNTARIO
+    AFILIADO: [1, 2, 6, 8], // ACTIVO, COTIZANTE SIN AFILIAR, REGISTRADO
+    JUBILADO: [1, 11, 12, 13], // SUSPENSO POR SOBREVIVENCIA, SUSPENSO POR INVESTIGACIÓN
+    PENSIONADO: [1, 11, 12, 13] // SUSPENSO POR SOBREVIVENCIA, SUSPENSO POR INVESTIGACIÓN
+  };
 
   estadoAfiliacion: any;
   fallecido: any;
@@ -243,15 +252,18 @@ export class EditDatosGeneralesComponent implements OnInit {
 
     this.svcAfiliado.buscarDetPersona(this.Afiliado.n_identificacion).subscribe(
       (detalles: any[]) => {
-        
         this.tableData = detalles;
-        this.loading = false;
+    
+        console.log("Datos de la tabla cargados:", this.tableData);
+    
+        // Llamar a cargarEstadosAfiliado después de cargar los datos
+        this.cargarEstadosAfiliado();
       },
       (error) => {
         console.error('Error al cargar movimientos:', error);
-        this.loading = false;
       }
     );
+    
 
     // --------------------------------
     // Escucha cambios en fallecido
@@ -341,17 +353,60 @@ export class EditDatosGeneralesComponent implements OnInit {
       }
     });
   }
-
-  async cargarEstadosAfiliado() {
-    const response = await this.svcAfiliado.getAllEstados().toPromise();
-    this.estado = response.map((estado: { codigo: any; nombre_estado: any; }) => ({
-      label: estado.nombre_estado,
-      value: estado.codigo
-    }));
-    this.form1.valueChanges.subscribe((value) => {
-      this.updateDatosGenerales(value);
-    });
+  
+  compararEstados(option: any, selected: any): boolean {
+    return option == selected; // Comparar por valor, asegurando que funcione con números y strings
   }
+  
+  async cargarEstadosAfiliado() {
+    try {
+      const response = await this.svcAfiliado.getAllEstados().toPromise();
+  
+      if (!this.tableData || this.tableData.length === 0) {
+        console.warn("No hay datos en la tabla.");
+        return;
+      }
+  
+      this.tableData.forEach((element: any) => {
+        let tiposPersona: string[] = [];
+  
+        if (Array.isArray(element.tipoPersona)) {
+          tiposPersona = element.tipoPersona.map((tp: any) => tp.tipo_persona);
+        } else if (element.tipoPersona) {
+          tiposPersona = [element.tipoPersona];
+        }
+  
+        // Obtener los estados permitidos
+        const estadosPermitidos = new Set<number>();
+        tiposPersona.forEach(tipo => {
+          const estados = this.estadosPermitidosPorTipoPersona[tipo] || [];
+          estados.forEach((estado:any) => estadosPermitidos.add(estado));
+        });
+  
+        // Filtrar los estados obtenidos desde el backend según los estados permitidos
+        element.estadosDisponibles = response
+          .filter((estado: { codigo: number }) => estadosPermitidos.has(estado.codigo))
+          .map((estado: { codigo: number; nombre_estado: string }) => ({
+            label: estado.nombre_estado,
+            value: estado.codigo
+          }));
+        if (element.ID_ESTADO_AFILIACION) {
+          element.estadoAfiliacion = element.estadosDisponibles.find(
+            (estado:any) => estado.value === element.ID_ESTADO_AFILIACION
+          )?.value || null;
+        } else {
+          element.estadoAfiliacion = null;
+        }
+      });
+    } catch (error) {
+      console.error("Error al cargar estados de afiliación:", error);
+    }
+  }
+  
+
+
+
+
 
   updateDatosGenerales(value: any) {
     this.initialData = { ...this.initialData, ...value };
@@ -761,7 +816,6 @@ if (!certificadoDefuncion && this.datos?.certificado_defuncion) {
         detalles: this.tableData
     };
 
-    console.log('Payload a enviar =>', datosActualizados);
 
     // Llamada al servicio para actualizar
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, datosActualizados)
@@ -789,29 +843,39 @@ if (!certificadoDefuncion && this.datos?.certificado_defuncion) {
 }
 
 
-  guardarEstadoAfiliacion(element: any) {
-    const payload = {
-      idPersona: element.ID_PERSONA,
-      idCausante: element.ID_CAUSANTE,
-      idCausantePadre: element.ID_CAUSANTE_PADRE,
-      idDetallePersona: element.ID_DETALLE_PERSONA,
-      idEstadoAfiliacion: element.ID_ESTADO_AFILIACION,
-      dniCausante: element.dniCausante,
-      estadoAfiliacion: element.estadoAfiliacion?.trim(),
-      observacion: element.observacion || ''
-    };
+guardarEstadoAfiliacion(element: any) {
+  console.log("Estado Afiliación antes de enviar:", element.estadoAfiliacion, typeof element.estadoAfiliacion);
+  
+  const estadoAfiliacion = typeof element.estadoAfiliacion === 'string' 
+    ? element.estadoAfiliacion.trim() 
+    : String(element.estadoAfiliacion); // Convertir a string si no lo es
 
-    this.svcAfiliado.updateEstadoAfiliacionPorDni(payload).subscribe(
-      (response) => {
-        this.toastr.success('Estado actualizado correctamente');
-      },
-      (error) => {
-        this.toastr.error(
-          `Error: ${error.error.message || 'No se pudo actualizar el estado'}`
-        );
-      }
-    );
-  }
+  const payload = {
+    idPersona: element.ID_PERSONA,
+    idCausante: element.ID_CAUSANTE,
+    idCausantePadre: element.ID_CAUSANTE_PADRE,
+    idDetallePersona: element.ID_DETALLE_PERSONA,
+    idEstadoAfiliacion: element.estadoAfiliacion,
+    dniCausante: element.dniCausante,
+    estadoAfiliacion: estadoAfiliacion, // Ahora siempre es un string
+    observacion: element.observacion || ''
+  };
+
+  console.log(payload);
+  
+
+  this.svcAfiliado.updateEstadoAfiliacionPorDni(payload).subscribe(
+    (response) => {
+      this.toastr.success('Estado actualizado correctamente');
+    },
+    (error) => {
+      this.toastr.error(
+        `Error: ${error.error.message || 'No se pudo actualizar el estado'}`
+      );
+    }
+  );
+}
+
 
   // ---------------------------------------------
   // Mostrar mensajes de error en HTML

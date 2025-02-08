@@ -11,9 +11,9 @@ export class BeneficiarioComponent implements OnInit {
   causantes: any[] = [];
 
   steps = [
-    { label: 'Beneficios Asignados', isActive: true },
-   // { label: 'Detalles de pagos', isActive: false },
-    //{ label: 'Todos los pagos', isActive: false },
+    { label: 'Beneficios', isActive: true },
+   { label: 'Detalles de pagos', isActive: false },
+    { label: 'Todos los pagos', isActive: false },
     { label: 'Detalles De Causantes', isActive: false },
     /* { label: 'Constancias', isActive: false }, */
   ];

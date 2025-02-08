@@ -40,8 +40,8 @@ export class AfiliadoComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // Verificar permisos
-    this.mostrarDetallesPagos = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editarDos') || this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'verpago');
-    this.mostrarTodosPagos = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editarDos') || this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'verpago');;
+    this.mostrarDetallesPagos = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['verpago', 'editarDos']) ;
+    this.mostrarTodosPagos = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['verpago', 'editarDos']);
 
     // Evitar duplicados eliminando si ya existen
     this.steps = this.steps.filter(step => step.label !== 'Detalles de pagos' && step.label !== 'Todos los pagos');

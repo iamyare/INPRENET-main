@@ -68,11 +68,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   // Función para verificar si tiene al menos uno de los permisos
   private tienePermiso(): boolean {
     return (
-      this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editar') ||
-      this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editarDos')
+      this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos'])
     );
   }
-  
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['persona'] && this.persona) {

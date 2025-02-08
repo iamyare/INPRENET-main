@@ -51,9 +51,9 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editar');
-    this.mostrarBotonEditar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editar');
-    this.mostrarBotonInhabilitar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonAgregar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos']);
+    this.mostrarBotonEditar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos']);
+    this.mostrarBotonInhabilitar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos']);
   }
 
   ngOnChanges(changes: SimpleChanges): void {

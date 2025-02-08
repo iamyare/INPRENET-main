@@ -312,22 +312,26 @@ export class PermisosService {
     return PermisosService.permisosPorModulo[module]?.rutas[route]?.title || null;
   }
 
-  userHasPermission(module: string, route: string, permiso: string): boolean {
+  userHasPermission(module: string, route: string, permisos: string | string[]): boolean {
     const rolesForRoute = PermisosService.getExpectedRolesForRoute(module, route);
     const userRolesAndModules = this.authService.getUserRolesAndModules();
     const hasGlobalAccess = userRolesAndModules.some(userRole =>
       userRole.rol === 'TODO' && userRole.modulo === 'TODO'
     );
+  
     if (hasGlobalAccess) {
       return true;
     }
+    const permisosArray = Array.isArray(permisos) ? permisos : [permisos];
+  
     return userRolesAndModules.some(userRole =>
-      rolesForRoute.some(role =>
+      rolesForRoute.some((role:any) =>
         role.role.toLowerCase().trim() === userRole.rol.toLowerCase().trim() &&
         role.module.toLowerCase().trim() === userRole.modulo.toLowerCase().trim() &&
-        (role.permiso === permiso || role.permiso === 'todos')
+        permisosArray.includes(role.permiso) // Verificar si el permiso está en la lista
       )
     );
   }
+  
 
 }

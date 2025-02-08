@@ -44,7 +44,7 @@ export class EditConyugueComponent implements OnChanges {
         es_afiliado: ['NO'],
       })
     });
-    this.mostrarBotonAgregar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonAgregar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos']);
   }
 
   ngOnChanges(changes: SimpleChanges): void {

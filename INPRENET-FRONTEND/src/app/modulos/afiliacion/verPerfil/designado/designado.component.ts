@@ -11,9 +11,9 @@ export class DesignadoComponent {
   causantes: any[] = [];
 
   steps = [
-    //{ label: 'Detalles de pagos', isActive: true },
-    //{ label: 'Todos los pagos', isActive: false },
-    { label: 'Beneficios Asignados', isActive: false },
+    { label: 'Detalles de pagos', isActive: true },
+    { label: 'Todos los pagos', isActive: false },
+    { label: 'Beneficios', isActive: false },
     { label: 'Detalles De Causantes', isActive: false },
     /* { label: 'Constancias', isActive: false }, */
   ];

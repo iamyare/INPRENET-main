@@ -12,9 +12,9 @@ export class BeneficiarioSinCausanteComponent {
 
   steps = [
      { label: 'Detalles de pagos', isActive: false },
-    //{ label: 'Todos los pagos', isActive: false },
-    //{ label: 'Beneficios Asignados', isActive: true },
-    { label: 'Detalles De Causantes', isActive: false },
+    { label: 'Todos los pagos', isActive: false },
+    { label: 'Beneficios Asignados', isActive: true },
+    { label: 'Detalles', isActive: false },
     /* { label: 'Constancias', isActive: false }, */
   ];
 

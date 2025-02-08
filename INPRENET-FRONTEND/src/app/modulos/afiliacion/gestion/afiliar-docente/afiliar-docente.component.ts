@@ -273,6 +273,8 @@ onSubmit(): void {
 
 //-------------------------------------------------------------------
   getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
+    console.log(beneficiarios);
+    
     userDetails.forEach(item => {
       item.nombre = [item.primer_nombre, item.segundo_nombre, item.primer_apellido, item.segundo_apellido]
       .filter(name => name && name.trim() !== '') // Filtra los valores vacíos
@@ -567,7 +569,8 @@ onSubmit(): void {
       jornada: trabajo.jornada,
       tipo_jornada: trabajo.tipo_jornada,
       direccionCentro: trabajo.direccionCentro,
-      id_municipio: trabajo.id_municipio
+      id_municipio: trabajo.id_municipio,
+      telefono_1: trabajo.telefono_1,
     }));
   }
   

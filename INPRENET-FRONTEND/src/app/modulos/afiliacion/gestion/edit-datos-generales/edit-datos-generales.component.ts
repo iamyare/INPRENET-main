@@ -227,7 +227,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       this.mostrarBotonGuardar = this.permisosService.userHasPermission(
         'AFILIACIONES',
         'afiliacion/buscar-persona',
-        'editar'
+        ['editar', 'editarDos']
       );
       this.cdr.detectChanges(); // Forzar la detección de cambios
     }, 0);

@@ -94,9 +94,9 @@
 
           <div class="form-row">
             <mat-form-field class="half-width" appearance="outline">
-              <mat-label>Telefono</mat-label>
-              <mat-icon matPrefix>home</mat-icon>
-              <input matInput formControlName="telefono_1" readonly>
+              <mat-label>Teléfono</mat-label>
+              <mat-icon matPrefix>phone</mat-icon>
+              <input matInput formControlName="telefono_1">
             </mat-form-field>
             <!-- Dirección del Centro -->
             <mat-form-field class="half-width" appearance="outline">
@@ -131,7 +131,7 @@
               <mat-error *ngFor="let error of getErrors(i, 'fecha_pago')">
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
-            </mat-form-field>
+            </mat-form-field>            
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Fecha de Ingreso</mat-label>
               <mat-icon matPrefix>calendar_today</mat-icon>

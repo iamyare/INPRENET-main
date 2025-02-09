@@ -315,6 +315,8 @@ private clearConyugeFieldsValidation(form: FormGroup): void {
   cambiarListadoParentesco(tipoReferencia: string, referenciaForm: FormGroup) {
     if (tipoReferencia === 'REFERENCIA FAMILIAR') {
       this.parentesco = this.datosEstaticosService.parentesco;
+      console.log(this.parentesco);
+      
     } else if (tipoReferencia === 'REFERENCIA PERSONAL') {
       this.parentesco = this.datosEstaticosService.parentescoReferenciasPersonales;
     }

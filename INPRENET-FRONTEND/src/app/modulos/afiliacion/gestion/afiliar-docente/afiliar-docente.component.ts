@@ -209,6 +209,9 @@ onSubmit(): void {
     // Archivo de identificación (ej. escaneo de cédula)
     const fileIdent = datosGenerales?.archivo_identificacion;
 
+    console.log(formattedData);
+    
+
     // Llamar al servicio para crear afiliación
     this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
       (response: any) => {
@@ -273,8 +276,6 @@ onSubmit(): void {
 
 //-------------------------------------------------------------------
   getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
-    console.log(beneficiarios);
-    
     userDetails.forEach(item => {
       item.nombre = [item.primer_nombre, item.segundo_nombre, item.primer_apellido, item.segundo_apellido]
       .filter(name => name && name.trim() !== '') // Filtra los valores vacíos

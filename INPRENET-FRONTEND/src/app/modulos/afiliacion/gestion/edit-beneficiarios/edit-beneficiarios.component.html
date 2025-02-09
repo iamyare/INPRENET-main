@@ -11,6 +11,11 @@
   Agregar Beneficiario
 </button>
 
+<div *ngIf="errorPorcentaje" class="error-message">
+  <mat-icon color="warn">error</mat-icon>
+  {{ errorPorcentaje }}
+</div>
+
 <div *ngIf="filas.length !== 0" style="background-color: white; border-radius: 10px; padding: 20px;">
   <app-dynamic-table
     style="width: 100%"

@@ -131,6 +131,7 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
             id_cargo_publico: item.id_cargo_publico
           }))
         );
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los puestos públicos');
         console.error('Error al obtener datos de los puestos públicos', error);
@@ -162,6 +163,12 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  eliminarTodosLosFamiliares(): void {
+    for (const familiar of this.familiares) {
+      this.eliminarFamiliar(familiar);
+    }
+  }
+
   cargarFamiliares() {
     if (this.ejecFFamiliares) {
       this.ejecFFamiliares(this.familiares).then(() => { });
@@ -177,6 +184,8 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   desactivarPep(row: any) {
+    console.log(row);
+    
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
@@ -184,13 +193,23 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
         message: '¿Está seguro de que desea eliminar este cargo público?',
       }
     });
-
+  
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.afiliacionService.eliminarCargoPublico(row.id_cargo_publico).subscribe({
-          next: () => {
+          next: async () => {
             this.toastr.success('Cargo público eliminado correctamente');
-            this.getFilas().then(() => this.cargar());
+  
+            // Recargar la lista de cargos públicos
+            await this.getFilas();
+  
+            // Si no quedan más cargos, eliminar todos los familiares
+            if (this.filas.length === 0) {
+              this.eliminarTodosLosFamiliares();
+            }
+  
+            // Actualizar la tabla
+            this.cargar();
           },
           error: (error) => {
             this.toastr.error('Error al eliminar el cargo público');
@@ -222,11 +241,12 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
         idPersona: this.Afiliado.id_persona
       }
     });
+  
     dialogRef.afterClosed().subscribe(() => {
-      this.ngOnInit();
+      this.getFilas().then(() => this.cargar());
     });
   }
-
+  
   eliminarFamiliar(familiar: any): void {
     const idFamiliar = familiar.id_familia;
     this.afiliacionService.eliminarFamiliar(this.Afiliado.id_persona, idFamiliar).subscribe({
@@ -330,10 +350,14 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-  convertirCadenaAFecha(fecha: string): Date | null {
+  convertirCadenaAFecha(fecha: string | null | undefined): Date | null {
+    if (!fecha || !fecha.includes('/')) {
+      return null;
+    }
+  
     const [day, month, year] = fecha.split('/').map(Number);
-    const date = new Date(year, month - 1, day);
-    return isNaN(date.getTime()) ? null : date;
+    return new Date(year, month - 1, day); 
   }
+  
 
 }

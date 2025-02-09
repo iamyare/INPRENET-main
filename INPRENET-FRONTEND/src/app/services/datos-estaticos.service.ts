@@ -211,6 +211,7 @@ export class DatosEstaticosService {
     try {
       const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
       if (response) {
+
         const mappedResponse = response.map((item) => ({
           label: item.nombre_centro_trabajo,
           value: String(item.id_centro_trabajo),
@@ -341,19 +342,19 @@ export class DatosEstaticosService {
 
   genero = [
     {
-      "value": "MASCULINO", "label": "MASCULINO"
+      "value": "FEMENINO", "label": "FEMENINO"
     },
     {
-      "value": "FEMENINO", "label": "FEMENINO"
+      "value": "MASCULINO", "label": "MASCULINO"
     }
   ];
 
   sexo = [
     {
-      "value": "M", "label": "MASCULINO"
+      "value": "F", "label": "FEMENINO"
     },
     {
-      "value": "F", "label": "FEMENINO"
+      "value": "M", "label": "MASCULINO"
     }
   ];
 
@@ -415,25 +416,29 @@ export class DatosEstaticosService {
   ];
 
   parentesco = [
-    { value: "PADRE", label: "PADRE" },
-    { value: "MADRE", label: "MADRE" },
-    { value: "CÓNYUGE", label: "CÓNYUGE" },
-    { value: "HIJA", label: "HIJA" },
-    { value: "HIJO", label: "HIJO" },
     { value: "ABUELA MATERNA", label: "ABUELA MATERNA" },
     { value: "ABUELA PATERNA", label: "ABUELA PATERNA" },
     { value: "ABUELO MATERNO", label: "ABUELO MATERNO" },
     { value: "ABUELO PATERNO", label: "ABUELO PATERNO" },
-    { value: "HERMANA", label: "HERMANA" },
-    { value: "HERMANO", label: "HERMANO" },
-    { value: "NIETA", label: "NIETA" },
-    { value: "NIETO", label: "NIETO" },
-    { value: "SUEGRA", label: "SUEGRA" },
-    { value: "SUEGRO", label: "SUEGRO" },
+    { value: "CÓNYUGE", label: "CÓNYUGE" },
     { value: "CUÑADA", label: "CUÑADA" },
     { value: "CUÑADO", label: "CUÑADO" },
-    { value: "YERNO", label: "YERNO" },
-    { value: "NUERA", label: "NUERA" }
+    { value: "HERMANA", label: "HERMANA" },
+    { value: "HERMANO", label: "HERMANO" },
+    { value: "HIJA", label: "HIJA" },
+    { value: "HIJO", label: "HIJO" },
+    { value: "MADRE", label: "MADRE" },
+    { value: "NIETA", label: "NIETA" },
+    { value: "NIETO", label: "NIETO" },
+    { value: "NUERA", label: "NUERA" },
+    { value: "PADRE", label: "PADRE" },
+    { value: "PRIMA", label: "PRIMA" },
+    { value: "PRIMO", label: "PRIMO" },
+    { value: "SOBRINA", label: "SOBRINA" },
+    { value: "SOBRINO", label: "SOBRINO" },
+    { value: "SUEGRA", label: "SUEGRA" },
+    { value: "SUEGRO", label: "SUEGRO" },
+    { value: "YERNO", label: "YERNO" }
   ];
 
   parentescoReferenciasPersonales = [
@@ -441,5 +446,26 @@ export class DatosEstaticosService {
     { value: "COMPAÑERO DE TRABAJO", label: "COMPAÑERO DE TRABAJO" },
     { value: "VECINO", label: "VECINO" },
     { value: "OTRO", label: "OTRO" },
+  ];
+
+  parentescoPEPS = [
+    { value: "ABUELA", label: "ABUELA" },
+    { value: "ABUELO", label: "ABUELO" },
+    { value: "CÓNYUGE", label: "CÓNYUGE" },
+    { value: "CUÑADA", label: "CUÑADA" },
+    { value: "CUÑADO", label: "CUÑADO" },
+    { value: "HERMANA", label: "HERMANA" },
+    { value: "HERMANO", label: "HERMANO" },
+    { value: "HIJA", label: "HIJA" },
+    { value: "HIJO", label: "HIJO" },
+    { value: "MADRE", label: "MADRE" },
+    { value: "PADRE", label: "PADRE" },
+    { value: "NIETA", label: "NIETA" },
+    { value: "NIETO", label: "NIETO" },
+    { value: "NUERA", label: "NUERA" },
+    { value: "SUEGRA", label: "SUEGRA" },
+    { value: "SUEGRO", label: "SUEGRO" },
+    { value: "YERNA", label: "YERNA" },
+    { value: "YERNO", label: "YERNO" }
   ];
 }

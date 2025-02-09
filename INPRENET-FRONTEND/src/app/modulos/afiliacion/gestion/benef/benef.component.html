@@ -197,11 +197,19 @@
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Porcentaje De Beneficio</mat-label>
               <mat-icon matPrefix>percent</mat-icon>
-              <input matInput formControlName="porcentaje" type="number">
-              <mat-error *ngFor="let error of getErrors(i, 'porcentaje')">
-                <mat-icon>error</mat-icon> {{ error }}
+              <input 
+                matInput 
+                formControlName="porcentaje" 
+                type="number" 
+                (input)="validarPorcentaje(i)"
+              >
+              <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('excedeTotal')">
+                <mat-icon>error</mat-icon> La suma total de los porcentajes no puede ser mayor a {{ porcentajeDisponible }}%.
               </mat-error>
-            </mat-form-field>
+              <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('minimoInvalido')">
+                <mat-icon>error</mat-icon> Debe ser entre 1% y el disponible: {{ porcentajeDisponible }}%
+              </mat-error>
+            </mat-form-field>    
           </div>
 
           <!-- Botón para eliminar beneficiario -->

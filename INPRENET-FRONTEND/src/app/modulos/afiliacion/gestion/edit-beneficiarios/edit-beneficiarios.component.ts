@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
-import { Validators } from '@angular/forms';
+import { AbstractControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -8,7 +8,7 @@ import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { DatePipe } from '@angular/common';
-import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
+import { EditarDialogComponent } from '../../../../../../src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { AgregarBenefCompComponent } from '../agregar-benef-comp/agregar-benef-comp.component';
 import { PermisosService } from 'src/app/services/permisos.service';
@@ -26,7 +26,6 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 })
 export class EditBeneficiariosComponent implements OnInit, OnChanges {
   convertirFechaInputs = convertirFechaInputs;
-  public myFormFields: FieldConfig[] = [];
   @Input() persona: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
@@ -37,6 +36,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   ejecF: any;
   municipios: { label: string, value: any }[] = [];
   estados: { label: string, value: any }[] = [];
+  public porcentajeDisponible: number = 0;
+  public errorPorcentaje: string = '';
   public mostrarBotonAgregar: boolean = false;
   public mostrarBotonEditar: boolean = false;
   public mostrarBotonEliminar: boolean = false;
@@ -84,14 +85,12 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       return;
     }
 
-    this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
-    ];
-
     this.myColumns = [
       { header: 'Número De Identificación', col: 'n_identificacion', validationRules: [Validators.required, Validators.minLength(3)] },
       { header: 'Nombres', col: 'nombres' },
       { header: 'Apellidos', col: 'apellidos' },
+      { header: 'Dirección', col: 'direccion_residencia' }, 
+      { header: 'Teléfono', col: 'telefono_1' },
       { header: 'Parentesco', col: 'parentesco' },
       { header: 'Porcentaje', col: 'porcentaje' },
       { header: 'Genero', col: 'genero' },
@@ -112,15 +111,15 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
-          
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy');
           const discapacidades = Array.isArray(item.discapacidades)
             ? item.discapacidades.map((disc: any) => disc.tipoDiscapacidad).join(', ')
             : '';
-          const respData = {
-            idDetallePersona : item.idDetallePersona,
+
+          return {
+            idDetallePersona: item.idDetallePersona,
             id_causante: item.ID_CAUSANTE_PADRE,
             id_persona: item.idPersona,
             n_identificacion: item.nIdentificacion,
@@ -131,7 +130,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
             cantidad_dependientes: item.cantidadDependientes,
             telefono_1: item.telefono1,
             fecha_nacimiento: fechaNacimiento,
-            direccion_residencia: item.direccionResidencia,
+            direccion_residencia: item.direccionResidencia || '',
             idPaisNacionalidad: item.idPaisNacionalidad,
             id_municipio_residencia: item.idMunicipioResidencia,
             id_estado_persona: item.idEstadoPersona,
@@ -140,9 +139,21 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
             tipo_persona: item.tipoPersona,
             discapacidades
           };
-          return respData;
         });
-        this.mostrarBotonGenerarPDF = this.filas.length > 1;
+
+        // Calcular porcentaje total y disponible
+        const totalPorcentaje = this.filas.reduce((acc, fila) => acc + (fila.porcentaje || 0), 0);
+        this.porcentajeDisponible = Math.max(100 - totalPorcentaje, 0);
+
+        if (totalPorcentaje > 100) {
+          this.errorPorcentaje = `La suma total de los porcentajes es ${totalPorcentaje}% y excede el límite permitido (100%).`;
+        } else if (totalPorcentaje < 100) {
+          this.errorPorcentaje = `Aún queda un ${this.porcentajeDisponible}% disponible para asignar.`;
+        } else {
+          this.errorPorcentaje = '';
+        }
+
+        this.mostrarBotonGenerarPDF = this.filas.length >= 1;
         this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
@@ -152,7 +163,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       this.resetDatos();
     }
   }
-
+  
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
@@ -163,28 +174,85 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     }
   }
 
-  openDialog(campos: any, row: any): void {
+  editarFila(row: any) {
+    const porcentajeOcupado = this.filas.reduce((acc, fila) => acc + (fila.porcentaje || 0), 0);
+    const porcentajeDisponible = 100 - (porcentajeOcupado - row.porcentaje);
+
+    const validacionesDinamicas = {
+      porcentaje: [
+          Validators.required,
+          Validators.min(1),
+          Validators.max(porcentajeDisponible),
+          (control: AbstractControl) => {
+              const nuevoValor = Number(control.value);
+              const totalPorcentaje = porcentajeOcupado - row.porcentaje + nuevoValor;
+              return totalPorcentaje > 100 ? { excedeTotal: true } : null;
+          }
+      ]
+  };
+
+    const campos = [
+        {
+            nombre: 'porcentaje',
+            tipo: 'number',
+            etiqueta: 'Porcentaje',
+            editable: true,
+            icono: 'pie_chart',
+            validadores: validacionesDinamicas.porcentaje
+        },
+        {
+            nombre: 'direccion_residencia',
+            tipo: 'text',
+            etiqueta: 'Dirección de Residencia',
+            editable: true,
+            icono: 'home',
+            validadores: [Validators.required, Validators.minLength(10), Validators.maxLength(200)]
+        },
+        {
+            nombre: 'telefono_1',
+            tipo: 'text',
+            etiqueta: 'Teléfono',
+            editable: true,
+            icono: 'phone',
+            validadores: [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]
+        },
+        {
+            nombre: 'parentesco',
+            tipo: 'list',
+            etiqueta: 'Parentesco',
+            editable: true,
+            icono: 'supervisor_account',
+            opciones: this.datosEstaticosService.parentesco,
+            validadores: [Validators.required]
+        }
+    ];
+
+    this.openDialog(campos, row, validacionesDinamicas);
+}
+
+
+
+  openDialog(campos: any, row: any, validacionesDinamicas: any = {}): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
-      data: { campos: campos, valoresIniciales: row }
+      data: { campos, valoresIniciales: row, validacionesDinamicas }
     });
+  
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         const updatedBeneficiario = {
           id_causante_padre: this.persona.id_persona,
           id_persona: row.id_persona,
-          porcentaje: result.porcentaje
+          porcentaje: result.porcentaje,
+          direccion_residencia: result.direccion_residencia, 
+          parentesco: result.parentesco, 
+          telefono_1: result.telefono_1
         };
+  
         this.svcAfiliado.updateBeneficiario(row.idDetallePersona, updatedBeneficiario).subscribe(
-          (response) => {
+          () => {
             this.toastr.success('Beneficiario actualizado exitosamente');
-            this.getFilas().then(() => {
-              const index = this.filas.findIndex((fila) => fila.id === row.id);
-              if (index !== -1) {
-                this.filas[index] = { ...this.filas[index], ...updatedBeneficiario };
-                this.cargar();
-              }
-            });
+            this.getFilas().then(() => this.cargar());
           },
           (error) => {
             this.toastr.error('Error al actualizar el beneficiario');
@@ -194,24 +262,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       }
     });
   }
-
-  editarFila(row: any) {
-    const campos = [{
-      nombre: 'porcentaje',
-      tipo: 'number',
-      etiqueta: 'Porcentaje',
-      editable: true,
-      icono: 'pie_chart',
-      validadores: [
-        Validators.required,
-        Validators.min(1),
-        Validators.max(100)
-      ]
-    }
-    ];
-    this.openDialog(campos, row);
-  }
-
+  
   eliminarFila(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
@@ -229,23 +280,28 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
   AgregarBeneficiario() {
     const afiliadoDetalle = this.persona.detallePersona.find(
-      (detalle: any) => detalle.tipoPersona && detalle.tipoPersona.tipo_persona === 'AFILIADO' || 'JUBILADO' || 'PENSIONADO'
-    );
+      (detalle: any) => detalle.tipoPersona && ['AFILIADO', 'JUBILADO', 'PENSIONADO'].includes(detalle.tipoPersona.tipo_persona)
+    ); 
     if (!afiliadoDetalle) {
       this.toastr.error("No se encontró un registro de tipo 'AFILIADO'");
       return;
     }
-    const dialogRef = this.dialog.open(AgregarBenefCompComponent, {
-      width: '55%',
-      height: '75%',
-      data: {
-        idPersona: this.persona.id_persona,
-        id_detalle_persona: afiliadoDetalle.ID_DETALLE_PERSONA
-      }
-    });
-    dialogRef.afterClosed().subscribe((result: any) => {
-      this.getFilas().then(() => this.cargar());
-    });
+    const porcentajeOcupado = this.filas.reduce((acc, fila) => acc + (fila.porcentaje || 0), 0);
+  const porcentajeDisponible = 100 - porcentajeOcupado;
+
+  const dialogRef = this.dialog.open(AgregarBenefCompComponent, {
+    width: '55%',
+    height: '75%',
+    data: {
+      idPersona: this.persona.id_persona,
+      id_detalle_persona: afiliadoDetalle.ID_DETALLE_PERSONA,
+      porcentajeDisponible 
+    }
+  });
+
+  dialogRef.afterClosed().subscribe(() => {
+    this.getFilas().then(() => this.cargar());
+  });
   }
 
   inactivarPersona(idPersona: number, idCausante: number) {

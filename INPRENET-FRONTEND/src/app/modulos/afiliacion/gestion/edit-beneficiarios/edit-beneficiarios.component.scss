@@ -76,3 +76,14 @@
     align-items: center;
     height: 200px;
   }
+
+  .error-message {
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  

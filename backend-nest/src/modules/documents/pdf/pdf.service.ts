@@ -367,7 +367,7 @@ export class PdfService {
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: persona?.cantidad_dependientes || '',
+                text: persona?.cantidad_dependientes !== undefined && persona?.cantidad_dependientes !== null ? persona.cantidad_dependientes.toString() : '',
                 alignment: 'left',
                 style: 'smallCell',
                 colSpan: 2,
@@ -381,7 +381,7 @@ export class PdfService {
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: persona?.cantidad_hijos || '',
+                text: persona?.cantidad_hijos !== undefined && persona?.cantidad_hijos !== null ? persona.cantidad_hijos.toString() : '',
                 alignment: 'left',
                 style: 'smallCell',
               },
@@ -468,7 +468,7 @@ export class PdfService {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text:
                   persona?.municipio_nacimiento?.departamento?.nombre_departamento ||
-                  'No disponible',
+                  '',
                 alignment: 'left',
                 style: 'smallCell',
                 colSpan: 3,
@@ -487,7 +487,7 @@ export class PdfService {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text:
                   persona?.municipio_nacimiento?.nombre_municipio ||
-                  'No disponible',
+                  '',
                 alignment: 'left',
                 style: 'smallCell',
                 colSpan: 2,
@@ -1388,7 +1388,7 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.centroTrabajo?.celular_1 || '',
+                      text: b?.centroTrabajo?.telefono_1 || '',
                       alignment: 'center',
                       style: 'smallCell',
                       colSpan: 2,

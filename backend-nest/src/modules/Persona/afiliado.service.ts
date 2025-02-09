@@ -144,21 +144,49 @@ export class AfiliadoService {
 
   async updateBeneficiario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_detalle_persona> {
     const detallePersona = await this.detallePersonaRepository.findOne({
-      where: {
-        ID_DETALLE_PERSONA: id,
-        ID_PERSONA: updatePersonaDto.id_persona,
-        ID_CAUSANTE_PADRE: updatePersonaDto.id_causante_padre
-      },
+        where: {
+            ID_DETALLE_PERSONA: id,
+            ID_PERSONA: updatePersonaDto.id_persona,
+            ID_CAUSANTE_PADRE: updatePersonaDto.id_causante_padre
+        },
+        relations: ['persona']
     });
+
     if (!detallePersona) {
-      throw new NotFoundException(`Detalle persona with ID ${id} not found`);
+        throw new NotFoundException(`Detalle persona con ID ${id} no encontrado`);
     }
+
+    // **Actualizar porcentaje en net_detalle_persona**
     if (updatePersonaDto.porcentaje !== undefined) {
-      detallePersona.porcentaje = updatePersonaDto.porcentaje;
+        detallePersona.porcentaje = updatePersonaDto.porcentaje;
     }
+
+    // **Actualizar parentesco en net_detalle_persona**
+    if (updatePersonaDto.parentesco !== undefined) {
+        detallePersona.parentesco = updatePersonaDto.parentesco;
+    }
+
+    // **Actualizar datos en net_persona**
+    if (detallePersona.persona) {
+        if (updatePersonaDto.direccion_residencia !== undefined) {
+            detallePersona.persona.direccion_residencia = updatePersonaDto.direccion_residencia;
+        }
+
+        if (updatePersonaDto.telefono_1 !== undefined) {
+            detallePersona.persona.telefono_1 = updatePersonaDto.telefono_1;
+        }
+
+        // Guardar cambios en net_persona
+        await this.personaRepository.save(detallePersona.persona);
+    }
+
+    // Guardar cambios en net_detalle_persona
     await this.detallePersonaRepository.save(detallePersona);
+
     return detallePersona;
   }
+
+
 
 
   async updateSalarioBase(n_identificacion: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
@@ -259,6 +287,14 @@ export class AfiliadoService {
     const tiposPersona = persona.detallePersona
       ? persona.detallePersona.map((detalle) => detalle.tipoPersona?.tipo_persona).filter(Boolean)
       : [];
+
+      const formatFecha = (fecha: string | Date | null) => {
+        if (!fecha) return null;
+        
+        const fechaDate = typeof fecha === 'string' ? new Date(`${fecha}T00:00:00Z`) : fecha;
+        return fechaDate.toISOString().split('T')[0]; 
+    };
+    
       
     // Construye el resultado con valores por defecto en caso de que no haya `detallePersona`
     const result = {
@@ -279,7 +315,7 @@ export class AfiliadoService {
       DIRECCION_RESIDENCIA: persona.direccion_residencia,
       DIRECCION_RESIDENCIA_ESTRUCTURADA: persona.direccion_residencia_estructurada,
       RTN: persona.rtn,
-      FECHA_NACIMIENTO: persona.fecha_nacimiento,
+      FECHA_NACIMIENTO: formatFecha(persona.fecha_nacimiento),
       FOTO_PERFIL: persona.foto_perfil ? Buffer.from(persona.foto_perfil).toString('base64') : null,
       DESCRIPCION: persona.profesion?.descripcion,
       ID_PROFESION: persona.profesion?.id_profesion,
@@ -305,7 +341,7 @@ export class AfiliadoService {
       FECHA_REPORTE_FALLECIDO: persona?.fechaReporteFallecido,
       CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.nombre,
       
-      FECHA_AFILIACION: persona.fecha_afiliacion,
+      FECHA_AFILIACION: formatFecha(persona.fecha_afiliacion),
       ULTIMA_FECHA_ACTUALIZACION: persona.ultima_fecha_actualizacion,
 
       fallecido: persona.fallecido,
@@ -914,21 +950,22 @@ export class AfiliadoService {
 
   async getAllPerfCentroTrabajo(n_identificacion: string): Promise<any[]> {
     try {
-      const persona = await this.personaRepository.createQueryBuilder('persona')
-        .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfPersCentTrabs')
-        .leftJoinAndSelect('perfPersCentTrabs.centroTrabajo', 'centroTrabajo')
-        .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
-        .getOne();
+        const persona = await this.personaRepository.createQueryBuilder('persona')
+            .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfPersCentTrabs')
+            .leftJoinAndSelect('perfPersCentTrabs.centroTrabajo', 'centroTrabajo')
+            .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
+            .orderBy('perfPersCentTrabs.estado', 'ASC') 
+            .getOne();
 
-      if (!persona || !persona.perfPersCentTrabs) {
-        return [];
-      }
-      return persona.perfPersCentTrabs;
+        if (!persona || !persona.perfPersCentTrabs) {
+            return [];
+        }
+        return persona.perfPersCentTrabs;
     } catch (error) {
-      console.error('Error al obtener los perfiles de la persona:', error);
-      throw new Error('Error al obtener los perfiles de la persona');
+        console.error('Error al obtener los perfiles de la persona:', error);
+        throw new Error('Error al obtener los perfiles de la persona');
     }
-  }
+}
 
   async getAllCargoPublicPeps(n_identificacion: string): Promise<any> {
     try {
@@ -1200,22 +1237,41 @@ export class AfiliadoService {
     }
   }
 
+  formatFechaYYYYMMDD(fecha: string): string | null {
+    if (!fecha) return null;
+    try {
+        const date = parse(fecha, 'dd/MM/yyyy', new Date());
+        return date.toISOString().split('T')[0]; 
+    } catch (error) {
+        console.error(`Error al convertir la fecha: ${fecha}`);
+        return null;
+    }
+  }
+
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
     if (!existingPerf) {
-      throw new NotFoundException(`Perfil centro trabajo con ID ${id} no encontrado`);
+        throw new NotFoundException(`Perfil centro trabajo con ID ${id} no encontrado`);
     }
-    if (updateDto.idCentroTrabajo) {
-      const centroTrabajoExistente = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: updateDto.idCentroTrabajo } });
 
-      if (!centroTrabajoExistente) {
-        throw new NotFoundException(`El centro de trabajo con ID ${updateDto.idCentroTrabajo} no existe`);
-      }
-      existingPerf.centroTrabajo = centroTrabajoExistente;
+    if (updateDto.idCentroTrabajo) {
+        const centroTrabajoExistente = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: updateDto.idCentroTrabajo } });
+        if (!centroTrabajoExistente) {
+            throw new NotFoundException(`El centro de trabajo con ID ${updateDto.idCentroTrabajo} no existe`);
+        }
+        existingPerf.centroTrabajo = centroTrabajoExistente;
     }
-    const updatedPerf = { ...existingPerf, ...updateDto };
-    return this.perfPersoCentTrabRepository.save(updatedPerf);
-  }
+    existingPerf.fecha_ingreso = this.formatFechaYYYYMMDD(updateDto.fecha_ingreso);
+    existingPerf.fecha_egreso = updateDto.fecha_egreso ? this.formatFechaYYYYMMDD(updateDto.fecha_egreso) : null;
+    existingPerf.cargo = updateDto.cargo;
+    existingPerf.numero_acuerdo = updateDto.numero_acuerdo;
+    existingPerf.salario_base = updateDto.salarioBase;
+    existingPerf.estado = updateDto.estado;
+    existingPerf.tipo_jornada = updateDto.tipo_jornada;
+    existingPerf.jornada = updateDto.jornada;
+
+    return this.perfPersoCentTrabRepository.save(existingPerf);
+}
 
   async desactivarPerfCentroTrabajo(id: number): Promise<void> {
     const perfil = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });

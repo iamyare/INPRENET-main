@@ -9,7 +9,6 @@ import { VerEditarBeneficioAfilComponent } from './beneneficios/ver-editar-benef
 import { VerEditarDeduccionAfilComponent } from './beneneficios/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 import { AsignacionDeduccionesComponent } from './beneneficios/asignacion-deducciones/asignacion-deducciones.component';
 import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-planilla.component';
-import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
 import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
 import { P60RentasComponent } from './p-60-rentas/p-60-rentas.component';
 import { RoleGuard } from 'src/app/guards/role-guard.guard';
@@ -110,12 +109,6 @@ const routes: Routes = [
         component: DocumentosPlanillaComponent,
         canActivate: [RoleGuard],
         data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('PLANILLA', 'planilla/Egresos/documentos-planilla') }
-      },
-      {
-        path: 'editar-banco',
-        component: GestionBancoComponent,
-        canActivate: [RoleGuard],
-        data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('PLANILLA', 'planilla/Egresos/editar-banco') }
       },
       {
         path: 'cargar-fallecidos',

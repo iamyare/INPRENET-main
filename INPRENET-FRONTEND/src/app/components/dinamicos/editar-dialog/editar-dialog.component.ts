@@ -33,7 +33,11 @@ export class EditarDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<EditarDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { campos: Campo[], valoresIniciales: { [key: string]: any } },
+    @Inject(MAT_DIALOG_DATA) public data: {
+      campos: Campo[];
+      valoresIniciales: { [key: string]: any };
+      validacionesDinamicas?: { [key: string]: ValidatorFn[] }; // 🔹 Agregamos validaciones dinámicas opcionales
+    },
     private cdr: ChangeDetectorRef
   ) {
     this.formGroup = this.fb.group({});
@@ -55,14 +59,18 @@ export class EditarDialogComponent implements OnInit {
   
     this.data.campos.forEach(campo => {
       let valorInicial = this.data.valoresIniciales[campo.nombre] || '';
-      const validadores = campo.validadores || [];
+      let validadores = campo.validadores || [];
+  
+      // 🔹 Si existen validaciones dinámicas para este campo, las agregamos
+      if (this.data.validacionesDinamicas && this.data.validacionesDinamicas[campo.nombre]) {
+        validadores = [...validadores, ...this.data.validacionesDinamicas[campo.nombre]];
+      }
   
       if (campo.tipo === 'daterange') {
-        const dateRangeGroup = this.fb.group({
+        group[campo.nombre] = this.fb.group({
           start: [this.convertToDate(valorInicial?.start) || null, validadores],
           end: [this.convertToDate(valorInicial?.end) || null, validadores]
         });
-        group[campo.nombre] = dateRangeGroup;
       } else if (campo.tipo === 'date') {
         group[campo.nombre] = new FormControl(
           { value: this.convertToDate(valorInicial) || null, disabled: !campo.editable },
@@ -75,7 +83,9 @@ export class EditarDialogComponent implements OnInit {
   
     this.formGroup = this.fb.group(group);
     this.cdr.detectChanges();
-  }  
+  }
+  
+   
 
   convertToDate(value: string | Date | null | undefined): Date | null {
     if (!value) {
@@ -184,8 +194,8 @@ export class EditarDialogComponent implements OnInit {
     if (!control || !control.errors) {
       return [];
     }
-
-    const errors: any = [];
+  
+    const errors: string[] = [];
     if (control.errors['required']) {
       errors.push('Este campo es requerido.');
     }
@@ -198,8 +208,12 @@ export class EditarDialogComponent implements OnInit {
     if (control.errors['pattern']) {
       errors.push('El formato no es válido.');
     }
+    if (control.errors['excedeTotal']) {
+      errors.push('Excede la suma total de los porcentajes');
+    }
     return errors;
   }
+  
 
   minCurrentValueValidator(minValue: number): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {

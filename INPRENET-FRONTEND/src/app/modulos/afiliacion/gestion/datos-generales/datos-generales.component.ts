@@ -76,6 +76,8 @@ export class DatosGeneralesComponent implements OnInit {
                 discapacidades: this.fb.array([]),
                 ...this.initialData
             });
+            console.log(this.initialData);
+            
 
             if (this.initialData.fecha_nacimiento) {
                 const fechaNacimiento = new Date(this.initialData.fecha_nacimiento + 'T00:00:00');

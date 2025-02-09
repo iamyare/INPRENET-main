@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectorRef  } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from '../../../../../../src/app/services/afiliado.service';
@@ -15,7 +15,7 @@ import { PersonaService } from '../../../../services/persona.service';
 @Component({
   selector: 'app-edit-datos-generales',
   templateUrl: './edit-datos-generales.component.html',
-  styleUrls: ['./edit-datos-generales.component.scss']
+  styleUrls: ['./edit-datos-generales.component.scss'],
 })
 export class EditDatosGeneralesComponent implements OnInit {
   autoResize($event: Event) {
@@ -44,11 +44,11 @@ export class EditDatosGeneralesComponent implements OnInit {
     nombreEmpleado: string;
   } | null = null;
 
-  
+
   estadosPermitidosPorTipoPersona: Record<string, number[]> = {
     BENEFICIARIO: [1, 2, 13], // ACTIVO, INACTIVO, NO COTIZA, SUSPENSO POR OFICIO
     "BENEFICIARIO SIN CAUSANTE": [1, 2, 13], // ACTIVO, NO COTIZA
-    DESIGNADO: [7,14], // ACTIVO, INACTIVO, NO COTIZA, SUSPENSO VOLUNTARIO
+    DESIGNADO: [7, 14], // ACTIVO, INACTIVO, NO COTIZA, SUSPENSO VOLUNTARIO
     AFILIADO: [1, 2, 6, 8], // ACTIVO, COTIZANTE SIN AFILIAR, REGISTRADO
     JUBILADO: [1, 11, 12, 13], // SUSPENSO POR SOBREVIVENCIA, SUSPENSO POR INVESTIGACIÓN
     PENSIONADO: [1, 11, 12, 13] // SUSPENSO POR SOBREVIVENCIA, SUSPENSO POR INVESTIGACIÓN
@@ -58,6 +58,8 @@ export class EditDatosGeneralesComponent implements OnInit {
   fallecido: any;
   minDate: Date;
   public loading: boolean = false;
+  cargandoTabla: boolean = false; 
+
   mostrarBotonGenerar: boolean = false;
 
   // -------------------------------------------
@@ -68,7 +70,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   archivoIdentificacionUrl: SafeResourceUrl | null = null;
 
   certificadoDefuncionFile: File | null = null;
-  
+
   initialData = {};
   indicesSeleccionados: any[] = [];
   discapacidadSeleccionada!: boolean;
@@ -183,67 +185,55 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.datosGeneralesForm = this.fb.group({
       // Campo para tomar foto
       FotoPerfil: [null, Validators.required],
-  
+
       // Datos de identificación
       //id_tipo_identificacion: ['', Validators.required],
-      n_identificacion: ['', [ Validators.required, Validators.minLength(13), Validators.maxLength(15), Validators.pattern(/^[0-9]+$/)]],
-      rtn: ['', [ Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]],
-  
+      n_identificacion: ['', [Validators.required, Validators.minLength(13), Validators.maxLength(15), Validators.pattern(/^[0-9]+$/)]],
+      rtn: ['', [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]],
+
       // Datos personales
       fecha_nacimiento: ['', Validators.required],
       fecha_afiliacion: ['', Validators.required],
       genero: ['', Validators.required],
-      primer_nombre: ['', [ Validators.required, Validators.maxLength(40)]],
-      primer_apellido: ['', [ Validators.required, Validators.maxLength(40), Validators.minLength(1), Validators.pattern('^[a-zA-Z0-9\\s]*$')]],
-  
+      primer_nombre: ['', [Validators.required, Validators.maxLength(40)]],
+      primer_apellido: ['', [Validators.required, Validators.maxLength(40), Validators.minLength(1), Validators.pattern('^[a-zA-Z0-9\\s]*$')]],
+
       // Contacto
-      telefono_1: ['', [ Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern("^[0-9]*$")]],
-      correo_1: ['', [ Validators.required, Validators.maxLength(40), Validators.email]],
-  
+      telefono_1: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern("^[0-9]*$")]],
+      correo_1: ['', [Validators.required, Validators.maxLength(40), Validators.email]],
+
       // Estado civil y dependientes
-      estado_civil: ['', [ Validators.required, Validators.maxLength(40)]],
-      cantidad_hijos: ['', [ Validators.required, Validators.pattern("^[0-9]+$")]],
-      cantidad_dependientes: ['', [ Validators.required, Validators.pattern("^[0-9]+$")]],
-  
+      estado_civil: ['', [Validators.required, Validators.maxLength(40)]],
+      cantidad_hijos: ['', [Validators.required, Validators.pattern("^[0-9]+$")]],
+      cantidad_dependientes: ['', [Validators.required, Validators.pattern("^[0-9]+$")]],
+
       // Educación y representación
       grado_academico: ['', Validators.required],
       representacion: ['', Validators.required],
-  
+
       // Nacionalidad y ubicación
       id_pais: ['', Validators.required],
       id_departamento_nacimiento: ['', Validators.required],
       id_municipio_nacimiento: ['', Validators.required],
       id_departamento_residencia: ['', Validators.required],
       id_municipio_residencia: ['', Validators.required],
-  
-      // Grupo étnico
       grupo_etnico: ['', Validators.required],
-  
-      // Archivo de identificación
       archivo_identificacion: [null, Validators.required],
-  
-      // **Discapacidades** - Agregar este control
-      discapacidades: this.fb.group({}) // Inicialmente vacío, se llenará dinámicamente
+      discapacidades: this.fb.group({}) 
     });
   }
 
   ngOnInit(): void {
     this.obtenerDatosDesdeToken();
-    // Permisos
 
-    
     setTimeout(() => {
       this.mostrarBotonGuardar = this.permisosService.userHasPermission(
         'AFILIACIONES',
         'afiliacion/buscar-persona',
         ['editar', 'editarDos']
       );
-      this.cdr.detectChanges(); // Forzar la detección de cambios
-    }, 0);
-    
-    if (this.dniCausante) {
-      // this.cargarDesignadosOBeneficiarios(this.dniCausante);
-    }
+      this.cdr.detectChanges();
+    });
 
     this.cargarCausasFallecimiento();
     this.cargarEstadosAfiliado();
@@ -253,9 +243,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.svcAfiliado.buscarDetPersona(this.Afiliado.n_identificacion).subscribe(
       (detalles: any[]) => {
         this.tableData = detalles;
-    
-        console.log("Datos de la tabla cargados:", this.tableData);
-    
+
         // Llamar a cargarEstadosAfiliado después de cargar los datos
         this.cargarEstadosAfiliado();
       },
@@ -263,7 +251,7 @@ export class EditDatosGeneralesComponent implements OnInit {
         console.error('Error al cargar movimientos:', error);
       }
     );
-    
+
 
     // --------------------------------
     // Escucha cambios en fallecido
@@ -278,14 +266,14 @@ export class EditDatosGeneralesComponent implements OnInit {
           fecha_reporte_fallecido: '',
           numero_certificado_defuncion: ''
         });
-    
+
         this.form1.get('causa_fallecimiento')?.disable();
         this.form1.get('fecha_defuncion')?.disable();
         this.form1.get('id_departamento_defuncion')?.disable();
         this.form1.get('id_municipio_defuncion')?.disable();
         this.form1.get('fecha_reporte_fallecido')?.disable();
         this.form1.get('numero_certificado_defuncion')?.disable();
-    
+
         if (!this.datos?.certificado_defuncion) {
           this.formDatosGenerales.get('archivoCertDef')?.disable();
           this.formDatosGenerales.get('archivoCertDef')?.clearValidators();
@@ -297,7 +285,7 @@ export class EditDatosGeneralesComponent implements OnInit {
         this.form1.get('id_municipio_defuncion')?.enable();
         this.form1.get('fecha_reporte_fallecido')?.enable();
         this.form1.get('numero_certificado_defuncion')?.enable();
-    
+
         this.formDatosGenerales.get('archivoCertDef')?.enable();
         if (!this.datos?.certificado_defuncion) {
           this.formDatosGenerales.get('archivoCertDef')?.setValidators([Validators.required]);
@@ -353,36 +341,36 @@ export class EditDatosGeneralesComponent implements OnInit {
       }
     });
   }
-  
+
   compararEstados(option: any, selected: any): boolean {
     return option == selected; // Comparar por valor, asegurando que funcione con números y strings
   }
-  
+
   async cargarEstadosAfiliado() {
     try {
       const response = await this.svcAfiliado.getAllEstados().toPromise();
-  
+
       if (!this.tableData || this.tableData.length === 0) {
         console.warn("No hay datos en la tabla.");
         return;
       }
-  
+
       this.tableData.forEach((element: any) => {
         let tiposPersona: string[] = [];
-  
+
         if (Array.isArray(element.tipoPersona)) {
           tiposPersona = element.tipoPersona.map((tp: any) => tp.tipo_persona);
         } else if (element.tipoPersona) {
           tiposPersona = [element.tipoPersona];
         }
-  
+
         // Obtener los estados permitidos
         const estadosPermitidos = new Set<number>();
         tiposPersona.forEach(tipo => {
           const estados = this.estadosPermitidosPorTipoPersona[tipo] || [];
-          estados.forEach((estado:any) => estadosPermitidos.add(estado));
+          estados.forEach((estado: any) => estadosPermitidos.add(estado));
         });
-  
+
         // Filtrar los estados obtenidos desde el backend según los estados permitidos
         element.estadosDisponibles = response
           .filter((estado: { codigo: number }) => estadosPermitidos.has(estado.codigo))
@@ -392,7 +380,7 @@ export class EditDatosGeneralesComponent implements OnInit {
           }));
         if (element.ID_ESTADO_AFILIACION) {
           element.estadoAfiliacion = element.estadosDisponibles.find(
-            (estado:any) => estado.value === element.ID_ESTADO_AFILIACION
+            (estado: any) => estado.value === element.ID_ESTADO_AFILIACION
           )?.value || null;
         } else {
           element.estadoAfiliacion = null;
@@ -402,7 +390,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       console.error("Error al cargar estados de afiliación:", error);
     }
   }
-  
+
 
 
 
@@ -517,209 +505,225 @@ export class EditDatosGeneralesComponent implements OnInit {
   // ---------------------------------------------
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
-      
-      
-        this.loading = true;
 
-        // 1) Llamar primero a getAfilByParam(...) para obtener la data principal
-        this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
-            (result) => {
-                this.datos = result;
-                this.Afiliado = result;
-                this.mostrarBotonGenerar = this.tieneTipoAfiliado();
 
-                if (result?.ID_DEPARTAMENTO_DEFUNCION) {
-                  this.cargarMunicipiosDefuncion(result.ID_DEPARTAMENTO_DEFUNCION);
-                }
+      this.loading = true;
 
-                // Manejo PDFs
-                this.certificadoDefuncionUrl = result?.certificado_defuncion
-          ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${result.certificado_defuncion}`)
-          : null;
+      // 1) Llamar primero a getAfilByParam(...) para obtener la data principal
+      this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
+        (result) => {
+          this.datos = result;
+          this.Afiliado = result;
+          console.log(result);
 
-                this.archivoIdentificacionUrl = this.datos?.archivo_identificacion
-                    ? this.sanitizer.bypassSecurityTrustResourceUrl(
-                        `data:application/pdf;base64,${this.datos.archivo_identificacion}`
-                    )
-                    : null;
+          this.mostrarBotonGenerar = this.tieneTipoAfiliado();
 
-                // Validación dinámica del archivo de identificación
-                const archivoIdentificacionControl = this.formDatosGenerales.get('archivo_identificacion');
-                
+          if (result?.ID_DEPARTAMENTO_DEFUNCION) {
+            this.cargarMunicipiosDefuncion(result.ID_DEPARTAMENTO_DEFUNCION);
+          }
 
-                  if (result?.archivo_identificacion) {
-                      archivoIdentificacionControl?.clearValidators();
-                      archivoIdentificacionControl?.updateValueAndValidity();
-                      this.formDatosGenerales.patchValue({ archivo_identificacion: result.archivo_identificacion });
-                  } else {
-                      archivoIdentificacionControl?.setValidators([Validators.required]);
-                      archivoIdentificacionControl?.updateValueAndValidity();
-                  }
+          // Manejo PDFs
+          this.certificadoDefuncionUrl = result?.certificado_defuncion
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${result.certificado_defuncion}`)
+            : null;
 
-                  const archivoCertDefControl = this.formDatosGenerales.get('archivoCertDef');
+          this.archivoIdentificacionUrl = this.datos?.archivo_identificacion
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(
+              `data:application/pdf;base64,${this.datos.archivo_identificacion}`
+            )
+            : null;
 
-                  if (result?.certificado_defuncion) {
-                    this.certificadoDefuncionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-                      `data:application/pdf;base64,${result.certificado_defuncion}`
-                    );
-                  
-                    // Establecer el archivo en el formulario
-                    archivoCertDefControl?.setValue(result.certificado_defuncion);
-                    archivoCertDefControl?.clearValidators();
-                    archivoCertDefControl?.updateValueAndValidity();
-                  } else {
-                    archivoCertDefControl?.setValidators([Validators.required]);
-                    archivoCertDefControl?.updateValueAndValidity();
-                  }
+          // Validación dinámica del archivo de identificación
+          const archivoIdentificacionControl = this.formDatosGenerales.get('archivo_identificacion');
 
-                // Otras propiedades globales
-                this.estadoAfiliacion = result.estadoAfiliacion;
-                this.fallecido = result.fallecido;
 
-                // Imagen de perfil
-                if (result.FOTO_PERFIL) {
-                    this.image = this.dataURItoBlob(
-                        `data:image/jpeg;base64,${result.FOTO_PERFIL}`
-                    );
-                }
+          if (result?.archivo_identificacion) {
+            archivoIdentificacionControl?.clearValidators();
+            archivoIdentificacionControl?.updateValueAndValidity();
+            this.formDatosGenerales.patchValue({ archivo_identificacion: result.archivo_identificacion });
+          } else {
+            archivoIdentificacionControl?.setValidators([Validators.required]);
+            archivoIdentificacionControl?.updateValueAndValidity();
+          }
 
-                // Dirección estructurada
-                if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
-                    const jsonObj = result.DIRECCION_RESIDENCIA_ESTRUCTURADA
-                        .split(',')
-                        .reduce((acc: any, curr: any) => {
-                            const [key, value] = curr.split(':').map((s: string) => s.trim());
-                            acc[key] = value;
-                            return acc;
-                        }, {});
+          const archivoCertDefControl = this.formDatosGenerales.get('archivoCertDef');
 
-                    this.initialData = {
-                        ...this.initialData,
-                        avenida: jsonObj.AVENIDA || '',
-                        calle: jsonObj.CALLE || '',
-                        sector: jsonObj.SECTOR || '',
-                        bloque: jsonObj.BLOQUE || '',
-                        aldea: jsonObj.ALDEA || '',
-                        caserio: jsonObj.CASERIO || '',
-                        barrio_colonia: jsonObj['BARRIO_COLONIA'] || '',
-                        numero_casa: jsonObj['N° DE CASA'] || '',
-                        color_casa: jsonObj['COLOR CASA'] || ''
-                    };
-                } else {
-                    this.direccionCompleta = result.DIRECCION_RESIDENCIA?.trim();
-                }
+          if (result?.certificado_defuncion) {
+            this.certificadoDefuncionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+              `data:application/pdf;base64,${result.certificado_defuncion}`
+            );
 
-                this.formDatosGenerales.markAllAsTouched();
-                this.form1.markAllAsTouched();
-                
-                // Llenar initialData con datos globales
-                this.initialData = {
-                    ...this.initialData,
-                    id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION,
-                    n_identificacion: result?.N_IDENTIFICACION,
-                    primer_nombre: result?.PRIMER_NOMBRE,
-                    segundo_nombre: result?.SEGUNDO_NOMBRE,
-                    tercer_nombre: result?.TERCER_NOMBRE,
-                    primer_apellido: result?.PRIMER_APELLIDO,
-                    segundo_apellido: result?.SEGUNDO_APELLIDO,
-                    fecha_nacimiento: result?.FECHA_NACIMIENTO,
-                    fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
-                    cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
-                    representacion: result?.REPRESENTACION,
-                    telefono_1: result?.TELEFONO_1,
-                    telefono_2: result?.TELEFONO_2,
-                    correo_1: result?.CORREO_1,
-                    correo_2: result?.CORREO_2,
-                    rtn: result?.RTN,
-                    genero: result?.GENERO,
-                    grupo_etnico: result?.GRUPO_ETNICO,
-                    grado_academico: result?.GRADO_ACADEMICO,
-                    estado_civil: result?.ESTADO_CIVIL,
-                    cantidad_hijos: result?.CANTIDAD_HIJOS,
-                    id_profesion: result?.ID_PROFESION,
-                    id_pais: result?.ID_PAIS,
-                    id_departamento_residencia: result?.id_departamento_residencia,
-                    id_municipio_residencia: result?.ID_MUNICIPIO,
-                    id_departamento_nacimiento: result?.id_departamento_nacimiento,
-                    id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
-                    discapacidad: result?.discapacidades?.length > 0 ? true : false,
-                    fecha_afiliacion: result?.FECHA_AFILIACION,
-                };
+            // Establecer el archivo en el formulario
+            archivoCertDefControl?.setValue(result.certificado_defuncion);
+            archivoCertDefControl?.clearValidators();
+            archivoCertDefControl?.updateValueAndValidity();
+          } else {
+            archivoCertDefControl?.setValidators([Validators.required]);
+            archivoCertDefControl?.updateValueAndValidity();
+          }
 
-                // Discapacidades
-                if (result?.discapacidades?.length > 0) {
-                    this.discapacidadSeleccionada = true;
-                    this.indicesSeleccionados = result?.discapacidades;
-                }
+          // Otras propiedades globales
+          this.estadoAfiliacion = result.estadoAfiliacion;
+          this.fallecido = result.fallecido;
 
-                // Rellenar valores de form1
-                this.form1.patchValue({
-                    fallecido: result?.fallecido,
-                    fecha_defuncion: result?.fecha_defuncion,
-                    causa_fallecimiento: result?.ID_CAUSA_FALLECIMIENTO,
-                    id_departamento_defuncion: result?.ID_DEPARTAMENTO_DEFUNCION,
-                    id_municipio_defuncion: result?.ID_MUNICIPIO_DEFUNCION,
-                    tipo_persona: result?.ID_TIPO_PERSONA,
-                    estado: result?.estadoAfiliacion?.codigo,
-                    voluntario: result?.VOLUNTARIO || 'NO',
-                    numero_certificado_defuncion: result?.NUMERO_CERTIFICADO_DEFUNCION,
-                    fecha_reporte_fallecido: result?.FECHA_REPORTE_FALLECIDO
-                });
+          // Imagen de perfil
+          if (result.FOTO_PERFIL) {
+            this.image = this.dataURItoBlob(
+              `data:image/jpeg;base64,${result.FOTO_PERFIL}`
+            );
+          }
 
-                // Parchar el FormGroup con los datos recibidos
-                this.datosGeneralesForm.patchValue({
-                    FotoPerfil: result?.FOTO_PERFIL ? `data:image/jpeg;base64,${result.FOTO_PERFIL}` : null,
-                    id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION,
-                    n_identificacion: result?.N_IDENTIFICACION,
-                    primer_nombre: result?.PRIMER_NOMBRE,
-                    segundo_nombre: result?.SEGUNDO_NOMBRE,
-                    tercer_nombre: result?.TERCER_NOMBRE,
-                    primer_apellido: result?.PRIMER_APELLIDO,
-                    segundo_apellido: result?.SEGUNDO_APELLIDO,
-                    fecha_nacimiento: result?.FECHA_NACIMIENTO,
-                    fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
-                    cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
-                    representacion: result?.REPRESENTACION,
-                    telefono_1: result?.TELEFONO_1,
-                    telefono_2: result?.TELEFONO_2,
-                    correo_1: result?.CORREO_1,
-                    correo_2: result?.CORREO_2,
-                    rtn: result?.RTN,
-                    genero: result?.GENERO,
-                    grupo_etnico: result?.GRUPO_ETNICO,
-                    grado_academico: result?.GRADO_ACADEMICO,
-                    estado_civil: result?.ESTADO_CIVIL,
-                    cantidad_hijos: result?.CANTIDAD_HIJOS,
-                    id_profesion: result?.ID_PROFESION,
-                    id_pais: result?.ID_PAIS,
-                    id_departamento_residencia: result?.id_departamento_residencia,
-                    id_municipio_residencia: result?.ID_MUNICIPIO,
-                    id_departamento_nacimiento: result?.id_departamento_nacimiento,
-                    id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
-                    discapacidad: result?.discapacidades?.length > 0 ? true : false,
-                    archivoIdentificacionUrl: result?.archivo_identificacion,
-                    fecha_afiliacion: result?.FECHA_AFILIACION,
-                });
+          // Dirección estructurada
+          if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
+            const jsonObj = result.DIRECCION_RESIDENCIA_ESTRUCTURADA
+              .split(',')
+              .reduce((acc: any, curr: any) => {
+                const [key, value] = curr.split(':').map((s: string) => s.trim());
+                acc[key] = value;
+                return acc;
+              }, {});
 
-                // Marcar todos los controles como tocados para mostrar errores
-                this.datosGeneralesForm.markAllAsTouched();
-                this.form1.markAllAsTouched();
+            this.initialData = {
+              ...this.initialData,
+              avenida: jsonObj.AVENIDA || '',
+              calle: jsonObj.CALLE || '',
+              sector: jsonObj.SECTOR || '',
+              bloque: jsonObj.BLOQUE || '',
+              aldea: jsonObj.ALDEA || '',
+              caserio: jsonObj.CASERIO || '',
+              barrio_colonia: jsonObj['BARRIO_COLONIA'] || '',
+              numero_casa: jsonObj['N° DE CASA'] || '',
+              color_casa: jsonObj['COLOR CASA'] || ''
+            };
+          } else {
+            this.direccionCompleta = result.DIRECCION_RESIDENCIA?.trim();
+          }
 
-                const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
-                refpersArray.clear();
-                refpersArray.push(this.createRefpersGroup(result));
-                
-                this.cdr.detectChanges(); // <-- Añadir esta línea
-                this.loading = false;
-            },
-            (error) => {
-                this.toastr.error(`Error: ${error.error.message}`);
-                this.loading = false;
-            }
-        );
+          this.formDatosGenerales.markAllAsTouched();
+          this.form1.markAllAsTouched();
+
+          // Llenar initialData con datos globales
+          this.initialData = {
+            ...this.initialData,
+            id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION,
+            n_identificacion: result?.N_IDENTIFICACION,
+            primer_nombre: result?.PRIMER_NOMBRE,
+            segundo_nombre: result?.SEGUNDO_NOMBRE,
+            tercer_nombre: result?.TERCER_NOMBRE,
+            primer_apellido: result?.PRIMER_APELLIDO,
+            segundo_apellido: result?.SEGUNDO_APELLIDO,
+            fecha_nacimiento: result?.FECHA_NACIMIENTO
+              ? new Date(new Date(result.FECHA_NACIMIENTO + 'T00:00:00').setDate(new Date(result.FECHA_NACIMIENTO + 'T00:00:00').getDate()))
+              : null,
+
+            fecha_afiliacion: result?.FECHA_AFILIACION
+              ? new Date(new Date(result.FECHA_AFILIACION + 'T00:00:00').setDate(new Date(result.FECHA_AFILIACION + 'T00:00:00').getDate()))
+              : null,
+            fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
+            cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
+            representacion: result?.REPRESENTACION,
+            telefono_1: result?.TELEFONO_1,
+            telefono_2: result?.TELEFONO_2,
+            correo_1: result?.CORREO_1,
+            correo_2: result?.CORREO_2,
+            rtn: result?.RTN,
+            genero: result?.GENERO,
+            grupo_etnico: result?.GRUPO_ETNICO,
+            grado_academico: result?.GRADO_ACADEMICO,
+            estado_civil: result?.ESTADO_CIVIL,
+            cantidad_hijos: result?.CANTIDAD_HIJOS,
+            id_profesion: result?.ID_PROFESION,
+            id_pais: result?.ID_PAIS,
+            id_departamento_residencia: result?.id_departamento_residencia,
+            id_municipio_residencia: result?.ID_MUNICIPIO,
+            id_departamento_nacimiento: result?.id_departamento_nacimiento,
+            id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
+            discapacidad: result?.discapacidades?.length > 0 ? true : false,
+          };
+
+          // Discapacidades
+          if (result?.discapacidades?.length > 0) {
+            this.discapacidadSeleccionada = true;
+            this.indicesSeleccionados = result?.discapacidades;
+          }
+
+          // Rellenar valores de form1
+          this.form1.patchValue({
+            fallecido: result?.fallecido,
+            fecha_defuncion: result?.fecha_defuncion
+            ? new Date(new Date(result?.fecha_defuncion + 'T00:00:00').setDate(new Date(result?.fecha_defuncion + 'T00:00:00').getDate()))
+              : null,
+            causa_fallecimiento: result?.ID_CAUSA_FALLECIMIENTO,
+            id_departamento_defuncion: result?.ID_DEPARTAMENTO_DEFUNCION,
+            id_municipio_defuncion: result?.ID_MUNICIPIO_DEFUNCION,
+            tipo_persona: result?.ID_TIPO_PERSONA,
+            estado: result?.estadoAfiliacion?.codigo,
+            voluntario: result?.VOLUNTARIO || 'NO',
+            numero_certificado_defuncion: result?.NUMERO_CERTIFICADO_DEFUNCION,
+            fecha_reporte_fallecido: result?.FECHA_REPORTE_FALLECIDO
+            ? new Date(new Date(result?.FECHA_REPORTE_FALLECIDO + 'T00:00:00').setDate(new Date(result?.FECHA_REPORTE_FALLECIDO + 'T00:00:00').getDate()))
+              : null,
+          });
+
+          // Parchar el FormGroup con los datos recibidos
+          this.datosGeneralesForm.patchValue({
+            FotoPerfil: result?.FOTO_PERFIL ? `data:image/jpeg;base64,${result.FOTO_PERFIL}` : null,
+            id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION,
+            n_identificacion: result?.N_IDENTIFICACION,
+            primer_nombre: result?.PRIMER_NOMBRE,
+            segundo_nombre: result?.SEGUNDO_NOMBRE,
+            tercer_nombre: result?.TERCER_NOMBRE,
+            primer_apellido: result?.PRIMER_APELLIDO,
+            segundo_apellido: result?.SEGUNDO_APELLIDO,
+            fecha_nacimiento: result?.FECHA_NACIMIENTO
+              ? new Date(new Date(result.FECHA_NACIMIENTO + 'T00:00:00').setDate(new Date(result.FECHA_NACIMIENTO + 'T00:00:00').getDate()))
+              : null,
+
+            fecha_afiliacion: result?.FECHA_AFILIACION
+              ? new Date(new Date(result.FECHA_AFILIACION + 'T00:00:00').setDate(new Date(result.FECHA_AFILIACION + 'T00:00:00').getDate()))
+              : null,
+            fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
+            cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
+            representacion: result?.REPRESENTACION,
+            telefono_1: result?.TELEFONO_1,
+            telefono_2: result?.TELEFONO_2,
+            correo_1: result?.CORREO_1,
+            correo_2: result?.CORREO_2,
+            rtn: result?.RTN,
+            genero: result?.GENERO,
+            grupo_etnico: result?.GRUPO_ETNICO,
+            grado_academico: result?.GRADO_ACADEMICO,
+            estado_civil: result?.ESTADO_CIVIL,
+            cantidad_hijos: result?.CANTIDAD_HIJOS,
+            id_profesion: result?.ID_PROFESION,
+            id_pais: result?.ID_PAIS,
+            id_departamento_residencia: result?.id_departamento_residencia,
+            id_municipio_residencia: result?.ID_MUNICIPIO,
+            id_departamento_nacimiento: result?.id_departamento_nacimiento,
+            id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
+            discapacidad: result?.discapacidades?.length > 0 ? true : false,
+            archivoIdentificacionUrl: result?.archivo_identificacion,
+          });
+
+          // Marcar todos los controles como tocados para mostrar errores
+          this.datosGeneralesForm.markAllAsTouched();
+          this.form1.markAllAsTouched();
+
+          const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
+          refpersArray.clear();
+          refpersArray.push(this.createRefpersGroup(result));
+
+          this.cdr.detectChanges(); // <-- Añadir esta línea
+          this.loading = false;
+        },
+        (error) => {
+          this.toastr.error(`Error: ${error.error.message}`);
+          this.loading = false;
+        }
+      );
     }
-}
-  
+  }
+
   // ---------------------------------------------
   // Manejo de discapacidades
   // ---------------------------------------------
@@ -751,9 +755,9 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.formDatosGenerales.markAllAsTouched();
 
     if (this.formDatosGenerales.invalid || this.form1.invalid) {
-        this.checkFormErrors();
-        this.toastr.error('Por favor complete los campos requeridos');
-        return;
+      this.checkFormErrors();
+      this.toastr.error('Por favor complete los campos requeridos');
+      return;
     }
 
     const refpersData = this.formDatosGenerales.get('refpers')?.value?.[0] || {};
@@ -761,120 +765,101 @@ export class EditDatosGeneralesComponent implements OnInit {
     const formValues = this.form1.value;
 
     let archivoIdentificacion = this.formDatosGenerales.get('archivo_identificacion')?.value;
-    
+
 
     if (!archivoIdentificacion && this.datos?.archivo_identificacion) {
       const base64Data = this.datos.archivo_identificacion;
-      const blob:any = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
+      const blob: any = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
       archivoIdentificacion = new File([blob], 'identificacion_existente.pdf', { type: 'application/pdf' });
     }
 
     let certificadoDefuncion = this.formDatosGenerales.get('archivoCertDef')?.value;
 
-if (!certificadoDefuncion && this.datos?.certificado_defuncion) {
-  const base64Data = this.datos.certificado_defuncion;
-  const blob:any = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
-  certificadoDefuncion = new File([blob], 'certificado_defuncion_existente.pdf', { type: 'application/pdf' });
-}
-  
-
-
-  // Si no hay archivo nuevo pero existe uno registrado
-  if (!archivoIdentificacion && this.datos?.archivo_identificacion) {
-    // Convertir base64 a File usando función existente
-    const base64Data = this.datos.archivo_identificacion;
-    const blob = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
-    
-    if (blob) {
-      archivoIdentificacion = new File([blob], 'identificacion_existente.pdf', {
-        type: 'application/pdf'
-      });
+    if (!certificadoDefuncion && this.datos?.certificado_defuncion) {
+      const base64Data = this.datos.certificado_defuncion;
+      const blob: any = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
+      certificadoDefuncion = new File([blob], 'certificado_defuncion_existente.pdf', { type: 'application/pdf' });
     }
-  }
+
+
+
+    // Si no hay archivo nuevo pero existe uno registrado
+    if (!archivoIdentificacion && this.datos?.archivo_identificacion) {
+      // Convertir base64 a File usando función existente
+      const base64Data = this.datos.archivo_identificacion;
+      const blob = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
+
+      if (blob) {
+        archivoIdentificacion = new File([blob], 'identificacion_existente.pdf', {
+          type: 'application/pdf'
+        });
+      }
+    }
     // Construcción del objeto a enviar
     const datosActualizados: any = {
-        ...refpersData,
-        fallecido: formValues.fallecido,
-        causa_fallecimiento: formValues.causa_fallecimiento,
-        fecha_defuncion: convertirFechaInputs(formValues.fecha_defuncion),
-        id_departamento_defuncion: formValues.id_departamento_defuncion,
-        id_municipio_defuncion: formValues.id_municipio_defuncion,
-        estado: formValues.estado,
-        tipo_persona: formValues.tipo_persona,
-        voluntario: formValues.voluntario,
-        numero_certificado_defuncion: formValues.numero_certificado_defuncion,
-        fecha_reporte_fallecido: convertirFechaInputs(formValues.fecha_reporte_fallecido),
-        fecha_afiliacion: convertirFechaInputs(refpersData.fecha_afiliacion) ,
-        // Archivos
-        certificado_defuncion: certificadoDefuncion,
-        archivo_identificacion: archivoIdentificacion,
+      ...refpersData,
+      fallecido: formValues.fallecido,
+      causa_fallecimiento: formValues.causa_fallecimiento,
+      fecha_defuncion: convertirFechaInputs(formValues.fecha_defuncion),
+      id_departamento_defuncion: formValues.id_departamento_defuncion,
+      id_municipio_defuncion: formValues.id_municipio_defuncion,
+      estado: formValues.estado,
+      tipo_persona: formValues.tipo_persona,
+      voluntario: formValues.voluntario,
+      numero_certificado_defuncion: formValues.numero_certificado_defuncion,
+      fecha_reporte_fallecido: convertirFechaInputs(formValues.fecha_reporte_fallecido),
+      fecha_afiliacion: convertirFechaInputs(refpersData.fecha_afiliacion),
+      // Archivos
+      certificado_defuncion: certificadoDefuncion,
+      archivo_identificacion: archivoIdentificacion,
 
-        // Foto perfil
-        FotoPerfil: this.image ? this.image : undefined,
+      // Foto perfil
+      FotoPerfil: this.image ? this.image : undefined,
 
-        // Tabla o detalles adicionales
-        detalles: this.tableData
+      // Tabla o detalles adicionales
+      detalles: this.tableData
     };
-
 
     // Llamada al servicio para actualizar
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, datosActualizados)
-        .subscribe(
-            async (result) => {
-                this.toastr.success('Datos generales modificados correctamente');
-            },
-            (error) => {
-                this.toastr.error(`Error: ${error.error.message}`);
-            }
-        );
+      .subscribe(
+        async (result) => {
+          this.toastr.success('Datos generales modificados correctamente');
+        },
+        (error) => {
+          this.toastr.error(`Error: ${error.error.message}`);
+        }
+      );
   }
 
-  formatFechaYYYYMMDD(fecha: any): string {
-    if (!fecha) return '';
+  guardarEstadoAfiliacion(element: any) {
+    const estadoAfiliacion = typeof element.estadoAfiliacion === 'string'
+      ? element.estadoAfiliacion.trim()
+      : String(element.estadoAfiliacion); // Convertir a string si no lo es
 
-    const date = fecha instanceof Date ? fecha : new Date(fecha);
-    if (isNaN(date.getTime())) return ''; // Verifica que la fecha sea válida
+    const payload = {
+      idPersona: element.ID_PERSONA,
+      idCausante: element.ID_CAUSANTE,
+      idCausantePadre: element.ID_CAUSANTE_PADRE,
+      idDetallePersona: element.ID_DETALLE_PERSONA,
+      idEstadoAfiliacion: element.estadoAfiliacion,
+      dniCausante: element.dniCausante,
+      estadoAfiliacion: estadoAfiliacion, 
+      observacion: element.observacion || ''
+    };
 
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Asegura 2 dígitos en el mes
-    const day = String(date.getDate()).padStart(2, '0'); // Asegura 2 dígitos en el día
 
-    return `${year}-${month}-${day}`;
-}
-
-
-guardarEstadoAfiliacion(element: any) {
-  console.log("Estado Afiliación antes de enviar:", element.estadoAfiliacion, typeof element.estadoAfiliacion);
-  
-  const estadoAfiliacion = typeof element.estadoAfiliacion === 'string' 
-    ? element.estadoAfiliacion.trim() 
-    : String(element.estadoAfiliacion); // Convertir a string si no lo es
-
-  const payload = {
-    idPersona: element.ID_PERSONA,
-    idCausante: element.ID_CAUSANTE,
-    idCausantePadre: element.ID_CAUSANTE_PADRE,
-    idDetallePersona: element.ID_DETALLE_PERSONA,
-    idEstadoAfiliacion: element.estadoAfiliacion,
-    dniCausante: element.dniCausante,
-    estadoAfiliacion: estadoAfiliacion, // Ahora siempre es un string
-    observacion: element.observacion || ''
-  };
-
-  console.log(payload);
-  
-
-  this.svcAfiliado.updateEstadoAfiliacionPorDni(payload).subscribe(
-    (response) => {
-      this.toastr.success('Estado actualizado correctamente');
-    },
-    (error) => {
-      this.toastr.error(
-        `Error: ${error.error.message || 'No se pudo actualizar el estado'}`
-      );
-    }
-  );
-}
+    this.svcAfiliado.updateEstadoAfiliacionPorDni(payload).subscribe(
+      (response) => {
+        this.toastr.success('Estado actualizado correctamente');
+      },
+      (error) => {
+        this.toastr.error(
+          `Error: ${error.error.message || 'No se pudo actualizar el estado'}`
+        );
+      }
+    );
+  }
 
 
   // ---------------------------------------------
@@ -897,7 +882,7 @@ guardarEstadoAfiliacion(element: any) {
     }
     return [];
   }
-  
+
   // ---------------------------------------------
   // Métodos para adjuntar archivos al form
   // ---------------------------------------------
@@ -953,7 +938,7 @@ guardarEstadoAfiliacion(element: any) {
     }
     return [];
   }
-  
+
   checkFormErrors(): void {
     console.log('Validando form1...');
     Object.keys(this.form1.controls).forEach(field => {
@@ -962,7 +947,7 @@ guardarEstadoAfiliacion(element: any) {
         console.log(`Campo '${field}' tiene errores:`, control.errors);
       }
     });
-  
+
     console.log('Validando formDatosGenerales...');
     Object.keys(this.formDatosGenerales.controls).forEach(field => {
       const control = this.formDatosGenerales.get(field);
@@ -970,19 +955,19 @@ guardarEstadoAfiliacion(element: any) {
         console.log(`Campo '${field}' tiene errores:`, control.errors);
       }
     });
-  
+
     const archivoCertDef = this.formDatosGenerales.get('archivoCertDef');
     const archivoIdentificacion = this.formDatosGenerales.get('archivo_identificacion');
-  
+
     if (archivoCertDef?.invalid) {
       console.log('El archivo "Certificado de Defunción" es inválido:', archivoCertDef.errors);
     }
-  
+
     if (archivoIdentificacion?.invalid) {
       console.log('El archivo "Identificación" es inválido:', archivoIdentificacion.errors);
     }
   }
- 
+
   eliminarCertificadoDefuncion(): void {
     this.certificadoDefuncionFile = null;
     this.formDatosGenerales.get('archivoCertDef')?.setValue(null); // Limpiar el valor del control
@@ -1002,25 +987,21 @@ guardarEstadoAfiliacion(element: any) {
       this.certificadoDefuncionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(file));
     }
   }
-  
+
   tieneTipoPersona(): boolean {
-    if (!this.tableData || this.tableData.length === 0) {
-      return false;
-    }
-  
-    const tiposPermitidos = ["BENEFICIARIO", "BENEFICIARIO SIN CAUSANTE", "DESIGNADO"];
-  
-    const tieneOtroTipo = this.tableData.some(item => !tiposPermitidos.includes(item.tipoPersona));
-  
-    return tieneOtroTipo;
+    return this.tableData && this.tableData.length > 0;
   }
   
-
+  esAfiliado(): boolean {
+    return this.Afiliado?.TIPO_PERSONA === 'AFILIADO' || 
+           this.tableData.some(item => item.tipoPersona === 'AFILIADO');
+  }
+  
   obtenerNombreTipoPersona(): string {
     const tipo = this.tiposPersona.find(tp => tp.ID_TIPO_PERSONA === this.tipoPersonaSeleccionada);
     return tipo ? tipo.TIPO_PERSONA : 'AFILIADO';
   }
-  
+
 
   convertirEnAfiliado() {
     if (!this.tipoPersonaSeleccionada || !this.Afiliado?.ID_PERSONA) {
@@ -1029,31 +1010,37 @@ guardarEstadoAfiliacion(element: any) {
     }
   
     const payload = {
-      idPersona: this.Afiliado.ID_PERSONA, 
+      idPersona: this.Afiliado.ID_PERSONA,
       idTipoPersona: this.tipoPersonaSeleccionada
     };
+  
+    this.cargandoTabla = true; // Mostrar el spinner en la tabla
   
     this.afiliacionService.convertirEnAfiliado(payload).subscribe({
       next: (response) => {
         this.toastr.success(response.message || 'Persona convertida exitosamente.');
-        this.tieneTipoPersona = () => true;
-        this.svcAfiliado.buscarDetPersona(this.Afiliado.n_identificacion).subscribe(
-          (detalles: any[]) => {
-            this.tableData = detalles;
-          }
-        );
+        this.Afiliado.TIPO_PERSONA = 'AFILIADO';
+  
+        // Simula una espera antes de recargar la tabla
+        setTimeout(() => {
+          this.cargarEstadosAfiliado(); // Recargar la tabla
+          this.cargandoTabla = false; // Ocultar el spinner después de la carga
+        }, 2000);
       },
       error: (error) => {
         this.toastr.error(error.message || 'Error al convertir en afiliado.');
+        this.cargandoTabla = false; // Ocultar el spinner en caso de error
       }
     });
   }
   
+  
+
   cargarMunicipiosDefuncion(departamentoId: number) {
     this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
       next: (data) => {
         this.municipios = data;
-        
+
         // Si ya hay un municipio de defunción, asignarlo después de cargar los municipios
         if (this.form1.get('id_municipio_defuncion')?.value) {
           this.form1.patchValue({
@@ -1093,30 +1080,30 @@ guardarEstadoAfiliacion(element: any) {
     this.personaService.getPersonaByDni(this.Afiliado.N_IDENTIFICACION).subscribe(
       (personaActualizada: any) => {
         if (!personaActualizada) {
-          
+
           console.error('No se encontró la persona luego de crear la afiliación.');
           return;
         }
         personaActualizada.tipoFormulario = 'ACTUALIZACION';
-          this.svcAfiliado.generarConstanciaQR(
-            personaActualizada, 
-            this.usuarioToken,
-            'afiliacion2'
-          ).subscribe((blob: Blob) => {
-            const downloadURL = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = downloadURL;
-            link.download = this.generarNombreArchivo(personaActualizada, 'afiliacion2');
-            link.click();
-            window.URL.revokeObjectURL(downloadURL);
-          });
+        this.svcAfiliado.generarConstanciaQR(
+          personaActualizada,
+          this.usuarioToken,
+          'afiliacion2'
+        ).subscribe((blob: Blob) => {
+          const downloadURL = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = downloadURL;
+          link.download = this.generarNombreArchivo(personaActualizada, 'afiliacion2');
+          link.click();
+          window.URL.revokeObjectURL(downloadURL);
+        });
       },
       (err) => {
         console.error('Error al consultar persona por DNI:', err);
       }
     );
   }
-  
+
   generarNombreArchivo(persona: any, tipo: string): string {
     const nombreCompleto = `${persona.primer_nombre}_${persona.primer_apellido}`;
     const fechaActual = new Date().toISOString().split('T')[0];
@@ -1124,22 +1111,22 @@ guardarEstadoAfiliacion(element: any) {
   }
 
   tieneTipoAfiliado(): boolean {
-  
+
     if (!this.Afiliado) {
       return false;
     }
-  
+
     const tiposPermitidos = ["AFILIADO", "PENSIONADO", "JUBILADO"];
-  
+
     if (this.Afiliado.TIPO_PERSONA && tiposPermitidos.includes(this.Afiliado.TIPO_PERSONA)) {
       return true;
     }
-  
-    if (Array.isArray(this.Afiliado.TIPOS_PERSONA) && this.Afiliado.TIPOS_PERSONA.some((tipo:any) => tiposPermitidos.includes(tipo))) {
+
+    if (Array.isArray(this.Afiliado.TIPOS_PERSONA) && this.Afiliado.TIPOS_PERSONA.some((tipo: any) => tiposPermitidos.includes(tipo))) {
       return true;
     }
     return false;
   }
-  
-  
+
+
 }

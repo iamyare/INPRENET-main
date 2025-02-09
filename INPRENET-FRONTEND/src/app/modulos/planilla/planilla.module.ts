@@ -34,7 +34,6 @@ import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-pla
 import { DialogDesgloseComponent } from './egresos/dialog-desglose/dialog-desglose.component';
 import { VerPlanillasActivasComponent } from './egresos/ver-planillas-activas/ver-planillas-activas.component';
 import { VerPlanillasCerradasComponent } from './egresos/ver-planillas-cerradas/ver-planillas-cerradas.component';
-import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
 import { CambioEstadoTipoPerComponent } from '../afiliacion/gestion/cambio-estado-tipo-per/cambio-estado-tipo-per.component';
 import { AfiliacionModule } from '../afiliacion/afiliacion.module';
 import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
@@ -74,7 +73,6 @@ import { AportacionCotizacionComponent } from './ingresos/aportacion-cotizacion/
     CargarbefDedComponent,
     ProcesoPlanillaComponent,
     DialogDesgloseComponent,
-    GestionBancoComponent,
     ActualizarFallecidosComponent,
     VerPlanillasActivasComponent,
     VerPlanillasCerradasComponent,

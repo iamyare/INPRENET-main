@@ -100,4 +100,9 @@ export class UpdateBeneficiarioDto {
   @IsOptional()
   @MaxLength(200)
   direccion_residencia?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(100)
+  parentesco?: string;
 }

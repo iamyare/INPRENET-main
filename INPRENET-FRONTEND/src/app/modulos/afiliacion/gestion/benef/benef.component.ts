@@ -19,6 +19,7 @@ export class BenefComponent implements OnInit {
   public genero: any = [];
   public departamentosNacimiento: any = [];
   public minDate: Date;
+  @Input() porcentajeDisponible!: number;
 
   fieldOptions = [
     { value: 'si', label: 'SI' },
@@ -36,26 +37,72 @@ export class BenefComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.porcentajeDisponible == null || this.porcentajeDisponible == undefined) {
+      this.porcentajeDisponible = 100;
+    }
+
+    if (!this.formGroup.get('beneficiario')) {
+      this.formGroup.addControl('beneficiario', this.fb.array([]));
+    }
+  
     this.genero = this.datosEstaticosService.genero;
+  
     if (!this.formGroup.get('beneficiario')) {
       const beneficiariosArray = this.fb.array([]);
       beneficiariosArray.setValidators(this.identidadUnicaValidator.bind(this));
       this.formGroup.addControl('beneficiario', beneficiariosArray);
     }
+  
     this.cargarDepartamentos();
     this.cargarDepartamentosNacimiento();
     this.loadDiscapacidades();
-
+  
     this.parentesco = this.datosEstaticosService.parentesco;
     const nuevoParentesco = { value: "OTRO", label: "OTRO" };
     if (!this.parentesco.some((item: { value: string }) => item.value === nuevoParentesco.value)) {
       this.parentesco.push(nuevoParentesco);
     }
-
+  
     if (this.beneficiarios.length === 0) {
       this.agregarBeneficiario();
     }
+    this.beneficiarios.valueChanges.subscribe(() => {
+      this.revalidarPorcentajes();
+    });
   }
+  
+  revalidarPorcentajes(): void {
+    this.beneficiarios.controls.forEach((control, index) => {
+      this.validarPorcentaje(index);
+    });
+  }
+  
+
+  validarPorcentaje(index: number): void {
+    const control = this.beneficiarios.at(index).get('porcentaje');
+  
+    if (control) {
+      const valorIngresado = Number(control.value);
+  
+      if (valorIngresado < 1) {
+        control.setErrors({ minimoInvalido: true });
+      } else {
+        const totalAsignado = this.beneficiarios.controls.reduce((acc, beneficiario, i) => {
+          const porcentaje = Number(beneficiario.get('porcentaje')?.value) || 0;
+          return i === index ? acc : acc + porcentaje; 
+        }, 0);
+  
+        const totalFinal = totalAsignado + valorIngresado;
+  
+        if (totalFinal > this.porcentajeDisponible) {
+          control.setErrors({ excedeTotal: true });
+        } else {
+          control.setErrors(null);
+        }
+      }
+    }
+  }
+  
 
   // Getter para obtener el FormArray de beneficiarios
   get beneficiarios(): FormArray {
@@ -81,7 +128,7 @@ export class BenefComponent implements OnInit {
       primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.maxLength(40)]),
       segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
       genero: new FormControl(datosBeneficiario?.genero || '', [Validators.required]),
-      telefono_1: new FormControl(''),
+      telefono_1: new FormControl('',[Validators.required]),
       correo_1: new FormControl(''),
       correo_2: new FormControl(''),
       fecha_nacimiento: new FormControl('', [Validators.required]),
@@ -93,7 +140,8 @@ export class BenefComponent implements OnInit {
       porcentaje: new FormControl('', [
         Validators.required,
         Validators.min(1),
-        Validators.max(100)
+        Validators.max(this.porcentajeDisponible),
+        this.validarPorcentajeDisponible()
       ]),
       parentesco: new FormControl(datosBeneficiario?.parentesco || '', [
         Validators.required,
@@ -117,6 +165,23 @@ export class BenefComponent implements OnInit {
     this.beneficiarios.push(beneficiarioForm);
     this.markAllAsTouched(beneficiarioForm);
   }
+
+  validarPorcentajeDisponible(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+        if (!control || !control.value) return null;
+
+        const nuevoPorcentaje = Number(control.value);
+        if (isNaN(nuevoPorcentaje)) return { invalidPorcentaje: true };
+
+        const totalAsignado = this.beneficiarios.controls.reduce((acc, b) => {
+            const porcentaje = Number(b.get('porcentaje')?.value) || 0;
+            return acc + porcentaje;
+        }, 0);
+
+        return totalAsignado > 100 ? { excedeTotal: true } : null;
+    };
+}
+
   
   limpiarCamposBeneficiario(beneficiarioForm: FormGroup): void {
     beneficiarioForm.patchValue({
@@ -249,38 +314,6 @@ export class BenefComponent implements OnInit {
     if (event.value === 'si') {
       // Aquí puedes agregar lógica adicional si es necesario
     }
-  }
-
-  // Validación personalizada para asegurar que la suma de porcentajes sea 100
-  validarSumaPorcentajes(control: AbstractControl): ValidationErrors | null {
-    const beneficiariosArray = this.beneficiarios;
-    if (!beneficiariosArray) {
-      return null;
-    }
-
-    let porcentajeTotal = 0;
-
-    beneficiariosArray.controls.forEach((control: any) => {
-      const controlporcentaje = control.get('porcentaje');
-      const porcentaje = controlporcentaje?.value;
-
-      if (porcentaje !== undefined) {
-        porcentajeTotal += porcentaje;
-      }
-    });
-
-    if (porcentajeTotal !== 100) {
-      return { invalidSumaPorcentajes: true };
-    } else {
-      beneficiariosArray.controls.forEach((control: any) => {
-        const controlporcentaje = control.get('porcentaje');
-        if (controlporcentaje.errors) {
-          const { invalidSumaPorcentajes, ...otherErrors } = controlporcentaje.errors;
-          controlporcentaje.setErrors(Object.keys(otherErrors).length ? otherErrors : null);
-        }
-      });
-    }
-    return null;
   }
 
   getDiscapacidadesFormArray(index: number): FormArray {

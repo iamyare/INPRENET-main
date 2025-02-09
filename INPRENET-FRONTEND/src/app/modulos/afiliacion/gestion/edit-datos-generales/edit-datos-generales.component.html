@@ -5,12 +5,15 @@
 
   <div *ngIf="datos && !loading">
 
-    <!-- TARJETA: Estado y Tipo de Persona -->
-    <!-- Mostrar la tarjeta solo si hay al menos un elemento con TipoPersona -->
     <mat-card class="tabla-datos-persona" *ngIf="tieneTipoPersona()">
       <mat-card-title>Estado y Tipo De Persona</mat-card-title>
       <mat-card-content>
-        <div class="responsive-table-container">
+
+        <div *ngIf="cargandoTabla" class="spinner-container">
+          <mat-spinner class="spinner" diameter="50"></mat-spinner>
+        </div>
+        
+        <div *ngIf="!cargandoTabla" class="responsive-table-container">
           <table
             mat-table
             [dataSource]="tableData"
@@ -146,26 +149,28 @@
     </mat-card>
 
     <!-- Mostrar mensaje alternativo si no hay datos -->
-    <div *ngIf="!tieneTipoPersona()" class="tipo-persona-container">
-      <mat-form-field class="custom-select" appearance="outline">
-        <mat-label>Seleccionar Tipo de Persona</mat-label>
-        <mat-select [(ngModel)]="tipoPersonaSeleccionada" name="tipoPersona">
-          <mat-option *ngFor="let tipo of tiposPersona" [value]="tipo.ID_TIPO_PERSONA">
-            {{ tipo.TIPO_PERSONA }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    
-      <!-- Botón para convertir a afiliado -->
-      <button 
-        mat-raised-button 
-        class="custom-button"
-        color="primary" 
-        (click)="convertirEnAfiliado()" 
-        [disabled]="!tipoPersonaSeleccionada">
-        Convertir a {{ obtenerNombreTipoPersona() }}
-      </button>
-    </div>
+   <!-- SOLO SE MUESTRA SI NO ES AFILIADO -->
+<div *ngIf="tieneTipoPersona() && !esAfiliado()" class="tipo-persona-container">
+  <mat-form-field class="custom-select" appearance="outline">
+    <mat-label>Seleccionar Tipo de Persona</mat-label>
+    <mat-select [(ngModel)]="tipoPersonaSeleccionada" name="tipoPersona">
+      <mat-option *ngFor="let tipo of tiposPersona" [value]="tipo.ID_TIPO_PERSONA">
+        {{ tipo.TIPO_PERSONA }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <button 
+    mat-raised-button 
+    class="custom-button"
+    color="primary" 
+    (click)="convertirEnAfiliado()" 
+    [disabled]="!tipoPersonaSeleccionada">
+    Convertir a {{ obtenerNombreTipoPersona() }}
+  </button>
+</div>
+
+
     
     <!-- Componente Datos Generales (datos personales, etc.) -->
     <app-datos-generales

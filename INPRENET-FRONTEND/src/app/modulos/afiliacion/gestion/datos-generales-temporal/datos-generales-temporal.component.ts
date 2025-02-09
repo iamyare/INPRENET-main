@@ -6,6 +6,7 @@ import { DireccionService } from 'src/app/services/direccion.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { CamaraComponent } from 'src/app/components/camara/camara.component';
 import { FormStateService } from 'src/app/services/form-state.service'; // Importar el servicio
+import { skip } from 'rxjs';
 
 @Component({
   selector: 'app-datos-generales-temporal',
@@ -38,14 +39,13 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   nacionalidades: { value: number, label: string }[] = [];
   discapacidades: { label: string, value: number }[] = [];
   useCamera: boolean = true;
-  height: number = 0;
+  mostrarUbicacionNacimiento: boolean = true;
 
   constructor(private fb: FormBuilder,
     private direccionSer: DireccionService,
     private datosEstaticos: DatosEstaticosService,
     private formStateService: FormStateService,
-
-    private cdr: ChangeDetectorRef, // -> 'Inyectamos ChangeDetectorRef'
+    private cdr: ChangeDetectorRef,
     private centroTrabajoService: CentroTrabajoService) { }
     
 //-----------------------------------
@@ -67,18 +67,49 @@ validarMayorDe18Anios(): Validators {
   };
 }
 
-
 ngOnInit(): void {
-  this.opcion = 'NO';
-  const today = new Date();
-  this.minDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-
-
-  // Asegurar que el formGroup existe
   if (!this.formGroup) {
     this.formGroup = this.fb.group({});
   }
 
+  // Inicializar controles si no existen
+['id_pais', 'id_departamento_nacimiento', 'id_municipio_nacimiento'].forEach((campo) => {
+  if (!this.formGroup.get(campo)) {
+    this.formGroup.addControl(campo, new FormControl('', Validators.required));
+  }
+});
+
+// Suscripción para limpiar municipios y quitar validaciones si el país cambia
+this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
+  const departamentoControl = this.formGroup.get('id_departamento_nacimiento');
+  const municipioControl = this.formGroup.get('id_municipio_nacimiento');
+
+  if (value && value !== 1) {
+    // Limpiar valores
+    this.formGroup.patchValue({
+      id_departamento_nacimiento: null,
+      id_municipio_nacimiento: null
+    });
+
+    // Quitar validaciones
+    departamentoControl?.clearValidators();
+    municipioControl?.clearValidators();
+  } else {
+    // Volver a agregar validaciones si es Honduras
+    departamentoControl?.setValidators(Validators.required);
+    municipioControl?.setValidators(Validators.required);
+  }
+
+  // Actualizar validaciones
+  departamentoControl?.updateValueAndValidity();
+  municipioControl?.updateValueAndValidity();
+});
+
+  this.opcion = 'NO';
+  const today = new Date();
+  this.minDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+
+  
   // Agregar campo fotoPerfil
   this.formGroup.addControl('fotoPerfil', new FormControl(null, Validators.required));
 
@@ -418,13 +449,6 @@ ngOnInit(): void {
   this.cargarDatosIniciales();
 
   this.marcarCamposComoTocados();
-
-  // Forzar detección de cambios
-  setTimeout(() => {
-    this.height =200// Actualizas la propiedad
-
-    this.cdr.detectChanges();
-  }, 0);
   
 }
 //-----------------------------------------------------
@@ -725,12 +749,6 @@ ngOnInit(): void {
       }
     });
   }
- 
-  ngAfterViewInit() {
-    setTimeout(() => {
-      this.height = 200;
-    }, 0);
-  }  
 }
 
 const observer = new ResizeObserver(entries => {

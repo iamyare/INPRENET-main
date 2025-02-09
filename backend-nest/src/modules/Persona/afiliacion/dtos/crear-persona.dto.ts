@@ -92,7 +92,6 @@ export class CrearPersonaDto {
   @IsString()
   telefono_3?: string;
 
-
   @IsOptional()
   @IsEmail()
   correo_1?: string;
@@ -138,7 +137,8 @@ export class CrearPersonaDto {
 
   @IsNotEmpty()
   @IsNumber()
-  id_municipio_nacimiento: number;
+  @IsOptional()
+  id_municipio_nacimiento?: number;
 
   @IsOptional()
   @IsNumber()

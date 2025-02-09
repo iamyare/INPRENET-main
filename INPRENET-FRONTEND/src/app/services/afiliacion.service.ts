@@ -10,6 +10,16 @@ export class AfiliacionService {
 
   constructor(private http: HttpClient) { }
 
+  obtenerPersonaConPerfilYBeneficiarios(n_identificacion: string): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/persona-con-perfil-y-beneficiarios/${n_identificacion}`;
+    return this.http.get<any>(url).pipe(
+      catchError((error) => {
+        console.error('Error al obtener la persona con perfil y beneficiarios:', error);
+        return throwError(() => new Error('Error al obtener la persona con perfil y beneficiarios. Intente nuevamente.'));
+      })
+    );
+  }
+
   convertirEnAfiliado(payload: { idPersona: number, idTipoPersona: number }): Observable<any> {
     const url = `${environment.API_URL}/api/afiliacion/convertir-afiliado`;
     return this.http.post<any>(url, payload).pipe(

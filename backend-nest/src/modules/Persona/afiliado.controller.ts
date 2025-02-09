@@ -204,7 +204,7 @@ export class AfiliadoController {
     }
     await this.afiliadoService.desactivarPerfCentroTrabajo(idNum);
     return {
-      mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
+      mensaje: `Centro De Trabajo Desactivado Exitosamente`,
     };
   }
 
@@ -239,7 +239,7 @@ export class AfiliadoController {
     }
     await this.afiliadoService.desactivarCuentaBancaria(idNum);
     return {
-      mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
+      mensaje: `Cuenta de Banco Desactivada`,
     };
   }
 
@@ -266,7 +266,7 @@ export class AfiliadoController {
     }
     await this.afiliadoService.activarCuentaBancaria(idNum, id_persona);
     return {
-      mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
+      mensaje: `Cuenta de Banco Activada Exitosamente`,
     };
   }
 

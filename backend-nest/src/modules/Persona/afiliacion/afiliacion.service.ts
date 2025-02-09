@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Net_Tipo_Persona } from '../entities/net_tipo_persona.entity';
 import { net_persona } from '../entities/net_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -58,6 +58,8 @@ export class AfiliacionService {
     private readonly estadoAfiliacionRepository: Repository<net_estado_afiliacion>,
     @InjectRepository(Net_Colegios_Magisteriales)
     private readonly colegiosMagisterialesRepository: Repository<Net_Colegios_Magisteriales>,
+    @InjectRepository(Net_Persona_Por_Banco)
+    private readonly personaBancoRepository: Repository<Net_Persona_Por_Banco>,
     @InjectRepository(Net_Banco)
     private readonly bancoRepository: Repository<Net_Banco>,
     @InjectRepository(Net_Centro_Trabajo)
@@ -208,81 +210,78 @@ export class AfiliacionService {
   }
 
   async getPersonaByn_identificacioni(n_identificacion: string): Promise<any> {
-    const persona = await this.personaRepository.findOne({
-      where: { n_identificacion },
-      relations: [
-          'tipoIdentificacion',
-          'pais',
-          'municipio',
-          'municipio.departamento',
-          'municipio_defuncion',
-          'municipio_nacimiento',
-          'municipio_nacimiento.departamento',
-          'profesion',
-          'detallePersona',
-          'peps',
-          'peps.cargo_publico',
-          'detallePersona.tipoPersona',
-          'detallePersona.estadoAfiliacion',
-          'referencias',
-          'personasPorBanco',
-          'personasPorBanco.banco',
-          'detalleDeduccion',
-          'perfPersCentTrabs',
-          'perfPersCentTrabs.centroTrabajo',
-          'perfPersCentTrabs.centroTrabajo.municipio',
-          'perfPersCentTrabs.centroTrabajo.municipio.departamento',
-          'cuentas',
-          'detallePlanIngreso',
-          'colegiosMagisteriales',
-          'otra_fuente_ingreso',
-          'familiares',
-          'familiares.referenciada',
-          'otra_fuente_ingreso',
-      ],
-  });
+    const persona = await this.personaRepository
+        .createQueryBuilder("persona")
+        .leftJoinAndSelect("persona.tipoIdentificacion", "tipoIdentificacion")
+        .leftJoinAndSelect("persona.pais", "pais")
+        .leftJoinAndSelect("persona.municipio", "municipio")
+        .leftJoinAndSelect("municipio.departamento", "departamento")
+        .leftJoinAndSelect("persona.municipio_defuncion", "municipio_defuncion")
+        .leftJoinAndSelect("persona.municipio_nacimiento", "municipio_nacimiento")
+        .leftJoinAndSelect("municipio_nacimiento.departamento", "municipio_nacimiento_departamento")
+        .leftJoinAndSelect("persona.profesion", "profesion")
+        .leftJoinAndSelect("persona.detallePersona", "detallePersona")
+        .leftJoinAndSelect("detallePersona.tipoPersona", "tipoPersona")
+        .leftJoinAndSelect("detallePersona.estadoAfiliacion", "estadoAfiliacion")
+        .leftJoinAndSelect("persona.peps", "peps")
+        .leftJoinAndSelect("peps.cargo_publico", "cargo_publico")
+        .leftJoinAndSelect("persona.referencias", "referencias")
+        .leftJoinAndSelect("persona.detalleDeduccion", "detalleDeduccion")
+        .leftJoinAndSelect("persona.cuentas", "cuentas")
+        .leftJoinAndSelect("persona.detallePlanIngreso", "detallePlanIngreso")
+        .leftJoinAndSelect("persona.colegiosMagisteriales", "colegiosMagisteriales")
+        .leftJoinAndSelect("persona.otra_fuente_ingreso", "otra_fuente_ingreso")
+        .leftJoinAndSelect("persona.familiares", "familiares")
+        .leftJoinAndSelect("familiares.referenciada", "referenciada")
+        .leftJoinAndSelect("persona.personasPorBanco", "personasPorBanco", "personasPorBanco.estado = :estadoBanco", { estadoBanco: "ACTIVO" }) // Solo bancos activos
+        .leftJoinAndSelect("personasPorBanco.banco", "banco")
+        .leftJoinAndSelect("persona.perfPersCentTrabs", "perfPersCentTrabs", "perfPersCentTrabs.estado = :estadoTrabajo", { estadoTrabajo: "ACTIVO" }) // Solo centros de trabajo activos
+        .leftJoinAndSelect("perfPersCentTrabs.centroTrabajo", "centroTrabajo")
+        .leftJoinAndSelect("centroTrabajo.municipio", "centroTrabajo_municipio")
+        .leftJoinAndSelect("centroTrabajo_municipio.departamento", "centroTrabajo_municipio_departamento")
+        .where("persona.n_identificacion = :n_identificacion", { n_identificacion })
+        .getOne();
 
-  if (!persona) {
-      throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
-  }
+    if (!persona) {
+        throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
+    }
+    const conyuge = persona.familiares.find(familiar => familiar.parentesco === 'CÓNYUGE');
+    const esAfiliado = conyuge && conyuge.referenciada
+        ? await this.verificarSiEsAfiliado(conyuge.referenciada.n_identificacion)
+        : "NO";
 
-  // Buscar el cónyuge en la tabla Net_Familia
-  const conyuge = persona.familiares.find(familiar => familiar.parentesco === 'CÓNYUGE');
+    // Mapear los familiares en el formato adecuado
+    const familiares = persona.familiares.map(familiar => ({
+        id_familia: familiar.id_familia,
+        parentesco: familiar.parentesco,
+        trabaja: familiar.trabaja,
+        referenciada: familiar.referenciada
+            ? {
+                id_persona: familiar.referenciada.id_persona,
+                primer_nombre: familiar.referenciada.primer_nombre,
+                segundo_nombre: familiar.referenciada.segundo_nombre,
+                primer_apellido: familiar.referenciada.primer_apellido,
+                segundo_apellido: familiar.referenciada.segundo_apellido,
+                n_identificacion: familiar.referenciada.n_identificacion,
+            }
+            : null
+    }));
 
-  // Verificar si el cónyuge es afiliado
-  const esAfiliado = conyuge && conyuge.referenciada
-      ? await this.verificarSiEsAfiliado(conyuge.referenciada.n_identificacion)
-      : "NO";
+    return {
+        ...persona,
+        conyuge: conyuge
+            ? {
+                ...conyuge.referenciada,
+                trabaja: conyuge.trabaja,
+                esAfiliado: esAfiliado
+            }
+            : null,
+        familiares,
+    };
+}
 
-  // Mapear los familiares en el formato adecuado
-  const familiares = persona.familiares.map(familiar => ({
-      id_familia: familiar.id_familia,
-      parentesco: familiar.parentesco,
-      trabaja: familiar.trabaja,
-      referenciada: familiar.referenciada
-          ? {
-              id_persona: familiar.referenciada.id_persona,
-              primer_nombre: familiar.referenciada.primer_nombre,
-              segundo_nombre: familiar.referenciada.segundo_nombre,
-              primer_apellido: familiar.referenciada.primer_apellido,
-              segundo_apellido: familiar.referenciada.segundo_apellido,
-              n_identificacion: familiar.referenciada.n_identificacion,
-          }
-          : null
-  }));
 
-  return {
-      ...persona,
-      conyuge: conyuge
-          ? {
-              ...conyuge.referenciada,
-              trabaja: conyuge.trabaja,
-              esAfiliado: esAfiliado
-          }
-          : null,
-      familiares,
-  };
-  }
+
 
   async verificarSiEsAfiliado(n_identificacion: string): Promise<string> {
     const persona = await this.personaRepository
@@ -368,16 +367,15 @@ export class AfiliacionService {
         this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: crearPersonaDto.id_tipo_identificacion } }),
         this.paisRepository.findOne({ where: { id_pais: crearPersonaDto.id_pais_nacionalidad } }),
         this.municipioRepository.findOne({ where: { id_municipio: crearPersonaDto.id_municipio_residencia } }),
-        this.municipioRepository.findOne({ where: { id_municipio: crearPersonaDto.id_municipio_nacimiento } }),
+        crearPersonaDto.id_municipio_nacimiento ? this.municipioRepository.findOne({ where: { id_municipio: crearPersonaDto.id_municipio_nacimiento } }) : null,
         crearPersonaDto.id_municipio_defuncion ? this.municipioRepository.findOne({ where: { id_municipio: crearPersonaDto.id_municipio_defuncion } }) : null,
         crearPersonaDto.id_profesion ? this.profesionRepository.findOne({ where: { id_profesion: crearPersonaDto.id_profesion } }) : null,
-        crearPersonaDto.id_causa_fallecimiento ? this.causasFallecimientosRepository.findOne({ where: { id_causa_fallecimiento: crearPersonaDto.id_causa_fallecimiento } }) : null
+        crearPersonaDto.id_causa_fallecimiento ? this.causasFallecimientosRepository.findOne({ where: { id_causa_fallecimiento: crearPersonaDto.id_causa_fallecimiento } }) : null,
       ]);
 
       if (!tipoIdentificacion) throw new NotFoundException(`El tipo de identificación con ID ${crearPersonaDto.id_tipo_identificacion} no existe`);
       if (!pais) throw new NotFoundException(`El país con ID ${crearPersonaDto.id_pais_nacionalidad} no existe`);
       if (!municipioResidencia) throw new NotFoundException(`El municipio de residencia con ID ${crearPersonaDto.id_municipio_residencia} no existe`);
-      if (!municipioNacimiento) throw new NotFoundException(`El municipio de nacimiento con ID ${crearPersonaDto.id_municipio_nacimiento} no existe`);
 
       persona = entityManager.create(net_persona, {
         ...crearPersonaDto,
@@ -389,7 +387,7 @@ export class AfiliacionService {
         tipoIdentificacion,
         pais,
         municipio: municipioResidencia,
-        municipio_nacimiento: municipioNacimiento,
+        municipio_nacimiento: municipioNacimiento || null,
         municipio_defuncion: municipioDefuncion,
         profesion,
         causa_fallecimiento: causaFallecimiento,
@@ -790,14 +788,25 @@ export class AfiliacionService {
             resultados.push(...personaBancos);
 
             // Crear las relaciones de la persona con los centros de trabajo
-            const personaCentrosTrabajo = await this.crearPersonaCentrosTrabajo(crearDatosDto.centrosTrabajo, persona.id_persona, transactionalEntityManager);
-
-            // Asegurar que `personaCentrosTrabajo` esté en la posición 3
-            if (resultados.length >= 3) {
-                resultados.splice(3, 0, ...personaCentrosTrabajo);
-            } else {
-                resultados[3] = personaCentrosTrabajo;
-            }
+            let personaCentrosTrabajo = await this.crearPersonaCentrosTrabajo(
+              crearDatosDto.centrosTrabajo, 
+              persona.id_persona, 
+              transactionalEntityManager
+          );
+          
+          // Ordenar los centros de trabajo por fecha_egreso más reciente primero
+          personaCentrosTrabajo = personaCentrosTrabajo.sort((a, b) => {
+              const fechaA = a.fecha_egreso ? new Date(a.fecha_egreso).getTime() : 0;
+              const fechaB = b.fecha_egreso ? new Date(b.fecha_egreso).getTime() : 0;
+              return fechaB - fechaA; // Orden descendente (más reciente primero)
+          });
+          
+          // Asegurar que `personaCentrosTrabajo` esté en la posición 3
+          if (resultados.length >= 3) {
+              resultados.splice(3, 0, ...personaCentrosTrabajo);
+          } else {
+              resultados[3] = personaCentrosTrabajo;
+          }
 
             // Crear las relaciones de la persona con las otras fuentes de ingreso
             const otrasFuentesIngreso = await this.crearOtrasFuentesIngreso(crearDatosDto.otrasFuentesIngreso, persona.id_persona, transactionalEntityManager);
@@ -1087,9 +1096,10 @@ export class AfiliacionService {
         'familia.parentesco',
       ])
       .where('familia.persona = :idPersona', { idPersona })
+      .andWhere('familia.parentesco != :conyuge', { conyuge: 'CÓNYUGE' })
       .getMany();
   }
-
+  
   async eliminarCargoPublico(id_cargo_publico: number): Promise<void> {
     const cargo = await this.entityManager.findOne(Net_Cargo_Publico, {
       where: { id_cargo_publico },
@@ -1150,6 +1160,104 @@ export class AfiliacionService {
     }
     await this.entityManager.remove(Net_Persona_Discapacidad, discapacidadRelacion);
   }
+
+  async getPersonaConPerfilYBeneficiarios(id_persona: string): Promise<any> {
+    try {
+        // Buscar la persona con el perfil de trabajo más reciente (activo)
+        const persona = await this.personaRepository
+            .createQueryBuilder('persona')
+            .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfil')
+            .leftJoinAndSelect('perfil.centroTrabajo', 'centroTrabajo')
+            .leftJoinAndSelect('centroTrabajo.municipio', 'municipio')
+            .leftJoinAndSelect('municipio.departamento', 'departamento')
+            .where('persona.id_persona = :id_persona', { id_persona })
+            .andWhere('perfil.estado = :estado', { estado: 'ACTIVO' }) // Solo perfiles activos
+            .orderBy('perfil.fecha_ingreso', 'DESC') // Perfil más reciente
+            .getOne();
+
+        if (!persona) {
+            return {
+                message: `⚠️ No se encontró una persona con la identificación ${id_persona}`,
+                data: null
+            };
+        }
+
+        // Determinar el perfil más reciente (si existe)
+        const perfilMasReciente = persona.perfPersCentTrabs?.[0] || null;
+
+        // Buscar los beneficiarios asociados a la persona
+        const beneficiarios = await this.detallePersonaRepository
+            .createQueryBuilder('beneficiario')
+            .leftJoinAndSelect('beneficiario.persona', 'personaBeneficiario')
+            .where('beneficiario.ID_CAUSANTE_PADRE = :idPersona', { idPersona: persona.id_persona })
+            .andWhere('beneficiario.ELIMINADO = :estado', { estado: 'NO' }) // Solo beneficiarios activos
+            .select([
+                'personaBeneficiario.id_persona',
+                'personaBeneficiario.n_identificacion',
+                'personaBeneficiario.primer_nombre',
+                'personaBeneficiario.segundo_nombre',
+                'personaBeneficiario.tercer_nombre',
+                'personaBeneficiario.primer_apellido',
+                'personaBeneficiario.segundo_apellido',
+                'personaBeneficiario.direccion_residencia',
+                'personaBeneficiario.fecha_nacimiento',
+                'personaBeneficiario.telefono_1',
+                'beneficiario.porcentaje',
+                'beneficiario.parentesco'
+            ])
+            .getMany();
+
+        // Función para formatear nombres eliminando espacios extra
+        const formatNombreCompleto = (persona: any): string => {
+            return [
+                persona.primer_nombre,
+                persona.segundo_nombre,
+                persona.tercer_nombre,
+                persona.primer_apellido,
+                persona.segundo_apellido
+            ].filter(Boolean).join(' '); // Filtra valores vacíos y une con espacio
+        };
+
+        // Formatear la respuesta con los beneficiarios estructurados
+        const formattedBeneficiarios = beneficiarios.map(b => ({
+            id_persona: b.persona.id_persona,
+            n_identificacion: b.persona.n_identificacion,
+            nombre_completo: formatNombreCompleto(b.persona),
+            direccion_residencia: b.persona.direccion_residencia,
+            fecha_nacimiento: b.persona.fecha_nacimiento,
+            telefono_1: b.persona.telefono_1,
+            porcentaje: b.porcentaje,
+            parentesco: b.parentesco
+        }));
+
+        return {
+            message: "✅ Persona y datos encontrados",
+            data: {
+                persona: {
+                    nombre_completo: formatNombreCompleto(persona),
+                    grado_academico: persona.grado_academico,
+                    n_identificacion: persona.n_identificacion
+                },
+                perfil: perfilMasReciente
+                    ? {
+                        nombre_centro_trabajo: perfilMasReciente.centroTrabajo?.nombre_centro_trabajo || null,
+                        nombre_municipio: perfilMasReciente.centroTrabajo?.municipio?.nombre_municipio || null,
+                        nombre_departamento: perfilMasReciente.centroTrabajo?.municipio?.departamento?.nombre_departamento || null,
+                        fecha_ingreso: perfilMasReciente.fecha_ingreso
+                    }
+                    : null,
+                beneficiarios: formattedBeneficiarios
+            }
+        };
+    } catch (error) {
+        console.error('❌ Error al obtener los datos:', error);
+        return {
+            message: "🚨 Ocurrió un error al obtener los datos.",
+            data: null
+        };
+    }
+}
+
 
 }
 

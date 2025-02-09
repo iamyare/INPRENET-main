@@ -185,7 +185,7 @@ export class TransaccionesController {
   async desactivarCuenta(@Param('numCuenta') numCuenta: string) {
     await this.transaccionesService.desactivarCuenta(numCuenta);
     return {
-      mensaje: `Perfil de centro de trabajo con número ${numCuenta} ha sido marcado como inactivo.`,
+      mensaje: `Cuenta Desactivada`,
     };
   }
 

@@ -103,13 +103,18 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
 
     this.myColumns = [
       {
-        header: 'Codigo del Centro Trabajo',
+        header: 'Estado',
+        col: 'estado',
+        isEditable: false
+      },
+      {
+        header: 'Codigo',
         col: 'codigo',
         isEditable: true,
         validationRules: [Validators.required]
       },
       {
-        header: 'Nombre del Centro Trabajo',
+        header: 'Nombre',
         col: 'nombre_centro_trabajo',
         isEditable: true,
         validationRules: [Validators.required]
@@ -127,12 +132,12 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
       },
       {
         header: 'Fecha Ingreso',
-        col: 'fechaIngreso',
+        col: 'fecha_ingreso',
         isEditable: true
       },
       {
         header: 'Fecha de Egreso',
-        col: 'fechaEgreso',
+        col: 'fecha_egreso',
         isEditable: true
       },
       {
@@ -151,12 +156,10 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
         isEditable: true
       }
     ];
-
     this.getCentrosTrabajo();
     this.getFilas().then(() => this.cargar());
 
   }
-
 
   async getCentrosTrabajo() {
     const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
@@ -181,9 +184,9 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   async getFilas() {
     if (this.Afiliado.n_identificacion) {
       try {
-        const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.n_identificacion).toPromise();
-        
+        const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.n_identificacion).toPromise();        
         this.filas = data.map((item: any) => ({
+          estado: item.estado,
           id_perf_pers_centro_trab: item.id_perf_pers_centro_trab,
           codigo: item.centroTrabajo.codigo,
           id_centro_trabajo: item.centroTrabajo.id_centro_trabajo,
@@ -192,8 +195,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
           nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
           numero_acuerdo: item.numero_acuerdo,
           salarioBase: item.salario_base,
-          fechaIngreso: this.datePipe.transform(item.fecha_ingreso, 'dd/MM/yyyy'),
-          fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy'),
+          fecha_ingreso: this.datePipe.transform(item.fecha_ingreso, 'dd/MM/yyyy'),
+          fecha_egreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy'),
           cargo: item.cargo,
           jornada: item.jornada,
           tipo_jornada: item.tipo_jornada,
@@ -233,8 +236,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     ];
 
     const fechaRango = {
-      start: this.convertirCadenaAFecha(row.fechaIngreso),
-      end: this.convertirCadenaAFecha(row.fechaEgreso)
+      start: this.convertirCadenaAFecha(row.fecha_ingreso),
+      end: this.convertirCadenaAFecha(row.fecha_egreso)
     };
 
     const valoresIniciales = {
@@ -249,13 +252,17 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
 
     dialogRef.afterClosed().subscribe(async (result: any) => {
       if (result) {
-        result.fechaIngreso = this.datePipe.transform(result.fechaRango.start, 'dd/MM/yyyy');
-        result.fechaEgreso = this.datePipe.transform(result.fechaRango.end, 'dd/MM/yyyy');
+        result.fecha_ingreso = this.datePipe.transform(result.fechaRango.start, 'dd/MM/yyyy');
+        result.fecha_egreso = this.datePipe.transform(result.fechaRango.end, 'dd/MM/yyyy');
         delete result.fechaRango;
+
+        // ✅ Si hay una fecha de egreso, enviar estado "INACTIVO"
+        const estadoFinal = result.fecha_egreso ? 'INACTIVO' : row.estado;
 
         const dataToSend = {
           ...result,
-          idCentroTrabajo: row.id_centro_trabajo
+          idCentroTrabajo: row.id_centro_trabajo,
+          estado: estadoFinal // Se agrega la lógica de cambio de estado
         };
 
         this.svcAfiliado.updatePerfCentroTrabajo(row.id_perf_pers_centro_trab, dataToSend).subscribe({
@@ -265,7 +272,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
               this.filas[index] = {
                 ...this.filas[index],
                 ...result,
-                nombre_centro_trabajo: row.nombre_centro_trabajo
+                nombre_centro_trabajo: row.nombre_centro_trabajo,
+                estado: estadoFinal // También actualiza el estado en la UI
               };
             }
             this.toastr.success("Se actualizó el perfil de trabajo correctamente");
@@ -278,14 +286,14 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
         });
       }
     });
-  }
+}
 
   manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
         title: 'Confirmar Desactivación',
-        message: '¿Está seguro de que desea desactivar este perfil?',
+        message: '¿Está seguro de que desea desactivar este Centro De Trabajo?',
         idPersona: this.Afiliado.ID_PERSONA
       }
     });
@@ -294,12 +302,12 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
       if (result) {
         this.svcAfiliado.desactivarPerfCentroTrabajo(row.id_perf_pers_centro_trab).subscribe({
           next: (response) => {
-            this.toastr.success(response.mensaje, 'Perfil Desactivado');
+            this.toastr.success(response.mensaje, 'Centro De Trabajo Desactivado');
             this.getFilas().then(() => this.cargar());
           },
           error: (error) => {
             console.error('Error al desactivar el perfil:', error);
-            this.toastr.error('Ocurrió un error al desactivar el perfil.');
+            this.toastr.error('Ocurrió un error al desactivar el Centro De Trabajo.');
           }
         });
       } else {

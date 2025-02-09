@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, Query, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, Query, Res, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { net_persona } from '../entities/net_persona.entity';
 import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -313,4 +313,10 @@ async obtenerFallecidos(@Query('mes') mes: number, @Query('anio') anio: number) 
   async obtenerFamiliaresDePersona(@Param('idPersona', ParseIntPipe) idPersona: number): Promise<Net_Familia[]> {
     return this.afiliacionService.obtenerFamiliaresPorPersona(idPersona);
   }
+
+  @Get('/persona-con-perfil-y-beneficiarios/:n_identificacion')
+async obtenerPersonaConPerfilYBeneficiarios(@Param('n_identificacion') n_identificacion: string) {
+    return await this.afiliacionService.getPersonaConPerfilYBeneficiarios(n_identificacion);
+}
+
 }

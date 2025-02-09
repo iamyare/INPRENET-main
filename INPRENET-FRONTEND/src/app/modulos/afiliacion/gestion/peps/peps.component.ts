@@ -88,7 +88,7 @@ export class PepsComponent implements OnInit {
         label: 'Segundo Apellido',
         type: 'text',
         icon: 'person',
-        validations: [Validators.required],
+        validations: [],
         layout: { row: 1, col: 6 }
       },
       {
@@ -109,7 +109,7 @@ export class PepsComponent implements OnInit {
         label: 'Parentesco',
         type: 'select',
         icon: 'family_restroom',
-        options: this.datosEstaticosService.parentesco,
+        options: this.datosEstaticosService.parentescoPEPS,
         validations: [Validators.required],
         layout: { row: 1, col: 6 }
       }

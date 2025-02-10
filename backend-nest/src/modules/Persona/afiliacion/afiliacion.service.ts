@@ -699,6 +699,7 @@ export class AfiliacionService {
         const familia = entityManager.create(Net_Familia, {
           parentesco: familiaDto.parentesco,
           persona: { id_persona: idPersona },
+          trabaja: familiaDto.trabaja ?? 'NO',
           referenciada: { id_persona: personaReferencia.id_persona },
         });
 
@@ -708,6 +709,7 @@ export class AfiliacionService {
           Net_Familia,
           { id_familia: relacionExistente.id_familia },
           {
+            trabaja: familiaDto.trabaja ?? 'NO',
             parentesco: familiaDto.parentesco,
           }
         );

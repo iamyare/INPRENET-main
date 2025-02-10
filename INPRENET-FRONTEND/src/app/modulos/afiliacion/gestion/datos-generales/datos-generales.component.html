@@ -343,7 +343,7 @@
             </mat-error>
           </mat-form-field>          
         </div>
-        <div class="col-lg-4 col-md-12">
+        <div class="col-lg-4 col-md-12" *ngIf="formGroup.get('id_pais')?.value === 1 || formGroup.get('id_pais')?.value === null">
           <mat-form-field appearance="outline" class="example-full-width inputs w-100">
             <mat-label>Departamento de Nacimiento</mat-label>
             <mat-icon matPrefix>location_on</mat-icon>
@@ -357,7 +357,7 @@
             </mat-error>
           </mat-form-field>          
         </div>
-        <div class="col-lg-4 col-md-12">
+        <div class="col-lg-4 col-md-12" *ngIf="formGroup.get('id_pais')?.value === 1 || formGroup.get('id_pais')?.value === null">
           <mat-form-field appearance="outline" class="example-full-width inputs w-100">
             <mat-label>Municipio de Nacimiento</mat-label>
             <mat-icon matPrefix>location_city</mat-icon>

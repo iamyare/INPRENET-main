@@ -19,6 +19,7 @@ import { GestionarDiscapacidadDialogComponent } from 'src/app/components/dinamic
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
+import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-edit-beneficiarios',
   templateUrl: './edit-beneficiarios.component.html',
@@ -43,6 +44,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   public mostrarBotonEliminar: boolean = false;
   public mostrarBotonAgregarDiscapacidad: boolean = false;
   public mostrarBotonGenerarPDF: boolean = false;
+  backgroundImageBase64: string = '';
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -53,10 +55,21 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     private afiliacionServicio: AfiliacionService,
     private datosEstaticosService: DatosEstaticosService,
     private cdr: ChangeDetectorRef,
-    private authService: AuthService
-  ) { }
+    private authService: AuthService,
+    private http: HttpClient,
+
+  ) {
+    this.convertirImagenABase64('../../../../../assets/images/membratadoFinal.jpg').then(base64 => {
+      this.backgroundImageBase64 = base64;
+    }).catch(error => {
+      console.error('Error al enviar los datos:', error);
+      const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
+      this.toastr.error(errorMessage, 'Error');
+    });
+   }
 
   ngOnInit(): void {
+    this.obtenerPersonaConPerfilYBeneficiarios(this.persona.id_persona);
     this.initializeComponent();
   
     // Verifica si el usuario tiene al menos uno de los permisos requeridos
@@ -494,6 +507,249 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       img.onerror = (error) => reject(error);
     });
   }
+
+  convertirImagenABase64(url: string): Promise<string> {
+    return this.http.get(url, { responseType: 'blob' }).toPromise().then((blob:any) => {
+      return new Promise<string>((resolve, reject) => {
+        if (blob) {
+          const reader = new FileReader();
+          reader.readAsDataURL(blob);
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+        } else {
+          reject('No se pudo cargar la imagen. El blob es undefined.');
+        }
+      });
+    });
+  }
+
+  generarPDF2() {
+      const documentDefinition = this.getDocumentDefinition(this.persona2, this.perfil2, this.beneficiarios2, this.backgroundImageBase64);
+      pdfMake.createPdf(documentDefinition).download();
+    }
+  
+    getDocumentDefinition(persona: any, perfil: any, beneficiarios: any[], backgroundImageBase64: string): any {
+      
+      beneficiarios.forEach(item => {
+        item.nombre = item.nombre_completo || 'N/A';
+        item.fechaNacimiento = item.fecha_nacimiento || 'N/A';
+        item.identidad = item.n_identificacion || 'N/A';
+        item.parentesco = item.parentesco || 'N/A';
+        item.porcentaje = item.porcentaje || 'N/A';
+        item.direccion_residencia = item.direccion_residencia || 'N/A';
+        item.telefono_1 = item.telefono_1 || 'N/A';
+      });
+  
+      // Detalles del usuario (afiliado)
+      const afiliado = {
+        nombre: persona.nombre_completo || 'N/A',
+        grado_academico: persona.grado_academico || 'N/A',
+        centroEducativo: perfil.nombre_centro_trabajo || 'N/A',
+        municipioResidencia: perfil.nombre_municipio || 'N/A',
+        departamentoResidencia: perfil.nombre_departamento || 'N/A',
+        n_identificacion: persona.n_identificacion || 'N/A'
+      };
+  
+      interface TableCell {
+        text?: string;
+        style?: string;
+        rowSpan?: number;
+        colSpan?: number;
+        fillColor?: string;
+        alignment?: string;
+      }
+  
+      const body: TableCell[][] = [
+        [
+          { text: 'N°', style: 'tableHeader', fillColor: '#CCCCCC', alignment: 'center' },
+          { text: 'NOMBRE COMPLETO', style: 'tableHeader', alignment: 'center' },
+          { text: 'FECHA DE NACIMIENTO', style: 'tableHeader', alignment: 'center' },
+          { text: 'IDENTIDAD', style: 'tableHeader', alignment: 'center' },
+          { text: 'PARENTESCO', style: 'tableHeader', alignment: 'center' },
+          { text: '%', style: 'tableHeader', alignment: 'center' },
+        ]
+      ];
+  
+      beneficiarios.forEach((item, index) => {
+        const fechaNacimiento = item.fechaNacimiento
+          ? new Date(item.fechaNacimiento).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })
+          : 'N/A';
+  
+        body.push(
+          [
+            { text: (index + 1).toString(), rowSpan: 2, style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+            { text: item.nombre, style: 'tableRowLarge', alignment: 'center' },
+            { text: fechaNacimiento, style: 'tableRowLarge', alignment: 'center' },
+            { text: item.identidad, style: 'tableRowLarge', alignment: 'center' },
+            { text: item.parentesco, style: 'tableRowLarge', alignment: 'center' },
+            { text: item.porcentaje, style: 'tableRowLarge', alignment: 'center' },
+          ],
+          [
+            {},
+            { text: 'DIRECCIÓN', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+            { text: item.direccion_residencia, style: 'tableRowLarge', colSpan: 2, alignment: 'center' },
+            { text: '', style: 'tableRowLarge' },
+            { text: 'TELEFONO/CEL', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+            { text: item.telefono_1, style: 'tableRowLarge', alignment: 'center' },
+          ]
+        );
+      });
+  
+      return {
+        background: function (currentPage: any, pageSize: any) {
+          return {
+            image: backgroundImageBase64,
+            width: pageSize.width,
+            height: pageSize.height,
+            absolutePosition: { x: 0, y: 2 }
+          };
+        },
+        content: [
+          {
+            text: [
+              'Señores de la Comisión Interventora del INPREMA\nPresente.\n\nYo ',
+              { text: afiliado.nombre, bold: true },
+              ', mayor de edad, laborando como docente en el nivel ',
+              { text: afiliado.grado_academico, bold: true },
+              ', del Centro Educativo ',
+              { text: afiliado.centroEducativo || 'NOMBRE NO DISPONIBLE', bold: true }, 
+              ', ubicado en el Municipio ',
+              { text: afiliado.municipioResidencia, bold: true },
+              ' del Departamento ',
+              { text: afiliado.departamentoResidencia, bold: true },
+              ', con Identidad N°. ',
+              { text: afiliado.n_identificacion, bold: true },
+              ', comparezco ante el Instituto Nacional de Previsión del magisterio a registrar mis beneficiarios legales de la manera siguiente:\n\n'
+            ],
+            style: 'introText',
+            margin: [0, 100, 0, 0]
+          },
+          {
+            table: {
+              widths: [20, '*', '*', '*', '*', '*'],
+              body: body
+            }
+          },
+          {
+            text: '', 
+            margin: [0, 20, 0, 0]
+          },
+          {
+            stack: [
+              {
+                text: [
+                  'También dispongo, que si alguno de mis beneficiarios (as) designados en este instrumento falleciere, el porcentaje de él o ella asignado, se distribuya en partes iguales entre los sobrevivientes registrados. Me reservo el derecho de actualizar, modificar o cancelar la presente DESIGNACIÓN, cuando lo estime conveniente.\n\n',
+                  { text: 'Nota: Con esta designación dejo sin valor ni efecto la presentada anteriormente.\n\n', bold: true }
+                ],
+                style: 'mainText'
+              },
+              {
+                columns: [
+                  {
+                    width: '*',
+                    stack: [
+                      {
+                        text: 'Lugar y Fecha: _______________________________________________________________',
+                        margin: [0, 20, 0, 15]
+                      },
+                      {
+                        text: '(f) _______________________________',
+                        margin: [0, 15, 0, 0]
+                      }
+                    ]
+                  },
+                  {
+                    width: 'auto',
+                    stack: [
+                      {
+                        canvas: [
+                          {
+                            type: 'rect',
+                            x: 0,
+                            y: 0,
+                            w: 80,
+                            h: 80,
+                            lineWidth: 1,
+                            lineColor: 'black'
+                          }
+                        ],
+                        margin: [0, -25, 0, 0]
+                      },
+                      {
+                        text: 'Huella',
+                        alignment: 'center',
+                        margin: [0, -60, 0, 0]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                style: 'usoExclusivo',
+                table: {
+                  widths: ['*'],
+                  body: [
+                    [{ text: 'PARA USO EXCLUSIVO DEL INPREMA', style: 'tableHeader', alignment: 'center', fillColor: '#CCCCCC' }],
+                    [
+                      {
+                        columns: [
+                          {
+                            width: '50%',
+                            stack: [
+                              { text: 'Nombre del empleado: ___________________________', margin: [0, 10] },
+                              { text: 'Código: _______', margin: [0, 10] }
+                            ],
+                            style: 'subHeader'
+                          },
+                          {
+                            width: '50%',
+                            stack: [
+                              { text: '________________________________', alignment: 'center', margin: [0, 10, 0, 0] },
+                              { text: 'Firma', alignment: 'center', margin: [-10, 0, 0, 0] }
+                            ],
+                            style: 'subHeader'
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                },
+                margin: [0, 20, 0, 0]
+              }
+            ]
+          }
+        ],
+        styles: {
+          introText: { fontSize: 12, margin: [0, 0, 0, 10] },
+          mainText: { fontSize: 12, margin: [0, 0, 0, 10] }
+        }
+      };
+    }
+    persona2:any
+    perfil2:any
+    beneficiarios2:any
+
+    obtenerPersonaConPerfilYBeneficiarios(n_identificacion: string) {
+      this.afiliacionServicio.obtenerPersonaConPerfilYBeneficiarios(n_identificacion).subscribe({
+        next: (response) => {
+          if (response.data) {
+            this.persona2 = response.data.persona;
+            this.perfil2 = response.data.perfil;
+            this.beneficiarios2 = response.data.beneficiarios || [];
+          } else {
+            this.toastr.warning("No se encontraron datos asociados");
+          }
+        },
+        error: (error) => {
+          this.toastr.error("Error al obtener los datos de la persona");
+          console.error("❌ Error en la carga de datos:", error);
+        }
+      });
+    }
   
 
 }

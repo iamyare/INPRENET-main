@@ -116,12 +116,12 @@ export class AgregarBenefCompComponent implements OnInit {
         if (res.length > 0) {
           this.toastr.success("Beneficiario agregado con éxito");
           
-          this.obtenerPersonaConPerfilYBeneficiarios(this.data.idPersona);
+          /* this.obtenerPersonaConPerfilYBeneficiarios(this.data.idPersona);
 
           setTimeout(() => {
             this.generarPDF();
           }, 1000);
-          
+           */
           this.cerrar();
         }
       },

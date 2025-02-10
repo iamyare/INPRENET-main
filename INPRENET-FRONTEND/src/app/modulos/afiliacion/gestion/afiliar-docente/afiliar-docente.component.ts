@@ -149,8 +149,6 @@ onSubmit(): void {
     const centrosTrabajo = this.formGroup.get('centrosTrabajo')?.value;
     const colegiosMagisteriales = datosGenerales.ColMags || [];
     const beneficiarios = this.formGroup.get('beneficiarios')?.value.beneficiario || [];
-
-    // Construir el objeto que enviarás al backend
     const formattedData = {
       persona: {
         id_tipo_identificacion: datosGenerales.id_tipo_identificacion,
@@ -263,7 +261,11 @@ onSubmit(): void {
       },
       (error: any) => {
         console.error('Error al enviar los datos:', error);
-        const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
+      
+        // Extraer correctamente el mensaje del error
+        const errorMessage = error.error?.message || error.error?.mensaje || 'Hubo un error al enviar los datos';
+      
+        // Mostrar el mensaje en Toastr
         this.toastr.error(errorMessage, 'Error');
       }
     );
@@ -647,20 +649,23 @@ onSubmit(): void {
       ...(referenciasPersonales.conyuge && referenciasPersonales.conyuge.primer_nombre ? [{
         parentesco: "CÓNYUGE",
         persona_referencia: {
-          primer_nombre: referenciasPersonales.conyuge.primer_nombre.toUpperCase(),
-          segundo_nombre: referenciasPersonales.conyuge.segundo_nombre.toUpperCase(),
-          tercer_nombre: referenciasPersonales.conyuge.tercer_nombre.toUpperCase(),
-          primer_apellido: referenciasPersonales.conyuge.primer_apellido.toUpperCase(),
-          segundo_apellido: referenciasPersonales.conyuge.segundo_apellido.toUpperCase(),
+          primer_nombre: referenciasPersonales.conyuge.primer_nombre?.toUpperCase() || '',
+          segundo_nombre: referenciasPersonales.conyuge.segundo_nombre?.toUpperCase() || '',
+          tercer_nombre: referenciasPersonales.conyuge.tercer_nombre?.toUpperCase() || '',
+          primer_apellido: referenciasPersonales.conyuge.primer_apellido?.toUpperCase() || '',
+          segundo_apellido: referenciasPersonales.conyuge.segundo_apellido?.toUpperCase() || '',
           telefono_domicilio: referenciasPersonales.conyuge.telefono_domicilio,
           telefono_trabajo: referenciasPersonales.conyuge.telefono_trabajo,
           telefono_personal: referenciasPersonales.conyuge.telefono_celular,
           n_identificacion: referenciasPersonales.conyuge.n_identificacion,
-          fecha_nacimiento: referenciasPersonales.conyuge.fecha_nacimiento
+          fecha_nacimiento: referenciasPersonales.conyuge.fecha_nacimiento,
+          trabaja: referenciasPersonales.conyuge.trabaja,
         }
       }] : [])
     ];
   }
+
+
   dataURItoBlob(dataURI: string): Blob {
     const byteString = atob(dataURI.split(',')[1]);
     const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];

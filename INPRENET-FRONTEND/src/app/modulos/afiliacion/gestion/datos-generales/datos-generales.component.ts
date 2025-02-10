@@ -66,9 +66,28 @@ export class DatosGeneralesComponent implements OnInit {
     
   ) { }
 
+  toggleNacimientoFields(value: number | null) {
+    if (value === 1 || value === null) {
+      this.formGroup.get('id_departamento_nacimiento')?.setValidators([Validators.required]);
+      this.formGroup.get('id_municipio_nacimiento')?.setValidators([Validators.required]);
+    } else {
+      this.formGroup.get('id_departamento_nacimiento')?.clearValidators();
+      this.formGroup.get('id_municipio_nacimiento')?.clearValidators();
+      this.formGroup.get('id_departamento_nacimiento')?.setValue(null);
+      this.formGroup.get('id_municipio_nacimiento')?.setValue(null);
+    }
+    this.formGroup.get('id_departamento_nacimiento')?.updateValueAndValidity();
+    this.formGroup.get('id_municipio_nacimiento')?.updateValueAndValidity();
+  }
+  
+
   ngOnInit(): void {
     const noSpecialCharsPattern = '^[a-zA-ZñÑáéíóúÁÉÍÓÚ\\s]*$';
     const addressPattern = /^[a-zA-Z0-9\s.]*$/;
+
+    this.formGroup.get('id_pais')?.valueChanges.subscribe((value) => {
+      this.toggleNacimientoFields(value);
+    });
 
     if (!this.formGroup) {
         if (this.initialData) {

@@ -383,20 +383,22 @@
 
     <!-- BOTÓN GUARDAR -->
     <button
-      mat-raised-button
-      color="primary"
-      style="color: white; margin: 1% 0 1% 0"
-      (click)="GuardarInformacion()"
-      *ngIf="mostrarBotonGuardar"
-    >
-      Guardar
-    </button>
-    <button *ngIf="mostrarBotonGenerar" 
-      mat-raised-button color="primary"
-      style="color: white; margin: 1% 0 1% 0"
-      (click)="generarConstanciaAfiliacion()">
-      Generar Formulario
-    </button>
+  mat-raised-button
+  color="primary"
+  style="color: white; margin: 1% 20px 1% 0"
+  (click)="GuardarInformacion()"
+  *ngIf="mostrarBotonGuardar"
+>
+  Guardar
+</button>
+<button 
+  *ngIf="mostrarBotonGenerar" 
+  mat-raised-button color="primary"
+  style="color: white; margin: 1% 0 1% 20px"
+  (click)="generarConstanciaAfiliacion()">
+  Generar Formulario
+</button>
+
 
 
   </div>

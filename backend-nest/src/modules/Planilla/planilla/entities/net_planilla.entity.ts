@@ -10,6 +10,7 @@ import { Net_Detalle_Prestamo } from 'src/modules/prestamos/entities/net_detalle
 @Check(`beneficios_cargados IN ('SI', 'NO')`)
 @Check(`deducc_inprema_cargadas IN ('SI', 'NO')`)
 @Check(`deducc_terceros_cargadas IN ('SI', 'NO')`)
+@Check(`generar_voucher IN ('SI', 'NO')`)
 export class Net_Planilla {
 
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PLANILLA', primaryKeyConstraintName: 'PK_id_plan_Plan' })
@@ -42,6 +43,9 @@ export class Net_Planilla {
 
     @Column('date', { nullable: false, name: 'PERIODO_FINALIZACION' })
     periodoFinalizacion: Date;
+
+    @Column('varchar2', { nullable: true, name: 'GENERAR_VOUCHER' })
+    generar_voucher: string;
 
     @ManyToOne(() => Net_TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla, { cascade: true })
     @JoinColumn({ name: 'ID_TIPO_PLANILLA', foreignKeyConstraintName: "FK_ID_TIPO_PLANILLA_PLAN" })

@@ -1,7 +1,15 @@
-<app-ver-planillas-activas (getElemSeleccionados)="getElemSeleccionados($event)"></app-ver-planillas-activas>
+  <app-ver-planillas-activas (getElemSeleccionados)="getElemSeleccionados($event) "></app-ver-planillas-activas>
+
+  <mat-grid-list cols="2" rowHeight="50px">
+    <mat-grid-tile>
+      <button color="primary" (click)="bajas()" mat-raised-button>Bajas</button>
+    </mat-grid-tile>
+    <mat-grid-tile>
+      <button color="primary" (click)="altas()" mat-raised-button>Altas</button>
+    </mat-grid-tile>
+  </mat-grid-list>
 
 <div class="basic-container">
-
   <div class=" card " *ngIf="detallePlanilla">
     <div class="card-body" >
       <h4 class="custom-header card-title">Datos Generales De La Planilla {{detallePlanilla?.tipoPlanilla?.nombre_planilla}} (CON Y SIN CUENTA BANCARIA)
@@ -40,6 +48,7 @@
         </tr>
       </table>
     </div>
+
   </div>
 
   <div *ngIf="datosTabl.length > 0" class="card" style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%;">
@@ -95,9 +104,25 @@
             Descargar Reporte de Pago Preliminar
         </button>
     </div>
+      <div style="text-align: right; margin: 10px;">
+        <button mat-raised-button color="accent" (click)="confirmarEliminarPlanilla()">
+            Eliminar toda la planilla preliminiar
+        </button>
+    </div>
+    <!-- Modal de confirmación -->
+    <ng-template #confirmacionEliminarPlanillaModal>
+      <h2 mat-dialog-title>Confirmar Eliminar beneficios de planilla</h2>
+      <mat-dialog-content>
+      <p>¿Estás seguro de eliminar beneficios de la planilla?</p>
+      </mat-dialog-content>
+      <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+      <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+      </mat-dialog-actions>
+      </ng-template>
     <div class="spinner-container" *ngIf="isLoading" style="text-align: center; margin: 20px;">
       <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
-      <p>Generando reporte, por favor espere...</p>
+      <p>Eliminando beneficios de la planilla {{idPlanilla}}, por favor espere ... </p>
     </div>
     </div>
   </div>

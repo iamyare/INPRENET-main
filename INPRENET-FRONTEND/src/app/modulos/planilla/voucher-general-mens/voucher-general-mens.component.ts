@@ -8,11 +8,13 @@ import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { obtenerNombreMes } from 'src/app/shared/functions/formatoFecha';
+import { obtenerNombreMes } from 'src/app/shared/functions/formatoFecha';/*
+import { obtenerRangoMeses } from 'src/app/shared/functions/obtenerRangoMeses'; */
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { ValidationService } from 'src/app/shared/services/validation.service';
 import * as QRCode from 'qrcode';
+import { obtenerRangoMeses } from '../../../shared/functions/formatoFecha';
 
 @Component({
   selector: 'app-voucher-general-mens',
@@ -246,7 +248,12 @@ export class VoucherGeneralMensComponent {
             causantesMap.set(detalle.ID_DETALLE_PERSONA, detalle.padreIdPersona.persona.n_identificacion);
           }
         });
+        const mesAnio = obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.fecha_cierre)
 
+        const meses = obtenerRangoMeses(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio,
+          resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoFinalizacion
+        )
+        //let meses = obtenerRangoMeses(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.fecha_cierre)
         let data: any[] = [];
         detallePersona.forEach((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
           detalle.detalleBeneficio.forEach((beneficio: any) => {
@@ -254,7 +261,7 @@ export class VoucherGeneralMensComponent {
               const montoPorPeriodo = detallePago.monto_a_pagar;
               sumaBeneficios += montoPorPeriodo;
               data.push({
-                TIPO_PLANILLA: detallePago.planilla.tipoPlanilla.nombre_planilla,
+                TIPO_PLANILLA: `${detallePago.planilla.tipoPlanilla.nombre_planilla} - ${meses}`,
                 CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || '-----------------------',
                 NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
                 MontoAPagar: montoPorPeriodo,
@@ -311,7 +318,7 @@ export class VoucherGeneralMensComponent {
                   return filteredItems.map((b, index) => {
                     return [
                       index === 0
-                        ? { text: tipoPlanilla, rowSpan: filteredItems.length } // Combinar celdas para TIPO_PLANILLA
+                        ? { text: `${tipoPlanilla} - ${meses}`, rowSpan: filteredItems.length } // Combinar celdas para TIPO_PLANILLA
                         : {}, // Celdas vacías para las filas combinadas
                       { text: b.NOMBRE_INSTITUCION },
                       { text: b.NOMBRE_DEDUCCION },
@@ -327,7 +334,7 @@ export class VoucherGeneralMensComponent {
 
 
         }
-        const mesAnio = obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio)
+
 
         const neto = sumaBeneficios - sumaDeducciones;
         const qrData = `https://script.google.com/macros/s/AKfycbwkPhOJeCFvI2dvsU_o6m3d5pn_1XJoJzGhMoom7FeORLeIU_LovB-2fNeHwf1Hgl6wzQ/exec?name=${encodeURIComponent(

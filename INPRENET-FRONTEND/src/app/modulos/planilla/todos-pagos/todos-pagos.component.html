@@ -43,7 +43,7 @@
       <td mat-cell *matCellDef="let pago">
         <ul>
           <li *ngFor="let deduccion of pago.deducciones">
-            {{ deduccion.deduccion }}: {{ deduccion.monto_total | currency : "L" : "symbol" : "1.2-2" }}
+            {{ deduccion.deduccion }}: {{ deduccion.monto_aplicado | currency : "L" : "symbol" : "1.2-2" }}
           </li>
         </ul>
       </td>

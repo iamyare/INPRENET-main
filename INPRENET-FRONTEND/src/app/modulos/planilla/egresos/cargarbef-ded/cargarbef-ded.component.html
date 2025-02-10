@@ -101,13 +101,13 @@
         </div>
       </mat-tab>
 
-      <!-- <mat-tab label="Cálculo de Planilla">
+      <mat-tab label="Cálculo de Planilla" *ngIf="id_planilla">
         <div>
           <button
           mat-raised-button
           color="primary"
           class="asignar-beneficios-btn"
-          (click)="confirmarAsignacionBeneficiarios()">
+          (click)="confirmarCalculoPlanilla()">
           Cálculo de planilla, Quitar inconsistencias de negativos.
           </button>
 
@@ -123,7 +123,7 @@
           </ng-template>
 
         </div>
-      </mat-tab> -->
+      </mat-tab>
 
     </mat-tab-group>
 

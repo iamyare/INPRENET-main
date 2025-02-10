@@ -24,7 +24,6 @@ export class DetallePagosComponent implements OnInit {
   loadPlanillas(dni: string) {
     this.planillaService.obtenerPlanillasPagosPorPersona(dni).subscribe({
       next: (response) => {
-        
         this.planillas = response.data.sort((a: any, b: any) => new Date(b.fecha_apertura).getTime() - new Date(a.fecha_apertura).getTime());
       },
       error: (error) => {

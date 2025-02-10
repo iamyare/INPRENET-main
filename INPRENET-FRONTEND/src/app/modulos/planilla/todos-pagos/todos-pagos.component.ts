@@ -31,9 +31,12 @@ export class TodosPagosComponent implements OnInit {
     this.planillaService.obtenerPlanillasPagosPorPersona(dni).subscribe({
       next: (response) => {
         this.planillas = response.data;
+        this.planillas.sort((a, b) => new Date(b.fecha_cierre).getTime() - new Date(a.fecha_cierre).getTime());
+
         const observables = this.planillas.map(planilla =>
           this.planillaService.obtenerPagosYBeneficiosPorPersona(planilla.id_planilla, dni)
         );
+
         forkJoin(observables).subscribe({
           next: (pagosResponses) => {
             this.allPagosData = pagosResponses.map(response => {
@@ -41,6 +44,7 @@ export class TodosPagosComponent implements OnInit {
                 beneficio.totalPagado = beneficio.pagos.reduce((acc: number, curr: any) => acc + curr.monto_a_pagar, 0);
               });
               return response;
+
             });
             this.loading = false;
           },
@@ -63,7 +67,7 @@ export class TodosPagosComponent implements OnInit {
       return acc + beneficio.pagos.reduce((accPago: number, pagoBeneficio: any) => accPago + pagoBeneficio.monto_a_pagar, 0);
     }, 0);
 
-    const totalDeducciones = pago.deducciones.reduce((acc: number, deduccion: any) => acc + deduccion.monto_total, 0);
+    const totalDeducciones = pago.deducciones.reduce((acc: number, deduccion: any) => acc + deduccion.monto_aplicado, 0);
 
     return totalBeneficios - totalDeducciones;
   }
@@ -88,7 +92,7 @@ export class TodosPagosComponent implements OnInit {
       ).join('\n') || 'Sin información de bancos';
 
       const beneficios = pago.beneficios.map((beneficio: any) => `${beneficio.beneficio}: ${beneficio.totalPagado}`).join('\n');
-      const deducciones = pago.deducciones.map((deduccion: any) => `${deduccion.deduccion}: ${deduccion.monto_total}`).join('\n');
+      const deducciones = pago.deducciones.map((deduccion: any) => `${deduccion.deduccion}: ${deduccion.monto_aplicado}`).join('\n');
       const total = this.calcularTotal(pago);
 
       tableBody.push([

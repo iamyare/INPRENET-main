@@ -406,6 +406,39 @@ export class PlanillaService {
     );
   }
 
+  eliminarPlanillaPrelByIdPlanilla(id_planilla: number): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/eliminarPlanillaPrelByIdPlanilla`;
+    return this.http.post(url, { id_planilla }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  calculoPlanilla(id_planilla: number): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/calculo-planilla/${id_planilla}`;
+    return this.http.post(url, {}).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  obtenerAltaPorPeriodoExcel() {
+    const url = `${environment.API_URL}/api/planilla/obtenerAltaPorPeriodoExcel`;
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError((error) => {
+        console.error('Error al descargar el Excel de afiliados por periodo', error);
+        throw error;
+      })
+    );
+  }
+  obtenerBajasPorPeriodoExcel() {
+    const url = `${environment.API_URL}/api/planilla/obtenerBajasPorPeriodoExcel`;
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError((error) => {
+        console.error('Error al descargar el Excel de afiliados por periodo', error);
+        throw error;
+      })
+    );
+  }
+
   private handleError(error: any): Observable<never> {
     console.error('An error occurred:', error.error);
     throw 'Error en la llamada HTTP';

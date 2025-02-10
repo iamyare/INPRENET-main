@@ -96,9 +96,6 @@
     </div>
    </div>
 
-
-
-
   <!-- [disabled]="FormBen.invalid" -->
   <!-- && hasBeneficios.length == 0 -->
   <!-- PARA AFILIADOS -->
@@ -108,9 +105,9 @@
     Afiliado.tipo_persona == 'JUBILADO'  && (Afiliado.estado_persona != 'ERROR') || Afiliado.tipo_persona == 'PENSIONADO'  && (Afiliado.estado_persona != 'ERROR')
     )" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
     <app-dynamic-form [fields]="myFormFields1" titulo="Datos sobre el beneficio"
-      subtitulo="Completa la información correspondiente" (selectChange)="prueba($event)" (newDatBenChange)="obtenerDatos1($event)"></app-dynamic-form>
+      subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatos1($event)"(selectChange)="prueba($event)" ></app-dynamic-form>
       <!-- [disabled]="form1.invalid" -->
-    <button mat-raised-button color="primary" [disabled]="form1.invalid" style="color: white; margin: 1% 0 1% 0"
+    <button mat-raised-button color="primary"  style="color: white; margin: 1% 0 1% 0"
       (click)="guardarNTBenef()">
       Asignar Beneficio
     </button>

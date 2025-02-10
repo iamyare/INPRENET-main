@@ -4,14 +4,16 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { unirNombres } from '../../../../shared/functions/formatoNombresP';
-import { BeneficiosService } from '../../../../../../src/app/services/beneficios.service';
+import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { convertirFecha } from '../../../../shared/functions/formatoFecha';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
-import { ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { format, parseISO } from 'date-fns';
 import { montoTotalValidator, noDecimalValidator } from '../nuevo-beneficio-afil/nuevo-beneficio-afil.component';
+
 interface Campo {
   nombre: string;
   tipo: string;
@@ -113,8 +115,8 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: true
       },
       {
-        header: 'Fecha de inicio',
-        col: 'periodo_inicio',
+        header: 'Fecha de efectividad',
+        col: 'fecha_calculo',
         isEditable: true
       },
       {
@@ -177,6 +179,7 @@ export class VerEditarBeneficioAfilComponent {
     this.form = event;
   }
 
+  //Funciones para llenar tabla
   getFilas = async () => {
     try {
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
@@ -420,9 +423,13 @@ export class VerEditarBeneficioAfilComponent {
 
     dialogRef.componentInstance.formUpdated.subscribe((formValues: any) => {
 
-      const campoActualizar = campos.find((c: any) => c.nombre === 'num_rentas_pagar_primer_pago');
+      const campoActualizar = campos;
 
       dataActu = formValues;
+
+      console.log(dataActu);
+
+      dataActu.periodo_finalizacion = new Date(dataActu.periodo_finalizacion.getTime() + 86400000);
 
       if (campoActualizar) {
         this.cdr.detectChanges();

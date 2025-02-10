@@ -144,40 +144,40 @@ export class AfiliadoService {
 
   async updateBeneficiario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_detalle_persona> {
     const detallePersona = await this.detallePersonaRepository.findOne({
-        where: {
-            ID_DETALLE_PERSONA: id,
-            ID_PERSONA: updatePersonaDto.id_persona,
-            ID_CAUSANTE_PADRE: updatePersonaDto.id_causante_padre
-        },
-        relations: ['persona']
+      where: {
+        ID_DETALLE_PERSONA: id,
+        ID_PERSONA: updatePersonaDto.id_persona,
+        ID_CAUSANTE_PADRE: updatePersonaDto.id_causante_padre
+      },
+      relations: ['persona']
     });
 
     if (!detallePersona) {
-        throw new NotFoundException(`Detalle persona con ID ${id} no encontrado`);
+      throw new NotFoundException(`Detalle persona con ID ${id} no encontrado`);
     }
 
     // **Actualizar porcentaje en net_detalle_persona**
     if (updatePersonaDto.porcentaje !== undefined) {
-        detallePersona.porcentaje = updatePersonaDto.porcentaje;
+      detallePersona.porcentaje = updatePersonaDto.porcentaje;
     }
 
     // **Actualizar parentesco en net_detalle_persona**
     if (updatePersonaDto.parentesco !== undefined) {
-        detallePersona.parentesco = updatePersonaDto.parentesco;
+      detallePersona.parentesco = updatePersonaDto.parentesco;
     }
 
     // **Actualizar datos en net_persona**
     if (detallePersona.persona) {
-        if (updatePersonaDto.direccion_residencia !== undefined) {
-            detallePersona.persona.direccion_residencia = updatePersonaDto.direccion_residencia;
-        }
+      if (updatePersonaDto.direccion_residencia !== undefined) {
+        detallePersona.persona.direccion_residencia = updatePersonaDto.direccion_residencia;
+      }
 
-        if (updatePersonaDto.telefono_1 !== undefined) {
-            detallePersona.persona.telefono_1 = updatePersonaDto.telefono_1;
-        }
+      if (updatePersonaDto.telefono_1 !== undefined) {
+        detallePersona.persona.telefono_1 = updatePersonaDto.telefono_1;
+      }
 
-        // Guardar cambios en net_persona
-        await this.personaRepository.save(detallePersona.persona);
+      // Guardar cambios en net_persona
+      await this.personaRepository.save(detallePersona.persona);
     }
 
     // Guardar cambios en net_detalle_persona
@@ -288,14 +288,14 @@ export class AfiliadoService {
       ? persona.detallePersona.map((detalle) => detalle.tipoPersona?.tipo_persona).filter(Boolean)
       : [];
 
-      const formatFecha = (fecha: string | Date | null) => {
-        if (!fecha) return null;
-        
-        const fechaDate = typeof fecha === 'string' ? new Date(`${fecha}T00:00:00Z`) : fecha;
-        return fechaDate.toISOString().split('T')[0]; 
+    const formatFecha = (fecha: string | Date | null) => {
+      if (!fecha) return null;
+
+      const fechaDate = typeof fecha === 'string' ? new Date(`${fecha}T00:00:00Z`) : fecha;
+      return fechaDate.toISOString().split('T')[0];
     };
-    
-      
+
+
     // Construye el resultado con valores por defecto en caso de que no haya `detallePersona`
     const result = {
       ID_TIPO_IDENTIFICACION: persona.tipoIdentificacion.id_identificacion,
@@ -340,7 +340,7 @@ export class AfiliadoService {
       NUMERO_CERTIFICADO_DEFUNCION: persona?.numero_certificado_defuncion,
       FECHA_REPORTE_FALLECIDO: persona?.fechaReporteFallecido,
       CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.nombre,
-      
+
       FECHA_AFILIACION: formatFecha(persona.fecha_afiliacion),
       ULTIMA_FECHA_ACTUALIZACION: persona.ultima_fecha_actualizacion,
 
@@ -416,10 +416,10 @@ export class AfiliadoService {
         DIRECCION_RESIDENCIA: detallePer.persona.direccion_residencia,
         FECHA_NACIMIENTO: detallePer.persona.fecha_nacimiento,
         TIPO_PERSONA: detallePer.tipoPersona.tipo_persona,
-        
+
         FECHA_AFILIACION: detallePer.persona.fecha_afiliacion,
         ULTIMA_FECHA_ACTUALIZACION: detallePer.persona.ultima_fecha_actualizacion,
-        
+
       };
 
       return result;
@@ -482,6 +482,7 @@ export class AfiliadoService {
         DIRECCION_RESIDENCIA: detallePer.persona.direccion_residencia,
         FECHA_NACIMIENTO: detallePer.persona.fecha_nacimiento,
         TIPO_PERSONA: detallePer.tipoPersona.tipo_persona,
+        ID_TIPO_PERSONA: detallePer.tipoPersona.id_tipo_persona,
         ESTADO_PERSONA: detallePer?.estadoAfiliacion?.nombre_estado,
         BENEFICIOS: detallePer.detalleBeneficio,
         VOLUNTARIO: detallePer.voluntario,
@@ -489,7 +490,7 @@ export class AfiliadoService {
 
         FECHA_AFILIACION: detallePer.persona.fecha_afiliacion,
         ULTIMA_FECHA_ACTUALIZACION: detallePer.persona.ultima_fecha_actualizacion
-        
+
         //fallecido: detallePer.persona.fallecido,
         //TIPO_PERSONA: detallePer.persona.detallePersona[0].tipoPersona.tipo_persona,
         //GRADO_ACADEMICO: detallePer.persona.grado_academico,
@@ -950,22 +951,22 @@ export class AfiliadoService {
 
   async getAllPerfCentroTrabajo(n_identificacion: string): Promise<any[]> {
     try {
-        const persona = await this.personaRepository.createQueryBuilder('persona')
-            .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfPersCentTrabs')
-            .leftJoinAndSelect('perfPersCentTrabs.centroTrabajo', 'centroTrabajo')
-            .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
-            .orderBy('perfPersCentTrabs.estado', 'ASC') 
-            .getOne();
+      const persona = await this.personaRepository.createQueryBuilder('persona')
+        .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfPersCentTrabs')
+        .leftJoinAndSelect('perfPersCentTrabs.centroTrabajo', 'centroTrabajo')
+        .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
+        .orderBy('perfPersCentTrabs.estado', 'ASC')
+        .getOne();
 
-        if (!persona || !persona.perfPersCentTrabs) {
-            return [];
-        }
-        return persona.perfPersCentTrabs;
+      if (!persona || !persona.perfPersCentTrabs) {
+        return [];
+      }
+      return persona.perfPersCentTrabs;
     } catch (error) {
-        console.error('Error al obtener los perfiles de la persona:', error);
-        throw new Error('Error al obtener los perfiles de la persona');
+      console.error('Error al obtener los perfiles de la persona:', error);
+      throw new Error('Error al obtener los perfiles de la persona');
     }
-}
+  }
 
   async getAllCargoPublicPeps(n_identificacion: string): Promise<any> {
     try {
@@ -1061,10 +1062,10 @@ export class AfiliadoService {
 
       // Obtención de la causa de fallecimiento (solo si no es null)
 
-        // Validar que el archivo de certificado de defunción sea obligatorio si FALLECIDO es SI
-    if (datosGenerales.fallecido === 'SI' && !arch_cert_def?.buffer) {
-      throw new BadRequestException('El certificado de defunción es obligatorio cuando el afiliado está marcado como fallecido.');
-    }
+      // Validar que el archivo de certificado de defunción sea obligatorio si FALLECIDO es SI
+      if (datosGenerales.fallecido === 'SI' && !arch_cert_def?.buffer) {
+        throw new BadRequestException('El certificado de defunción es obligatorio cuando el afiliado está marcado como fallecido.');
+      }
       const causaFallecimiento = datosGenerales.causa_fallecimiento
         ? await this.causasFallecimientoRepository.findOne({
           where: { id_causa_fallecimiento: datosGenerales.causa_fallecimiento },
@@ -1143,16 +1144,16 @@ export class AfiliadoService {
 
       // Definir formato de entrada y salida
       const formatoEntrada = 'yyyy-MM-dd';
-      const formatoSalida = 'yyyy-MM-dd'; 
-      
-        const fechaAfiliacion = temp.fecha_afiliacion
+      const formatoSalida = 'yyyy-MM-dd';
+
+      const fechaAfiliacion = temp.fecha_afiliacion
         ? format(parse(temp.fecha_afiliacion, formatoEntrada, new Date()), formatoSalida)
         : temp.fecha_defuncion
           ? format(parse(temp.fecha_defuncion, formatoEntrada, new Date()), formatoSalida)
           : null;
 
       const fechaAfiliacionDate = fechaAfiliacion ? new Date(fechaAfiliacion + 'T00:00:00') : null;
-    
+
       // Convierte la fecha de defunción y la fecha de reporte de fallecido
       const fechaDefuncion = datosGenerales.fecha_defuncion
         ? format(parse(datosGenerales.fecha_defuncion, formatoEntrada, new Date()), formatoSalida)
@@ -1189,8 +1190,8 @@ export class AfiliadoService {
       };
 
       if (datosGenerales.fallecido === 'NO') {
-      data.certificado_defuncion = null;
-    }  
+        data.certificado_defuncion = null;
+      }
       if (fileIdent?.buffer) {
         data.archivo_identificacion = Buffer.from(fileIdent.buffer);
       }
@@ -1210,9 +1211,9 @@ export class AfiliadoService {
       const existingDetalle = await this.detallePersonaRepository.findOne({
         where: { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
       });
-      
+
       const voluntario = datosGenerales?.voluntario ?? 'NO';
-      
+
       if (existingDetalle) {
         await this.detallePersonaRepository.update(
           { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
@@ -1240,26 +1241,26 @@ export class AfiliadoService {
   formatFechaYYYYMMDD(fecha: string): string | null {
     if (!fecha) return null;
     try {
-        const date = parse(fecha, 'dd/MM/yyyy', new Date());
-        return date.toISOString().split('T')[0]; 
+      const date = parse(fecha, 'dd/MM/yyyy', new Date());
+      return date.toISOString().split('T')[0];
     } catch (error) {
-        console.error(`Error al convertir la fecha: ${fecha}`);
-        return null;
+      console.error(`Error al convertir la fecha: ${fecha}`);
+      return null;
     }
   }
 
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
     if (!existingPerf) {
-        throw new NotFoundException(`Perfil centro trabajo con ID ${id} no encontrado`);
+      throw new NotFoundException(`Perfil centro trabajo con ID ${id} no encontrado`);
     }
 
     if (updateDto.idCentroTrabajo) {
-        const centroTrabajoExistente = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: updateDto.idCentroTrabajo } });
-        if (!centroTrabajoExistente) {
-            throw new NotFoundException(`El centro de trabajo con ID ${updateDto.idCentroTrabajo} no existe`);
-        }
-        existingPerf.centroTrabajo = centroTrabajoExistente;
+      const centroTrabajoExistente = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: updateDto.idCentroTrabajo } });
+      if (!centroTrabajoExistente) {
+        throw new NotFoundException(`El centro de trabajo con ID ${updateDto.idCentroTrabajo} no existe`);
+      }
+      existingPerf.centroTrabajo = centroTrabajoExistente;
     }
     existingPerf.fecha_ingreso = this.formatFechaYYYYMMDD(updateDto.fecha_ingreso);
     existingPerf.fecha_egreso = updateDto.fecha_egreso ? this.formatFechaYYYYMMDD(updateDto.fecha_egreso) : null;
@@ -1271,7 +1272,7 @@ export class AfiliadoService {
     existingPerf.jornada = updateDto.jornada;
 
     return this.perfPersoCentTrabRepository.save(existingPerf);
-}
+  }
 
   async desactivarPerfCentroTrabajo(id: number): Promise<void> {
     const perfil = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
@@ -1318,19 +1319,19 @@ export class AfiliadoService {
 
   async updateEstadoAfil(payload: { idPersona: number, idCausante: number, idCausantePadre: number, idDetallePersona: number, idEstadoAfiliacion: number, dniCausante: string; estadoAfiliacion: string; observacion: string }): Promise<{ codigo: number; mensaje: string }> {
     try {
-  
+
       const estadoAfiliacion = await this.estadoAfiliacionRepository
         .createQueryBuilder('estadoAfiliacion')
         .where('estadoAfiliacion.codigo = :idEstadoAfiliacion', { idEstadoAfiliacion: payload.idEstadoAfiliacion })
         .getOne();
-  
+
       if (!estadoAfiliacion) {
         return {
           codigo: 404,
           mensaje: `No se encontró el estado de afiliación con ID ${payload.idEstadoAfiliacion}.`
         };
       }
-  
+
       // Buscar el registro en NET_DETALLE_PERSONA
       const detallePersona = await this.detallePersonaRepository
         .createQueryBuilder('detalle')
@@ -1339,81 +1340,81 @@ export class AfiliadoService {
         .andWhere('detalle.ID_PERSONA = :idPersona', { idPersona: payload.idPersona })
         .orWhere('detalle.ID_CAUSANTE_PADRE = :idCausantePadre', { idCausantePadre: payload.idCausantePadre })
         .getOne();
-  
+
       if (!detallePersona) {
         return {
           codigo: 404,
           mensaje: `No se encontró el registro con ID_CAUSANTE ${payload.idCausante}, ID_PERSONA ${payload.idPersona}.`,
         };
       }
-  
+
       // ✅ Actualizar el estado de afiliación correctamente
       detallePersona.ID_ESTADO_AFILIACION = estadoAfiliacion.codigo;
       detallePersona.observacion = payload.observacion;
-  
+
       // Guardar los cambios
       await this.detallePersonaRepository.save(detallePersona);
-  
+
       return {
         codigo: 200,
         mensaje: 'Registro actualizado correctamente',
       };
     } catch (error) {
       console.error('Error al actualizar el registro:', error);
-  
+
       return {
         codigo: 500,
         mensaje: 'Error interno al intentar actualizar el registro',
       };
     }
   }
-  
+
 
   private handleException(error: any): void {
     this.logger.error('Error detallado:', JSON.stringify(error, null, 2));
-    
+
     // Error específico de Oracle para número hexadecimal
     if (error.message && error.message.includes('ORA-01465')) {
-        throw new BadRequestException('Error al procesar archivos binarios. Verifique el formato de los archivos.');
+      throw new BadRequestException('Error al procesar archivos binarios. Verifique el formato de los archivos.');
     }
-    
+
     // Error de clave única
     if (error.driverError && error.driverError.errorNum === 1) {
-        throw new BadRequestException('Algún dato clave ya existe');
+      throw new BadRequestException('Algún dato clave ya existe');
     }
-    
+
     // Errores de tamaño de archivo
     if (error.message && error.message.includes('exceeds')) {
-        throw new BadRequestException(error.message);
+      throw new BadRequestException(error.message);
     }
-    
+
     // Otros errores de Oracle
     if (error.driverError) {
-        this.logger.error(`Oracle Error ${error.driverError.errorNum}: ${error.message}`);
-        throw new BadRequestException(`Error de base de datos: ${error.message}`);
+      this.logger.error(`Oracle Error ${error.driverError.errorNum}: ${error.message}`);
+      throw new BadRequestException(`Error de base de datos: ${error.message}`);
     }
 
     throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
-}
+  }
 
-// Agregar esta función auxiliar para validar archivos
-private validateFile(file: any, maxSize: number, fieldName: string): Buffer | null {
+  // Agregar esta función auxiliar para validar archivos
+  private validateFile(file: any, maxSize: number, fieldName: string): Buffer | null {
     if (!file?.buffer) {
-        return null;
+      return null;
     }
 
     if (file.buffer.length > maxSize) {
-        throw new BadRequestException(`El archivo ${fieldName} excede el tamaño máximo permitido`);
+      throw new BadRequestException(`El archivo ${fieldName} excede el tamaño máximo permitido`);
     }
 
     try {
-        const buffer = Buffer.from(file.buffer);
-        return buffer.length > 0 ? buffer : null;
+      const buffer = Buffer.from(file.buffer);
+      return buffer.length > 0 ? buffer : null;
     } catch (error) {
-        this.logger.error(`Error al procesar ${fieldName}:`, error);
-        throw new BadRequestException(`Error al procesar el archivo ${fieldName}`);
+      this.logger.error(`Error al procesar ${fieldName}:`, error);
+      throw new BadRequestException(`Error al procesar el archivo ${fieldName}`);
     }
-}
+  }
 
   async obtenerTodasLasProfesiones(): Promise<NET_PROFESIONES[]> {
     try {

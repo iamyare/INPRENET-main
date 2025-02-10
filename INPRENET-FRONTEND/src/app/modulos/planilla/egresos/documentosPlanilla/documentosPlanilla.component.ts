@@ -1636,7 +1636,7 @@ export class DocumentosPlanillaComponent implements OnInit {
         console.error('Error al generar el reporte de partida de diario:', error);
       }
     });
-}
+  }
 
 
   async exportarExcelDetallePorPeriodo() {
@@ -1858,147 +1858,18 @@ export class DocumentosPlanillaComponent implements OnInit {
     }
 } */
 
-    async generarPDF() {
-      try {
-          const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
-  
-          const afiliadosPorTabla = 10; // Cada tabla tendrá 10 filas (2 tablas por página)
-          const afiliadosPorPagina = afiliadosPorTabla * 2;
-          const totalAfiliados = this.afiliados.length;
-          const numPaginas = Math.ceil(totalAfiliados / afiliadosPorPagina);
-  
-          const content = [];
-  
-          for (let i = 0; i < numPaginas; i++) {
-              const startIndex = i * afiliadosPorPagina;
-              const midIndex = startIndex + afiliadosPorTabla;
-              const endIndex = midIndex + afiliadosPorTabla;
-  
-              // Primera tabla
-              const table1Data = this.afiliados.slice(startIndex, midIndex).map((a, index) => [
-                  (startIndex + index + 1).toString(), // Corregir índice
-                  a.n_identificacion || 'N/A',
-                  a.nombre_completo || 'N/A'
-              ]);
-  
-              // Segunda tabla (si hay más datos disponibles)
-              const table2Data = this.afiliados.slice(midIndex, endIndex).map((a, index) => [
-                  (midIndex + index + 1).toString(),
-                  a.n_identificacion || 'N/A',
-                  a.nombre_completo || 'N/A'
-              ]);
-  
-              // Construcción de la página con una o dos tablas
-              const pageContent = {
-                  columns: [
-                      {
-                          width: '50%',
-                          table: {
-                              headerRows: 1,
-                              widths: ['10%', '40%', '50%'],
-                              body: [
-                                  [{ text: '#', bold: true }, { text: 'Identificación', bold: true }, { text: 'Nombre Completo', bold: true }],
-                                  ...table1Data
-                              ]
-                          },
-                          layout: 'lightHorizontalLines'
-                      }
-                  ],
-                  margin: [0, 20, 0, 30]
-              };
-  
-              // Solo agregar la segunda tabla si hay datos disponibles
-              if (table2Data.length > 0) {
-                  pageContent.columns.push({
-                      width: '50%',
-                      table: {
-                          headerRows: 1,
-                          widths: ['10%', '40%', '50%'],
-                          body: [
-                              [{ text: '#', bold: true }, { text: 'Identificación', bold: true }, { text: 'Nombre Completo', bold: true }],
-                              ...table2Data
-                          ]
-                      },
-                      layout: 'lightHorizontalLines'
-                  });
-              }
-  
-              content.push(pageContent);
-          }
-  
-          const docDefinition: any = {
-              pageSize: 'LETTER',
-              background: (currentPage: any, pageSize: any) => ({
-                  image: base64Image,
-                  width: pageSize.width,
-                  height: pageSize.height,
-                  absolutePosition: { x: 0, y: 0 }
-              }),
-              pageMargins: [40, 130, 40, 100],
-              header: {
-                  text: 'INFORME DE AFILIADOS DEL MES ANTERIOR',
-                  style: 'header',
-                  alignment: 'center',
-                  margin: [50, 90, 50, 0]
-              },
-              content: content,
-              styles: {
-                  header: { fontSize: 16, bold: true },
-                  signature: { fontSize: 10, bold: true }
-              },
-              footer: (currentPage: any, pageCount: any) => ({
-                  table: {
-                      widths: ['*', '*', '*'],
-                      body: [
-                          [
-                              { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
-                              { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false] },
-                              { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
-                          ]
-                      ]
-                  },
-                  margin: [20, 0, 20, 20]
-              }),
-              defaultStyle: { fontSize: 10 }
-          };
-  
-          pdfMake.createPdf(docDefinition).download('Informe_Afiliados_Mes_Anterior.pdf');
-      } catch (error) {
-          console.error('Error al generar el PDF:', error);
+  obtenerAfiliados() {
+    this.conasaService.obtenerAfiliadosMesAnterior().subscribe({
+      next: (response) => {
+        this.afiliados = response.data;
+      },
+      error: (error) => {
+        console.error('Error al obtener afiliados:', error);
       }
+    });
   }
-  
 
-    obtenerAfiliados() {
-      this.conasaService.obtenerAfiliadosMesAnterior().subscribe({
-        next: (response) => {
-          this.afiliados = response.data;
-          console.log('Afiliados obtenidos:', this.afiliados);
-        },
-        error: (error) => {
-          console.error('Error al obtener afiliados:', error);
-        }
-      });
-    }
-  
-    afiliados: any[] = [];
-    generarExcel() {
-      if (this.afiliados.length === 0) {
-        console.warn('No hay afiliados para exportar.');
-        return;
-      }
-  
-      const worksheet = XLSX.utils.json_to_sheet(this.afiliados);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Afiliados_Mes_Anterior');
-  
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const fileName = `Afiliados_Mes_Anterior_${new Date().toISOString().split('T')[0]}.xlsx`;
-  
-      const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      saveAs(file, fileName);
-  
-      console.log('Archivo Excel generado y descargado:', fileName);
-    }
+  afiliados: any[] = [];
+
 
 }

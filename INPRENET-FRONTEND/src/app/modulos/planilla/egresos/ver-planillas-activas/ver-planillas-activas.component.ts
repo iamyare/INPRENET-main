@@ -15,6 +15,8 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 export class VerPlanillasActivasComponent {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   @Output() getElemSeleccionados = new EventEmitter<any>()
+  @Output() planActivas = new EventEmitter<any>()
+
   form!: FormGroup;
   form1!: FormGroup;
 
@@ -99,5 +101,6 @@ export class VerPlanillasActivasComponent {
     this.mostrarB = false;
     this.desOBenSeleccionado = row;
     this.getElemSeleccionados.emit(this.desOBenSeleccionado);
+    this.planActivas.emit(this.filas);
   }
 }

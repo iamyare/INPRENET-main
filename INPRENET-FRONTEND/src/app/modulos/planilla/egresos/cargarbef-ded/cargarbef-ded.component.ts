@@ -102,14 +102,14 @@ export class CargarbefDedComponent {
   }
 
   calculoPlanilla() {
-    /* this.planillaService.generarPlanillaOrdinaria('BENEFICIARIO SIN CAUSANTE,BENEFICIARIO').subscribe({
+    this.planillaService.calculoPlanilla(this.id_planilla).subscribe({
       next: () => {
-        this.toastr.success('Planilla ordinaria generada para Beneficiarios y Afiliados', 'Éxito');
+        this.toastr.success('se realizó el cálculo de la planilla de forma correcta', 'Éxito');
       },
       error: err => {
-        this.toastr.error('Error al generar la planilla ordinaria para Beneficiarios y Afiliados', 'Error');
+        this.toastr.error('Error en calcular Prioridad', 'Error');
       }
-    }); */
+    });
   }
 
   confirmarAsignacionComplementaria(): void {

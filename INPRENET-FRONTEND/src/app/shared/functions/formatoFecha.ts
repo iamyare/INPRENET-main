@@ -1,4 +1,6 @@
 import * as moment from 'moment';
+import { format, parseISO } from 'date-fns';
+import { es as localeEs } from 'date-fns/locale';
 
 function convertirFecha(fechaStr: string, hora: boolean): string {
   let fechaFormateada = "";
@@ -17,6 +19,14 @@ function convertirFechaInputs(fecha: string): string {
   if (fecha) {
     const fechaMoment = moment.utc(fecha);
     return fechaMoment.format('YYYY-MM-DD');
+  }
+  return ""
+}
+
+function convertirFechaInputs2(fecha: string): string {
+  if (fecha) {
+    const fechaMoment = moment.utc(fecha);
+    return fechaMoment.format('DD/MM/YYYY');
   }
   return ""
 }
@@ -49,4 +59,15 @@ function obtenerNombreMes(fecha: string): string {
   return '';
 }
 
-export { convertirFechaInputsDMY, convertirFecha, convertirFechaInputs, obtenerNombreMes }
+function obtenerRangoMeses(fechaInicio: string, fechaFin: string): string {
+  const inicio = parseISO(fechaInicio);
+  const fin = parseISO(fechaFin);
+
+  const mesAnioInicio = format(inicio, 'MMMM yyyy', { locale: localeEs }).toUpperCase();
+  const mesAnioFin = format(fin, 'MMMM yyyy', { locale: localeEs }).toUpperCase();
+
+  return mesAnioInicio === mesAnioFin ? mesAnioInicio : `${mesAnioInicio} - ${mesAnioFin}`;
+}
+
+
+export { convertirFechaInputsDMY, convertirFecha, convertirFechaInputs, obtenerNombreMes, obtenerRangoMeses, convertirFechaInputs2 }

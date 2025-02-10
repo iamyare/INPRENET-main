@@ -44,6 +44,22 @@ export class PlanillaController {
     return { message: 'Pago realizado y correo de confirmación enviado' };
   }
 
+  @Get('obtenerBajasPorPeriodoExcel')
+  async obtenerbajasPorPeriodoExcel(
+
+    @Res() res,
+  ) {
+    await this.planillaService.obtenerBajasPorPeriodoExcel(res);
+  }
+
+  @Get('obtenerAltaPorPeriodoExcel')
+  async obtenerAfiliadosPorPeriodoExcel(
+
+    @Res() res,
+  ) {
+    await this.planillaService.obtenerAltaPorPeriodoExcel(res);
+  }
+
   @Get('pagos-persona/:dni')
   async obtenerPlanillasPorPersona(@Param('dni') dni: string) {
     try {
@@ -545,6 +561,30 @@ export class PlanillaController {
     await this.planillaService.generarPlanillaOrdinaria(token, generatePlanillaDto.tipos_persona);
   }
 
+  @Post('calculo-planilla/:id_planilla')
+  async calculoPrioridadMontoAplicado(@Param('id_planilla') id_planilla: number): Promise<void> {
+    try {
+      return await this.planillaService.calculoPrioridadMontoAplicado(id_planilla);
+
+    } catch (error) {
+      console.error('Error en calcularPrioridad:', error);
+      //return res.status(500).json({ message: 'Error al quitar valores negativos', error: error.message });
+    }
+
+  }
+
+  @Post('eliminarPlanillaPrelByIdPlanilla')
+  async eliminarPlanillaPrelByIdPlanilla(@Body('id_planilla') id_planilla: any): Promise<void> {
+    try {
+      return await this.planillaService.eliminarPlanillaPrelByIdPlanilla(id_planilla);
+
+    } catch (error) {
+      console.error(`Error al eliminar la planilla preliminar: ${id_planilla}`, error);
+      //return res.status(500).json({ message: 'Error al procesar la solicitud', error: error.message });
+    }
+
+  }
+
   @Post('get-preliminares')
   async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<any[]> {
     try {
@@ -553,6 +593,7 @@ export class PlanillaController {
       throw new BadRequestException('Error en la solicitud: ' + error.message);
     }
   }
+
 
 
 

@@ -45,6 +45,17 @@ export class DeduccionController {
     return this.deduccionService.uploadDeducciones(idTipoPlanilla, id_planilla, file);
   }
 
+  @Post('upload-excel-deducciones-temp')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadDeduccionesTemp(@UploadedFile() file: Express.Multer.File, @Body('idTipoPlanilla') idTipoPlanilla: number, @Body('id_planilla') id_planilla: number,) {
+    return this.deduccionService.uploadDeduccionesTemporal(idTipoPlanilla, id_planilla, file);
+  }
+
+  @Post('insert-deducciones-temp')
+  insertDetDed(@Body('idTipoPlanilla') idTipoPlanilla: number, @Body('id_planilla') id_planilla: number,) {
+    return this.deduccionService.insertDetDed(idTipoPlanilla, id_planilla);
+  }
+
   @Get('deducciones-por-anio-mes/:dni')
   async getDeduccionesPorAnioMes(
     @Param('dni') dni: string,

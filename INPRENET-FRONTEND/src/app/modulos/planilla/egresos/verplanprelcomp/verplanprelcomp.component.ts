@@ -11,6 +11,7 @@ import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { DynamicDialogComponent } from 'src/app/components/dinamicos/dynamic-dialog/dynamic-dialog.component';
 import { saveAs } from 'file-saver';
 import { firstValueFrom } from 'rxjs';
+import { DialogSuboptionsComponent } from 'src/app/modulos/afiliacion/constancias/dialog-suboptions/dialog-suboptions.component';
 
 @Component({
   selector: 'app-verplanprelcomp',
@@ -19,6 +20,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class VerplanprelcompComponent implements OnInit, OnChanges {
   @ViewChild('confirmacionModal') confirmacionModal!: TemplateRef<any>;
+  @ViewChild('confirmacionEliminarPlanillaModal') confirmacionEliminarPlanillaModal!: TemplateRef<any>;
   convertirFecha = convertirFecha;
   idPlanilla: any = "";
   dataPlan: any;
@@ -292,22 +294,22 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
       return;
     }
-  
+
     this.isLoading = true;
-  
+
     try {
       // Siempre envía el estado 1 al método del servicio
       const response: any = await firstValueFrom(
         this.planillaService.exportarDetallesCompletosExcel(this.idPlanilla, 1)
       );
-  
+
       const blob = new Blob([response], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
-  
+
       const nombreArchivo = `PlanillaCompleta_${this.idPlanilla}.xlsx`;
       saveAs(blob, nombreArchivo);
-  
+
       this.toastr.success('Archivo Excel completo generado y descargado con éxito');
     } catch (error) {
       console.error('Error al descargar el Excel completo:', error);
@@ -337,5 +339,113 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     }
   }
 
-}
+  confirmarEliminarPlanilla(): void {
+    const dialogRef = this.dialog.open(this.confirmacionEliminarPlanillaModal);
 
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirmar') {
+        console.log('Cierre de planilla confirmado');
+        // Aquí puedes implementar la lógica para cerrar la planilla.
+        this.eliminarPlanillaPrelByIdPlanilla(this.codigoPlanilla);
+      } else {
+        console.log('Cierre de planilla cancelado');
+      }
+    });
+  }
+
+  async eliminarPlanillaPrelByIdPlanilla(codigoPlanilla: string) {
+    if (!this.idPlanilla) {
+      this.toastr.warning('Debe seleccionar una planilla para poderla eliminar.');
+      return;
+    }
+    this.isLoading = true;
+    let data = { codigoPlanilla: codigoPlanilla, id_planilla: this.idPlanilla }
+    try {
+      const response: any = await this.planillaService.eliminarPlanillaPrelByIdPlanilla(data.id_planilla).toPromise();
+      this.toastr.success(`Planilla con codigo ${codigoPlanilla} Eliminada con éxito`);
+    } catch (error) {
+      console.error(`Error al Eliminar la planilla ${codigoPlanilla}`, error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+
+  openDynamicDialogBajas() {
+    const dialogRef = this.dialog.open(DialogSuboptionsComponent, {
+      width: '400px',
+      data: {
+        options: ['Generar Reporte de bajas'],
+        params: [
+          { key: 'fecha_anterior', label: 'Seleccione la fecha anterior', type: 'date' },
+          { key: 'fecha_reporte', label: 'Seleccione la fecha reporte', type: 'date' }
+        ]
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+
+      if (result) {
+        this.bajas();
+      }
+    });
+  }
+
+  openDynamicDialogAltas() {
+    const dialogRef = this.dialog.open(DialogSuboptionsComponent, {
+      width: '400px',
+      data: {
+        options: ['Generar Reporte de Altas'],
+        params: [
+          { key: 'fecha_anterior', label: 'Seleccione la fecha anterior', type: 'date' },
+          { key: 'fecha_reporte', label: 'Seleccione la fecha reporte', type: 'date' }
+        ]
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+
+      if (result) {
+        this.altas();
+      }
+    });
+  }
+
+
+  bajas() {
+    this.planillaService.obtenerBajasPorPeriodoExcel().subscribe({
+      next: (response) => {
+        const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Bajas.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error al descargar el archivo:', err);
+        alert('Hubo un error al intentar descargar el archivo.');
+      },
+    });
+  }
+
+  altas() {
+    this.planillaService.obtenerAltaPorPeriodoExcel().subscribe({
+      next: (response) => {
+        const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Altas.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error al descargar el archivo:', err);
+        alert('Hubo un error al intentar descargar el archivo.');
+      },
+    });
+  }
+
+}

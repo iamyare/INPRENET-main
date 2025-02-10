@@ -1,8 +1,9 @@
+
 import { ChangeDetectorRef, Component, Inject, OnInit, QueryList, ViewChild, ViewChildren, Output, EventEmitter } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDatepicker } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { addMonths, format, parseISO } from 'date-fns';
+import { addMonths, endOfMonth, format, parseISO } from 'date-fns';
 
 interface Campo {
   nombre: string;
@@ -56,16 +57,16 @@ export class EditarDialogComponent implements OnInit {
 
   crearFormulario() {
     const group: { [key: string]: FormControl | FormGroup } = {};
-  
+
     this.data.campos.forEach(campo => {
       let valorInicial = this.data.valoresIniciales[campo.nombre] || '';
       let validadores = campo.validadores || [];
-  
+
       // 🔹 Si existen validaciones dinámicas para este campo, las agregamos
       if (this.data.validacionesDinamicas && this.data.validacionesDinamicas[campo.nombre]) {
         validadores = [...validadores, ...this.data.validacionesDinamicas[campo.nombre]];
       }
-  
+
       if (campo.tipo === 'daterange') {
         group[campo.nombre] = this.fb.group({
           start: [this.convertToDate(valorInicial?.start) || null, validadores],
@@ -73,45 +74,40 @@ export class EditarDialogComponent implements OnInit {
         });
       } else if (campo.tipo === 'date') {
         group[campo.nombre] = new FormControl(
-          { value: this.convertToDate(valorInicial) || null, disabled: !campo.editable },
+          { value: this.convertToDate(valorInicial), disabled: !campo.editable },
           validadores
         );
       } else {
         group[campo.nombre] = new FormControl({ value: valorInicial, disabled: !campo.editable }, validadores);
       }
     });
-  
+
     this.formGroup = this.fb.group(group);
     this.cdr.detectChanges();
   }
-  
-   
 
-  convertToDate(value: string | Date | null | undefined): Date | null {
-    if (!value) {
-      return null; // Retorna null si el valor no es válido
-    }
-  
+  convertToDate(value: string | Date): Date {
     if (value instanceof Date) {
       return value;
     }
-  
-    if (typeof value === 'string' && value.includes('-')) {
+
+    if (typeof value === 'string') {
+      // Extraemos los componentes de la fecha
       const [year, month, day] = value.split('-').map(Number);
-      return new Date(year, month - 1, day); // Meses en JavaScript empiezan desde 0
+
+      // Creamos la fecha ajustándola directamente como local sin desfase
+      return new Date(year, month - 1, day); // `month - 1` porque los meses empiezan desde 0 en JavaScript
     }
-  
-    return null; // Retorna null si no cumple con los casos anteriores
+
+    // Retornamos una fecha por defecto si el valor no es válido
+    return new Date();
   }
-  
-
-
 
   escucharCambiosFormulario() {
     this.formGroup.valueChanges.subscribe(() => {
       const values = this.formGroup.getRawValue();
 
-      const {
+      let {
         num_rentas_pagar_primer_pago,
         monto_por_periodo,
         num_rentas_aplicadas,
@@ -133,9 +129,9 @@ export class EditarDialogComponent implements OnInit {
       }
 
       // Calcular `periodo_finalizacion` basado en `fecha_calculo`
-      if (num_rentas_aplicadas !== undefined && ultimo_dia_ultima_renta) {
-        let startDate: Date;
-
+      let startDate: Date = new Date();
+      if (num_rentas_aplicadas !== undefined) {
+        // Ajustar la fecha al próximo mes y día especificado
         if (fecha_calculo) {
           if (typeof fecha_calculo === 'string') {
             startDate = parseISO(fecha_calculo);
@@ -145,27 +141,64 @@ export class EditarDialogComponent implements OnInit {
             console.error('El formato de fecha no es válido.');
             return;
           }
-        } else {
-          startDate = new Date();
         }
 
-        // Sumar meses a la fecha inicial
-        const endDateWithMonths = addMonths(startDate, parseInt(num_rentas_aplicadas, 10));
+        // Asegúrate de que el número de meses no sea negativo
+        let meses: number = Math.max(num_rentas_aplicadas - 1, 0);
 
-        // Ajustar la fecha al próximo mes y día especificado
-        const endDateAdjusted = new Date(
-          endDateWithMonths.getFullYear(),
-          endDateWithMonths.getMonth(),
-          parseInt(ultimo_dia_ultima_renta + 1, 10)
-        );
+        const endDateWithMonths = addMonths(startDate, meses);
 
-        this.formGroup
-          .get('periodo_finalizacion')
-          ?.patchValue(format(endDateAdjusted, 'yyyy-MM-dd'), { emitEvent: false });
-        values.periodo_finalizacion = endDateAdjusted
+        let endDateAdjusted: Date | null = null;
+
+        const endOfMonthDate = endOfMonth(endDateWithMonths); // Último día del mes resultante
+        let localEndOfMonthDate = new Date(endOfMonthDate.getTime() - (endOfMonthDate.getTimezoneOffset() * 60000));
+
+        const lastDay = parseInt(ultimo_dia_ultima_renta, 10);
+
+        monto_ultima_cuota = (monto_ultima_cuota === null) ? "" : monto_ultima_cuota;
+        ultimo_dia_ultima_renta = (ultimo_dia_ultima_renta === null) ? "" : ultimo_dia_ultima_renta;
+
+        if ((monto_ultima_cuota === '' || monto_ultima_cuota === 0) && (ultimo_dia_ultima_renta === '' || ultimo_dia_ultima_renta === 0)) {
+          endDateAdjusted = localEndOfMonthDate;
+
+        } else if ((monto_ultima_cuota !== '' && monto_ultima_cuota !== 0) && (ultimo_dia_ultima_renta !== '' && ultimo_dia_ultima_renta !== 0)) {
+
+          let tem = new Date(endDateWithMonths);
+          tem.setMonth(tem.getMonth() + 1);
+          endDateAdjusted = new Date(tem.getFullYear(), tem.getMonth(), lastDay + 1);
+        }
+
+        else if (monto_ultima_cuota !== '' && monto_ultima_cuota !== 0) {
+          let endDateWithMonths = addMonths(startDate, meses + 1);
+          let tem = new Date(endDateWithMonths);
+          tem.setMonth(tem.getMonth() + 1);
+          endDateAdjusted = new Date(tem.getFullYear(), tem.getMonth());
+          console.log(endDateAdjusted);
+
+        }
+
+        else if (ultimo_dia_ultima_renta !== '' && ultimo_dia_ultima_renta !== 0) {
+          let endDateWithMonths = addMonths(startDate, meses + 1);
+          let tem = new Date(endDateWithMonths);
+          tem.setMonth(tem.getMonth());
+          endDateAdjusted = new Date(tem.getFullYear(), tem.getMonth(), lastDay + 1);
+        }
+
+
+        // Verificar que endDateAdjusted no sea null antes de formatear
+        if (endDateAdjusted) {
+          // Ajustar la fecha a la zona horaria local
+          const fechaLocal = new Date(endDateAdjusted.getTime() - (endDateAdjusted.getTimezoneOffset() * 60000));
+
+          this.formGroup
+            .get('periodo_finalizacion')
+            ?.patchValue(fechaLocal, { emitEvent: false });
+
+          values.periodo_finalizacion = endDateAdjusted;
+        }
+
+        this.formUpdated.emit(values); // Emitir cambios del formulario
       }
-
-      this.formUpdated.emit(values); // Emitir cambios del formulario
     });
   }
 
@@ -194,7 +227,7 @@ export class EditarDialogComponent implements OnInit {
     if (!control || !control.errors) {
       return [];
     }
-  
+
     const errors: string[] = [];
     if (control.errors['required']) {
       errors.push('Este campo es requerido.');
@@ -213,7 +246,7 @@ export class EditarDialogComponent implements OnInit {
     }
     return errors;
   }
-  
+
 
   minCurrentValueValidator(minValue: number): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {

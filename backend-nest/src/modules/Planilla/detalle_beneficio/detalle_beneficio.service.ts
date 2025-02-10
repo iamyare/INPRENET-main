@@ -1189,6 +1189,7 @@ export class DetalleBeneficioService {
         num_rentas_aplicadas: data.num_rentas_aplicadas === undefined || data.num_rentas_aplicadas === '' ? null : parseInt(data.num_rentas_aplicadas),
 
         fecha_calculo: this.convertirCadenaAFechaPleca(data.fecha_calculo),
+        periodo_inicio: this.convertirCadenaAFechaPleca(data.fecha_calculo),
         periodo_finalizacion: this.convertirCadenaAFechaPleca(data.periodo_finalizacion),
 
         monto_primera_cuota: isNaN(data.monto_primera_cuota) ? null : data.monto_primera_cuota,

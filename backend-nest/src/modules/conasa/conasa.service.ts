@@ -41,7 +41,7 @@ export class ConasaService {
     private readonly consultaRepository: Repository<Net_Consultas_Medicas>,
     @InjectRepository(Net_Facturas_Conasa)
     private readonly facturasRepository: Repository<Net_Facturas_Conasa>,
-  ) {}
+  ) { }
 
   async obtenerAfiliadosMesAnterior() {
     return this.dataSource.query(`
@@ -137,7 +137,7 @@ export class ConasaService {
         ...beneficiario,
       }),
     );
-  
+
     await this.beneficiariosRepository.save(nuevosBeneficiarios);
     return 'Beneficiarios creados exitosamente.';
   }
@@ -150,7 +150,7 @@ export class ConasaService {
     }
     return persona;
   }
-  
+
   async verificarPlan(idPlan: number, manager?: any): Promise<Net_Plan> {
     const repo = manager ? manager.getRepository(Net_Plan) : this.planesRepository;
     const plan = await repo.findOne({ where: { id_plan: idPlan } });
@@ -159,7 +159,7 @@ export class ConasaService {
     }
     return plan;
   }
-  
+
   async verificarContratoExistente(idPersona: number, manager?: any): Promise<boolean> {
     const repo = manager ? manager.getRepository(Net_Contratos_Conasa) : this.contratosRepository;
     const contratoExistente = await repo.findOne({
@@ -167,18 +167,18 @@ export class ConasaService {
     });
     return !!contratoExistente;
   }
-  
+
   async asignarContrato(contratoData: AsignarContratoDto): Promise<string> {
     const persona = await this.verificarPersona(contratoData.idPersona);
     const plan = await this.verificarPlan(contratoData.idPlan);
     const existeContrato = await this.verificarContratoExistente(contratoData.idPersona);
-  
+
     if (existeContrato) {
       throw new BadRequestException('La persona ya tiene un contrato activo.');
     }
-  
+
     const numeroProducto = this.generateNumeroProducto();
-  
+
     const contrato = this.contratosRepository.create({
       titular: persona,
       plan,
@@ -191,26 +191,26 @@ export class ConasaService {
       status: 'ACTIVO',
       observacion: contratoData.observacion,
     });
-  
+
     await this.contratosRepository.save(contrato);
     return 'Contrato asignado exitosamente.';
   }
-  
+
   async manejarTransaccion(payload: ManejarTransaccionDto): Promise<string> {
     const { contrato, beneficiarios } = payload;
-  
+
     return await this.dataSource.transaction(async (manager) => {
       // Verificar la persona
       const persona = await this.verificarPersona(contrato.idPersona, manager);
       const plan = await this.verificarPlan(contrato.idPlan, manager);
       const existeContrato = await this.verificarContratoExistente(contrato.idPersona, manager);
-  
+
       if (existeContrato) {
         throw new BadRequestException(
           `La persona con ID ${contrato.idPersona} ya tiene un contrato activo.`,
         );
       }
-  
+
       // Crear el contrato
       const nuevoContrato = manager.create(Net_Contratos_Conasa, {
         titular: persona,
@@ -224,9 +224,9 @@ export class ConasaService {
         status: 'ACTIVO',
         observacion: contrato.observacion,
       });
-  
+
       const savedContrato = await manager.save(nuevoContrato);
-  
+
       // Crear beneficiarios si existen
       if (beneficiarios && beneficiarios.length > 0) {
         const beneficiariosRepo = manager.getRepository(Net_Beneficiarios_Conasa);
@@ -238,11 +238,11 @@ export class ConasaService {
         );
         await beneficiariosRepo.save(nuevosBeneficiarios);
       }
-  
+
       return 'Contrato y beneficiarios procesados exitosamente.';
     });
   }
-  
+
   formatDateToYYYYMMDD(dateString: string): string {
     if (!dateString) return null;
     const date = new Date(dateString);
@@ -254,55 +254,55 @@ export class ConasaService {
 
   async obtenerContratoYBeneficiariosPorDNI(dni: string): Promise<any> {
     const persona = await this.personaRepository.findOne({
-        where: { n_identificacion: dni },
-        relations: ['detallePersona'],
+      where: { n_identificacion: dni },
+      relations: ['detallePersona'],
     });
 
     if (!persona) {
-        throw new NotFoundException(`No se encontró ninguna persona con el DNI ${dni}`);
+      throw new NotFoundException(`No se encontró ninguna persona con el DNI ${dni}`);
     }
 
     const contrato = await this.contratosRepository.findOne({
-        where: { titular: { id_persona: persona.id_persona } },
-        relations: ['plan', 'plan.categoria', 'beneficiarios'],
+      where: { titular: { id_persona: persona.id_persona } },
+      relations: ['plan', 'plan.categoria', 'beneficiarios'],
     });
 
     if (!contrato) {
-        throw new NotFoundException(`No se encontró ningún contrato para la persona con DNI ${dni}`);
+      throw new NotFoundException(`No se encontró ningún contrato para la persona con DNI ${dni}`);
     }
 
     const contratoFormateado = {
-        idContrato: contrato.id_contrato,
-        numeroProducto: contrato.numero_producto,
-        lugarCobro: contrato.lugar_cobro,
-        fechaInicioContrato: contrato.fecha_inicio_contrato,
-        fechaCancelacionContrato: contrato.fecha_cancelacion_contrato,
-        status: contrato.status,
-        plan: {
-            idPlan: contrato.plan.id_plan,
-            nombrePlan: contrato.plan.nombre_plan,
-            precio: contrato.plan.precio,
-            descripcion: contrato.plan.descripcion,
-            proteccionPara: contrato.plan.proteccion_para,
-            categoria: contrato.plan.categoria
-                ? {
-                      idCategoria: contrato.plan.categoria.id_categoria,
-                      nombre: contrato.plan.categoria.nombre,
-                  }
-                : null,
-        },
-        beneficiarios: contrato.beneficiarios.map((beneficiario) => ({
-            idBeneficiario: beneficiario.id_beneficiario,
-            primerNombre: beneficiario.primer_nombre,
-            segundoNombre: beneficiario.segundo_nombre,
-            primerApellido: beneficiario.primer_apellido,
-            segundoApellido: beneficiario.segundo_apellido,
-            parentesco: beneficiario.parentesco,
-            fechaNacimiento: beneficiario.fecha_nacimiento,
-        })),
+      idContrato: contrato.id_contrato,
+      numeroProducto: contrato.numero_producto,
+      lugarCobro: contrato.lugar_cobro,
+      fechaInicioContrato: contrato.fecha_inicio_contrato,
+      fechaCancelacionContrato: contrato.fecha_cancelacion_contrato,
+      status: contrato.status,
+      plan: {
+        idPlan: contrato.plan.id_plan,
+        nombrePlan: contrato.plan.nombre_plan,
+        precio: contrato.plan.precio,
+        descripcion: contrato.plan.descripcion,
+        proteccionPara: contrato.plan.proteccion_para,
+        categoria: contrato.plan.categoria
+          ? {
+            idCategoria: contrato.plan.categoria.id_categoria,
+            nombre: contrato.plan.categoria.nombre,
+          }
+          : null,
+      },
+      beneficiarios: contrato.beneficiarios.map((beneficiario) => ({
+        idBeneficiario: beneficiario.id_beneficiario,
+        primerNombre: beneficiario.primer_nombre,
+        segundoNombre: beneficiario.segundo_nombre,
+        primerApellido: beneficiario.primer_apellido,
+        segundoApellido: beneficiario.segundo_apellido,
+        parentesco: beneficiario.parentesco,
+        fechaNacimiento: beneficiario.fecha_nacimiento,
+      })),
     };
     return contratoFormateado;
-}
+  }
 
 
   async obtenerPlanillaContratosActivos(email: string, password: string): Promise<any[]> {
@@ -311,7 +311,7 @@ export class ConasaService {
         correo_1: email,
         usuarioEmpresas: {
           usuarioModulos: {
-            rolModulo: { nombre: In(['ADMINISTRADOR' ,'CONSULTA', 'TODO']) },
+            rolModulo: { nombre: In(['ADMINISTRADOR', 'CONSULTA', 'TODO']) },
           },
         },
       },
@@ -321,20 +321,20 @@ export class ConasaService {
         'usuarioEmpresas.usuarioModulos.rolModulo',
       ],
     });
-  
+
     if (!empCentTrabajoRepository) {
       throw new UnauthorizedException('User not found or unauthorized');
     }
-  
+
     const isPasswordValid = await bcrypt.compare(
       password,
       empCentTrabajoRepository.usuarioEmpresas[0].contrasena,
     );
-  
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
-  
+
     // Consulta para obtener los contratos activos con la información solicitada
     const query = this.dataSource
       .createQueryBuilder()
@@ -351,11 +351,11 @@ export class ConasaService {
       .innerJoin('contrato.plan', 'plan')
       .innerJoin('plan.categoria', 'categoria')
       .where('contrato.status = :status', { status: 'ACTIVO' });
-  
+
     const result = await query.getRawMany();
     return result;
   }
-  
+
   async consultaUnificada(
     tipo: number,
     terminos: string,
@@ -367,7 +367,7 @@ export class ConasaService {
         correo_1: email,
         usuarioEmpresas: {
           usuarioModulos: {
-            rolModulo: { nombre: In(['ADMINISTRADOR' ,'CONSULTA', 'TODO']) },
+            rolModulo: { nombre: In(['ADMINISTRADOR', 'CONSULTA', 'TODO']) },
           },
         },
       },
@@ -377,20 +377,20 @@ export class ConasaService {
         'usuarioEmpresas.usuarioModulos.rolModulo',
       ],
     });
-  
+
     if (!empCentTrabajoRepository) {
       throw new UnauthorizedException('User not found or unauthorized');
     }
-  
+
     const isPasswordValid = await bcrypt.compare(
       password,
       empCentTrabajoRepository.usuarioEmpresas[0].contrasena
     );
-  
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
-  
+
     // Consulta por tipo
     if (tipo === 1) {
       // Consulta por DNI
@@ -407,15 +407,15 @@ export class ConasaService {
           'municipio_nacimiento.departamento',
         ],
       });
-  
+
       if (!persona) {
         throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${terminos} no existe`);
       }
-  
+
       const tiposPersona = persona.detallePersona
         .map(detalle => detalle.tipoPersona?.tipo_persona)
         .filter(Boolean);
-  
+
       return {
         N_IDENTIFICACION: persona.n_identificacion,
         PRIMER_NOMBRE: persona.primer_nombre,
@@ -439,15 +439,15 @@ export class ConasaService {
         .split(' ')
         .filter((palabra) => palabra.trim().length > 0)
         .map((palabra) => palabra.trim().toLowerCase());
-  
+
       if (palabras.length !== 2) {
         throw new BadRequestException('Debe proporcionar exactamente dos términos de búsqueda.');
       }
-  
+
       if (palabras.some((palabra) => palabra.length < 3)) {
         throw new BadRequestException('Ambos términos deben tener al menos 3 caracteres.');
       }
-  
+
       const query = this.personaRepository.createQueryBuilder('persona')
         .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
         .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
@@ -457,10 +457,10 @@ export class ConasaService {
         .leftJoinAndSelect('persona.municipio_nacimiento', 'municipio_nacimiento')
         .leftJoinAndSelect('municipio_nacimiento.departamento', 'departamento_nacimiento')
         .leftJoinAndSelect('persona.tipoIdentificacion', 'tipoIdentificacion');
-  
+
       let whereClause = '';
       const parametros: Record<string, string> = {};
-  
+
       palabras.forEach((palabra, index) => {
         const marcador = `palabra${index}`;
         const condiciones = [
@@ -472,26 +472,26 @@ export class ConasaService {
         ];
         whereClause += whereClause ? ' AND ' : '';
         whereClause += `(${condiciones.join(' OR ')})`;
-  
+
         parametros[`${marcador}_primer_nombre`] = `%${palabra}%`;
         parametros[`${marcador}_segundo_nombre`] = `%${palabra}%`;
         parametros[`${marcador}_tercer_nombre`] = `%${palabra}%`;
         parametros[`${marcador}_primer_apellido`] = `%${palabra}%`;
         parametros[`${marcador}_segundo_apellido`] = `%${palabra}%`;
       });
-  
+
       const personas = await query.where(whereClause).setParameters(parametros).getMany();
-  
+
       if (personas.length === 0) {
         throw new NotFoundException(`No persons found with terms: ${terminos}`);
       }
-  
+
       // Mapear y devolver la información completa
       return personas.map((persona) => {
         const tiposPersona = persona.detallePersona
           .map((detalle) => detalle.tipoPersona?.tipo_persona)
           .filter(Boolean);
-  
+
         return {
           N_IDENTIFICACION: persona.n_identificacion,
           PRIMER_NOMBRE: persona.primer_nombre,
@@ -515,7 +515,7 @@ export class ConasaService {
       throw new BadRequestException('Tipo de consulta no válido. Debe ser 1 (DNI) o 2 (Nombres/Apellidos).');
     }
   }
-  
+
   async crearConsultasMedicas(
     crearConsultasDto: CrearConsultaDto[],
     email: string,
@@ -536,25 +536,25 @@ export class ConasaService {
         'usuarioEmpresas.usuarioModulos.rolModulo',
       ],
     });
-  
+
     if (!empCentTrabajoRepository) {
       throw new UnauthorizedException('User not found or unauthorized');
     }
-  
+
     const isPasswordValid = await bcrypt.compare(
       password,
       empCentTrabajoRepository.usuarioEmpresas[0].contrasena
     );
-  
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
-  
+
     const resultados = {
       totalExitosos: 0,
       fallidos: [],
     };
-  
+
     for (const consultaDto of crearConsultasDto) {
       const {
         dni,
@@ -568,40 +568,40 @@ export class ConasaService {
         detalle_atencion,
         fecha_cierre,
       } = consultaDto;
-  
+
       try {
         if (!dni || dni.length !== 13) {
           throw new Error('El campo "dni" es obligatorio y debe tener exactamente 13 caracteres.');
         }
-  
+
         if (!fecha_consulta) {
           throw new Error('El campo "fecha_consulta" es obligatorio.');
         }
-  
+
         if (!motivo_consulta) {
           throw new Error('El campo "motivo_consulta" es obligatorio.');
         }
-  
+
         if (!tiempo_sintomas) {
           throw new Error('El campo "tiempo_sintomas" es obligatorio.');
         }
-  
+
         if (!tipo_atencion) {
           throw new Error('El campo "tipo_atencion" es obligatorio.');
         }
-  
+
         if (!triage) {
           throw new Error('El campo "triage" es obligatorio.');
         }
-  
+
         if (!diagnostico_presuntivo) {
           throw new Error('El campo "diagnostico_presuntivo" es obligatorio.');
         }
-  
+
         if (detalle_atencion && detalle_atencion.length > 1000) {
           throw new Error('El campo "detalle_atencion" no debe exceder los 500 caracteres.');
         }
-  
+
         if (fecha_cierre && isNaN(Date.parse(fecha_cierre))) {
           throw new Error('El campo "fecha_cierre" debe tener un formato de fecha válido.');
         }
@@ -610,7 +610,7 @@ export class ConasaService {
           ...consultaDto,
           usuario_creacion: email,
         });
-  
+
         await this.consultaRepository.save(nuevaConsulta);
         resultados.totalExitosos += 1;
       } catch (error) {
@@ -626,14 +626,14 @@ export class ConasaService {
       fallidos: resultados.fallidos
     };
   }
-  
+
   async obtenerDatos(email: string, password: string, tipo: number): Promise<any> {
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
       where: {
         correo_1: email,
         usuarioEmpresas: {
           usuarioModulos: {
-            rolModulo: { nombre: In(['ADMINISTRADOR' ,'CONSULTA', 'TODO']) },
+            rolModulo: { nombre: In(['ADMINISTRADOR', 'CONSULTA', 'TODO']) },
           },
         },
       },
@@ -643,23 +643,23 @@ export class ConasaService {
         'usuarioEmpresas.usuarioModulos.rolModulo',
       ],
     });
-  
+
     if (!empCentTrabajoRepository) {
       throw new UnauthorizedException('User not found or unauthorized');
     }
-  
+
     const isPasswordValid = await bcrypt.compare(
       password,
       empCentTrabajoRepository.usuarioEmpresas[0].contrasena,
     );
-  
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
-  
+
     const currentDate = new Date();
     const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
-  
+
     if (tipo === 1) {
       const currentDate = new Date();
       const formattedCurrentDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
@@ -667,7 +667,7 @@ export class ConasaService {
       const formattedPreviousDate1 = `${previousDate1.getFullYear()}-${String(previousDate1.getMonth() + 1).padStart(2, '0')}`;
       const previousDate2 = new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 1);
       const formattedPreviousDate2 = `${previousDate2.getFullYear()}-${String(previousDate2.getMonth() + 1).padStart(2, '0')}`;
-    
+
       // Validar si alguna planilla se ha pagado en el mes actual
       const planillaPagadaQuery = `
         SELECT COUNT(*) AS pagadas
@@ -686,7 +686,7 @@ export class ConasaService {
             p.id_planilla,
             tp.nombre_planilla,
             p.periodo_inicio,
-            p.periodo_finalizacion
+            p.fecha_cierre
         FROM
             net_detalle_pago_beneficio dpb
         INNER JOIN
@@ -699,6 +699,7 @@ export class ConasaService {
             tp.nombre_planilla IN ('ORDINARIA DE JUBILADOS Y PENSIONADOS', 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS')
             AND dpb.id_af_banco IS NOT NULL
             AND dpb.estado = 'PAGADA'
+            AND p.generar_voucher = 'SI'
     ),
     mes_actual AS (
         SELECT DISTINCT id_persona
@@ -745,7 +746,7 @@ export class ConasaService {
         ALTAS_MES_ANTERIOR_2,
         BAJAS_MES_ANTERIOR_2,
       } = result[0] || {};
-    
+
       const response = [];
       if (planillasPagadas === 0) {
         response.push({
@@ -778,17 +779,17 @@ export class ConasaService {
       );
       return response;
     }
-     else if (tipo === 2) {
+    else if (tipo === 2) {
       const contratosActivos = await this.contratosRepository.find({
         where: { status: 'ACTIVO' },
         relations: ['plan', 'plan.categoria'],
       });
-  
+
       const contratosCancelados = await this.contratosRepository.find({
         where: { status: 'CANCELADO' },
         relations: ['plan', 'plan.categoria'],
       });
-  
+
       const categoriaMap = new Map<
         string,
         {
@@ -806,12 +807,12 @@ export class ConasaService {
           >;
         }
       >();
-  
+
       contratosActivos.forEach((contrato) => {
         const categoria = contrato.plan.categoria.nombre;
         const plan = contrato.plan.nombre_plan;
         const valorContrato = contrato.plan.precio;
-  
+
         if (!categoriaMap.has(categoria)) {
           categoriaMap.set(categoria, {
             nombre_categoria: categoria,
@@ -822,23 +823,23 @@ export class ConasaService {
             planes: new Map(),
           });
         }
-  
+
         const categoriaData = categoriaMap.get(categoria)!;
         categoriaData.tot_no_contratos_activos++;
         categoriaData.total_valor_contratos += valorContrato;
-  
+
         if (!categoriaData.planes.has(plan)) {
           categoriaData.planes.set(plan, {
             tot_no_contratos_activos: 0,
             total_valor_contratos: 0,
           });
         }
-  
+
         const planData = categoriaData.planes.get(plan)!;
         planData.tot_no_contratos_activos++;
         planData.total_valor_contratos += valorContrato;
       });
-  
+
       contratosActivos.forEach((contrato) => {
         const categoria = contrato.plan.categoria.nombre;
         if (new Date(contrato.fecha_inicio_contrato).getMonth() === currentDate.getMonth()) {
@@ -846,7 +847,7 @@ export class ConasaService {
           categoriaData.altas++;
         }
       });
-  
+
       contratosCancelados.forEach((contrato) => {
         const categoria = contrato.plan.categoria.nombre;
         if (new Date(contrato.fecha_cancelacion_contrato).getMonth() === currentDate.getMonth()) {
@@ -854,7 +855,7 @@ export class ConasaService {
           categoriaData.cancelaciones++;
         }
       });
-  
+
       return Array.from(categoriaMap.entries()).map(([categoria, data]) => ({
         mes: formattedDate,
         nombre_categoria: data.nombre_categoria,
@@ -872,32 +873,32 @@ export class ConasaService {
       throw new BadRequestException('Tipo de consulta no válido. Debe ser 1 o 2.');
     }
   }
-  
+
   async cancelarContrato(dto: CancelarContratoDto): Promise<string> {
     let contrato: Net_Contratos_Conasa | undefined;
     if (dto.id_contrato) {
-        contrato = await this.contratosRepository.findOne({
-            where: { id_contrato: dto.id_contrato, status: 'ACTIVO' },
-        });
+      contrato = await this.contratosRepository.findOne({
+        where: { id_contrato: dto.id_contrato, status: 'ACTIVO' },
+      });
     } else if (dto.n_identificacion) {
-        const persona = await this.personaRepository.findOne({
-            where: { n_identificacion: dto.n_identificacion },
-        });
+      const persona = await this.personaRepository.findOne({
+        where: { n_identificacion: dto.n_identificacion },
+      });
 
-        if (!persona) {
-            throw new NotFoundException(
-                `No se encontró una persona con identificación ${dto.n_identificacion}`,
-            );
-        }
+      if (!persona) {
+        throw new NotFoundException(
+          `No se encontró una persona con identificación ${dto.n_identificacion}`,
+        );
+      }
 
-        contrato = await this.contratosRepository.findOne({
-            where: { titular: { id_persona: persona.id_persona }, status: 'ACTIVO' },
-            relations: ['titular'],
-        });
+      contrato = await this.contratosRepository.findOne({
+        where: { titular: { id_persona: persona.id_persona }, status: 'ACTIVO' },
+        relations: ['titular'],
+      });
     }
 
     if (!contrato) {
-        throw new NotFoundException('No se encontró un contrato activo para cancelar.');
+      throw new NotFoundException('No se encontró un contrato activo para cancelar.');
     }
 
     contrato.status = 'CANCELADO';
@@ -908,7 +909,7 @@ export class ConasaService {
 
     return `Contrato con ID ${contrato.id_contrato} ha sido cancelado exitosamente.`;
   }
-  
+
   async obtenerAfiliadosPorPeriodo(fechaInicio: string, fechaFin: string) {
     try {
       const [diaInicio, mesInicio, anoInicio] = fechaInicio.split('/');
@@ -996,7 +997,7 @@ export class ConasaService {
           `TRUNC(MONTHS_BETWEEN(SYSDATE, beneficiario.fecha_nacimiento) / 12) AS edad`, // Edad calculada
         ])
         .getRawMany();
-  
+
       return beneficiarios;
     } catch (error) {
       throw new BadRequestException(
@@ -1004,7 +1005,7 @@ export class ConasaService {
       );
     }
   }
-  
+
   async obtenerAfiliadosPorPeriodoExcel(
     fechaInicio: string,
     fechaFin: string,
@@ -1014,14 +1015,14 @@ export class ConasaService {
       // Parsear las fechas en formato dd/MM/yyyy
       const [diaInicio, mesInicio, anoInicio] = fechaInicio.split('/');
       const [diaFin, mesFin, anoFin] = fechaFin.split('/');
-  
+
       const fechaInicioISO = `${anoInicio}-${mesInicio}-${diaInicio}`;
       const fechaFinISO = `${anoFin}-${mesFin}-${diaFin}`;
-  
+
       if (isNaN(new Date(fechaInicioISO).getTime()) || isNaN(new Date(fechaFinISO).getTime())) {
         throw new BadRequestException('Las fechas no son válidas.');
       }
-  
+
       // Consultar los afiliados
       const afiliados = await this.contratosRepository
         .createQueryBuilder('contrato')
@@ -1056,7 +1057,7 @@ export class ConasaService {
           'categoria.nombre',
         ])
         .getMany();
-  
+
       // Formatear los datos para el Excel
       const afiliadosConFormato = afiliados.map((afiliado) => ({
         'Número de Producto': afiliado.numero_producto,
@@ -1084,20 +1085,20 @@ export class ConasaService {
         'Nombre del Plan': afiliado.plan.nombre_plan,
         Categoría: afiliado.plan.categoria.nombre,
       }));
-  
+
       // Crear el archivo Excel
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Afiliados');
-  
+
       // Definir las columnas del archivo
       worksheet.columns = Object.keys(afiliadosConFormato[0]).map((key) => ({
         header: key,
         key,
       }));
-  
+
       // Agregar las filas al archivo
       worksheet.addRows(afiliadosConFormato);
-  
+
       // Configurar la respuesta HTTP
       res.setHeader(
         'Content-Disposition',
@@ -1107,7 +1108,7 @@ export class ConasaService {
         'Content-Type',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       );
-  
+
       // Enviar el archivo al cliente
       await workbook.xlsx.write(res);
       res.end();
@@ -1115,7 +1116,7 @@ export class ConasaService {
       throw new BadRequestException(error.message || 'Error al generar el archivo Excel.');
     }
   }
-  
+
   async generarExcelBeneficiarios(res: Response): Promise<void> {
     try {
       // Ejecutar la consulta existente
@@ -1134,16 +1135,16 @@ export class ConasaService {
           `TRUNC(MONTHS_BETWEEN(SYSDATE, beneficiario.fecha_nacimiento) / 12) AS edad`, // Edad calculada
         ])
         .getRawMany();
-  
+
       // Crear la hoja de trabajo
       const worksheet = XLSX.utils.json_to_sheet(beneficiarios);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Beneficiarios');
-  
+
       // Configurar el archivo en formato Excel
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
       const excelFilename = `Beneficiarios_${new Date().toISOString().split('T')[0]}.xlsx`;
-  
+
       // Enviar el archivo como respuesta
       res.setHeader('Content-Disposition', `attachment; filename=${excelFilename}`);
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -1162,7 +1163,7 @@ export class ConasaService {
       order: { fecha_subida: 'DESC' },
     });
   }
-  
+
 
   async obtenerFactura(id: number): Promise<Net_Facturas_Conasa | null> {
     return await this.facturasRepository.findOne({ where: { id_factura: id } });

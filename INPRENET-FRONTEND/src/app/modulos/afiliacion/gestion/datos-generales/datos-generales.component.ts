@@ -295,10 +295,10 @@ export class DatosGeneralesComponent implements OnInit {
   ];
 
   grado_academico = [
-    { "label": "PRIMARIA", "value": "PRIMARIA" },
-    { "label": "EDUCACIÓN MEDIA", "value": "EDUCACIÓN MEDIA" },
-    { "label": "PRE-GRADO", "value": "PRE-GRADO" },
-    { "label": "POST-GRADO", "value": "POST-GRADO" },
+    { "label": "MAESTRO DE EDUCACION PRIMARIA", "value": "MAESTRO DE EDUCACION PRIMARIA" },
+    { "label": "MAESTRO DE EDUCACION SECUNDARIA", "value": "MAESTRO DE EDUCACION SECUNDARIA" },
+    { "label": "MAESTRO DE EDUCACION SUPERIOR", "value": "MAESTRO DE EDUCACION SUPERIOR" },
+    { "label": "LICENCIATURA EN EDUCACION SUPERIOR", "value": "LICENCIATURA EN EDUCACION SUPERIOR" },
   ];
 
   onTipoIdentificacionChange(tipoIdentificacion: number) {

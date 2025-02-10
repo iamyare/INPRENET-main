@@ -4155,24 +4155,26 @@ GROUP BY
       const beneficios = await this.entityManager.query(query);
       const workbook = new ExcelJS.Workbook();
       const beneficiosSheet = workbook.addWorksheet('Beneficios');
+      const fallecidosSheet = workbook.addWorksheet('Fallecidos');
   
-      // Definir encabezados de la hoja de cálculo
-      beneficiosSheet.columns = [
+      const columns = [
         { header: 'IDENTIFICACION', key: 'N_IDENTIFICACION', width: 15 },
         { header: 'Nombre Completo', key: 'NOMBRE_COMPLETO', width: 30 },
         { header: 'FALLECIDO', key: 'FALLECIDO', width: 15 },
-        { header: 'CODIGO PLANILLA', key: 'CODIGO_PLANILLA', width: 15 },
-        { header: 'ESTADO', key: 'ESTADO', width: 15 },
-        { header: 'ESTADO_SOLICITUD', key: 'ESTADO_SOLICITUD', width: 15 },
         { header: 'CODIGO DE BENEFICIO', key: 'ID_BENEFICIO', width: 15 },
-        { header: 'RENTAS APROBADAS', key: 'RENTAS_APROBADAS', width: 15 },
-        { header: 'FECHA EFECTIVIDAD', key: 'FECHA_EFECTIVIDAD', width: 15 },
+        { header: 'PERIODO INICIO', key: 'PERIODO_INICIO', width: 15 },
         { header: 'PERIODO FINALIZACION', key: 'PERIODO_FINALIZACION', width: 15 },
       ];
+      
+      beneficiosSheet.columns = columns;
+      fallecidosSheet.columns = columns;
   
-      // Agregar datos
       beneficios.forEach((beneficio) => {
-        beneficiosSheet.addRow(beneficio);
+        if (beneficio.FALLECIDO === 'SI') {
+          fallecidosSheet.addRow(beneficio);
+        } else {
+          beneficiosSheet.addRow(beneficio);
+        }
       });
   
       res.setHeader(
@@ -4251,12 +4253,9 @@ GROUP BY
       beneficiosSheet.columns = [
         { header: 'IDENTIFICACION', key: 'N_IDENTIFICACION', width: 15 },
         { header: 'Nombre Completo', key: 'NOMBRE_COMPLETO', width: 30 },
-        { header: 'CODIGO PLANILLA', key: 'CODIGO_PLANILLA', width: 15 },
         { header: 'PERIODO INICIO', key: 'PERIODO_INICIO', width: 15 },
         { header: 'PERIODO FINALIZACION', key: 'PERIODO_FINALIZACION', width: 15 },
-        { header: 'ESTADO', key: 'ESTADO', width: 15 },
         { header: 'CODIGO DE BENEFICIO', key: 'ID_BENEFICIO', width: 15 },
-        { header: 'FECHA EFECTIVIDAD', key: 'FECHA_EFECTIVIDAD', width: 15 },
       ];
   
       // Agregar datos

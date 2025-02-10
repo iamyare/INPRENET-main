@@ -129,13 +129,13 @@
           </mat-form-field>
         </div>
       
-        <div class="form-row">
+        <div class="form-row" style="display: flex; flex-direction: column; gap: 20px;">
           <mat-radio-group formControlName="trabaja" aria-label="Seleccione si trabaja" class="radio-group">
             <label>¿TRABAJA?</label>
             <mat-radio-button value="SÍ">SÍ</mat-radio-button>
             <mat-radio-button value="NO">NO</mat-radio-button>
           </mat-radio-group>
-      
+        
           <div class="half-width afiliado-container">
             <label class="afiliado-label">¿ES AFILIADO?</label>
             <div [ngClass]="{'text-success': esAfiliadoText === 'SÍ', 'text-danger': esAfiliadoText === 'NO'}">
@@ -143,6 +143,7 @@
             </div>
           </div>
         </div>
+        
       </div>
       
       <br>

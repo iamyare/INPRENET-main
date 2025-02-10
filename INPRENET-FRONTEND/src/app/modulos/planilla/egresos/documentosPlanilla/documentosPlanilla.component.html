@@ -60,6 +60,26 @@
 
         <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="descargarExcelInv()">Generar Excel Para Inversiones</button>
         <!-- Puedes añadir más botones aquí -->
+
+        <!-- Botón Descargar Altas Excel -->
+          <button *ngIf="tipoPlanilla === 'ordinaria'" 
+          class="button" 
+          mat-raised-button color="primary" 
+          [disabled]="!planillaForm.valid" 
+          (click)="descargarAltasExcel()">
+          Descargar Altas Excel
+          </button>
+
+          <!-- Botón Descargar Bajas Excel -->
+          <button *ngIf="tipoPlanilla === 'ordinaria'" 
+          class="button" 
+          mat-raised-button color="warn" 
+          [disabled]="!planillaForm.valid" 
+          (click)="descargarBajasExcel()">
+          Descargar Bajas Excel
+          </button>
+
+        
       </div>
     </form>
   </div>

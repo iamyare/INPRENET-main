@@ -970,37 +970,33 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   eliminarCertificadoDefuncion(): void {
     this.certificadoDefuncionFile = null;
-    this.formDatosGenerales.get('archivoCertDef')?.setValue(null); // Limpiar el valor del control
-    this.formDatosGenerales.get('archivoCertDef')?.markAsTouched(); // Marcar como tocado
-    this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity(); // Forzar la validación
-    this.certificadoDefuncionUrl = null; // Limpiar la URL de previsualización
+    this.formDatosGenerales.get('archivoCertDef')?.setValue(null);
+    this.formDatosGenerales.get('archivoCertDef')?.markAsTouched();
+    this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity(); 
+    this.certificadoDefuncionUrl = null;
   }
 
   onCertificadoDefuncionChange(event: Event): void {
-    const input = event.target as HTMLInputElement; // Obtener el input de archivo
+    const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      const file = input.files[0]; // Obtener el archivo seleccionado
+      const file = input.files[0];
       this.certificadoDefuncionFile = file;
-      this.formDatosGenerales.get('archivoCertDef')?.setValue(file); // Actualizar el valor del control
-      this.formDatosGenerales.get('archivoCertDef')?.markAsTouched(); // Marcar como tocado
-      this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity(); // Forzar la validación
+      this.formDatosGenerales.get('archivoCertDef')?.setValue(file);
+      this.formDatosGenerales.get('archivoCertDef')?.markAsTouched();
+      this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
       this.certificadoDefuncionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(file));
     }
   }
 
   tieneTipoPersona(): boolean {
-    return this.tableData && this.tableData.length > 0;
+    return !!(this.Afiliado?.TIPO_PERSONA || this.tableData.length > 0);
   }
   
   esAfiliado(): boolean {
-    return this.Afiliado?.TIPO_PERSONA === 'AFILIADO' || 
-           this.Afiliado?.TIPO_PERSONA === 'JUBILADO' || 
-           this.Afiliado?.TIPO_PERSONA === 'PENSIONADO' || 
+    return !!(this.Afiliado?.TIPO_PERSONA && 
+              ["AFILIADO", "JUBILADO", "PENSIONADO"].includes(this.Afiliado.TIPO_PERSONA)) || 
            this.tableData.some(item => 
-             item.tipoPersona === 'AFILIADO' || 
-             item.tipoPersona === 'JUBILADO' || 
-             item.tipoPersona === 'PENSIONADO'
-           );
+              ["AFILIADO", "JUBILADO", "PENSIONADO"].includes(item.tipoPersona));
   }
   
   obtenerNombreTipoPersona(): string {

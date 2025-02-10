@@ -252,7 +252,7 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
         Validators.required,
         this.validarMayorDe18Anios()
       ]
-    } as any) // Agregar 'as any' si sigue marcando error
+    } as any)
   );
 
   this.formGroup.addControl(

@@ -420,23 +420,25 @@ export class PlanillaService {
     );
   }
 
-  obtenerAltaPorPeriodoExcel() {
-    const url = `${environment.API_URL}/api/planilla/obtenerAltaPorPeriodoExcel`;
-    return this.http.get(url, { responseType: 'blob' }).pipe(
-      catchError((error) => {
-        console.error('Error al descargar el Excel de afiliados por periodo', error);
-        throw error;
-      })
-    );
+    obtenerAltaPorPeriodoExcel(mes_inicio: string, anio_inicio: string, mes_finalizacion: string, anio_finalizacion: string) {
+      const url = `${environment.API_URL}/api/planilla/obtenerAltaPorPeriodoExcel?mes_inicio=${mes_inicio}&anio_inicio=${anio_inicio}&mes_finalizacion=${mes_finalizacion}&anio_finalizacion=${anio_finalizacion}`;
+      
+      return this.http.get(url, { responseType: 'blob' }).pipe(
+        catchError((error) => {
+          console.error('Error al descargar el Excel de afiliados por periodo', error);
+          throw error;
+        })
+      );
   }
-  obtenerBajasPorPeriodoExcel() {
-    const url = `${environment.API_URL}/api/planilla/obtenerBajasPorPeriodoExcel`;
-    return this.http.get(url, { responseType: 'blob' }).pipe(
-      catchError((error) => {
-        console.error('Error al descargar el Excel de afiliados por periodo', error);
-        throw error;
-      })
-    );
+
+  obtenerBajasPorPeriodoExcel(mes_inicio: string, anio_inicio: string, mes_finalizacion: string, anio_finalizacion: string) {
+      const url = `${environment.API_URL}/api/planilla/obtenerBajasPorPeriodoExcel?mes_inicio=${mes_inicio}&anio_inicio=${anio_inicio}&mes_finalizacion=${mes_finalizacion}&anio_finalizacion=${anio_finalizacion}`;
+      return this.http.get(url, { responseType: 'blob' }).pipe(
+        catchError((error) => {
+          console.error('Error al descargar el Excel de bajas por periodo', error);
+          throw error;
+        })
+      );
   }
 
   private handleError(error: any): Observable<never> {

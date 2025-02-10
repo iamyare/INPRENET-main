@@ -29,6 +29,8 @@ export class BeneficiarioBeneficiosAsignadosComponent implements OnInit {
   cargarBeneficios(dni: string) {
     this.beneficiosService.obtenerCausantesYBeneficios(dni).subscribe({
       next: (res) => {
+        console.log(res);
+        
         this.beneficiosPorCausante = res || [];
       },
       error: (err) => {

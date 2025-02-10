@@ -413,7 +413,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
 
 
   bajas() {
-    this.planillaService.obtenerBajasPorPeriodoExcel().subscribe({
+    /* this.planillaService.obtenerBajasPorPeriodoExcel().subscribe({
       next: (response) => {
         const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const url = window.URL.createObjectURL(blob);
@@ -427,11 +427,11 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
         console.error('Error al descargar el archivo:', err);
         alert('Hubo un error al intentar descargar el archivo.');
       },
-    });
+    }); */
   }
 
   altas() {
-    this.planillaService.obtenerAltaPorPeriodoExcel().subscribe({
+    /* this.planillaService.obtenerAltaPorPeriodoExcel().subscribe({
       next: (response) => {
         const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const url = window.URL.createObjectURL(blob);
@@ -445,7 +445,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
         console.error('Error al descargar el archivo:', err);
         alert('Hubo un error al intentar descargar el archivo.');
       },
-    });
+    }); */
   }
 
 }

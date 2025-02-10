@@ -23,6 +23,7 @@ export class DocumentosPlanillaComponent implements OnInit {
   @Output() getElemSeleccionados = new EventEmitter<any>()
   planillaForm: FormGroup;
   tipoPlanilla: string | null = null;
+  mostrarBotonesOrdinaria: boolean = false;
 
   myColumns: any = [
     {
@@ -92,16 +93,13 @@ export class DocumentosPlanillaComponent implements OnInit {
   }
 
   manejarRowClick(row: any) {
-    // Ocultamos el formulario temporalmente
-    //this.mostrarB = false;
-
-    // Asignamos el valor del DNI de la fila seleccionada al campo de DNI del beneficiario
-    //console.log(row);
-
     this.desOBenSeleccionado = row;
     this.getElemSeleccionados.emit(this.desOBenSeleccionado);
-
+  
+    // Asegurarse de que la planilla seleccionada se guarda correctamente
+    this.tipoPlanilla = row.tipoPlanilla;
   }
+  
 
   cargar() {
     if (this.ejecF) {
@@ -148,6 +146,53 @@ export class DocumentosPlanillaComponent implements OnInit {
 
   seleccionarTipoPlanilla(tipo: string) {
     this.tipoPlanilla = tipo;
+  }
+  
+
+  private obtenerFechasFormateadasDosDigitos() {
+    const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
+    const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
+
+    return {
+      fechaInicioFormateada: this.formatearFechaDosDigitos(new Date(fechaInicio)),
+      fechaFinFormateada: this.formatearFechaDosDigitos(new Date(fechaFin))
+    };
+  }
+
+  private formatearFechaDosDigitos(fecha: Date): string {
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); // Asegura formato 2 dígitos
+    const anio = fecha.getFullYear().toString();
+    return `${mes}/${anio}`; // Formato MM/YYYY
+  }
+
+  descargarAltasExcel(): void {
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadasDosDigitos();
+    const [mes_inicio, anio_inicio] = fechaInicioFormateada.split('/');
+    const [mes_finalizacion, anio_finalizacion] = fechaFinFormateada.split('/');
+
+    this.planillaService.obtenerAltaPorPeriodoExcel(mes_inicio, anio_inicio, mes_finalizacion, anio_finalizacion)
+      .subscribe((response) => {
+        this.descargarArchivoBajasAltas(response, `Altas-mes-${mes_finalizacion}-${anio_finalizacion}.xlsx`);
+      }, (error) => {
+        console.error('Error al descargar el archivo de Altas:', error);
+      });
+  }
+
+  descargarBajasExcel(): void {
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadasDosDigitos();
+    const [mes_inicio, anio_inicio] = fechaInicioFormateada.split('/');
+    const [mes_finalizacion, anio_finalizacion] = fechaFinFormateada.split('/');
+
+    this.planillaService.obtenerBajasPorPeriodoExcel(mes_inicio, anio_inicio, mes_finalizacion, anio_finalizacion)
+      .subscribe((response) => {
+        this.descargarArchivoBajasAltas(response, `Bajas-mes-${mes_finalizacion}-${anio_finalizacion}.xlsx`);
+      }, (error) => {
+        console.error('Error al descargar el archivo de Bajas:', error);
+      });
+  }
+
+  private descargarArchivoBajasAltas(blob: Blob, nombreArchivo: string): void {
+    saveAs(blob, nombreArchivo);
   }
 
   checkFechasCompletas() {
@@ -610,7 +655,6 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getTotalMontosPorBancoYPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
       next: async (data) => {
-        console.log(data);
 
         const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
@@ -1329,7 +1373,6 @@ export class DocumentosPlanillaComponent implements OnInit {
   }
 
   crearTablaPartidaDiario(data: any[], deduccionesInprema: number, deduccionesTerceros: number) {
-    console.log(data);
 
     const headers = [
       { text: 'Cuenta Contable', style: 'tableHeader' },

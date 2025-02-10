@@ -45,21 +45,37 @@ export class PlanillaController {
   }
 
   @Get('obtenerBajasPorPeriodoExcel')
-  async obtenerbajasPorPeriodoExcel(
-
+  async obtenerBajasPorPeriodoExcel(
     @Res() res,
+    @Query('mes_inicio') mes_inicio: string,
+    @Query('anio_inicio') anio_inicio: string,
+    @Query('mes_finalizacion') mes_finalizacion: string,
+    @Query('anio_finalizacion') anio_finalizacion: string
   ) {
-    await this.planillaService.obtenerBajasPorPeriodoExcel(res);
+    await this.planillaService.obtenerBajasPorPeriodoExcel(res, {
+      mes_inicio,
+      anio_inicio,
+      mes_finalizacion,
+      anio_finalizacion,
+    });
   }
 
   @Get('obtenerAltaPorPeriodoExcel')
-  async obtenerAfiliadosPorPeriodoExcel(
-
+  async obtenerAltaPorPeriodoExcel(
     @Res() res,
+    @Query('mes_inicio') mes_inicio: string,
+    @Query('anio_inicio') anio_inicio: string,
+    @Query('mes_finalizacion') mes_finalizacion: string,
+    @Query('anio_finalizacion') anio_finalizacion: string
   ) {
-    await this.planillaService.obtenerAltaPorPeriodoExcel(res);
+    await this.planillaService.obtenerAltaPorPeriodoExcel(res, {
+      mes_inicio,
+      anio_inicio,
+      mes_finalizacion,
+      anio_finalizacion,
+    });
   }
-
+ 
   @Get('pagos-persona/:dni')
   async obtenerPlanillasPorPersona(@Param('dni') dni: string) {
     try {

@@ -311,8 +311,6 @@ export class PlanillaService {
     }
   }
 
-
-
   async obtenerPlanillasPorPersona(dni: string): Promise<any> {
     try {
       // Buscar la persona con sus detalles de beneficios y pagos
@@ -4090,26 +4088,9 @@ GROUP BY
   }
 
   async obtenerBajasPorPeriodoExcel(
-
     res: Response,
-  ): Promise<void> {/* 
-    let mes_inicio_ant = '01';
-    let anio_inicio_ant = '2025';
-
-    let mes_finalizacion_act = '02';
-    let anio_finalizacion_act = '2025'; */
-
-    const fechaActual = new Date();
-
-    // Obtener el mes y año de inicio del mes anterior
-    const fechaAnterior = subMonths(fechaActual, 1);
-    const mes_inicio_ant = format(fechaAnterior, "MM");
-    const anio_inicio_ant = format(fechaAnterior, "yyyy");
-
-    // Obtener el mes y año de finalización del mes actual
-    const mes_finalizacion_act = format(fechaActual, "MM");
-    const anio_finalizacion_act = format(fechaActual, "yyyy");
-
+    fecha: { mes_inicio: string; anio_inicio: string; mes_finalizacion: string; anio_finalizacion: string }
+  ): Promise<void> {
     try {
       const query = `
         ---------BAJAS---------------------
@@ -4154,26 +4135,27 @@ GROUP BY
         JOIN net_planilla t5 ON t5.id_planilla = t2.id_planilla
         WHERE t2.estado = 'PAGADA'
             AND t5.id_tipo_planilla IN (1,2)
-            AND TO_DATE(${mes_inicio_ant} || '-' || ${anio_inicio_ant}, 'MM-YYYY') BETWEEN t5.periodo_inicio AND t5.periodo_finalizacion
+            AND TO_DATE('01/' || ${fecha.mes_inicio} || '/' || ${fecha.anio_inicio}, 'DD/MM/YY') 
+                BETWEEN t5.periodo_inicio AND t5.periodo_finalizacion
             AND NOT EXISTS (
                 SELECT 1 
                 FROM net_detalle_pago_beneficio t1
                 JOIN net_planilla t6 ON t6.id_planilla = t1.id_planilla 
                 WHERE 
-                TO_DATE(${mes_finalizacion_act} || '-' || ${anio_finalizacion_act}, 'MM-YYYY') BETWEEN t6.periodo_inicio AND t6.periodo_finalizacion
+                TO_DATE('01/' || ${fecha.mes_finalizacion} || '/' || ${fecha.anio_finalizacion}, 'DD/MM/YY') 
+                    BETWEEN t6.periodo_inicio AND t6.periodo_finalizacion
                 AND t6.id_tipo_planilla IN (1,2)
                 AND t1.id_detalle_persona = t2.id_detalle_persona
                 AND t1.id_causante = t2.id_causante
                 AND t1.id_persona = t2.id_persona
                 AND t1.id_beneficio = t2.id_beneficio
             )
-
       `;
-
+  
       const beneficios = await this.entityManager.query(query);
       const workbook = new ExcelJS.Workbook();
       const beneficiosSheet = workbook.addWorksheet('Beneficios');
-
+  
       // Definir encabezados de la hoja de cálculo
       beneficiosSheet.columns = [
         { header: 'IDENTIFICACION', key: 'N_IDENTIFICACION', width: 15 },
@@ -4182,138 +4164,122 @@ GROUP BY
         { header: 'CODIGO PLANILLA', key: 'CODIGO_PLANILLA', width: 15 },
         { header: 'ESTADO', key: 'ESTADO', width: 15 },
         { header: 'ESTADO_SOLICITUD', key: 'ESTADO_SOLICITUD', width: 15 },
-        { header: 'ID BENEFICIO', key: 'ID_BENEFICIO', width: 15 },
+        { header: 'CODIGO DE BENEFICIO', key: 'ID_BENEFICIO', width: 15 },
         { header: 'RENTAS APROBADAS', key: 'RENTAS_APROBADAS', width: 15 },
         { header: 'FECHA EFECTIVIDAD', key: 'FECHA_EFECTIVIDAD', width: 15 },
         { header: 'PERIODO FINALIZACION', key: 'PERIODO_FINALIZACION', width: 15 },
       ];
-
+  
       // Agregar datos
       beneficios.forEach((beneficio) => {
         beneficiosSheet.addRow(beneficio);
       });
-
-      // Configurar encabezados para la descarga del archivo
+  
       res.setHeader(
         'Content-Type',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       );
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename=bajas-mes-${anio_finalizacion_act}-${anio_finalizacion_act}.xlsx`
+        `attachment; filename=bajas-mes-${fecha.mes_finalizacion}-${fecha.anio_finalizacion}.xlsx`
       );
-
-      // Escribir el archivo en la respuesta
+  
       await workbook.xlsx.write(res);
       res.end();
-
+  
     } catch (error) {
       throw new BadRequestException(error.message || 'Error al generar el archivo Excel.');
     }
   }
-
+  
   async obtenerAltaPorPeriodoExcel(
-
     res: Response,
+    fecha: { mes_inicio: string; anio_inicio: string; mes_finalizacion: string; anio_finalizacion: string }
   ): Promise<void> {
-
-    const fechaActual = new Date();
-
-    // Obtener el mes y año de inicio del mes anterior
-    const fechaAnterior = subMonths(fechaActual, 1);
-    const mes_finalizacion_act = format(fechaAnterior, "MM");
-    const anio_finalizacion_act = format(fechaAnterior, "yyyy");
-
-    // Obtener el mes y año de finalización del mes actual
-    const mes_inicio_ant = format(fechaActual, "MM");
-    const anio_inicio_ant = format(fechaActual, "yyyy");
-
     try {
       const query = `
-        SELECT t4.n_identificacion, 
-        TRIM(
+        ---------ALTAS---------------------
+        SELECT 
+            t4.n_identificacion, 
+            TRIM(
               t4.primer_apellido ||
-              CASE
-                  WHEN t4.segundo_apellido IS NOT NULL THEN ' ' || TRIM(t4.segundo_apellido)
-                  ELSE ''
-              END ||
-              CASE
-                  WHEN t4.primer_nombre IS NOT NULL THEN ' ' || TRIM(t4.primer_nombre)
-                  ELSE ''
-              END ||
-              CASE
-                  WHEN t4.segundo_nombre IS NOT NULL THEN ' ' || TRIM(t4.segundo_nombre)
-                  ELSE ''
-              END ||
-              CASE
-                  WHEN t4.tercer_nombre IS NOT NULL THEN ' ' || TRIM(t4.tercer_nombre)
-                  ELSE ''
-              END
-          ) AS "NOMBRE_COMPLETO",
-        t1.* 
+              CASE WHEN t4.segundo_apellido IS NOT NULL THEN ' ' || TRIM(t4.segundo_apellido) ELSE '' END ||
+              CASE WHEN t4.primer_nombre IS NOT NULL THEN ' ' || TRIM(t4.primer_nombre) ELSE '' END ||
+              CASE WHEN t4.segundo_nombre IS NOT NULL THEN ' ' || TRIM(t4.segundo_nombre) ELSE '' END ||
+              CASE WHEN t4.tercer_nombre IS NOT NULL THEN ' ' || TRIM(t4.tercer_nombre) ELSE '' END
+            ) AS "NOMBRE_COMPLETO",
+            t1.id_beneficio, 
+            t5.periodo_inicio AS PERIODO_INICIO, 
+            t5.periodo_finalizacion AS PERIODO_FINALIZACION,
+            t3.fecha_calculo AS FECHA_EFECTIVIDAD,
+            t5.CODIGO_PLANILLA, 
+            t1.estado
         FROM net_detalle_pago_beneficio t1
-        join net_planilla t5 on
-        t5.id_planilla = t1.id_planilla
-        join net_persona t4 on t4.id_persona = t1.id_persona
-        WHERE
-        --t1.id_planilla IN (315,316) AND
-        TO_DATE(${mes_inicio_ant} || '-' || ${anio_inicio_ant}, 'MM-YYYY') BETWEEN t5.periodo_inicio AND t5.periodo_finalizacion
-        AND t5.id_tipo_planilla in (1,2)
-        AND (t1.estado = 'PAGADA' OR  t1.estado = 'EN PRELIMINAR')
-        AND t1.ID_BENEFICIO NOT IN (27)
-        AND NOT EXISTS (
-            SELECT 1 
-            FROM net_detalle_pago_beneficio t2
-            join net_planilla t6 on
-                t6.id_planilla = t2.id_planilla
-            WHERE t2.estado = 'PAGADA' 
-            --AND t6.id_planilla IN (255,256)
-            AND t6.id_tipo_planilla in (1,2)
-            AND TO_DATE(${mes_finalizacion_act} || '-' || ${anio_finalizacion_act}, 'MM-YYYY') BETWEEN t6.periodo_inicio AND t6.periodo_finalizacion
-            --AND :fecha_plan_ant BETWEEN t6.periodo_inicio AND t6.periodo_finalizacion
-            AND t2.id_detalle_persona = t1.id_detalle_persona
-            AND t2.id_causante = t1.id_causante
-            AND t2.id_persona = t1.id_persona
-            AND t2.id_beneficio = t1.id_beneficio
-        )
+        JOIN net_detalle_beneficio_afiliado t3 ON 
+            t1.id_detalle_persona = t3.id_detalle_persona
+            AND t1.id_causante = t3.id_causante
+            AND t1.id_persona = t3.id_persona
+            AND t1.id_beneficio = t3.id_beneficio
+        JOIN net_planilla t5 ON t5.id_planilla = t1.id_planilla
+        JOIN net_persona t4 ON t4.id_persona = t1.id_persona
+        WHERE 
+            TO_DATE('01/' || ${fecha.mes_finalizacion} || '/' || ${fecha.anio_finalizacion}, 'DD/MM/YY') 
+              BETWEEN t5.periodo_inicio AND t5.periodo_finalizacion
+            AND t5.id_tipo_planilla IN (1,2)
+            AND (t1.estado = 'PAGADA' OR t1.estado = 'EN PRELIMINAR')
+            AND t1.ID_BENEFICIO NOT IN (27)
+            AND NOT EXISTS (
+                SELECT 1 
+                FROM net_detalle_pago_beneficio t2
+                JOIN net_planilla t6 ON t6.id_planilla = t2.id_planilla
+                WHERE t2.estado = 'PAGADA' 
+                AND t6.id_tipo_planilla IN (1,2)
+                AND TO_DATE('01/' || ${fecha.mes_inicio} || '/' || ${fecha.anio_inicio}, 'DD/MM/YY') 
+                    BETWEEN t6.periodo_inicio AND t6.periodo_finalizacion
+                AND t2.id_detalle_persona = t1.id_detalle_persona
+                AND t2.id_causante = t1.id_causante
+                AND t2.id_persona = t1.id_persona
+                AND t2.id_beneficio = t1.id_beneficio
+            )
       `;
-
+  
       const beneficios = await this.entityManager.query(query);
       const workbook = new ExcelJS.Workbook();
       const beneficiosSheet = workbook.addWorksheet('Beneficios');
-
+  
       // Definir encabezados de la hoja de cálculo
       beneficiosSheet.columns = [
-        { header: 'Identificación', key: 'N_IDENTIFICACION', width: 15 },
+        { header: 'IDENTIFICACION', key: 'N_IDENTIFICACION', width: 15 },
         { header: 'Nombre Completo', key: 'NOMBRE_COMPLETO', width: 30 },
-        { header: 'ID Planilla', key: 'ID_PLANILLA', width: 15 },
-        { header: 'Estado', key: 'ESTADO', width: 15 },
-        { header: 'ID Beneficio', key: 'ID_BENEFICIO', width: 15 },
-        { header: 'Periodo Inicio', key: 'MONTO_A_PAGAR', width: 15 },
+        { header: 'CODIGO PLANILLA', key: 'CODIGO_PLANILLA', width: 15 },
+        { header: 'PERIODO INICIO', key: 'PERIODO_INICIO', width: 15 },
+        { header: 'PERIODO FINALIZACION', key: 'PERIODO_FINALIZACION', width: 15 },
+        { header: 'ESTADO', key: 'ESTADO', width: 15 },
+        { header: 'CODIGO DE BENEFICIO', key: 'ID_BENEFICIO', width: 15 },
+        { header: 'FECHA EFECTIVIDAD', key: 'FECHA_EFECTIVIDAD', width: 15 },
       ];
-
+  
       // Agregar datos
       beneficios.forEach((beneficio) => {
         beneficiosSheet.addRow(beneficio);
       });
-
-      // Configurar encabezados para la descarga del archivo
+  
       res.setHeader(
         'Content-Type',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       );
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename=Altas-mes-${mes_inicio_ant}-${anio_inicio_ant}.xlsx`
+        `attachment; filename=altas-mes-${fecha.mes_finalizacion}-${fecha.anio_finalizacion}.xlsx`
       );
-
-      // Escribir el archivo en la respuesta
+  
       await workbook.xlsx.write(res);
       res.end();
-
+  
     } catch (error) {
       throw new BadRequestException(error.message || 'Error al generar el archivo Excel.');
     }
   }
+  
 
 }

@@ -994,7 +994,13 @@ export class EditDatosGeneralesComponent implements OnInit {
   
   esAfiliado(): boolean {
     return this.Afiliado?.TIPO_PERSONA === 'AFILIADO' || 
-           this.tableData.some(item => item.tipoPersona === 'AFILIADO');
+           this.Afiliado?.TIPO_PERSONA === 'JUBILADO' || 
+           this.Afiliado?.TIPO_PERSONA === 'PENSIONADO' || 
+           this.tableData.some(item => 
+             item.tipoPersona === 'AFILIADO' || 
+             item.tipoPersona === 'JUBILADO' || 
+             item.tipoPersona === 'PENSIONADO'
+           );
   }
   
   obtenerNombreTipoPersona(): string {

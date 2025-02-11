@@ -83,8 +83,6 @@ export class EditDatosGeneralesComponent implements OnInit {
   tiposIdentificacion: any[] = [];
   profesiones: any[] = [];
   direccionValida: boolean = true;
-  direccionCompleta: string = '';
-
   dniCausante: string = '';
   displayedColumns: string[] = ['ID_PERSONA', 'ID_CAUSANTE', 'ID_CAUSANTE_PADRE', 'ID_DETALLE_PERSONA', 'ID_ESTADO_AFILIACION', 'DNICausante', 'TipoPersona', 'EstadoAfiliacion', 'Observacion'];
 
@@ -514,7 +512,6 @@ export class EditDatosGeneralesComponent implements OnInit {
         (result) => {
           this.datos = result;
           this.Afiliado = result;
-          console.log(result);
 
           this.mostrarBotonGenerar = this.tieneTipoAfiliado();
 
@@ -576,7 +573,7 @@ export class EditDatosGeneralesComponent implements OnInit {
           // Dirección estructurada
           if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
             const jsonObj = result.DIRECCION_RESIDENCIA_ESTRUCTURADA
-              .split(',')
+              .split('/')
               .reduce((acc: any, curr: any) => {
                 const [key, value] = curr.split(':').map((s: string) => s.trim());
                 acc[key] = value;
@@ -595,8 +592,6 @@ export class EditDatosGeneralesComponent implements OnInit {
               numero_casa: jsonObj['N° DE CASA'] || '',
               color_casa: jsonObj['COLOR CASA'] || ''
             };
-          } else {
-            this.direccionCompleta = result.DIRECCION_RESIDENCIA?.trim();
           }
 
           this.formDatosGenerales.markAllAsTouched();
@@ -639,6 +634,7 @@ export class EditDatosGeneralesComponent implements OnInit {
             id_departamento_nacimiento: result?.id_departamento_nacimiento,
             id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
             discapacidad: result?.discapacidades?.length > 0 ? true : false,
+            direccion_residencia: result.DIRECCION_RESIDENCIA
           };
 
           // Discapacidades
@@ -703,6 +699,7 @@ export class EditDatosGeneralesComponent implements OnInit {
             id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
             discapacidad: result?.discapacidades?.length > 0 ? true : false,
             archivoIdentificacionUrl: result?.archivo_identificacion,
+            direccion_residencia: result.DIRECCION_RESIDENCIA
           });
 
           // Marcar todos los controles como tocados para mostrar errores

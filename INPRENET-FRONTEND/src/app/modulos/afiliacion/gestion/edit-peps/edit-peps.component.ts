@@ -69,6 +69,18 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     this.subscriptions.unsubscribe();
   }
 
+  listaCargos = [
+    { value: 'ALCALDE', label: 'ALCALDE' },
+    { value: 'ASAMBLEA APA', label: 'ASAMBLEA APA' },
+    { value: 'DIPUTADO', label: 'DIPUTADO' },
+    { value: 'DIRECTOR DEPARTAMENTAL', label: 'DIRECTOR DEPARTAMENTAL' },
+    { value: 'FUNCIONARIO', label: 'FUNCIONARIO' },
+    { value: 'MILITAR', label: 'MILITAR' },
+    { value: 'MINISTRO', label: 'MINISTRO' },
+    { value: 'REGIDOR', label: 'REGIDOR' },
+    { value: 'VICE ALCALDE', label: 'VICE ALCALDE' }
+];
+  
   initializeComponent(): void {
     if (!this.Afiliado) {
       return;
@@ -268,10 +280,11 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     const campos = [
       {
         nombre: 'cargo',
-        tipo: 'text',
+        tipo: 'list',
         requerido: true,
         etiqueta: 'Cargo',
         editable: true,
+        opciones: this.listaCargos,
         validadores: [Validators.required, Validators.maxLength(40)]
       },
       {

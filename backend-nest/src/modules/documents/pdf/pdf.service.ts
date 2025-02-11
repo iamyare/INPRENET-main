@@ -208,7 +208,7 @@ export class PdfService {
   
     const jsonObj: any =
       typeof persona?.direccion_residencia_estructurada === 'string'
-        ? persona.direccion_residencia_estructurada.split(',').reduce(
+        ? persona.direccion_residencia_estructurada.split('/').reduce(
             (acc: any, curr: any) => {
               const [key, value] = curr.split(':').map((s: string) => s.trim());
               acc[key] = value;

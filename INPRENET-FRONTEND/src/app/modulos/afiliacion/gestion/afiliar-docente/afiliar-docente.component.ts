@@ -170,6 +170,7 @@ onSubmit(): void {
         telefono_1: datosGenerales.telefono_1,
         telefono_2: datosGenerales.telefono_2,
         correo_1: datosGenerales.correo_1,
+        direccion_residencia: datosGenerales.direccion_residencia?.toUpperCase(),
         correo_2: datosGenerales.correo_2,
         fecha_nacimiento: datosGenerales.fecha_nacimiento,
         direccion_residencia_estructurada: this.formatDireccion(datosGenerales).toUpperCase(),
@@ -536,7 +537,7 @@ onSubmit(): void {
       datosGenerales.caserio ? `CASERIO: ${datosGenerales.caserio}` : ''
     ]
       .filter(Boolean)
-      .join(', ');
+      .join('/ ');
   }
 
   private formatPeps(peps: any[]): any[] {
@@ -664,7 +665,6 @@ onSubmit(): void {
       }] : [])
     ];
   }
-
 
   dataURItoBlob(dataURI: string): Blob {
     const byteString = atob(dataURI.split(',')[1]);

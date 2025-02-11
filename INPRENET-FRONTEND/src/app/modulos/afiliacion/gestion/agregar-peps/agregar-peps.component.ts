@@ -12,15 +12,28 @@ import { FieldArrays } from 'src/app/shared/Interfaces/field-arrays';
 })
 export class AgregarPepsComponent implements OnInit {
   formPeps!: FormGroup;
+  
+  listaCargos = [
+    { value: 'ALCALDE', label: 'ALCALDE' },
+    { value: 'ASAMBLEA APA', label: 'ASAMBLEA APA' },
+    { value: 'DIPUTADO', label: 'DIPUTADO' },
+    { value: 'DIRECTOR DEPARTAMENTAL', label: 'DIRECTOR DEPARTAMENTAL' },
+    { value: 'FUNCIONARIO', label: 'FUNCIONARIO' },
+    { value: 'MILITAR', label: 'MILITAR' },
+    { value: 'MINISTRO', label: 'MINISTRO' },
+    { value: 'REGIDOR', label: 'REGIDOR' },
+    { value: 'VICE ALCALDE', label: 'VICE ALCALDE' }
+];
 
   fields: FieldArrays[] = [
     {
       name: 'pep_cargo_desempenado',
       label: 'Cargo Desempeñado',
-      type: 'text',
+      type: 'select', // Ahora es un select en lugar de text
       icon: 'work',
       value: '',
       validations: [Validators.required],
+      options: this.listaCargos, // Se usa la lista de cargos aquí
       layout: { row: 1, col: 6 }
     },
     {

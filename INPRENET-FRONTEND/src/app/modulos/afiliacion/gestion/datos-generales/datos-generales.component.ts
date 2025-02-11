@@ -83,7 +83,7 @@ export class DatosGeneralesComponent implements OnInit {
 
   ngOnInit(): void {
     const noSpecialCharsPattern = '^[a-zA-ZñÑáéíóúÁÉÍÓÚ\\s]*$';
-    const addressPattern = /^[a-zA-Z0-9\s.]*$/;
+    const addressPattern = /^[^\/]*$/;
 
     this.formGroup.get('id_pais')?.valueChanges.subscribe((value) => {
       this.toggleNacimientoFields(value);
@@ -95,8 +95,6 @@ export class DatosGeneralesComponent implements OnInit {
                 discapacidades: this.fb.array([]),
                 ...this.initialData
             });
-            console.log(this.initialData);
-            
 
             if (this.initialData.fecha_nacimiento) {
                 const fechaNacimiento = new Date(this.initialData.fecha_nacimiento + 'T00:00:00');
@@ -205,8 +203,12 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.addControl('aldea', new FormControl('', [Validators.maxLength(75), Validators.pattern(addressPattern)]));
     this.formGroup.addControl('caserio', new FormControl('', [Validators.maxLength(75), Validators.pattern(addressPattern)]));
     this.formGroup.addControl('grado_academico', new FormControl('', [Validators.maxLength(75)]));
-    
-    // Agregar el control para el archivo de identificación con Validators.required
+    this.formGroup.addControl(
+      'direccion_residencia',
+      new FormControl('', [
+        Validators.maxLength(200)
+      ])
+    );
     this.formGroup.addControl('archivo_identificacion', new FormControl(null, Validators.required));
 
     // Lista de campos que mostrarán errores desde el inicio
@@ -242,6 +244,8 @@ export class DatosGeneralesComponent implements OnInit {
     await this.cargarTiposIdentificacion();
     this.cargarGenero();
     await this.cargarNacionalidades();
+    console.log(this.initialData);
+    
     
     this.formGroup.patchValue({
       id_profesion: this.initialData?.id_profesion || '',
@@ -261,6 +265,7 @@ export class DatosGeneralesComponent implements OnInit {
       sector: this.initialData?.sector || '',
       correo_2: this.initialData?.correo_2 || '',
       telefono_2: this.initialData?.telefono_2 || '',
+      direccion_residencia: this.initialData?.direccion_residencia || '',
     });
   }
   

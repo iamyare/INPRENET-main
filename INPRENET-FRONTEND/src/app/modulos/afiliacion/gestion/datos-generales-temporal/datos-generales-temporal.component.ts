@@ -155,7 +155,7 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
   });
 
   const noSpecialCharsPattern = '^[a-zA-ZñÑáéíóúÁÉÍÓÚ\\s]*$';
-  const addressPattern = /^[a-zA-Z0-9\s.]*$/;
+  const addressPattern = /^[^\/]*$/;
 
   // Inicializar controles adicionales del formulario
   this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
@@ -445,6 +445,13 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
     ])
   );
 
+  this.formGroup.addControl(
+    'direccion_residencia',
+    new FormControl('', [
+      Validators.maxLength(200)
+    ])
+  );
+
   // Cargar datos iniciales
   this.cargarDatosIniciales();
 
@@ -497,6 +504,7 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
     const departamentoId = event.value;
     this.cargarMunicipiosNacimiento(departamentoId);
   }
+  
   resetForm(): void {
     this.formGroup.reset({
       discapacidad: false,

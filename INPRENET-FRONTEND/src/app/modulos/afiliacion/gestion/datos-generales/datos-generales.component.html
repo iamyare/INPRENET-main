@@ -4,8 +4,8 @@
     <p class="card-category">Completa la información correspondiente</p>
   </div>
   <div class="card-body">
-    <app-camara *ngIf="useCamera" (imageCaptured)="handleImageCaptured($event)">
-    </app-camara>
+    <app-camara *ngIf="useCamera && puedeEditar" (imageCaptured)="handleImageCaptured($event)">
+    </app-camara>    
     
     <!-- Mensaje de error si no se ha capturado la foto -->
     <div *ngIf="isPhotoInvalid" class="error-message">
@@ -543,7 +543,7 @@
       <div class="row">
         <div class="col-lg-12 col-md-12">
           <label>¿Posee alguna discapacidad?</label>
-          <mat-radio-group formControlName="discapacidad" (change)="onDiscapacidadChange($event)">
+          <mat-radio-group formControlName="discapacidad" [disabled]="!isEditable" (change)="onDiscapacidadChange($event)">
             <mat-radio-button [value]="true">Sí</mat-radio-button>
             <mat-radio-button [value]="false">No</mat-radio-button>
           </mat-radio-group>
@@ -552,12 +552,14 @@
         <div class="col-lg-12 col-md-12" *ngIf="discapacidadSeleccionada">
           <div class="discapacidades-container">
             <div formGroupName="discapacidades" class="grid-container">
-              <div *ngFor="let tipo of discapacidades; let i = index" class="discapacidad-item">
-                <mat-checkbox [formControlName]="tipo.label">{{ tipo.label }}</mat-checkbox>
+              <div *ngFor="let tipo of discapacidades" class="discapacidad-item">
+                <mat-checkbox [formControlName]="tipo.label" [disabled]="!isEditable">
+                  {{ tipo.label }}
+                </mat-checkbox>
               </div>
-            </div>
+            </div>            
           </div>
-        </div>      
+        </div>         
       </div>
     </form>
   </div>

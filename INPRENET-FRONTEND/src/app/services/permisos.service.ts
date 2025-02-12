@@ -25,7 +25,7 @@ export class PermisosService {
         'afiliacion/mantenimiento': {
           title: 'Mantenimiento',
           permisos: [
-            { role: 'ADMINISTRADOR', module: 'AFILIACION' }
+            //{ role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }
           ]
         }
       }
@@ -55,7 +55,8 @@ export class PermisosService {
             { role: 'ADMINISTRADOR', module: 'AFILIACION', permiso: 'editar' },
             { role: 'CONSULTA AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'verpago' },
             { role: 'MODIFICACION AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'editarDos' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' }
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
+            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }
           ]
         },
         'afiliacion/buscar-persona': {
@@ -66,14 +67,14 @@ export class PermisosService {
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
             { role: 'CONSULTA AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'verpago' },
             { role: 'MODIFICACION AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'editarDos' },
-            { role: 'ADMINISTRADOR', module: 'AFILIACION' }
+            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' },
           ]
         },
         'afiliacion/constancias-afiliados': {
           title: 'Ver Centro Educativo',
           permisos: [
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
-            { role: 'ADMINISTRADOR', module: 'AFILIACION' },
+            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' },
             { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
             { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
             { role: 'CONSULTA AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'verpago' },
@@ -84,14 +85,14 @@ export class PermisosService {
           title: 'Nuevo Centro Educativo',
           permisos: [
             /* { role: 'MODIFICACION AFILIACION', module: 'AFILIACION' },
-            { role: 'ADMINISTRADOR', module: 'AFILIACION' } */
+            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' } */
           ]
         },
         'afiliacion/ver-datos-centro': {
           title: 'Ver Centro Educativo',
           permisos: [
             /* { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
-            { role: 'ADMINISTRADOR', module: 'AFILIACION' } */
+            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' } */
           ]
         }
       }
@@ -187,6 +188,7 @@ export class PermisosService {
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
             { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
             { role: 'CONSULTA COBROS', module: 'COBROS' },
+            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }
           ]
         }
       }

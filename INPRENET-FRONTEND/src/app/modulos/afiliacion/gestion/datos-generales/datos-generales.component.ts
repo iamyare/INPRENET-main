@@ -19,6 +19,7 @@ export class DatosGeneralesComponent implements OnInit {
   @Input() initialData!: any;
   @Input() discapacidadSeleccionada!: boolean;
   @Output() newDatosGenerales = new EventEmitter<any>();
+  @Input() puedeEditar: boolean = false;
 
   departamentos: { value: number, label: string }[] = [];
   municipios: { value: number, label: string }[] = [];
@@ -32,6 +33,7 @@ export class DatosGeneralesComponent implements OnInit {
   nacionalidades: { value: number, label: string }[] = [];
   discapacidades: { label: string, value: number }[] = [];
   useCamera: boolean = true;
+  isEditable: boolean = false;
 
   private camposRequeridosIniciales: string[] = [
     'FotoPerfil',
@@ -79,9 +81,46 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.get('id_departamento_nacimiento')?.updateValueAndValidity();
     this.formGroup.get('id_municipio_nacimiento')?.updateValueAndValidity();
   }
+
+  setDisabledFieldsByRole(): void {
+    if (!this.puedeEditar) { 
+      setTimeout(() => {
+        Object.keys(this.formGroup.controls).forEach(field => {
+          const control = this.formGroup.get(field);
+          if (control) {
+            control.disable({ emitEvent: false });
+          }
+        });
+        this.disableNestedControls(this.formGroup);
+      }, 0);
+    } else {
+      setTimeout(() => {
+        Object.keys(this.formGroup.controls).forEach(field => {
+          const control = this.formGroup.get(field);
+          if (control) {
+            control.enable({ emitEvent: false }); // Habilita los campos si puedeEditar es true
+          }
+        });
+      }, 0);
+    }
+  }
   
+  disableNestedControls(formGroup: FormGroup | FormArray): void {
+    Object.keys(formGroup.controls).forEach(field => {
+      const control = formGroup.get(field);
+      if (control instanceof FormGroup || control instanceof FormArray) {
+        this.disableNestedControls(control);
+      } else {
+        control?.disable({ emitEvent: false });
+      }
+    });
+  }
 
   ngOnInit(): void {
+    this.setDisabledFieldsByRole();
+    if (!this.isEditable) {
+      this.formGroup.disable(); // Esto deshabilita todos los campos
+    }
     const noSpecialCharsPattern = '^[a-zA-ZñÑáéíóúÁÉÍÓÚ\\s]*$';
     const addressPattern = /^[^\/]*$/;
 
@@ -519,16 +558,21 @@ export class DatosGeneralesComponent implements OnInit {
 
   resetDiscapacidadesFormArray() {
     const discapacidadesGroup = this.fb.group({});
-    
+  
     this.discapacidades.forEach(discapacidad => {
-      const isSelected = this.indicesSeleccionados.some(
-        indice => indice.tipo === discapacidad.label
-      );
-      discapacidadesGroup.addControl(discapacidad.label, new FormControl(isSelected));
+      const isSelected = this.indicesSeleccionados.some(indice => indice.tipo === discapacidad.label);
+      const control = new FormControl(isSelected);
+      if (!this.puedeEditar) {
+        control.disable({ emitEvent: false });
+      }
+  
+      discapacidadesGroup.addControl(discapacidad.label, control);
     });
   
     this.formGroup.setControl('discapacidades', discapacidadesGroup);
   }
+  
+  
   
   handleImageCaptured(image: string): void {
     this.formGroup.patchValue({ FotoPerfil: image });

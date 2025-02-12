@@ -83,24 +83,24 @@
 
           <!-- EstadoAfiliacion -->
           <!-- EstadoAfiliacion -->
-<ng-container matColumnDef="EstadoAfiliacion">
-  <mat-header-cell *matHeaderCellDef>Estado de Afiliación</mat-header-cell>
-  <mat-cell *matCellDef="let element; let i = index">
-    <mat-form-field appearance="outline">
-      <mat-select
-  [(ngModel)]="element.estadoAfiliacion"
-  [compareWith]="compararEstados"
-  [ngModelOptions]="{ standalone: true }"
-  name="estadoSelect_{{ i }}"
->
-  <mat-option *ngFor="let e of element.estadosDisponibles" [value]="e.value">
-    {{ e.label }}
-  </mat-option>
-</mat-select>
-    </mat-form-field>
-    
-  </mat-cell>
-</ng-container>
+          <ng-container matColumnDef="EstadoAfiliacion">
+            <mat-header-cell *matHeaderCellDef>Estado de Afiliación</mat-header-cell>
+            <mat-cell *matCellDef="let element; let i = index">
+              <mat-form-field appearance="outline">
+                <mat-select
+                  [(ngModel)]="element.estadoAfiliacion"
+                  [compareWith]="compararEstados"
+                  [ngModelOptions]="{ standalone: true }"
+                  name="estadoSelect_{{ i }}"
+                  [disabled]="!puedeEditarTabla"  
+                >
+                  <mat-option *ngFor="let e of element.estadosDisponibles" [value]="e.value">
+                    {{ e.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
 
 
           <!-- Observacion -->
@@ -114,6 +114,7 @@
                   [ngModelOptions]="{ standalone: true }"
                   name="observacion_{{ i }}"
                   rows="1"
+                  [disabled]="!puedeEditarTabla" 
                 ></textarea>
               </mat-form-field>
             </mat-cell>
@@ -128,6 +129,7 @@
                 color="primary"
                 aria-label="Guardar"
                 (click)="guardarEstadoAfiliacion(element)"
+                [disabled]="!puedeEditarTabla"  
               >
                 <mat-icon>save</mat-icon>
               </button>
@@ -150,25 +152,25 @@
 
     <!-- Mostrar mensaje alternativo si no hay datos -->
    <!-- SOLO SE MUESTRA SI NO ES AFILIADO -->
-<div *ngIf="tieneTipoPersona() && !esAfiliado()" class="tipo-persona-container">
-  <mat-form-field class="custom-select" appearance="outline">
-    <mat-label>Seleccionar Tipo de Persona</mat-label>
-    <mat-select [(ngModel)]="tipoPersonaSeleccionada" name="tipoPersona">
-      <mat-option *ngFor="let tipo of tiposPersona" [value]="tipo.ID_TIPO_PERSONA">
-        {{ tipo.TIPO_PERSONA }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+      <div *ngIf="!esAfiliado()" class="tipo-persona-container">
+        <mat-form-field class="custom-select" appearance="outline">
+          <mat-label>Seleccionar Tipo de Persona</mat-label>
+          <mat-select [(ngModel)]="tipoPersonaSeleccionada" name="tipoPersona">
+            <mat-option *ngFor="let tipo of tiposPersona" [value]="tipo.ID_TIPO_PERSONA">
+              {{ tipo.TIPO_PERSONA }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-  <button 
-    mat-raised-button 
-    class="custom-button"
-    color="primary" 
-    (click)="convertirEnAfiliado()" 
-    [disabled]="!tipoPersonaSeleccionada">
-    Convertir a {{ obtenerNombreTipoPersona() }}
-  </button>
-</div>
+        <button 
+          mat-raised-button 
+          class="custom-button"
+          color="primary" 
+          (click)="convertirEnAfiliado()" 
+          [disabled]="!tipoPersonaSeleccionada">
+          Convertir a {{ obtenerNombreTipoPersona() }}
+        </button>
+      </div>
 
 
     
@@ -180,6 +182,7 @@
       [discapacidadSeleccionada]="true"
       (newDatosGenerales)="setDatosGenerales($event)"
       (imageCaptured)="onImageCaptured($event)"
+      [puedeEditar]="mostrarBotonGuardar"
     >
     </app-datos-generales>
 
@@ -199,6 +202,7 @@
       ></iframe>
       
       <app-botonarchivos
+      *ngIf="mostrarBotonGuardar"
         labelBoton="Actualizar Archivo"
         (setArchivo)="getArchivoIdentificacion($event)"
       ></app-botonarchivos>
@@ -347,6 +351,7 @@
             <iframe *ngIf="certificadoDefuncionUrl" [src]="certificadoDefuncionUrl" width="100%" height="500px"></iframe>
             
             <app-botonarchivos
+              *ngIf="mostrarBotonGuardar"
               labelBoton="Certificado de Defunción"
               (setArchivo)="getArchivoDef($event)"
               [disabled]="form1.get('fallecido')?.value === 'NO'"
@@ -354,7 +359,7 @@
           
             <!-- Botón para eliminar el archivo adjunto -->
             <button
-              *ngIf="form1.get('fallecido')?.value === 'SI' && certificadoDefuncionUrl"
+              *ngIf="form1.get('fallecido')?.value === 'SI' && certificadoDefuncionUrl && mostrarBotonGuardar"
               mat-raised-button
               color="warn"
               (click)="eliminarCertificadoDefuncion()"
@@ -384,7 +389,7 @@
   Guardar
 </button>
 <button 
-  *ngIf="mostrarBotonGenerar" 
+  *ngIf="mostrarBotonGenerar && mostrarBotonGuardar" 
   mat-raised-button color="primary"
   style="color: white; margin: 1% 0 1% 20px"
   (click)="generarConstanciaAfiliacion()">

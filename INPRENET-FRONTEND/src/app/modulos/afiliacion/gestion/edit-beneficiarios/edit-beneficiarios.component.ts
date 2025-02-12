@@ -69,7 +69,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
    }
 
   ngOnInit(): void {
-    this.obtenerPersonaConPerfilYBeneficiarios(this.persona.id_persona);
     this.initializeComponent();
   
     // Verifica si el usuario tiene al menos uno de los permisos requeridos
@@ -524,9 +523,22 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   }
 
   generarPDF2() {
-      const documentDefinition = this.getDocumentDefinition(this.persona2, this.perfil2, this.beneficiarios2, this.backgroundImageBase64);
-      pdfMake.createPdf(documentDefinition).download();
-    }
+    this.obtenerPersonaConPerfilYBeneficiarios(this.persona.id_persona);
+    setTimeout(() => {
+      if (this.persona2 && this.perfil2 && this.beneficiarios2) {
+        const documentDefinition = this.getDocumentDefinition(
+          this.persona2, 
+          this.perfil2, 
+          this.beneficiarios2, 
+          this.backgroundImageBase64
+        );
+        pdfMake.createPdf(documentDefinition).download();
+      } else {
+        this.toastr.error("No se pudo generar el PDF porque no se actualizaron los datos.");
+      }
+    }, 1000); // Espera 1 segundo para asegurar que los datos se actualicen
+}
+
   
     getDocumentDefinition(persona: any, perfil: any, beneficiarios: any[], backgroundImageBase64: string): any {
       

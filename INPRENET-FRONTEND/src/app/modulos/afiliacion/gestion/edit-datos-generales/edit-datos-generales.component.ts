@@ -34,6 +34,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   datos!: any;
   form: any;
   datosGeneralesForm: FormGroup;
+  puedeEditarTabla : boolean = false;
 
   usuarioToken: {
     correo: string;
@@ -85,7 +86,6 @@ export class EditDatosGeneralesComponent implements OnInit {
   direccionValida: boolean = true;
   dniCausante: string = '';
   displayedColumns: string[] = ['ID_PERSONA', 'ID_CAUSANTE', 'ID_CAUSANTE_PADRE', 'ID_DETALLE_PERSONA', 'ID_ESTADO_AFILIACION', 'DNICausante', 'TipoPersona', 'EstadoAfiliacion', 'Observacion'];
-
   tableData: any[] = [];
   formObservacion = new FormControl('');
 
@@ -221,22 +221,123 @@ export class EditDatosGeneralesComponent implements OnInit {
     });
   }
 
+  setDisabledFieldsByRole(): void {
+    setTimeout(() => {
+      // Obtener si el usuario tiene el permiso "administrar"
+      const puedeAdministrar = this.permisosService.userHasPermission(
+        'AFILIACIONES', 'afiliacion/buscar-persona', ['administrar']
+      );
+  
+      // Si no tiene permisos de edición y no puede administrar, deshabilitar todo
+      if ((!this.mostrarBotonGuardar && !puedeAdministrar) || (this.Afiliado && this.Afiliado.fallecido === "SI" && !puedeAdministrar)) {
+        Object.keys(this.datosGeneralesForm.controls).forEach(field => {
+          const control = this.datosGeneralesForm.get(field);
+          if (control) control.disable({ emitEvent: false });
+        });
+  
+        this.disableNestedControls(this.datosGeneralesForm);
+        this.disableNestedControls(this.formDatosGenerales);
+        this.disableNestedControls(this.form1);
+      } else {
+        // Habilitar los campos si el usuario tiene permisos o puede administrar
+        Object.keys(this.datosGeneralesForm.controls).forEach(field => {
+          const control = this.datosGeneralesForm.get(field);
+          if (control) control.enable({ emitEvent: false });
+        });
+  
+        this.enableNestedControls(this.datosGeneralesForm);
+        this.enableNestedControls(this.formDatosGenerales);
+        this.enableNestedControls(this.form1);
+      }
+    }, 0);
+  }
+  
+  // Deshabilita los controles anidados en grupos o arrays
+  disableNestedControls(formGroup: FormGroup | FormArray): void {
+    Object.keys(formGroup.controls).forEach(field => {
+      const control = formGroup.get(field);
+      if (control instanceof FormGroup || control instanceof FormArray) {
+        this.disableNestedControls(control);
+      } else {
+        control?.disable({ emitEvent: false });
+      }
+    });
+  }
+  
+  // Habilita los controles anidados en grupos o arrays
+  enableNestedControls(formGroup: FormGroup | FormArray): void {
+    Object.keys(formGroup.controls).forEach(field => {
+      const control = formGroup.get(field);
+      if (control instanceof FormGroup || control instanceof FormArray) {
+        this.enableNestedControls(control);
+      } else {
+        control?.enable({ emitEvent: false });
+      }
+    });
+  }
+
+  toggleCamposFallecimiento(value: string): void {
+    const campos = [
+      'causa_fallecimiento', 'fecha_defuncion', 'id_departamento_defuncion',
+      'id_municipio_defuncion', 'fecha_reporte_fallecido', 'numero_certificado_defuncion'
+    ];
+  
+    if (value === 'NO') {
+      this.form1.patchValue({
+        causa_fallecimiento: '', fecha_defuncion: '',
+        id_departamento_defuncion: '', id_municipio_defuncion: '',
+        fecha_reporte_fallecido: '', numero_certificado_defuncion: ''
+      });
+  
+      campos.forEach(field => this.form1.get(field)?.disable());
+      this.formDatosGenerales.get('archivoCertDef')?.disable();
+      this.formDatosGenerales.get('archivoCertDef')?.clearValidators();
+    } else {
+      campos.forEach(field => this.form1.get(field)?.enable());
+      this.formDatosGenerales.get('archivoCertDef')?.enable();
+  
+      if (!this.datos?.certificado_defuncion) {
+        this.formDatosGenerales.get('archivoCertDef')?.setValidators([Validators.required]);
+      }
+    }
+  
+    this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
+  }
+  
+  
   ngOnInit(): void {
     this.obtenerDatosDesdeToken();
 
+    
     setTimeout(() => {
-      this.mostrarBotonGuardar = this.permisosService.userHasPermission(
-        'AFILIACIONES',
-        'afiliacion/buscar-persona',
-        ['editar', 'editarDos']
+      const puedeEditar = this.permisosService.userHasPermission(
+        'AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos']
       );
+  
+      const puedeAdministrar = this.permisosService.userHasPermission(
+        'AFILIACIONES', 'afiliacion/buscar-persona', ['administrar']
+      );
+  
+      this.mostrarBotonGuardar = puedeAdministrar || (!this.Afiliado || this.Afiliado.fallecido !== "SI" && puedeEditar);
+
+      this.puedeEditarTabla = puedeAdministrar;
+  
+      this.setDisabledFieldsByRole();
       this.cdr.detectChanges();
+    });
+
+    this.form1.get('fallecido')?.valueChanges.subscribe((value) => {
+      this.toggleCamposFallecimiento(value);
     });
 
     this.cargarCausasFallecimiento();
     this.cargarEstadosAfiliado();
     this.previsualizarInfoAfil();
     this.cargarDepartamentos();
+
+    if (this.form1.get('fallecido')?.value === 'NO') {
+      this.toggleCamposFallecimiento('NO');
+    }
 
     this.svcAfiliado.buscarDetPersona(this.Afiliado.n_identificacion).subscribe(
       (detalles: any[]) => {
@@ -255,35 +356,33 @@ export class EditDatosGeneralesComponent implements OnInit {
     // Escucha cambios en fallecido
     // --------------------------------
     this.form1.get('fallecido')?.valueChanges.subscribe((value) => {
+      if (!this.mostrarBotonGuardar) {
+        ['causa_fallecimiento', 'fecha_defuncion', 'id_departamento_defuncion',
+         'id_municipio_defuncion', 'fecha_reporte_fallecido', 'numero_certificado_defuncion']
+        .forEach(field => this.form1.get(field)?.disable({ emitEvent: false }));
+        
+        this.formDatosGenerales.get('archivoCertDef')?.disable();
+        return;
+      }
+    
       if (value === 'NO') {
         this.form1.patchValue({
-          causa_fallecimiento: '',
-          fecha_defuncion: '',
-          id_departamento_defuncion: '',
-          id_municipio_defuncion: '',
-          fecha_reporte_fallecido: '',
-          numero_certificado_defuncion: ''
+          causa_fallecimiento: '', fecha_defuncion: '',
+          id_departamento_defuncion: '', id_municipio_defuncion: '',
+          fecha_reporte_fallecido: '', numero_certificado_defuncion: ''
         });
-
-        this.form1.get('causa_fallecimiento')?.disable();
-        this.form1.get('fecha_defuncion')?.disable();
-        this.form1.get('id_departamento_defuncion')?.disable();
-        this.form1.get('id_municipio_defuncion')?.disable();
-        this.form1.get('fecha_reporte_fallecido')?.disable();
-        this.form1.get('numero_certificado_defuncion')?.disable();
-
-        if (!this.datos?.certificado_defuncion) {
-          this.formDatosGenerales.get('archivoCertDef')?.disable();
-          this.formDatosGenerales.get('archivoCertDef')?.clearValidators();
-        }
+    
+        ['causa_fallecimiento', 'fecha_defuncion', 'id_departamento_defuncion',
+         'id_municipio_defuncion', 'fecha_reporte_fallecido', 'numero_certificado_defuncion']
+        .forEach(field => this.form1.get(field)?.disable());
+    
+        this.formDatosGenerales.get('archivoCertDef')?.disable();
+        this.formDatosGenerales.get('archivoCertDef')?.clearValidators();
       } else {
-        this.form1.get('causa_fallecimiento')?.enable();
-        this.form1.get('fecha_defuncion')?.enable();
-        this.form1.get('id_departamento_defuncion')?.enable();
-        this.form1.get('id_municipio_defuncion')?.enable();
-        this.form1.get('fecha_reporte_fallecido')?.enable();
-        this.form1.get('numero_certificado_defuncion')?.enable();
-
+        ['causa_fallecimiento', 'fecha_defuncion', 'id_departamento_defuncion',
+         'id_municipio_defuncion', 'fecha_reporte_fallecido', 'numero_certificado_defuncion']
+        .forEach(field => this.form1.get(field)?.enable());
+    
         this.formDatosGenerales.get('archivoCertDef')?.enable();
         if (!this.datos?.certificado_defuncion) {
           this.formDatosGenerales.get('archivoCertDef')?.setValidators([Validators.required]);
@@ -291,6 +390,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       }
       this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
     });
+    
 
     // Importante: Si inicias con "NO", deshabilita al cargar
     if (this.form1.get('fallecido')?.value === 'NO') {
@@ -388,11 +488,6 @@ export class EditDatosGeneralesComponent implements OnInit {
       console.error("Error al cargar estados de afiliación:", error);
     }
   }
-
-
-
-
-
 
   updateDatosGenerales(value: any) {
     this.initialData = { ...this.initialData, ...value };
@@ -503,8 +598,6 @@ export class EditDatosGeneralesComponent implements OnInit {
   // ---------------------------------------------
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
-
-
       this.loading = true;
 
       // 1) Llamar primero a getAfilByParam(...) para obtener la data principal
@@ -634,7 +727,8 @@ export class EditDatosGeneralesComponent implements OnInit {
             id_departamento_nacimiento: result?.id_departamento_nacimiento,
             id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
             discapacidad: result?.discapacidades?.length > 0 ? true : false,
-            direccion_residencia: result.DIRECCION_RESIDENCIA
+            direccion_residencia: result.DIRECCION_RESIDENCIA,
+            fallecido: result?.fallecido,
           };
 
           // Discapacidades

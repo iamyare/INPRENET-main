@@ -203,13 +203,27 @@
                 type="number" 
                 (input)="validarPorcentaje(i)"
               >
+            
+              <!-- Error: No puede superar el disponible -->
               <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('excedeTotal')">
-                <mat-icon>error</mat-icon> La suma total de los porcentajes no puede ser mayor a {{ porcentajeDisponible }}%.
+                <mat-icon>error</mat-icon> No puede superar el {{ porcentajeDisponible }}% disponible.
               </mat-error>
+            
+              <!-- Error: El porcentaje mínimo permitido -->
               <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('minimoInvalido')">
-                <mat-icon>error</mat-icon> Debe ser entre 1% y el disponible: {{ porcentajeDisponible }}%
+                <mat-icon>error</mat-icon> El porcentaje mínimo permitido es {{ porcentajeDisponible }}%.
               </mat-error>
-            </mat-form-field>    
+            
+              <!-- Error: La suma total debe ser exactamente 100% -->
+              <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('noCumpleTotal')">
+                <mat-icon>error</mat-icon> La suma total de los porcentajes debe ser exactamente 100%.
+              </mat-error>
+            
+            </mat-form-field>
+            
+            
+            
+              
           </div>
 
           <!-- Botón para eliminar beneficiario -->

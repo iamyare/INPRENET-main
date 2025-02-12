@@ -191,14 +191,21 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     const porcentajeDisponible = 100 - (porcentajeOcupado - row.porcentaje);
 
     const validacionesDinamicas = {
-      porcentaje: [
-          Validators.required,
-          Validators.min(1),
-          Validators.max(porcentajeDisponible),
-          (control: AbstractControl) => {
-              const nuevoValor = Number(control.value);
-              const totalPorcentaje = porcentajeOcupado - row.porcentaje + nuevoValor;
-              return totalPorcentaje > 100 ? { excedeTotal: true } : null;
+        porcentaje: [
+            Validators.required,
+            Validators.min(1),
+            Validators.max(porcentajeDisponible),
+            (control: AbstractControl) => {
+                const nuevoValor = Number(control.value);
+                const totalPorcentaje = porcentajeOcupado - row.porcentaje + nuevoValor;
+                if (totalPorcentaje > 100) {
+                    return { excedeTotal: true };
+                }
+                if (totalPorcentaje < 100) {
+                    return { noCumpleTotal: true };
+                }
+
+                return null;
           }
       ]
   };

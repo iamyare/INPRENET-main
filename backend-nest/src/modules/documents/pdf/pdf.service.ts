@@ -79,22 +79,40 @@ export class PdfService {
     // Espaciado adicional para empujar la firma hacia abajo
     content.push({ text: '\n\n\n\n\n\n\n\n\n' });
 
-    // Firma
-    content.push(
-        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
-        { text: dto.nombreEmpleado, style: 'signature' }, // Nombre del empleado
-        { text: dto.nombrePuesto, style: 'signatureTitle' }, // Puesto del empleado
-        { text: '\n\n\n' }
-    );
+    // Firma completamente centrada usando una tabla
+    content.push({
+        table: {
+            widths: ['*', 'auto', '*'],
+            body: [
+                [
+                    '',
+                    {
+                        stack: [
+                            { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 1 }] },
+                            { text: dto.nombreEmpleado, style: 'signature' },
+                            { text: dto.nombrePuesto, style: 'signatureTitle' }
+                        ],
+                        alignment: 'center'
+                    },
+                    ''
+                ]
+            ]
+        },
+        layout: 'noBorders',
+        margin: [0, 20, 0, 0]
+    });
 
     return {
         pageSize: 'letter',
-        pageMargins: [20, 100, 20, 60],
-        background: {
-            image: data.base64data,
-            width: 595.28,
-            height: 841.89
-        },
+        pageMargins: [20, 80, 20, 80], // Ajustar márgenes para que no corte el membrete
+        background: [
+            {
+                image: data.base64data, // Imagen del membrete
+                width: 612, // Tamaño completo de la página letter
+                height: 792,
+                absolutePosition: { x: 0, y: 0 } // Fijar imagen en la parte superior
+            }
+        ],
         content: content,
         footer: function (currentPage, pageCount) {
             const user = dto.correo.split('@')[0]; 
@@ -121,7 +139,7 @@ export class PdfService {
             },
             subheader: {
                 fontSize: 11,
-                alignment: 'left',
+                alignment: 'center',
                 margin: [40, 10, 40, 5],
                 lineHeight: 1.8
             },
@@ -134,7 +152,7 @@ export class PdfService {
             },
             body: {
                 fontSize: 11,
-                alignment: 'left',
+                alignment: 'center',
                 margin: [20, 10, 20, 5],
                 lineHeight: 1.8
             },
@@ -147,7 +165,7 @@ export class PdfService {
                 fontSize: 12,
                 bold: true,
                 alignment: 'center',
-                margin: [0, 10, 0, 0]
+                margin: [0, 5, 0, 0]
             },
             signatureTitle: {
                 fontSize: 12,
@@ -155,11 +173,12 @@ export class PdfService {
             },
             footer: {
                 fontSize: 8,
-                alignment: 'right',
+                alignment: 'center',
             }
         }
     };
-}
+  }
+
 
   public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean, dto: EmpleadoDto) {
     

@@ -37,6 +37,7 @@ export class BenefComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    
     if (this.porcentajeDisponible == null || this.porcentajeDisponible == undefined) {
       this.porcentajeDisponible = 100;
     }
@@ -80,29 +81,43 @@ export class BenefComponent implements OnInit {
 
   validarPorcentaje(index: number): void {
     const control = this.beneficiarios.at(index).get('porcentaje');
-  
+
     if (control) {
-      const valorIngresado = Number(control.value);
-  
-      if (valorIngresado < 1) {
-        control.setErrors({ minimoInvalido: true });
-      } else {
+        const valorIngresado = Number(control.value) || 0;
+
+        // Sumar los porcentajes de todos los beneficiarios excepto el actual
         const totalAsignado = this.beneficiarios.controls.reduce((acc, beneficiario, i) => {
-          const porcentaje = Number(beneficiario.get('porcentaje')?.value) || 0;
-          return i === index ? acc : acc + porcentaje; 
+            if (i !== index) {
+                const porcentaje = Number(beneficiario.get('porcentaje')?.value) || 0;
+                return acc + porcentaje;
+            }
+            return acc;
         }, 0);
-  
-        const totalFinal = totalAsignado + valorIngresado;
-  
-        if (totalFinal > this.porcentajeDisponible) {
-          control.setErrors({ excedeTotal: true });
-        } else {
-          control.setErrors(null);
+
+        const disponible = this.porcentajeDisponible - totalAsignado; 
+
+        // Validar que el porcentaje ingresado no exceda el disponible
+        if (valorIngresado > disponible) {
+            control.setErrors({ excedeTotal: true });
+        } 
+        // Validar que el mínimo permitido es exactamente el disponible si es el último beneficiario
+        else if (disponible === valorIngresado) {
+            control.setErrors(null);
+        } 
+        // Si aún queda espacio, pero el usuario ingresa menos del disponible, forzarlo a usarlo todo
+        else if (valorIngresado < 1) {
+            control.setErrors({ minimoInvalido: true });
+        } 
+        else if (totalAsignado + valorIngresado !== 100) {
+            control.setErrors({ noCumpleTotal: true });
+        } 
+        else {
+            control.setErrors(null);
         }
-      }
     }
-  }
-  
+}
+
+
 
   // Getter para obtener el FormArray de beneficiarios
   get beneficiarios(): FormArray {
@@ -140,9 +155,8 @@ export class BenefComponent implements OnInit {
       porcentaje: new FormControl('', [
         Validators.required,
         Validators.min(1),
-        Validators.max(this.porcentajeDisponible),
         this.validarPorcentajeDisponible()
-      ]),
+    ]),
       parentesco: new FormControl(datosBeneficiario?.parentesco || '', [
         Validators.required,
         Validators.minLength(2),
@@ -171,18 +185,25 @@ export class BenefComponent implements OnInit {
         if (!control || !control.value) return null;
 
         const nuevoPorcentaje = Number(control.value);
-        if (isNaN(nuevoPorcentaje)) return { invalidPorcentaje: true };
+        if (isNaN(nuevoPorcentaje) || nuevoPorcentaje < 1) return { minimoInvalido: true };
 
+        // Calcular cuánto porcentaje ya ha sido asignado
         const totalAsignado = this.beneficiarios.controls.reduce((acc, b) => {
             const porcentaje = Number(b.get('porcentaje')?.value) || 0;
             return acc + porcentaje;
         }, 0);
 
-        return totalAsignado > 100 ? { excedeTotal: true } : null;
+        const disponible = this.porcentajeDisponible - (totalAsignado - nuevoPorcentaje);
+
+        if (nuevoPorcentaje > disponible) return { excedeTotal: true };
+        if (nuevoPorcentaje < disponible) return { noCumpleTotal: true };
+
+        return null;
     };
 }
 
-  
+
+
   limpiarCamposBeneficiario(beneficiarioForm: FormGroup): void {
     beneficiarioForm.patchValue({
       primer_nombre: '',

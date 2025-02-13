@@ -3685,7 +3685,8 @@ GROUP BY
         WHERE
             planilla."ID_PLANILLA" = :idPlanilla
             AND dd."ESTADO_APLICACION" = 'EN PRELIMINAR'
-            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51, 45)
+             AND dd.ID_AF_BANCO IS NOT NULL
+            AND ded.ID_CENTRO_TRABAJO != 1
         GROUP BY
             dd."ID_PERSONA"
     `;
@@ -3711,6 +3712,7 @@ GROUP BY
           n_identificacion: beneficio?.n_identificacion?.trim(),
         };
       }).sort((a, b) => a.neto - b.neto);
+      
       return result;
     } catch (error) {
       console.error('Error al obtener los detalles preliminares de pago por planilla:', error);
@@ -4215,6 +4217,7 @@ GROUP BY
             t5.periodo_finalizacion AS PERIODO_FINALIZACION,
             t3.fecha_calculo AS FECHA_EFECTIVIDAD,
             t5.CODIGO_PLANILLA, 
+            t3.MONTO_POR_PERIODO,
             t1.estado
         FROM net_detalle_pago_beneficio t1
         JOIN net_detalle_beneficio_afiliado t3 ON 
@@ -4256,6 +4259,8 @@ GROUP BY
         { header: 'PERIODO INICIO', key: 'PERIODO_INICIO', width: 15 },
         { header: 'PERIODO FINALIZACION', key: 'PERIODO_FINALIZACION', width: 15 },
         { header: 'CODIGO DE BENEFICIO', key: 'ID_BENEFICIO', width: 15 },
+        { header: 'CODIGO PLANILLA', key: 'CODIGO_PLANILLA', width: 15 },
+        { header: 'MONTO POR PERIODO', key: 'MONTO_POR_PERIODO', width: 20 },
       ];
   
       // Agregar datos
@@ -4279,6 +4284,7 @@ GROUP BY
       throw new BadRequestException(error.message || 'Error al generar el archivo Excel.');
     }
   }
+  
   
 
 }

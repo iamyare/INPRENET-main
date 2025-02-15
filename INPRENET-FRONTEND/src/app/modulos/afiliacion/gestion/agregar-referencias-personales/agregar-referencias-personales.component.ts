@@ -49,7 +49,6 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
       telefono_trabajo: [datos?.telefono_trabajo || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       telefono_personal: [datos?.telefono_personal || '', [Validators.required ,Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       parentesco: [datos?.parentesco || '', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
-      n_identificacion: [datos?.n_identificacion || '', [Validators.pattern(/^[0-9]*$/), Validators.minLength(13), Validators.maxLength(13)]]
     });
 
     referenciaForm.get('tipo_referencia')?.valueChanges.subscribe(value => {
@@ -119,7 +118,6 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
       telefono_domicilio: referencia.telefono_domicilio,
       telefono_trabajo: referencia.telefono_trabajo,
       telefono_personal: referencia.telefono_personal,
-      n_identificacion: referencia.n_identificacion,
       direccion: referencia.direccion,
     }));
   }

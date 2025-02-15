@@ -99,7 +99,8 @@ export class SharedFormFieldsComponent implements OnInit {
       min: `El valor debe ser mayor o igual a ${control.errors?.['min']?.min}`,
       max: `El valor debe ser menor o igual a ${control.errors?.['max']?.max}`,
       pattern: 'Formato incorrecto',
-      fieldNotUnique: 'El número de identificación ya ha sido ingresado.'
+      fieldNotUnique: 'El número de identificación ya ha sido ingresado.',
+      identificacionDuplicada: 'No puede ser igual al número de identificación del afiliado.'
     };
     return errorMessages[errorKey] || 'Error desconocido';
   }

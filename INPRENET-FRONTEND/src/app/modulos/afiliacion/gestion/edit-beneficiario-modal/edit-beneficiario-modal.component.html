@@ -1,0 +1,232 @@
+<mat-dialog-content>
+    <h2>Editar Beneficiario</h2>
+  
+    <form [formGroup]="formGroup">
+      <div class="row">
+        <!-- Número de Identificación -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <mat-form-field appearance="outline" class="full-width" [ngClass]="{'error-field': formGroup.get('n_identificacion')?.invalid && formGroup.get('n_identificacion')?.touched}">
+              <mat-label>Número de Identificación</mat-label>
+              <mat-icon matPrefix>badge</mat-icon>
+              <input matInput formControlName="n_identificacion">
+              <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('required')">Este campo es obligatorio.</mat-error>
+              <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('pattern')">Solo se permiten números.</mat-error>
+              <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('minlength')">Debe tener 13 dígitos.</mat-error>
+            </mat-form-field>
+          </div>
+         <!-- Primer Nombre -->
+         <div class="col-lg-6 col-md-6 col-sm-12">
+            <mat-form-field appearance="outline" class="full-width" [ngClass]="{'error-field': formGroup.get('primer_nombre')?.invalid && formGroup.get('primer_nombre')?.touched}">
+                <mat-label>Primer Nombre</mat-label>
+                <mat-icon matPrefix>person</mat-icon>
+                <input matInput formControlName="primer_nombre">
+                <mat-error *ngIf="formGroup.get('primer_nombre')?.hasError('required')">Este campo es obligatorio.</mat-error>
+              </mat-form-field>
+          </div>
+      </div>
+  
+      <div class="row">
+        <!-- Segundo Nombre -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Segundo Nombre</mat-label>
+            <mat-icon matPrefix>person</mat-icon>
+            <input matInput formControlName="segundo_nombre">
+          </mat-form-field>
+        </div>
+  
+        <!-- Tercer Nombre -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Tercer Nombre</mat-label>
+            <mat-icon matPrefix>person</mat-icon>
+            <input matInput formControlName="tercer_nombre">
+          </mat-form-field>
+        </div>
+      </div>
+  
+      <div class="row">
+        <!-- Primer Apellido -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <mat-form-field appearance="outline" class="full-width" [ngClass]="{'error-field': formGroup.get('primer_apellido')?.invalid && formGroup.get('primer_apellido')?.touched}">
+                <mat-label>Primer Apellido</mat-label>
+                <mat-icon matPrefix>person</mat-icon>
+                <input matInput formControlName="primer_apellido">
+                <mat-error *ngIf="formGroup.get('primer_apellido')?.hasError('required')">Este campo es obligatorio.</mat-error>
+              </mat-form-field>
+        </div>
+  
+        <!-- Segundo Apellido -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Segundo Apellido</mat-label>
+            <mat-icon matPrefix>person</mat-icon>
+            <input matInput formControlName="segundo_apellido">
+          </mat-form-field>
+        </div>
+      </div>
+  
+      <div class="row">
+        <!-- Género -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <mat-form-field appearance="outline" class="full-width" [ngClass]="{'error-field': formGroup.get('genero')?.invalid && formGroup.get('genero')?.touched}">
+                <mat-label>Género</mat-label>
+                <mat-icon matPrefix>wc</mat-icon>
+                <mat-select formControlName="genero">
+                  <mat-option *ngFor="let item of genero" [value]="item.value">{{ item.label }}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="formGroup.get('genero')?.hasError('required')">Selecciona un género.</mat-error>
+              </mat-form-field>
+        </div>
+  
+        <!-- Fecha de Nacimiento -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <mat-form-field appearance="outline" class="full-width" [ngClass]="{'error-field': formGroup.get('fecha_nacimiento')?.invalid && formGroup.get('fecha_nacimiento')?.touched}">
+                <mat-label>Fecha de Nacimiento</mat-label>
+                <mat-datepicker-toggle matSuffix [for]="fechaNac"></mat-datepicker-toggle>
+                <mat-datepicker #fechaNac></mat-datepicker>
+                <input matInput formControlName="fecha_nacimiento" [matDatepicker]="fechaNac">
+                <mat-error *ngIf="formGroup.get('fecha_nacimiento')?.hasError('required')">Debes ingresar una fecha.</mat-error>
+              </mat-form-field>
+        </div>
+      </div>
+  
+      <div class="row">
+        <!-- Departamento de Nacimiento -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Departamento de Nacimiento</mat-label>
+            <mat-icon matPrefix>location_on</mat-icon>
+            <mat-select formControlName="id_departamento_nacimiento" (selectionChange)="onDepartamentoNacimientoChange($event)">
+              <mat-option *ngFor="let departamento of departamentosNacimiento" [value]="departamento.value">
+                {{ departamento.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+  
+        <!-- Municipio de Nacimiento -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Municipio de Nacimiento</mat-label>
+            <mat-icon matPrefix>location_city</mat-icon>
+            <mat-select formControlName="id_municipio_nacimiento">
+              <mat-option *ngFor="let municipio of municipiosNacimiento" [value]="municipio.value">
+                {{ municipio.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+  
+      <div class="row">
+        <!-- Departamento de Residencia -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Departamento de Residencia</mat-label>
+                <mat-icon matPrefix>home</mat-icon>
+                <mat-select formControlName="id_departamento_residencia" (selectionChange)="onDepartamentoChange($event)">
+                  <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+                    {{ departamento.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+        </div>
+  
+        <!-- Municipio de Residencia -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Municipio de Residencia</mat-label>
+                <mat-icon matPrefix>home</mat-icon>
+                <mat-select formControlName="id_municipio_residencia">
+                  <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
+                    {{ municipio.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+        </div>
+      </div>
+  
+      <div class="row">
+        <!-- Dirección de Residencia -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <mat-form-field appearance="outline" class="full-width" [ngClass]="{'error-field': formGroup.get('direccion_residencia')?.invalid && formGroup.get('direccion_residencia')?.touched}">
+              <mat-label>Dirección de Residencia</mat-label>
+              <mat-icon matPrefix>home</mat-icon>
+              <input matInput formControlName="direccion_residencia">
+              <mat-error *ngIf="formGroup.get('direccion_residencia')?.hasError('required')">Este campo es obligatorio.</mat-error>
+            </mat-form-field>
+          </div>
+  
+        <!-- Teléfono -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <mat-form-field appearance="outline" class="full-width" [ngClass]="{'error-field': formGroup.get('telefono_1')?.invalid && formGroup.get('telefono_1')?.touched}">
+                <mat-label>Teléfono</mat-label>
+                <mat-icon matPrefix>phone</mat-icon>
+                <input matInput formControlName="telefono_1">
+                <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('required')">Este campo es obligatorio.</mat-error>
+              </mat-form-field>
+        </div>
+      </div>
+  
+      <div class="row">
+        <!-- Parentesco -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Parentesco</mat-label>
+            <mat-icon matPrefix>people</mat-icon>
+            <mat-select formControlName="parentesco">
+              <mat-option *ngFor="let item of parentesco" [value]="item.value">
+                {{ item.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+  
+        <!-- Porcentaje -->
+        <div class="col-lg-6 col-md-6 col-sm-12">
+          <mat-form-field appearance="outline" class="full-width"
+            [ngClass]="{'error-field': formGroup.get('porcentaje')?.invalid && formGroup.get('porcentaje')?.touched}">
+            <mat-label>Porcentaje</mat-label>
+            <mat-icon matPrefix>percent</mat-icon>
+            <input matInput formControlName="porcentaje" type="number">
+        
+            <!-- 🔹 Aviso constante con el porcentaje disponible -->
+            <mat-hint *ngIf="porcentajeDisponible > 0">
+              Porcentaje disponible: {{ porcentajeDisponible }}%
+            </mat-hint>
+        
+            <!-- ⚠️ Errores del campo -->
+            <mat-error *ngIf="formGroup.get('porcentaje')?.hasError('required')">
+              Este campo es obligatorio.
+            </mat-error>
+        
+            <mat-error *ngIf="formGroup.get('porcentaje')?.hasError('min')">
+              El porcentaje mínimo es 1%.
+            </mat-error>
+        
+            <mat-error *ngIf="formGroup.get('porcentaje')?.hasError('max')">
+              El porcentaje máximo es 100%.
+            </mat-error>
+        
+            <mat-error *ngIf="formGroup.get('porcentaje')?.hasError('porcentajeNegativo')">
+              No se permiten valores negativos.
+            </mat-error>
+        
+            <mat-error *ngIf="formGroup.get('porcentaje')?.hasError('porcentajeExcedido')">
+              El porcentaje ingresado supera el límite permitido ({{ porcentajeDisponible }}% disponible).
+            </mat-error>
+        
+          </mat-form-field>
+        </div>
+        
+
+      </div>
+    </form>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="cancelar()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="guardar()" [disabled]="formGroup.invalid">Guardar</button>
+  </mat-dialog-actions>
+  

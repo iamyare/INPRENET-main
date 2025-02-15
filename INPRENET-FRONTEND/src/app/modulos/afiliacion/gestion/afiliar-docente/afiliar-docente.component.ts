@@ -229,16 +229,25 @@ onSubmit(): void {
               console.error('No se encontró la persona luego de crear la afiliación.');
               return;
             }
-
             personaActualizada.tipoFormulario = 'NUEVA AFILIACION';
-            const documentDefinition = this.getDocumentDefinition(
-              beneficiarios,
-              response,
-              this.backgroundImageBase64
-            );
-            pdfMake.createPdf(documentDefinition).download('beneficiarios.pdf');
 
-            // Generar constancia QR
+            this.afiliacionService.descargarConstanciaBeneficiarios(response[0].id_persona, this.usuarioToken)
+            .subscribe({
+              next: (pdfBlob: Blob) => {
+                const url = window.URL.createObjectURL(pdfBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `constancia_${response[0].n_identificacion}.pdf`; // Nombre del archivo
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+              },
+              error: (error) => {
+                this.toastr.error('No se pudo descargar la constancia.');
+                console.error('Error al descargar la constancia:', error);
+              }
+            });
             this.afiliadoService.generarConstanciaQR(
               personaActualizada,
               this.usuarioToken,
@@ -276,253 +285,6 @@ onSubmit(): void {
     this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
   }
 }
-
-//-------------------------------------------------------------------
-  getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
-    userDetails.forEach(item => {
-      item.nombre = [item.primer_nombre, item.segundo_nombre, item.primer_apellido, item.segundo_apellido]
-      .filter(name => name && name.trim() !== '') // Filtra los valores vacíos
-      .join(' ') || 'N/A';item.fechaNacimiento = item.fecha_nacimiento || 'N/A';
-      item.identidad = item.n_identificacion || 'N/A';
-      item.parentesco = item.parentesco || 'N/A';
-      item.porcentaje = item.porcentaje || 'N/A';
-      item.direccion_residencia = item.direccion_residencia || 'N/A';
-      item.telefono_1 = item.telefono_1 || 'N/A';
-    });
-    // Detalles del usuario
-    beneficiarios.nombre = [
-      beneficiarios[0].primer_nombre, 
-      beneficiarios[0].segundo_nombre, 
-      beneficiarios[0].primer_apellido, 
-      beneficiarios[0].segundo_apellido
-    ].filter(name => name && name.trim() !== '').join(' ') || 'N/A'
-    beneficiarios.grado_academico = beneficiarios[0].grado_academico || 'N/A';
-    beneficiarios.centroEducativo = beneficiarios[3].nombre_centro_trabajo || 'N/A';
-    beneficiarios.municipioResidencia = beneficiarios[3].nombre_municipio || 'N/A';
-    beneficiarios.departamentoResidencia = beneficiarios[3].nombre_departamento || 'N/A';
-    beneficiarios.n_identificacion = beneficiarios[0].n_identificacion || 'N/A';
-
-    interface TableCell {
-      text?: string;
-      style?: string;
-      rowSpan?: number;
-      colSpan?: number;
-      fillColor?: string;
-      alignment?: string;
-    }
-
-    const body: TableCell[][] = [
-      [
-        { text: 'N°', style: 'tableHeader', fillColor: '#CCCCCC', alignment: 'center' },
-        { text: 'NOMBRE COMPLETO', style: 'tableHeader', alignment: 'center' },
-        { text: 'FECHA DE NACIMIENTO', style: 'tableHeader', alignment: 'center' },
-        { text: 'IDENTIDAD', style: 'tableHeader', alignment: 'center' },
-        { text: 'PARENTESCO', style: 'tableHeader', alignment: 'center' },
-        { text: '%', style: 'tableHeader', alignment: 'center' },
-      ]
-    ];
-
-    userDetails.forEach((item, index) => {
-      const fechaNacimiento = item.fechaNacimiento
-        ? new Date(item.fechaNacimiento).toLocaleDateString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        })
-        : 'N/A';
-
-      body.push(
-        [
-          { text: (index + 1).toString(), rowSpan: 2, style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
-          { text: item.nombre, style: 'tableRowLarge', alignment: 'center' },
-          { text: fechaNacimiento, style: 'tableRowLarge', alignment: 'center' },
-          { text: item.identidad, style: 'tableRowLarge', alignment: 'center' },
-          { text: item.parentesco, style: 'tableRowLarge', alignment: 'center' },
-          { text: item.porcentaje, style: 'tableRowLarge', alignment: 'center' },
-        ],
-        [
-          {},
-          { text: 'DIRECCIÓN', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
-          { text: item.direccion_residencia, style: 'tableRowLarge', colSpan: 2, alignment: 'center' },
-          { text: '', style: 'tableRowLarge' },
-          { text: 'TELEFONO/CEL', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
-          { text: item.telefono_1, style: 'tableRowLarge', alignment: 'center' },
-        ]
-      );
-    });
-
-    return {
-      background: function (currentPage: any, pageSize: any) {
-        return {
-          image: backgroundImageBase64,
-          width: pageSize.width,
-          height: pageSize.height,
-          absolutePosition: { x: 0, y: 2 }
-        };
-      },
-      content: [
-        {
-          text: [
-            'Señores de la Comisión Interventora del INPREMA\nPresente.\n\nYo ',
-            { text: beneficiarios.nombre, bold: true },
-            ', mayor de edad, laborando como docente en el nivel ',
-            { text: beneficiarios.grado_academico, bold: true },
-            ', del Centro Educativo ',
-            { text: beneficiarios.centroEducativo || 'NOMBRE NO DISPONIBLE', bold: true }, 
-            ', ubicado en el Municipio ',
-            { text: beneficiarios.municipioResidencia, bold: true },
-            ' del Departamento ',
-            { text: beneficiarios.departamentoResidencia, bold: true },
-            ', con Identidad N°. ',
-            { text: beneficiarios.n_identificacion, bold: true },
-            ', comparezco ante el Instituto Nacional de Previsión del magisterio a registrar mis beneficiarios legales de la manera siguiente:\n\n'
-          ],
-          style: 'introText',
-          margin: [0, 100, 0, 0] // Aumentar el margen superior a 100 para bajarlo
-        },
-        {
-          table: {
-            widths: [20, '*', '*', '*', '*', '*'],
-            body: body
-          }
-        },
-        {
-          text: '', // Separación adicional
-          margin: [0, 20, 0, 0]
-        },
-        {
-          stack: [
-            {
-              text: [
-                'También dispongo, que si alguno de mis beneficiarios (as) designados en este instrumento falleciere, el porcentaje de él o ella asignado, se distribuya en partes iguales entre los sobrevivientes registrados. Me reservo el derecho de actualizar, modificar o cancelar la presente DESIGNACIÓN, cuando lo estime conveniente.\n\n',
-                { text: 'Nota: Con esta designación dejo sin valor ni efecto la presentada anteriormente.\n\n', bold: true }
-              ],
-              style: 'mainText'
-            },
-            {
-              columns: [
-                {
-                  width: '*',
-                  stack: [
-                    {
-                      text: 'Lugar y Fecha: _______________________________________________________________',
-                      margin: [0, 20, 0, 15]  // Añadir margen adicional
-                    },
-                    {
-                      text: '(f) _______________________________',
-                      margin: [0, 15, 0, 0]  // Añadir margen adicional
-                    }
-                  ]
-                },
-                {
-                  width: 'auto',
-                  stack: [
-                    {
-                      canvas: [
-                        {
-                          type: 'rect',
-                          x: 0,
-                          y: 0,
-                          w: 80,
-                          h: 80,
-                          lineWidth: 1,
-                          lineColor: 'black'
-                        }
-                      ],
-                      margin: [0, -25, 0, 0]  // Ajustar la posición vertical del cuadro de huella
-                    },
-                    {
-                      text: 'Huella',
-                      alignment: 'center',
-                      margin: [0, -60, 0, 0]  // Ajustar la posición vertical de la palabra "Huella"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              style: 'usoExclusivo',
-              table: {
-                widths: ['*'],
-                body: [
-                  [{ text: 'PARA USO EXCLUSIVO DEL INPREMA', style: 'tableHeader', alignment: 'center', fillColor: '#CCCCCC' }],
-                  [
-                    {
-                      columns: [
-                        {
-                          width: '50%',
-                          stack: [
-                            { text: 'Nombre del empleado: ___________________________', margin: [0, 10] },
-                            { text: 'Código: _______', margin: [0, 10] }
-                          ],
-                          style: 'subHeader'
-                        },
-                        {
-                          width: '50%',
-                          stack: [
-                            { text: '________________________________', alignment: 'center', margin: [0, 10, 0, 0] },
-                            { text: 'Firma', alignment: 'center', margin: [-10, 0, 0, 0] }
-                          ],
-                          style: 'subHeader'
-                        }
-                      ]
-                    }
-                  ]
-                ]
-              },
-              layout: {
-                hLineWidth: function (i: any, node: any) {
-                  return (i === 0 || i === node.table.body.length) ? 1 : 0.5;
-                },
-                vLineWidth: function (i: any, node: any) {
-                  return (i === 0 || i === node.table.widths.length) ? 1 : 0.5;
-                }
-              },
-              margin: [0, 20, 0, 0]
-            }
-          ]
-        }
-      ],
-      styles: {
-        introText: {
-          fontSize: 12,
-          margin: [0, 0, 0, 10]
-        },
-        mainText: {
-          fontSize: 12,
-          margin: [0, 0, 0, 10]
-        },
-        subHeader: {
-          fontSize: 10,
-          bold: false,
-          margin: [0, 0, 0, 10]
-        },
-        tableHeader: {
-          bold: true,
-          fontSize: 10,
-          color: 'black',
-          fillColor: '#CCCCCC',
-          alignment: 'center'
-        },
-        tableRow: {
-          fontSize: 9,
-          color: 'black',
-          alignment: 'center'
-        },
-        tableRowLarge: {
-          fontSize: 11,
-          color: 'black',
-          alignment: 'center'
-        },
-        grayBackground: {
-          fillColor: '#CCCCCC'
-        },
-        usoExclusivo: {
-          margin: [0, 20, 0, 0]
-        }
-      }
-    };
-  }
 
   private formatDireccion(datosGenerales: any): string {
     return [
@@ -620,7 +382,8 @@ onSubmit(): void {
           fecha_nacimiento: beneficiario.fecha_nacimiento,
           direccion_residencia: beneficiario.direccion_residencia.toUpperCase(),
           id_municipio_residencia: beneficiario.id_municipio_residencia,
-          id_municipio_nacimiento: beneficiario.id_municipio_nacimiento
+          id_municipio_nacimiento: beneficiario.id_municipio_nacimiento,
+          genero: beneficiario.genero?.toUpperCase(),
         },
         discapacidades: this.formatDiscapacidades(discapacidades),
         porcentaje: beneficiario.porcentaje || null,
@@ -655,9 +418,9 @@ onSubmit(): void {
           tercer_nombre: referenciasPersonales.conyuge.tercer_nombre?.toUpperCase() || '',
           primer_apellido: referenciasPersonales.conyuge.primer_apellido?.toUpperCase() || '',
           segundo_apellido: referenciasPersonales.conyuge.segundo_apellido?.toUpperCase() || '',
-          telefono_domicilio: referenciasPersonales.conyuge.telefono_domicilio,
-          telefono_trabajo: referenciasPersonales.conyuge.telefono_trabajo,
-          telefono_personal: referenciasPersonales.conyuge.telefono_celular,
+          telefono_3: referenciasPersonales.conyuge.telefono_domicilio,
+          telefono_2: referenciasPersonales.conyuge.telefono_trabajo,
+          telefono_1: referenciasPersonales.conyuge.telefono_celular,
           n_identificacion: referenciasPersonales.conyuge.n_identificacion,
           fecha_nacimiento: referenciasPersonales.conyuge.fecha_nacimiento,
           trabaja: referenciasPersonales.conyuge.trabaja,

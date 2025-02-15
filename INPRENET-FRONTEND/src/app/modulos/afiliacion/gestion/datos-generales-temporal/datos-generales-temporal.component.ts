@@ -452,6 +452,23 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
     ])
   );
 
+  this.formGroup.get('n_identificacion')?.valueChanges.subscribe((value) => {
+    const tipoIdentificacion = this.formGroup.get('id_tipo_identificacion')?.value;
+    
+    if (tipoIdentificacion === 1 && value) {
+      this.formGroup.patchValue({ rtn: value });
+    }
+  });
+
+  // Suscribirse a los cambios en `id_tipo_identificacion` para limpiar RTN si cambia
+  this.formGroup.get('id_tipo_identificacion')?.valueChanges.subscribe((tipo) => {
+    if (tipo !== 1) {
+      this.formGroup.patchValue({ rtn: '' });
+    }
+  });
+
+  this.setValidacionesIdentificacion(false);
+
   // Cargar datos iniciales
   this.cargarDatosIniciales();
 

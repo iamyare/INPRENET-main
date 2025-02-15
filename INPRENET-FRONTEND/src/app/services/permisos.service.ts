@@ -53,7 +53,6 @@ export class PermisosService {
           permisos: [
             { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
             { role: 'ADMINISTRADOR', module: 'AFILIACION', permiso: 'editar' },
-            { role: 'CONSULTA AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'verpago' },
             { role: 'MODIFICACION AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'editarDos' },
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
             { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }

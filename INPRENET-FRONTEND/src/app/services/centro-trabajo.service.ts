@@ -21,6 +21,11 @@ export class CentroTrabajoService {
     return this.http.get<any[]>(url);
   }
 
+  buscarCentroTrabajo(termino: string): Observable<any[]> {
+    const url = `${environment.API_URL}/api/centro-trabajo/buscar?termino=${termino}`;
+    return this.http.get<any[]>(url);
+  }
+
   actualizarEmpleado(id: number, datos: any, archivos: { archivoIdentificacion?: File; fotoEmpleado?: File }): Observable<any> {
     const formData = new FormData();
     formData.append('nombreEmpleado', datos.nombreEmpleado);

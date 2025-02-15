@@ -62,6 +62,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   cargandoTabla: boolean = false; 
 
   mostrarBotonGenerar: boolean = false;
+  puedeAdministrar: boolean = false;
 
   // -------------------------------------------
   // FORMULARIOS
@@ -223,34 +224,54 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   setDisabledFieldsByRole(): void {
     setTimeout(() => {
-      // Obtener si el usuario tiene el permiso "administrar"
+      const puedeEditar = this.permisosService.userHasPermission(
+        'AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos']
+      );
+  
       const puedeAdministrar = this.permisosService.userHasPermission(
         'AFILIACIONES', 'afiliacion/buscar-persona', ['administrar']
       );
   
-      // Si no tiene permisos de edición y no puede administrar, deshabilitar todo
-      if ((!this.mostrarBotonGuardar && !puedeAdministrar) || (this.Afiliado && this.Afiliado.fallecido === "SI" && !puedeAdministrar)) {
+      // 🔹 Si el usuario NO tiene permisos de edición NI administración, deshabilitar todo
+      if (!puedeEditar && !puedeAdministrar) {
         Object.keys(this.datosGeneralesForm.controls).forEach(field => {
-          const control = this.datosGeneralesForm.get(field);
-          if (control) control.disable({ emitEvent: false });
+          this.datosGeneralesForm.get(field)?.disable({ emitEvent: false });
         });
   
         this.disableNestedControls(this.datosGeneralesForm);
         this.disableNestedControls(this.formDatosGenerales);
         this.disableNestedControls(this.form1);
       } else {
-        // Habilitar los campos si el usuario tiene permisos o puede administrar
+        // 🔹 Habilitar los campos generales si el usuario tiene permisos (excepto fallecimiento)
         Object.keys(this.datosGeneralesForm.controls).forEach(field => {
-          const control = this.datosGeneralesForm.get(field);
-          if (control) control.enable({ emitEvent: false });
+          this.datosGeneralesForm.get(field)?.enable({ emitEvent: false });
         });
   
         this.enableNestedControls(this.datosGeneralesForm);
         this.enableNestedControls(this.formDatosGenerales);
         this.enableNestedControls(this.form1);
       }
+  
+      // 🔴 Deshabilitar SIEMPRE los campos de fallecimiento si el usuario NO es "administrador"
+      if (!puedeAdministrar) {
+        const camposFallecimiento = [
+          'fallecido', 'causa_fallecimiento', 'fecha_defuncion', 
+          'id_departamento_defuncion', 'id_municipio_defuncion', 
+          'fecha_reporte_fallecido', 'numero_certificado_defuncion'
+        ];
+        camposFallecimiento.forEach(field => {
+          this.form1.get(field)?.disable({ emitEvent: false });
+        });
+  
+        // Deshabilitar también la carga del certificado de defunción
+        this.formDatosGenerales.get('archivoCertDef')?.disable({ emitEvent: false });
+      }
+  
+      this.cdr.detectChanges();
     }, 0);
   }
+  
+  
   
   // Deshabilita los controles anidados en grupos o arrays
   disableNestedControls(formGroup: FormGroup | FormArray): void {
@@ -314,22 +335,20 @@ export class EditDatosGeneralesComponent implements OnInit {
         'AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos']
       );
   
-      const puedeAdministrar = this.permisosService.userHasPermission(
+      this.puedeAdministrar = this.permisosService.userHasPermission(
         'AFILIACIONES', 'afiliacion/buscar-persona', ['administrar']
       );
   
-      this.mostrarBotonGuardar = puedeAdministrar || (!this.Afiliado || this.Afiliado.fallecido !== "SI" && puedeEditar);
-
-      this.puedeEditarTabla = puedeAdministrar;
+      this.mostrarBotonGuardar = this.puedeAdministrar || (!this.Afiliado || this.Afiliado.fallecido !== "SI" && puedeEditar);
+      this.puedeEditarTabla = this.puedeAdministrar;
   
       this.setDisabledFieldsByRole();
       this.cdr.detectChanges();
     });
-
+  
     this.form1.get('fallecido')?.valueChanges.subscribe((value) => {
       this.toggleCamposFallecimiento(value);
     });
-
     this.cargarCausasFallecimiento();
     this.cargarEstadosAfiliado();
     this.previsualizarInfoAfil();
@@ -926,7 +945,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   guardarEstadoAfiliacion(element: any) {
     const estadoAfiliacion = typeof element.estadoAfiliacion === 'string'
       ? element.estadoAfiliacion.trim()
-      : String(element.estadoAfiliacion); // Convertir a string si no lo es
+      : String(element.estadoAfiliacion);
 
     const payload = {
       idPersona: element.ID_PERSONA,
@@ -939,7 +958,6 @@ export class EditDatosGeneralesComponent implements OnInit {
       observacion: element.observacion || ''
     };
 
-
     this.svcAfiliado.updateEstadoAfiliacionPorDni(payload).subscribe(
       (response) => {
         this.toastr.success('Estado actualizado correctamente');
@@ -951,7 +969,6 @@ export class EditDatosGeneralesComponent implements OnInit {
       }
     );
   }
-
 
   // ---------------------------------------------
   // Mostrar mensajes de error en HTML

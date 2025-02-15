@@ -38,6 +38,9 @@
             Máximo 15 caracteres permitidos
           </ng-container><ng-container *ngIf="getControl(field.name)?.errors?.['pattern']">Formato incorrecto</ng-container>
           <ng-container *ngIf="getControl(field.name)?.errors?.['fieldNotUnique']">El número de identificación ya ha sido ingresado.</ng-container>
+          <ng-container *ngIf="getControl(field.name)?.errors?.['identificacionDuplicada']">
+            <mat-icon>error</mat-icon> No puede ser igual al número de identificación del afiliado.
+          </ng-container>
         </mat-error>
       </mat-form-field>
 

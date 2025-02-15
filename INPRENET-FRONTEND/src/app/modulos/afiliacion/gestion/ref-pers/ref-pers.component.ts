@@ -35,10 +35,12 @@ export class RefPersComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Verificamos si ya existen los form controls,
-    // si no, los creamos.
     if (!this.formGroup.get('refpers')) {
       this.formGroup.addControl('refpers', this.fb.array([]));
+    }
+  
+    if (this.referencias.length === 0) {
+      this.agregarReferencia(); // Agregar una referencia por defecto
     }
 
     if (!this.formGroup.get('conyuge')) {
@@ -46,6 +48,13 @@ export class RefPersComponent implements OnInit {
     }
 
     this.cargarDatosEstaticos();
+  }
+
+  private validarMinimoUnaReferencia(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const formArray = control as FormArray;
+      return formArray.length > 0 ? null : { alMenosUnaReferencia: true };
+    };
   }
 
   // ---------------------------------------------
@@ -307,15 +316,18 @@ private clearConyugeFieldsValidation(form: FormGroup): void {
   }
 
   eliminarReferencia(index: number): void {
-    if (this.referencias.length > 0) {
+    if (this.referencias.length > 1) {
       this.referencias.removeAt(index);
+    } else {
+      console.warn("Debe haber al menos una referencia.");
     }
+    this.referencias.updateValueAndValidity(); 
   }
+  
 
   cambiarListadoParentesco(tipoReferencia: string, referenciaForm: FormGroup) {
     if (tipoReferencia === 'REFERENCIA FAMILIAR') {
       this.parentesco = this.datosEstaticosService.parentesco;
-      console.log(this.parentesco);
       
     } else if (tipoReferencia === 'REFERENCIA PERSONAL') {
       this.parentesco = this.datosEstaticosService.parentescoReferenciasPersonales;

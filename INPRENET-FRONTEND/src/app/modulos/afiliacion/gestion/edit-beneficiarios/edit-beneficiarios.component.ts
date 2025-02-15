@@ -20,6 +20,7 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 import { HttpClient } from '@angular/common/http';
+import { EditBeneficiarioModalComponent } from '../edit-beneficiario-modal/edit-beneficiario-modal.component';
 @Component({
   selector: 'app-edit-beneficiarios',
   templateUrl: './edit-beneficiarios.component.html',
@@ -81,7 +82,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   // Función para verificar si tiene al menos uno de los permisos
   private tienePermiso(): boolean {
     return (
-      this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos'])
+      this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos', 'administrar'])
     );
   }
 
@@ -144,12 +145,20 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
             fecha_nacimiento: fechaNacimiento,
             direccion_residencia: item.direccionResidencia || '',
             idPaisNacionalidad: item.idPaisNacionalidad,
+            id_municipio_nacimiento: item.idMunicipioNacimiento,
             id_municipio_residencia: item.idMunicipioResidencia,
             id_estado_persona: item.idEstadoPersona,
             porcentaje: item.porcentaje,
             parentesco: item.parentesco,
             tipo_persona: item.tipoPersona,
-            discapacidades
+            id_departamento_residencia: item.idDepartamentoResidencia,
+            id_departamento_nacimiento: item.idDepartamentoNacimiento,
+            discapacidades,
+            primer_nombre: item.primerNombre,
+            segundo_nombre: item.segundoNombre,
+            tercer_nombre: item.tercerNombre,
+            primer_apellido: item.primerApellido,
+            segundo_apellido: item.segundoApellido,
           };
         });
 
@@ -187,69 +196,31 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   }
 
   editarFila(row: any) {
-    const porcentajeOcupado = this.filas.reduce((acc, fila) => acc + (fila.porcentaje || 0), 0);
-    const porcentajeDisponible = 100 - (porcentajeOcupado - row.porcentaje);
+    const totalOcupado = this.filas.reduce((acc, fila) => acc + (fila.porcentaje || 0), 0);
+    const porcentajeDisponible = 100 - (totalOcupado - row.porcentaje);
 
-    const validacionesDinamicas = {
-        porcentaje: [
-            Validators.required,
-            Validators.min(1),
-            Validators.max(porcentajeDisponible),
-            (control: AbstractControl) => {
-                const nuevoValor = Number(control.value);
-                const totalPorcentaje = porcentajeOcupado - row.porcentaje + nuevoValor;
-                if (totalPorcentaje > 100) {
-                    return { excedeTotal: true };
-                }
-                if (totalPorcentaje < 100) {
-                    return { noCumpleTotal: true };
-                }
-
-                return null;
+    const dialogRef = this.dialog.open(EditBeneficiarioModalComponent, {
+      width: '600px',
+      data: { 
+        beneficiario: row,
+        porcentajeDisponible 
+      }
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.svcAfiliado.updateBeneficiario(row.id_persona, result).subscribe(
+          () => {
+            this.toastr.success('Beneficiario actualizado exitosamente');
+            this.getFilas();
+          },
+          (error) => {
+            this.toastr.error('Error al actualizar beneficiario');
+            console.error('Error al actualizar beneficiario', error);
           }
-      ]
-  };
-
-    const campos = [
-        {
-            nombre: 'porcentaje',
-            tipo: 'number',
-            etiqueta: 'Porcentaje',
-            editable: true,
-            icono: 'pie_chart',
-            validadores: validacionesDinamicas.porcentaje
-        },
-        {
-            nombre: 'direccion_residencia',
-            tipo: 'text',
-            etiqueta: 'Dirección de Residencia',
-            editable: true,
-            icono: 'home',
-            validadores: [Validators.required, Validators.minLength(10), Validators.maxLength(200)]
-        },
-        {
-            nombre: 'telefono_1',
-            tipo: 'text',
-            etiqueta: 'Teléfono',
-            editable: true,
-            icono: 'phone',
-            validadores: [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]
-        },
-        {
-            nombre: 'parentesco',
-            tipo: 'list',
-            etiqueta: 'Parentesco',
-            editable: true,
-            icono: 'supervisor_account',
-            opciones: this.datosEstaticosService.parentesco,
-            validadores: [Validators.required]
-        }
-    ];
-
-    this.openDialog(campos, row, validacionesDinamicas);
-}
-
-
+        );
+      }
+    });
+  }
 
   openDialog(campos: any, row: any, validacionesDinamicas: any = {}): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
@@ -493,8 +464,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     });
 }
 
-
-
   // Método para convertir imagen a Base64
   getBase64ImageFromURL(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -529,246 +498,35 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     });
   }
 
-  generarPDF2() {
-    this.obtenerPersonaConPerfilYBeneficiarios(this.persona.id_persona);
-    setTimeout(() => {
-      if (this.persona2 && this.perfil2 && this.beneficiarios2) {
-        const documentDefinition = this.getDocumentDefinition(
-          this.persona2, 
-          this.perfil2, 
-          this.beneficiarios2, 
-          this.backgroundImageBase64
-        );
-        pdfMake.createPdf(documentDefinition).download();
-      } else {
-        this.toastr.error("No se pudo generar el PDF porque no se actualizaron los datos.");
-      }
-    }, 1000); // Espera 1 segundo para asegurar que los datos se actualicen
+  descargarConstanciaBeneficiarios() {
+    if (!this.persona || !this.persona.id_persona) {
+        this.toastr.error('No se puede generar la constancia sin un afiliado seleccionado.');
+        return;
+    }
+
+    const usuarioToken = this.authService.decodeToken(sessionStorage.getItem('token') || '');
+
+    const empleadoDto = {
+        nombreEmpleado: usuarioToken.nombreEmpleado || 'N/A',
+        numero_empleado: usuarioToken.numero_empleado || 'N/A',
+        departamento: usuarioToken.departamento || 'N/A',
+        municipio: usuarioToken.municipio || 'N/A',
+        nombrePuesto: usuarioToken.nombrePuesto || 'N/A',
+        correo: usuarioToken.correo || 'N/A'
+    };
+
+    this.afiliacionServicio.descargarConstanciaBeneficiarios(this.persona.id_persona, empleadoDto).subscribe({
+        next: (pdfBlob: Blob) => {
+            const url = window.URL.createObjectURL(pdfBlob);
+            window.open(url, '_blank');
+        },
+        error: (error) => {
+            this.toastr.error('No se pudo descargar la constancia.');
+            console.error('Error al descargar la constancia:', error);
+        }
+    });
 }
 
   
-    getDocumentDefinition(persona: any, perfil: any, beneficiarios: any[], backgroundImageBase64: string): any {
-      
-      beneficiarios.forEach(item => {
-        item.nombre = item.nombre_completo || 'N/A';
-        item.fechaNacimiento = item.fecha_nacimiento || 'N/A';
-        item.identidad = item.n_identificacion || 'N/A';
-        item.parentesco = item.parentesco || 'N/A';
-        item.porcentaje = item.porcentaje || 'N/A';
-        item.direccion_residencia = item.direccion_residencia || 'N/A';
-        item.telefono_1 = item.telefono_1 || 'N/A';
-      });
   
-      // Detalles del usuario (afiliado)
-      const afiliado = {
-        nombre: persona.nombre_completo || 'N/A',
-        grado_academico: persona.grado_academico || 'N/A',
-        centroEducativo: perfil.nombre_centro_trabajo || 'N/A',
-        municipioResidencia: perfil.nombre_municipio || 'N/A',
-        departamentoResidencia: perfil.nombre_departamento || 'N/A',
-        n_identificacion: persona.n_identificacion || 'N/A'
-      };
-  
-      interface TableCell {
-        text?: string;
-        style?: string;
-        rowSpan?: number;
-        colSpan?: number;
-        fillColor?: string;
-        alignment?: string;
-      }
-  
-      const body: TableCell[][] = [
-        [
-          { text: 'N°', style: 'tableHeader', fillColor: '#CCCCCC', alignment: 'center' },
-          { text: 'NOMBRE COMPLETO', style: 'tableHeader', alignment: 'center' },
-          { text: 'FECHA DE NACIMIENTO', style: 'tableHeader', alignment: 'center' },
-          { text: 'IDENTIDAD', style: 'tableHeader', alignment: 'center' },
-          { text: 'PARENTESCO', style: 'tableHeader', alignment: 'center' },
-          { text: '%', style: 'tableHeader', alignment: 'center' },
-        ]
-      ];
-  
-      beneficiarios.forEach((item, index) => {
-        const fechaNacimiento = item.fechaNacimiento
-          ? new Date(item.fechaNacimiento).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          })
-          : 'N/A';
-  
-        body.push(
-          [
-            { text: (index + 1).toString(), rowSpan: 2, style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
-            { text: item.nombre, style: 'tableRowLarge', alignment: 'center' },
-            { text: fechaNacimiento, style: 'tableRowLarge', alignment: 'center' },
-            { text: item.identidad, style: 'tableRowLarge', alignment: 'center' },
-            { text: item.parentesco, style: 'tableRowLarge', alignment: 'center' },
-            { text: item.porcentaje, style: 'tableRowLarge', alignment: 'center' },
-          ],
-          [
-            {},
-            { text: 'DIRECCIÓN', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
-            { text: item.direccion_residencia, style: 'tableRowLarge', colSpan: 2, alignment: 'center' },
-            { text: '', style: 'tableRowLarge' },
-            { text: 'TELEFONO/CEL', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
-            { text: item.telefono_1, style: 'tableRowLarge', alignment: 'center' },
-          ]
-        );
-      });
-  
-      return {
-        background: function (currentPage: any, pageSize: any) {
-          return {
-            image: backgroundImageBase64,
-            width: pageSize.width,
-            height: pageSize.height,
-            absolutePosition: { x: 0, y: 2 }
-          };
-        },
-        content: [
-          {
-            text: [
-              'Señores de la Comisión Interventora del INPREMA\nPresente.\n\nYo ',
-              { text: afiliado.nombre, bold: true },
-              ', mayor de edad, laborando como docente en el nivel ',
-              { text: afiliado.grado_academico, bold: true },
-              ', del Centro Educativo ',
-              { text: afiliado.centroEducativo || 'NOMBRE NO DISPONIBLE', bold: true }, 
-              ', ubicado en el Municipio ',
-              { text: afiliado.municipioResidencia, bold: true },
-              ' del Departamento ',
-              { text: afiliado.departamentoResidencia, bold: true },
-              ', con Identidad N°. ',
-              { text: afiliado.n_identificacion, bold: true },
-              ', comparezco ante el Instituto Nacional de Previsión del magisterio a registrar mis beneficiarios legales de la manera siguiente:\n\n'
-            ],
-            style: 'introText',
-            margin: [0, 100, 0, 0]
-          },
-          {
-            table: {
-              widths: [20, '*', '*', '*', '*', '*'],
-              body: body
-            }
-          },
-          {
-            text: '', 
-            margin: [0, 20, 0, 0]
-          },
-          {
-            stack: [
-              {
-                text: [
-                  'También dispongo, que si alguno de mis beneficiarios (as) designados en este instrumento falleciere, el porcentaje de él o ella asignado, se distribuya en partes iguales entre los sobrevivientes registrados. Me reservo el derecho de actualizar, modificar o cancelar la presente DESIGNACIÓN, cuando lo estime conveniente.\n\n',
-                  { text: 'Nota: Con esta designación dejo sin valor ni efecto la presentada anteriormente.\n\n', bold: true }
-                ],
-                style: 'mainText'
-              },
-              {
-                columns: [
-                  {
-                    width: '*',
-                    stack: [
-                      {
-                        text: 'Lugar y Fecha: _______________________________________________________________',
-                        margin: [0, 20, 0, 15]
-                      },
-                      {
-                        text: '(f) _______________________________',
-                        margin: [0, 15, 0, 0]
-                      }
-                    ]
-                  },
-                  {
-                    width: 'auto',
-                    stack: [
-                      {
-                        canvas: [
-                          {
-                            type: 'rect',
-                            x: 0,
-                            y: 0,
-                            w: 80,
-                            h: 80,
-                            lineWidth: 1,
-                            lineColor: 'black'
-                          }
-                        ],
-                        margin: [0, -25, 0, 0]
-                      },
-                      {
-                        text: 'Huella',
-                        alignment: 'center',
-                        margin: [0, -60, 0, 0]
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                style: 'usoExclusivo',
-                table: {
-                  widths: ['*'],
-                  body: [
-                    [{ text: 'PARA USO EXCLUSIVO DEL INPREMA', style: 'tableHeader', alignment: 'center', fillColor: '#CCCCCC' }],
-                    [
-                      {
-                        columns: [
-                          {
-                            width: '50%',
-                            stack: [
-                              { text: 'Nombre del empleado: ___________________________', margin: [0, 10] },
-                              { text: 'Código: _______', margin: [0, 10] }
-                            ],
-                            style: 'subHeader'
-                          },
-                          {
-                            width: '50%',
-                            stack: [
-                              { text: '________________________________', alignment: 'center', margin: [0, 10, 0, 0] },
-                              { text: 'Firma', alignment: 'center', margin: [-10, 0, 0, 0] }
-                            ],
-                            style: 'subHeader'
-                          }
-                        ]
-                      }
-                    ]
-                  ]
-                },
-                margin: [0, 20, 0, 0]
-              }
-            ]
-          }
-        ],
-        styles: {
-          introText: { fontSize: 12, margin: [0, 0, 0, 10] },
-          mainText: { fontSize: 12, margin: [0, 0, 0, 10] }
-        }
-      };
-    }
-    persona2:any
-    perfil2:any
-    beneficiarios2:any
-
-    obtenerPersonaConPerfilYBeneficiarios(n_identificacion: string) {
-      this.afiliacionServicio.obtenerPersonaConPerfilYBeneficiarios(n_identificacion).subscribe({
-        next: (response) => {
-          if (response.data) {
-            this.persona2 = response.data.persona;
-            this.perfil2 = response.data.perfil;
-            this.beneficiarios2 = response.data.beneficiarios || [];
-          } else {
-            this.toastr.warning("No se encontraron datos asociados");
-          }
-        },
-        error: (error) => {
-          this.toastr.error("Error al obtener los datos de la persona");
-          console.error("❌ Error en la carga de datos:", error);
-        }
-      });
-    }
-  
-
 }

@@ -212,22 +212,23 @@ export class PepsComponent implements OnInit {
 
   uniqueIdentificacionValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const currentValue = control.value;
-      if (!currentValue) return null;
-
-      const familiaresArray = this.familiares;
+      if (!control.value) return null;
+  
+      const afiliadoIdentificacion = this.parentForm?.root?.get('datosGenerales')?.get('n_identificacion')?.value;
       let count = 0;
-
-      familiaresArray.controls.forEach((familiar) => {
-        if (familiar.get('n_identificacion')?.value === currentValue) {
+  
+      this.familiares.controls.forEach((familiar) => {
+        if (familiar.get('n_identificacion')?.value === control.value) {
           count++;
         }
       });
-
+      if (afiliadoIdentificacion && control.value === afiliadoIdentificacion) {
+        return { identificacionDuplicada: true };
+      }
       return count > 1 ? { fieldNotUnique: true } : null;
     };
   }
-
+  
   reset(): void {
     // Limpiar el array de PEPS
     const pepsArray = this.peps;

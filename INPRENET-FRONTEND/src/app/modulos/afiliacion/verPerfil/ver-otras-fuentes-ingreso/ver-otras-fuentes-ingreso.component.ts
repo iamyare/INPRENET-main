@@ -58,17 +58,17 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
     this.mostrarBotonFuente = this.permisosService.userHasPermission(
       'AFILIACIONES', 
       'afiliacion/nueva-afiliacion', 
-      ['editar', 'editarDos']
+      ['editar', 'editarDos','administrar']
     );
     this.mostrarBotonEditar = this.permisosService.userHasPermission(
       'AFILIACIONES', 
       'afiliacion/nueva-afiliacion', 
-      ['editar', 'editarDos']
+      ['editar', 'editarDos','administrar']
     );
     this.mostrarBotonEliminar = this.permisosService.userHasPermission(
       'AFILIACIONES', 
       'afiliacion/nueva-afiliacion', 
-      ['editar', 'editarDos']
+      ['editar', 'editarDos','administrar']
     );
   }
 

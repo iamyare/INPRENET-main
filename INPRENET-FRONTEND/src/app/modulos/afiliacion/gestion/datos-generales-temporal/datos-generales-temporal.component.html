@@ -42,7 +42,7 @@
               Debe tener al menos {{ formGroup.get('id_tipo_identificacion')?.value === 2 ? 9 : 13 }} caracteres.
             </mat-error>
             <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('maxlength') && formGroup.get('n_identificacion')?.touched">
-              No puede tener más de 15 caracteres.
+              Excede el límite de caracteres.
             </mat-error>
             <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('pattern') && formGroup.get('n_identificacion')?.touched">
               {{ formGroup.get('id_tipo_identificacion')?.value === 3 ? 'Puede contener números y letras' : 'Solo puede contener números' }}.

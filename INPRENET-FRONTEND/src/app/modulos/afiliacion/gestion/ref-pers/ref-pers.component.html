@@ -268,9 +268,9 @@
           </div>
 
           <div class="action-buttons">
-            <button mat-button color="warn" (click)="eliminarReferencia(i)">
+            <button mat-button color="warn" (click)="eliminarReferencia(i)" [disabled]="referencias.length === 1">
               <mat-icon>remove</mat-icon> Eliminar Referencia
-            </button>
+            </button>            
           </div>
         </div>
       </div>

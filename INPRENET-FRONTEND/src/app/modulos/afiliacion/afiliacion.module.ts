@@ -74,6 +74,7 @@ import { BeneficiarioSinCausanteComponent } from './verPerfil/beneficiario-sin-c
 import { DesignadoComponent } from './verPerfil/designado/designado.component';
 import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
 import { DialogSuboptionsComponent } from './constancias/dialog-suboptions/dialog-suboptions.component';
+import { EditBeneficiarioModalComponent } from './gestion/edit-beneficiario-modal/edit-beneficiario-modal.component';
 
 @NgModule({
   declarations: [
@@ -145,7 +146,8 @@ import { DialogSuboptionsComponent } from './constancias/dialog-suboptions/dialo
     BeneficiarioSinCausanteComponent,
     DesignadoComponent,
     ContanciasAfiliadosComponent,
-    DialogSuboptionsComponent
+    DialogSuboptionsComponent,
+    EditBeneficiarioModalComponent
   ],
   imports: [
     CommonModule,

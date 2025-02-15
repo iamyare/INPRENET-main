@@ -9,59 +9,45 @@
       <div formArrayName="trabajo">
         <div *ngFor="let trabajo of trabajosArray.controls; let i = index" [formGroupName]="i" class="reference-group">
           <h4 class="reference-title">Centro De Trabajo Número: {{ i + 1 }}</h4>
-
           <div class="form-row">
-            <!-- Código del Centro de Trabajo -->
-            <mat-form-field class="half-width" appearance="outline">
-              <mat-label>Código del Centro de Trabajo</mat-label>
-              <mat-icon matPrefix>business</mat-icon>
-              <input
-                type="text"
-                matInput
-                formControlName="id_centro_trabajo"
-                [matAutocomplete]="autoCodigo"
-                placeholder="Buscar código del centro"
-              />
-              <mat-autocomplete #autoCodigo="matAutocomplete" [displayWith]="displayCodigo">
-                <mat-option
-                  *ngFor="let centro of getFilteredCodigosTrabajo(i)"
-                  [value]="centro"
-                >
-                  {{ centro.label }}
-                </mat-option>
-              </mat-autocomplete>
-              <mat-error *ngFor="let error of getErrors(i, 'id_centro_trabajo')">
-                <mat-icon>error</mat-icon> {{ error }}
-              </mat-error>
+            <!-- Input de búsqueda -->
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Buscar Centro de Trabajo</mat-label>
+              <mat-icon matPrefix>search</mat-icon>
+              <input matInput formControlName="buscarCentro" placeholder="Ingrese nombre o código del centro">
             </mat-form-field>
-            
-            
-            
-            
-            <mat-form-field class="half-width" appearance="outline">
-              <mat-label>Nombre del Centro de Trabajo</mat-label>
-              <mat-icon matPrefix>business</mat-icon>
-              <input
-                type="text"
-                matInput
-                formControlName="nombre_centro_trabajo"
-                [matAutocomplete]="autoNombre"
-                placeholder="Buscar centro de trabajo"
-              />
-              <mat-autocomplete #autoNombre="matAutocomplete" [displayWith]="displayNombre">
-                <mat-option
-                  *ngFor="let centro of getFilteredCentrosTrabajo(i)"
-                  [value]="centro"
-                >
-                  {{ centro.nombreCentro }}
-                </mat-option>
-              </mat-autocomplete>
-              <mat-error *ngFor="let error of getErrors(i, 'nombre_centro_trabajo')">
-                <mat-icon>error</mat-icon> {{ error }}
-              </mat-error>
-            </mat-form-field>
-            
+          
+            <!-- Botón para ejecutar la búsqueda -->
+            <button mat-button color="primary" (click)="buscarCentroTrabajoAPI(i)">
+              <mat-icon>search</mat-icon> Buscar
+            </button>
           </div>
+          
+          <!-- Listado de centros encontrados -->
+          <div *ngIf="trabajo.get('centrosFiltrados')?.value?.length">
+            <p>Centros encontrados:</p>
+            <mat-list>
+              <mat-list-item *ngFor="let centro of trabajo.get('centrosFiltrados')?.value">
+                <button mat-button (click)="seleccionarCentro(i, centro)">
+                  {{ centro.id_centro_trabajo }} - {{ centro.nombre_centro_trabajo }} - {{ centro.direccion_1 || centro.direccion_2 }}
+                </button>
+              </mat-list-item>
+            </mat-list>
+          </div>
+          <!-- Información del Centro de Trabajo -->
+          <div class="info-container">
+            <div class="info-field">
+              <mat-icon class="info-icon">business</mat-icon>
+              <p><strong class="info-label">Código del Centro de Trabajo:</strong> {{ trabajo.get('codigo_centro')?.value || 'No asignado' }}</p>
+            </div>
+
+            <div class="info-field">
+              <mat-icon class="info-icon">business</mat-icon>
+              <p><strong class="info-label">Nombre del Centro de Trabajo:</strong> {{ trabajo.get('nombre_centro_trabajo')?.value || 'No asignado' }}</p>
+            </div>
+          </div>
+          <br>
+
           <div class="form-row">
             <!-- Departamento -->
             <mat-form-field class="half-width" appearance="outline">
@@ -78,18 +64,20 @@
             </mat-form-field>
 
             <!-- Municipio -->
-            <mat-form-field class="half-width" appearance="outline">
-              <mat-label>Municipio</mat-label>
-              <mat-icon matPrefix>location_city</mat-icon>
-              <mat-select formControlName="id_municipio">
-                <mat-option *ngFor="let municipio of trabajo.get('listaMunicipios')?.value || []" [value]="municipio.value">
-                  {{ municipio.label }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="trabajo.get('id_municipio')?.invalid">
-                <mat-icon>error</mat-icon> Municipio es requerido
-              </mat-error>
-            </mat-form-field>
+           <!-- Municipio -->
+           <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Municipio</mat-label>
+            <mat-icon matPrefix>location_city</mat-icon>
+            <mat-select formControlName="id_municipio">
+              <mat-option *ngFor="let municipio of trabajosArray.at(i).get('municipiosDisponibles')?.value" [value]="municipio.value">
+                {{ municipio.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="trabajo.get('id_municipio')?.invalid">
+              <mat-icon>error</mat-icon> Municipio es requerido
+            </mat-error>
+          </mat-form-field>
+            
           </div>
 
           <div class="form-row">
@@ -182,7 +170,8 @@
               <mat-error *ngFor="let error of getErrors(i, 'numero_acuerdo')">
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
-            </mat-form-field>            
+            </mat-form-field>
+                      
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Jornada</mat-label>
               <mat-icon matPrefix>schedule</mat-icon>

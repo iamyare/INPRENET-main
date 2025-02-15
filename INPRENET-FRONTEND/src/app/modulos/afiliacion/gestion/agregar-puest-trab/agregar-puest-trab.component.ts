@@ -26,10 +26,12 @@ export class AgregarPuestTrabComponent{
 
   guardar() {
     const datosParseados = this.formPuestTrab.value.trabajo.map((trabajo: any) => ({
-        ...trabajo,
-        id_centro_trabajo: trabajo.id_centro_trabajo?.value || trabajo.id_centro_trabajo,
-        nombre_centro_trabajo: trabajo.nombre_centro_trabajo?.nombreCentro || trabajo.nombre_centro_trabajo,
+      
+      ...trabajo,
+      id_centro_trabajo: trabajo.id_centro_trabajo?.value || trabajo.id_centro_trabajo,
+      nombre_centro_trabajo: trabajo.nombre_centro_trabajo?.nombreCentro || trabajo.nombre_centro_trabajo,
     }));
+    console.log(datosParseados);
     this.afiliacionService.asignarCentrosTrabajoAPersona(Number(this.data.idPersona), datosParseados).subscribe(
         (res: any) => {
             if (res.length > 0) {

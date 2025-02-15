@@ -123,3 +123,29 @@ button:focus {
   margin-right: 4px;
   font-size: 20px;
 }
+
+.info-container {
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa; /* Color suave de fondo */
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-top: 10px;
+}
+
+.info-field {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.info-icon {
+  font-size: 24px;
+  margin-right: 10px;
+}
+
+.info-label {
+  font-size: 16px;
+  color: #333;
+}

@@ -10,6 +10,17 @@ export class AfiliacionService {
 
   constructor(private http: HttpClient) { }
 
+  descargarConstanciaBeneficiarios(idPersona: string, empleadoDto: any): Observable<Blob> {
+    const url = `${environment.API_URL}/api/documents/constancia-beneficiarios/${idPersona}`;
+    
+    return this.http.post(url, empleadoDto, { responseType: 'blob' }).pipe(
+        catchError((error) => {
+            console.error('Error al descargar la constancia:', error);
+            return throwError(() => new Error('Error al descargar la constancia. Intente nuevamente.'));
+        })
+    );
+}
+  
   obtenerPersonaConPerfilYBeneficiarios(n_identificacion: string): Observable<any> {
     const url = `${environment.API_URL}/api/afiliacion/persona-con-perfil-y-beneficiarios/${n_identificacion}`;
     return this.http.get<any>(url).pipe(

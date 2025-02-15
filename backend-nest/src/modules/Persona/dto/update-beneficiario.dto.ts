@@ -105,4 +105,8 @@ export class UpdateBeneficiarioDto {
   @IsOptional()
   @MaxLength(100)
   parentesco?: string;
+
+  @IsInt()
+  @IsOptional()
+  id_detalle_persona?: number;
 }

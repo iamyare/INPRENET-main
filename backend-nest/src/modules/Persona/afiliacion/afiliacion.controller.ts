@@ -157,7 +157,7 @@ async obtenerFallecidos(@Query('mes') mes: number, @Query('anio') anio: number) 
   async obtenerConyuge(@Param('n_identificacion') n_identificacion: string): Promise<Net_Familia> {
     return this.afiliacionService.obtenerConyugePorIdentificacion(n_identificacion);
   }
-
+ 
   @Delete('otra-fuente-ingreso/:id')
   async eliminarOtraFuenteIngreso(@Param('id', ParseIntPipe) id: number) {
     return this.afiliacionService.eliminarOtraFuenteIngreso(id);

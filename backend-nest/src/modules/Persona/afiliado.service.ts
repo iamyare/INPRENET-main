@@ -142,53 +142,74 @@ export class AfiliadoService {
     }
   }
 
-  async updateBeneficiario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_detalle_persona> {
-    const detallePersona = await this.detallePersonaRepository.findOne({
-      where: {
-        ID_DETALLE_PERSONA: id,
-        ID_PERSONA: updatePersonaDto.id_persona,
-        ID_CAUSANTE_PADRE: updatePersonaDto.id_causante_padre
-      },
-      relations: ['persona']
-    });
+  private formatDateToYYYYMMDD(dateString: string): string {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    const utcDay = ('0' + date.getUTCDate()).slice(-2);
+    const utcMonth = ('0' + (date.getUTCMonth() + 1)).slice(-2);
+    const utcYear = date.getUTCFullYear();
+    return `${utcYear}-${utcMonth}-${utcDay}`;
+}
 
-    if (!detallePersona) {
-      throw new NotFoundException(`Detalle persona con ID ${id} no encontrado`);
-    }
-
-    // **Actualizar porcentaje en net_detalle_persona**
-    if (updatePersonaDto.porcentaje !== undefined) {
-      detallePersona.porcentaje = updatePersonaDto.porcentaje;
-    }
-
-    // **Actualizar parentesco en net_detalle_persona**
-    if (updatePersonaDto.parentesco !== undefined) {
-      detallePersona.parentesco = updatePersonaDto.parentesco;
-    }
-
-    // **Actualizar datos en net_persona**
-    if (detallePersona.persona) {
-      if (updatePersonaDto.direccion_residencia !== undefined) {
-        detallePersona.persona.direccion_residencia = updatePersonaDto.direccion_residencia;
+  async updateBeneficiario(id: number, updatePersonaDto: UpdateBeneficiarioDto) {
+    try {
+  
+      const detallePersona = await this.detallePersonaRepository.findOne({
+        where: {
+          ID_DETALLE_PERSONA: updatePersonaDto.id_detalle_persona,
+          ID_PERSONA: id,
+          ID_CAUSANTE_PADRE: updatePersonaDto.id_causante_padre
+        },
+        relations: ['persona'],
+      });
+  
+      if (!detallePersona) {
+        throw new BadRequestException(`No se encontró el detalle de persona.`);
       }
-
-      if (updatePersonaDto.telefono_1 !== undefined) {
-        detallePersona.persona.telefono_1 = updatePersonaDto.telefono_1;
+  
+      const persona = await this.personaRepository.findOne({ where: { id_persona: id } });
+  
+      if (!persona) {
+        throw new BadRequestException(`No se encontró la persona con ID_PERSONA: ${id}`);
       }
-
-      // Guardar cambios en net_persona
-      await this.personaRepository.save(detallePersona.persona);
+  
+      // ✅ Convertir la fecha a formato correcto 'DD/MM/YY'
+      let fechaNacimientoFormatted: string | null = null;
+        if (updatePersonaDto.fecha_nacimiento) {
+            fechaNacimientoFormatted = this.formatDateToYYYYMMDD(updatePersonaDto.fecha_nacimiento);
+        }
+  
+      // 🔹 Actualiza los datos de `net_persona`
+      Object.assign(persona, {
+        n_identificacion: updatePersonaDto.dni,
+        primer_nombre: updatePersonaDto.primer_nombre,
+        segundo_nombre: updatePersonaDto.segundo_nombre,
+        tercer_nombre: updatePersonaDto.tercer_nombre,
+        primer_apellido: updatePersonaDto.primer_apellido,
+        segundo_apellido: updatePersonaDto.segundo_apellido,
+        genero: updatePersonaDto.genero,
+        fecha_nacimiento: fechaNacimientoFormatted, // ✅ Fecha corregida
+        telefono_1: updatePersonaDto.telefono_1,
+        direccion_residencia: updatePersonaDto.direccion_residencia,
+        id_municipio_residencia: updatePersonaDto.id_municipio_residencia,
+      });
+  
+      await this.personaRepository.save(persona);
+  
+      Object.assign(detallePersona, {
+        parentesco: updatePersonaDto.parentesco,
+        porcentaje: updatePersonaDto.porcentaje,
+      });
+  
+      await this.detallePersonaRepository.save(detallePersona);
+      return { message: "Beneficiario actualizado con éxito" };
+  
+    } catch (error) {
+      console.error("❌ Error al actualizar beneficiario:", error);
+      throw new InternalServerErrorException("Error al actualizar beneficiario");
     }
-
-    // Guardar cambios en net_detalle_persona
-    await this.detallePersonaRepository.save(detallePersona);
-
-    return detallePersona;
   }
-
-
-
-
+  
   async updateSalarioBase(n_identificacion: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
     const perfil = await this.perfPersoCentTrabRepository
       .createQueryBuilder('perfil')
@@ -733,8 +754,13 @@ export class AfiliadoService {
           'persona',
           'tipoPersona',
           'estadoAfiliacion',
+          'persona.pais',
+          'persona.municipio',
+          'persona.municipio.departamento',
+          'persona.municipio_nacimiento',
+          'persona.municipio_nacimiento.departamento',
           'persona.personaDiscapacidades',
-          'persona.personaDiscapacidades.discapacidad'
+          'persona.personaDiscapacidades.discapacidad',
         ],
       });
       const beneficiariosFormatted = beneficiarios.map(beneficiario => ({
@@ -755,19 +781,29 @@ export class AfiliadoService {
         fechaNacimiento: beneficiario.persona?.fecha_nacimiento || null,
         direccionResidencia: beneficiario.persona?.direccion_residencia || null,
         idPaisNacionalidad: beneficiario.persona?.pais?.id_pais || null,
+        // Municipio y departamento de residencia
         idMunicipioResidencia: beneficiario.persona?.municipio?.id_municipio || null,
+        nombreMunicipioResidencia: beneficiario.persona?.municipio?.nombre_municipio || null,
+        idDepartamentoResidencia: beneficiario.persona?.municipio?.departamento?.id_departamento || null,
+        nombreDepartamentoResidencia: beneficiario.persona?.municipio?.departamento?.nombre_departamento || null,
+
+        // Municipio y departamento de nacimiento
+        idMunicipioNacimiento: beneficiario.persona?.municipio_nacimiento?.id_municipio || null,
+        nombreMunicipioNacimiento: beneficiario.persona?.municipio_nacimiento?.nombre_municipio || null,
+        idDepartamentoNacimiento: beneficiario.persona?.municipio_nacimiento?.departamento?.id_departamento || null,
+        nombreDepartamentoNacimiento: beneficiario.persona?.municipio_nacimiento?.departamento?.nombre_departamento || null,
         idEstadoPersona: beneficiario.estadoAfiliacion?.codigo || null,
         estadoDescripcion: beneficiario.estadoAfiliacion?.nombre_estado || null,
         porcentaje: beneficiario.porcentaje || null,
         parentesco: beneficiario.parentesco || null,
-        tipoPersona: beneficiario.tipoPersona?.tipo_persona || null,
+        tipoPersona: beneficiario.tipoPersona?.tipo_persona || null,/* 
         discapacidades: beneficiario.persona?.personaDiscapacidades
           ?.filter(discapacidad => discapacidad.discapacidad?.id_discapacidad)
           .map(discapacidad => ({
             idDiscapacidad: discapacidad.discapacidad?.id_discapacidad || null,
             tipoDiscapacidad: discapacidad.discapacidad?.tipo_discapacidad || null,
             descripcion: discapacidad.discapacidad?.descripcion || null,
-          })) || []
+          })) || [] */
       }));
       return beneficiariosFormatted;
     } catch (error) {

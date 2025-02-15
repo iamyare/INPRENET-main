@@ -1,4 +1,4 @@
-import { Body, Controller, HttpException, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { PdfService } from './pdf/pdf.service';
 import { EmpleadoDto } from './pdf/empleado.dto';
@@ -6,6 +6,27 @@ import { EmpleadoDto } from './pdf/empleado.dto';
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly pdfService: PdfService) { }
+
+  @Post('constancia-beneficiarios/:id')
+async generarConstanciaBeneficiarios(
+  @Param('id') idPersona: string,
+  @Body() dto: EmpleadoDto,  // ✅ Recibe el DTO
+  @Res() res: Response
+) {
+  try {
+    const pdfBuffer = await this.pdfService.generarConstanciaBeneficiarios(idPersona, dto);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Constancia_Beneficiarios_${idPersona}.pdf`);
+    res.setHeader('Content-Length', pdfBuffer.length.toString());
+
+    res.end(pdfBuffer);
+  } catch (error) {
+    console.error('Error al generar la constancia de beneficiarios:', error);
+    res.status(500).json({ message: 'Error al generar el documento PDF.' });
+  }
+}
+
 
   @Post('movimientos-pdf')
   async postMovimientosPdf(@Body() data: any, @Res() res: Response) {

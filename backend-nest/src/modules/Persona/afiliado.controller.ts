@@ -222,7 +222,7 @@ export class AfiliadoController {
     );
     return { message: 'Salario base actualizado con éxito.' };
   }
-
+ 
   @Put('actualizarBeneficiario/:id')
   updatePersona(
     @Param('id') id: number,

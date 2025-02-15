@@ -1014,24 +1014,39 @@ export class AfiliacionService {
     await this.otraFuenteIngresoRepository.remove(fuenteIngreso);
   }
 
-  async obtenerConyugePorIdentificacion(n_identificacion: string): Promise<any> {
+  async obtenerConyugePorIdentificacion(n_identificacion: string): Promise<any> { 
+    // Buscar a la persona por su número de identificación
     const persona = await this.personaRepository.createQueryBuilder("persona")
       .where("persona.n_identificacion = :n_identificacion", { n_identificacion })
       .getOne();
+  
     if (!persona) {
       throw new NotFoundException(`No se encontró la persona con identificación ${n_identificacion}`);
     }
+  
+    // Buscar al cónyuge
     const conyuge = await this.familiaRepository.createQueryBuilder("familia")
       .leftJoinAndSelect("familia.referenciada", "referenciada")
       .where("familia.persona.id_persona = :id_persona", { id_persona: persona.id_persona })
       .andWhere("familia.parentesco = :parentesco", { parentesco: 'CÓNYUGE' })
       .getOne();
+  
+    // ✅ Si no hay cónyuge, devolver un objeto vacío o un mensaje.
+    if (!conyuge || !conyuge.referenciada) {
+      return {
+        mensaje: `No se encontró un cónyuge registrado para la persona con identificación ${n_identificacion}`,
+        conyuge: null
+      };
+    }
+  
+    // Verificar si el cónyuge es afiliado
     const detallePersona = await this.detallePersonaRepository.createQueryBuilder("detallePersona")
       .where("detallePersona.ID_PERSONA = :id_persona", { id_persona: conyuge.referenciada.id_persona })
       .andWhere("detallePersona.ID_TIPO_PERSONA = :id_tipo_persona", { id_tipo_persona: 1 })
       .getOne();
-
-    const esAfiliado = detallePersona ? 'SI' : 'NO';
+  
+    const esAfiliado = detallePersona ? 'SÍ' : 'NO';
+  
     return {
       id_familia: conyuge.id_familia,
       primer_nombre: conyuge.referenciada.primer_nombre,
@@ -1048,8 +1063,7 @@ export class AfiliacionService {
       esAfiliado
     };
   }
-
-
+  
   async actualizarConyuge(n_identificacion: string, body: any): Promise<any> {
     const persona = await this.personaRepository.createQueryBuilder("persona")
       .where("persona.n_identificacion = :n_identificacion", { n_identificacion })
@@ -1115,19 +1129,30 @@ export class AfiliacionService {
   }
 
   async eliminarFamiliar(idPersona: number, idFamiliar: number): Promise<any> {
+    // 🔍 Verifica que la persona existe
     const persona = await this.personaRepository.findOne({
       where: { id_persona: idPersona },
       relations: ['familiares'],
     });
+  
     if (!persona) {
-      throw new NotFoundException('Persona no encontrada.');
+      throw new NotFoundException(`No se encontró la persona con ID ${idPersona}.`);
     }
+  
+    // 🔍 Verifica que el familiar existe antes de intentar eliminar
     const familiar = await this.familiaRepository.findOne({
       where: { id_familia: idFamiliar, persona: { id_persona: idPersona } },
     });
+  
+    if (!familiar) {
+      throw new NotFoundException(`No se encontró el familiar con ID ${idFamiliar} para la persona con ID ${idPersona}.`);
+    }
+  
+    // 🗑️ Eliminar el familiar
     await this.familiaRepository.remove(familiar);
-    return { message: 'Familiar eliminado exitosamente.' };
+    return { message: `Familiar con ID ${idFamiliar} eliminado exitosamente.` };
   }
+  
 
   async actualizarPeps(pepsData: any, entityManager: EntityManager): Promise<Net_Cargo_Publico> {
     if (Array.isArray(pepsData)) {

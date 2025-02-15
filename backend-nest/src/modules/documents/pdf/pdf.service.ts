@@ -8,11 +8,12 @@ import { unirNombres } from '../../../shared/formatoNombresP';
 import * as path from 'path';
 import { EmpleadoDto } from './empleado.dto';
 import { validate } from 'class-validator';
+import { AfiliacionService } from 'src/modules/Persona/afiliacion/afiliacion.service';
 
 @Injectable()
 export class PdfService {
   token: any;
-  constructor(private readonly driveService: DriveService) {
+  constructor(private readonly driveService: DriveService, private readonly afiliacionService: AfiliacionService) {
     (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
   }
 
@@ -53,27 +54,27 @@ export class PdfService {
 
   async generateConstanciaAfiliacionTemplate(data: any, includeQR: boolean, dto: EmpleadoDto) {
     const content: Array<any> = [
-        { text: 'A QUIEN INTERESE', style: 'header' },
-        {
-            text: 'El Instituto Nacional de Previsión del Magisterio (INPREMA), por este medio indica que:',
-            style: 'subheader'
-        },
-        {
-            text: unirNombres(data.primer_nombre, data.segundo_nombre, data.tercer_nombre, data.primer_apellido, data.segundo_apellido),
-            style: 'name'
-        },
-        {
-            text: [
-                { text: 'Se encuentra afiliado a este Sistema de Previsión con el número ' },
-                { text: `${data.n_identificacion}`, style: 'dni' }
-            ],
-            style: 'body'
-        },
-        {
-            text: `Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de ${dto.municipio}, Departamento de ${dto.departamento}, a los ${new Date().getDate()} días del mes de ${new Date().toLocaleString('es-HN', { month: 'long' })} del año ${new Date().getFullYear()}.`,
-            style: 'body'
-        },
-        { text: '\n\n\n' }
+      { text: 'A QUIEN INTERESE', style: 'header' },
+      {
+        text: 'El Instituto Nacional de Previsión del Magisterio (INPREMA), por este medio indica que:',
+        style: 'subheader'
+      },
+      {
+        text: unirNombres(data.primer_nombre, data.segundo_nombre, data.tercer_nombre, data.primer_apellido, data.segundo_apellido),
+        style: 'name'
+      },
+      {
+        text: [
+          { text: 'Se encuentra afiliado a este Sistema de Previsión con el número ' },
+          { text: `${data.n_identificacion}`, style: 'dni' }
+        ],
+        style: 'body'
+      },
+      {
+        text: `Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de ${dto.municipio}, Departamento de ${dto.departamento}, a los ${new Date().getDate()} días del mes de ${new Date().toLocaleString('es-HN', { month: 'long' })} del año ${new Date().getFullYear()}.`,
+        style: 'body'
+      },
+      { text: '\n\n\n' }
     ];
 
     // Espaciado adicional para empujar la firma hacia abajo
@@ -81,107 +82,106 @@ export class PdfService {
 
     // Firma completamente centrada usando una tabla
     content.push({
-        table: {
-            widths: ['*', 'auto', '*'],
-            body: [
-                [
-                    '',
-                    {
-                        stack: [
-                            { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 1 }] },
-                            { text: dto.nombreEmpleado, style: 'signature' },
-                            { text: dto.nombrePuesto, style: 'signatureTitle' }
-                        ],
-                        alignment: 'center'
-                    },
-                    ''
-                ]
-            ]
-        },
-        layout: 'noBorders',
-        margin: [0, 20, 0, 0]
+      table: {
+        widths: ['*', 'auto', '*'],
+        body: [
+          [
+            '',
+            {
+              stack: [
+                { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 1 }] },
+                { text: dto.nombreEmpleado, style: 'signature' },
+                { text: dto.nombrePuesto, style: 'signatureTitle' }
+              ],
+              alignment: 'center'
+            },
+            ''
+          ]
+        ]
+      },
+      layout: 'noBorders',
+      margin: [0, 20, 0, 0]
     });
 
     return {
-        pageSize: 'letter',
-        pageMargins: [20, 80, 20, 80], // Ajustar márgenes para que no corte el membrete
-        background: [
-            {
-                image: data.base64data, // Imagen del membrete
-                width: 612, // Tamaño completo de la página letter
-                height: 792,
-                absolutePosition: { x: 0, y: 0 } // Fijar imagen en la parte superior
-            }
-        ],
-        content: content,
-        footer: function (currentPage, pageCount) {
-            const user = dto.correo.split('@')[0]; 
-            return {
-                table: {
-                    widths: ['*', '*', '*'],
-                    body: [
-                        [
-                            { text: `Fecha y Hora: ${new Date().toLocaleString()}`, alignment: 'left', border: [false, false, false, false], style: 'footer' },
-                            { text: `Generó: ${user}`, alignment: 'center', border: [false, false, false, false], style: 'footer' },
-                            { text: `Página: ${currentPage} de ${pageCount}`, alignment: 'right', border: [false, false, false, false], style: 'footer' }
-                        ]
-                    ]
-                },
-                margin: [20, 0, 20, 20]
-            };
-        },
-        styles: {
-            header: {
-                fontSize: 18,
-                bold: true,
-                alignment: 'center',
-                margin: [0, 20, 0, 20]
-            },
-            subheader: {
-                fontSize: 11,
-                alignment: 'center',
-                margin: [40, 10, 40, 5],
-                lineHeight: 1.8
-            },
-            name: {
-                fontSize: 14,
-                bold: true,
-                alignment: 'center',
-                margin: [20, 10, 20, 5],
-                lineHeight: 1.8
-            },
-            body: {
-                fontSize: 11,
-                alignment: 'center',
-                margin: [20, 10, 20, 5],
-                lineHeight: 1.8
-            },
-            dni: {
-                fontSize: 11,
-                bold: true,
-                lineHeight: 1.8
-            },
-            signature: {
-                fontSize: 12,
-                bold: true,
-                alignment: 'center',
-                margin: [0, 5, 0, 0]
-            },
-            signatureTitle: {
-                fontSize: 12,
-                alignment: 'center'
-            },
-            footer: {
-                fontSize: 8,
-                alignment: 'center',
-            }
+      pageSize: 'letter',
+      pageMargins: [20, 80, 20, 80], // Ajustar márgenes para que no corte el membrete
+      background: [
+        {
+          image: data.base64data, // Imagen del membrete
+          width: 612, // Tamaño completo de la página letter
+          height: 792,
+          absolutePosition: { x: 0, y: 0 } // Fijar imagen en la parte superior
         }
+      ],
+      content: content,
+      footer: function (currentPage, pageCount) {
+        const user = dto.correo.split('@')[0];
+        return {
+          table: {
+            widths: ['*', '*', '*'],
+            body: [
+              [
+                { text: `Fecha y Hora: ${new Date().toLocaleString()}`, alignment: 'left', border: [false, false, false, false], style: 'footer' },
+                { text: `Generó: ${user}`, alignment: 'center', border: [false, false, false, false], style: 'footer' },
+                { text: `Página: ${currentPage} de ${pageCount}`, alignment: 'right', border: [false, false, false, false], style: 'footer' }
+              ]
+            ]
+          },
+          margin: [20, 0, 20, 20]
+        };
+      },
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          alignment: 'center',
+          margin: [0, 20, 0, 20]
+        },
+        subheader: {
+          fontSize: 11,
+          alignment: 'center',
+          margin: [40, 10, 40, 5],
+          lineHeight: 1.8
+        },
+        name: {
+          fontSize: 14,
+          bold: true,
+          alignment: 'center',
+          margin: [20, 10, 20, 5],
+          lineHeight: 1.8
+        },
+        body: {
+          fontSize: 11,
+          alignment: 'center',
+          margin: [20, 10, 20, 5],
+          lineHeight: 1.8
+        },
+        dni: {
+          fontSize: 11,
+          bold: true,
+          lineHeight: 1.8
+        },
+        signature: {
+          fontSize: 12,
+          bold: true,
+          alignment: 'center',
+          margin: [0, 5, 0, 0]
+        },
+        signatureTitle: {
+          fontSize: 12,
+          alignment: 'center'
+        },
+        footer: {
+          fontSize: 8,
+          alignment: 'center',
+        }
+      }
     };
   }
 
-
   public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean, dto: EmpleadoDto) {
-    
+
     const calcularEdad = (fecha: string) => {
       if (!fecha) return '';
       const hoy = new Date();
@@ -193,7 +193,7 @@ export class PdfService {
       }
       return edad;
     };
-  
+
     let persona = data;
     let dataCentTrab = persona?.perfPersCentTrabs;
     let dataRef = persona?.referencias;
@@ -205,61 +205,73 @@ export class PdfService {
 
     const detallePersonaFiltrado = data.detallePersona?.find(
       (detalle: any) => [1, 2, 3].includes(detalle.tipoPersona.id_tipo_persona)
-  );
+    );
 
-  // Si no hay un tipo válido, no generamos la constancia
-  if (!detallePersonaFiltrado) {
+    // Si no hay un tipo válido, no generamos la constancia
+    if (!detallePersonaFiltrado) {
       console.error('No se encontró un tipo de persona válido para la constancia.');
       return;
-  }
+    }
 
-  // Obtener la clase cliente
-  let claseCliente = detallePersonaFiltrado.tipoPersona.tipo_persona;
+    // Obtener la clase cliente
+    let claseCliente = detallePersonaFiltrado.tipoPersona.tipo_persona;
 
-  // Si el tipo de persona es "AFILIADO", establecerlo como "ACTIVO"
-  if (claseCliente === 'AFILIADO') {
+    // Si el tipo de persona es "AFILIADO", establecerlo como "ACTIVO"
+    if (claseCliente === 'AFILIADO') {
       claseCliente = 'ACTIVO';
-  }
+    }
 
-  // Obtener el tipo de formulario
-  const tipoFormulario = data.tipoFormulario || 'NO DISPONIBLE'
-    
-  
+    // Obtener el tipo de formulario
+    const tipoFormulario = data.tipoFormulario || 'NO DISPONIBLE'
+
+
     const jsonObj: any =
       typeof persona?.direccion_residencia_estructurada === 'string'
         ? persona.direccion_residencia_estructurada.split('/').reduce(
-            (acc: any, curr: any) => {
-              const [key, value] = curr.split(':').map((s: string) => s.trim());
-              acc[key] = value;
-              return acc;
-            },
-            {} as { [key: string]: string }
-          )
+          (acc: any, curr: any) => {
+            const [key, value] = curr.split(':').map((s: string) => s.trim());
+            acc[key] = value;
+            return acc;
+          },
+          {} as { [key: string]: string }
+        )
         : {};
 
-        const currentDate = new Date(); // Obtiene la fecha actual
-        const formattedDate = currentDate.toLocaleDateString('es-HN', {
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric',
-        }); 
+    const currentDate = new Date(); // Obtiene la fecha actual
+    const formattedDate = currentDate.toLocaleDateString('es-HN', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
 
-        const municipio = dto.municipio;
+    const municipio = dto.municipio;
 
-  
+
     const content: Array<any> = [
       {
-        text: `CLASE CLIENTE: ${claseCliente}`,
-        style: 'infoHeader',
-        alignment: 'left',
-        margin: [0, 0, 0, 5], 
-    },
-    {
-        text: `TIPO DE FORMULARIO: ${tipoFormulario}`,
-        style: 'infoHeader',
-        alignment: 'left',
-        margin: [0, 0, 0, 10], 
-    },
+        table: {
+          widths: ['50%', '50%'], // Divide la sección en dos partes iguales
+          body: [
+            [
+              {
+                text: `CLASE CLIENTE: ${claseCliente}`,
+                style: 'infoHeader',
+                alignment: 'left',
+                margin: [0, 5, 0, 5],
+                border: [false, false, false, false], // Sin bordes
+              },
+              {
+                text: `TIPO DE FORMULARIO: ${tipoFormulario}`,
+                style: 'infoHeader',
+                alignment: 'right',
+                margin: [0, 5, 0, 5],
+                border: [false, false, false, false], // Sin bordes
+              }
+            ]
+          ]
+        },
+        layout: 'noBorders' // Elimina cualquier borde de la tabla
+      },
       {
         table: {
           widths: ['14%', '14%', '14%', '14%', '14%', '14%', '14%'],
@@ -280,19 +292,19 @@ export class PdfService {
               {
                 ...(persona?.foto_perfil?.data?.length > 0
                   ? {
-                      image: `data:image/png;base64,${Buffer.from(
-                        persona.foto_perfil.data
-                      ).toString('base64')}`,
-                      fit: [75, 100], // Ajusta las dimensiones de la imagen al cuadro
-                      alignment: 'center',
-                      rowSpan: 3,
-                    }
+                    image: `data:image/png;base64,${Buffer.from(
+                      persona.foto_perfil.data
+                    ).toString('base64')}`,
+                    fit: [75, 100], // Ajusta las dimensiones de la imagen al cuadro
+                    alignment: 'center',
+                    rowSpan: 6,
+                  }
                   : {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: 'SIN FOTO',
-                      alignment: 'center',
-                      rowSpan: 3,
-                    }),
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: 'SIN FOTO',
+                    alignment: 'center',
+                    rowSpan: 6,
+                  }),
               }
               ,
             ],
@@ -302,7 +314,9 @@ export class PdfService {
                 text: 'NOMBRE DEL DOCENTE',
                 alignment: 'left',
                 style: ['subheader'],
+                colSpan: 2,
               },
+              {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: [
@@ -314,16 +328,14 @@ export class PdfService {
                 ]
                   .filter((name) => name && name.trim() !== "")
                   .join(" "),
-                alignment: 'center',
+                alignment: 'left',
                 style: 'smallCell',
-                colSpan: 5,
+                colSpan: 4,
               },
-              
               {},
               {},
               {},
-              {},
-              {},
+              {}
             ],
             [
               {
@@ -339,14 +351,7 @@ export class PdfService {
                 text: `${persona?.n_identificacion}`,
                 alignment: 'center',
                 style: 'smallCell',
-                colSpan: 4,
               },
-              {},
-              {},
-              {},
-              {},
-            ],
-            [
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: 'GÉNERO',
@@ -358,52 +363,12 @@ export class PdfService {
                 text: persona?.genero || '',
                 alignment: 'left',
                 style: 'smallCell',
-                colSpan: 3,
-              },
-              {},
-              {},
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'ESTADO CIVIL',
-                alignment: 'left',
-                style: ['subheader'],
-              },
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: persona?.estado_civil || '',
-                alignment: 'left',
-                style: 'smallCell',
                 colSpan: 2,
               },
+              {},
               {},
             ],
             [
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'NÚMERO DE DEPENDIENTES',
-                alignment: 'left',
-                style: ['subheader'],
-              },
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: persona?.cantidad_dependientes !== undefined && persona?.cantidad_dependientes !== null ? persona.cantidad_dependientes.toString() : '',
-                alignment: 'left',
-                style: 'smallCell',
-                colSpan: 2,
-              },
-              {},
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'CANTIDAD DE HIJOS',
-                alignment: 'left',
-                style: ['subheader'],
-              },
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: persona?.cantidad_hijos !== undefined && persona?.cantidad_hijos !== null ? persona.cantidad_hijos.toString() : '',
-                alignment: 'left',
-                style: 'smallCell',
-              },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: 'PROFESIÓN',
@@ -414,7 +379,56 @@ export class PdfService {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: persona?.profesion?.descripcion || '',
                 alignment: 'left',
+                style: 'smallCell',
+                colSpan: 2,
               },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'ESTADO CIVIL',
+                alignment: 'left',
+                style: ['subheader'],
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.estado_civil || '',
+                alignment: 'center',
+                style: 'smallCell',
+                colSpan: 2,
+              },
+              {},
+              {}, // Espacio reservado para respetar la imagen
+            ],
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'NÚMERO DE DEPENDIENTES',
+                alignment: 'left',
+                style: ['subheader'],
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.cantidad_dependientes !== undefined && persona?.cantidad_dependientes !== null ? persona.cantidad_dependientes.toString() : '',
+                alignment: 'left',
+                style: 'smallCell',
+              },
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'CANTIDAD DE HIJOS',
+                alignment: 'left',
+                style: ['subheader'],
+                colSpan: 2,
+              },
+              {},
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: persona?.cantidad_hijos !== undefined && persona?.cantidad_hijos !== null ? persona.cantidad_hijos.toString() : '',
+                alignment: 'left',
+                style: 'smallCell',
+              },
+              {},
             ],
             [
               {
@@ -428,9 +442,8 @@ export class PdfService {
                 text: persona?.pais?.nacionalidad || '',
                 alignment: 'left',
                 style: 'smallCell',
-                colSpan: 3,
+                colSpan: 2,
               },
-              {},
               {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -445,6 +458,7 @@ export class PdfService {
                 style: 'smallCell',
                 colSpan: 2,
               },
+              {},
               {},
             ],
             [
@@ -509,15 +523,16 @@ export class PdfService {
                   '',
                 alignment: 'left',
                 style: 'smallCell',
-                colSpan: 2,
+                colSpan: 1,
               },
-              {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: 'FECHA DE NACIMIENTO',
                 alignment: 'left',
                 style: ['subheader'],
+                colSpan: 2,
               },
+              {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: persona?.fecha_nacimiento || '',
@@ -544,236 +559,21 @@ export class PdfService {
                 text: 'REPRESENTACIÓN',
                 alignment: 'left',
                 style: ['subheader'],
+                colSpan: 2,
               },
+              {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: persona?.representacion || '',
                 alignment: 'left',
                 style: 'smallCell',
-                colSpan: 6,
+                colSpan: 5,
               },
-              {},
               {},
               {},
               {},
               {},
             ],
-            [
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'DECLARACIÓN DE PERSONA POLÍTICAMENTE EXPUESTA (PEPS)',
-                alignment: 'center',
-                colSpan: 7,
-                style: ['header'],
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-            ],
-            [
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                // Haz la pregunta más larga (o la que necesites)
-                text: '¿ACTUALMENTE DESEMPEÑA O HA DESEMPEÑADO ALGÚN CARGO PÚBLICO EN LA ADMINISTRACIÓN DEL GOBIERNO?',
-                style: ['subheader'],
-                alignment: 'left',
-                colSpan: 6, // Ocupe 6 columnas de las 7 totales
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {
-                // Esta última celda es la columna 7, donde va "SI" o "NO"
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: cargos_publicos?.length > 0 ? 'SI' : 'NO',
-                alignment: 'center',
-              },
-            ],            
-            // Sección de CARGOS PÚBLICOS (PEPS)
-            ...(() => {
-              if (cargos_publicos?.length > 0) {
-                return cargos_publicos.flatMap((cargo: any, index: number) => {
-                  return [
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: `CARGO DESEMPEÑADO #${index + 1}`,
-                        alignment: 'center',
-                        colSpan: 2,
-                        style: ['subheader'],
-                      },
-                      {},
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: `${cargo?.cargo || ''}`,
-                        alignment: 'left',
-                        style: 'smallCell'
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'PERÍODO',
-                        alignment: 'left',
-                        style: ['subheader'],
-                      },
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: `${cargo?.fecha_inicio || ''} / ${
-                          cargo?.fecha_fin || ''
-                        }`,
-                        alignment: 'left',
-                        style: 'smallCell',
-                        colSpan: 3,
-                      },
-                      {},
-                      {},
-                    ],
-                  ];
-                });
-              } else {
-                // Sección vacía si no hay cargos públicos
-                return [
-                  [
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: `CARGO DESEMPEÑADO #1`,
-                      alignment: 'center',
-                      colSpan: 2,
-                      style: ['subheader'],
-                    },
-                    {},
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: ``,
-                      alignment: 'left',
-                    },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: 'PERÍODO',
-                      alignment: 'left',
-                      style: ['subheader'],
-                    },
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: ` / `,
-                      alignment: 'left',
-                      style: 'smallCell',
-                      colSpan: 3,
-                    },
-                    {},
-                    {},
-                  ],
-                ];
-              }
-            })(),
-            [
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'EN CASO AFIRMATIVO: INDIQUE EL NOMBRE DE SUS FAMILIARES HASTA EL SEGUNDO GRADO DE CONSANGUINIDAD Y SEGUNDO DE AFINIDAD COMO SER: (PADRES, CONYUGUE, HIJOS, ABUELOS, HERMANOS, NIETOS, SUEGROS, CUÑADOS, YERNOS NUERAS).',
-                alignment: 'center',
-                colSpan: 7,
-                style: ['header'],
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-            ],
-            [
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'NOMBRES Y APELLIDOS',
-                alignment: 'center',
-                style: ['subheader'],
-                colSpan: 3,
-              },
-              {},
-              {},
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'NÚMERO DE IDENTIFICACIÓN',
-                alignment: 'center',
-                style: ['subheader'],
-                colSpan: 2,
-              },
-              {},
-              {
-                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'PARENTESCO',
-                alignment: 'center',
-                style: ['subheader'],
-                colSpan: 2,
-              },
-              {},
-            ],
-            ...(() => {
-              if (persona?.familiares?.length > 0) {
-                return persona.familiares.flatMap((familiar: any) => {
-                  return [
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: [
-                          familiar?.referenciada?.primer_nombre,
-                          familiar?.referenciada?.segundo_nombre,
-                          familiar?.referenciada?.tercer_nombre,
-                          familiar?.referenciada?.primer_apellido,
-                          familiar?.referenciada?.segundo_apellido,
-                        ]
-                          .filter((name) => name && name.trim() !== "")
-                          .join(" "),
-                        alignment: 'center',
-                        style: 'smallCell',
-                        colSpan: 3,
-                      },
-                      {},
-                      {},
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: familiar?.referenciada?.n_identificacion || 'N/A',
-                        alignment: 'center',
-                        style: 'smallCell',
-                        colSpan: 2,
-                      },
-                      {},
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: familiar?.parentesco || 'N/A',
-                        alignment: 'center',
-                        style: 'smallCell',
-                        colSpan: 2,
-                      },
-                      {},
-                    ],
-                  ];
-                });
-              } else {
-                // Sección vacía si no hay familiares
-                return [
-                  [
-                    {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: 'NO HAY REGISTRO DE FAMILIARES',
-                      alignment: 'center',
-                      colSpan: 7,
-                      style: 'smallCell',
-                    },
-                    {},
-                    {},
-                    {},
-                    {},
-                    {},
-                    {},
-                  ],
-                ];
-              }
-            })(),
             [
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -811,48 +611,48 @@ export class PdfService {
               {},
             ],
             ...(
-              persona?.otra_fuente_ingreso?.length > 0 
+              persona?.otra_fuente_ingreso?.length > 0
                 ? persona.otra_fuente_ingreso.flatMap((fuente: any) => [
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: fuente.actividad_economica || 'N/A',
-                        alignment: 'center',
-                        style: 'smallCell',
-                        colSpan: 2,
-                      },
-                      {},
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: fuente.observacion || 'N/A',
-                        alignment: 'center',
-                        style: 'smallCell',
-                        colSpan: 3,
-                      },
-                      {},
-                      {},
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: fuente.monto_ingreso ? `L. ${fuente.monto_ingreso}` : 'N/A',
-                        alignment: 'center',
-                        style: 'smallCell',
-                        colSpan: 2,
-                      },
-                      {},
-                    ],
-                  ])
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: fuente.actividad_economica || 'N/A',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 2,
+                    },
+                    {},
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: fuente.observacion || 'N/A',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 3,
+                    },
+                    {},
+                    {},
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: fuente.monto_ingreso ? `L. ${fuente.monto_ingreso}` : 'N/A',
+                      alignment: 'center',
+                      style: 'smallCell',
+                      colSpan: 2,
+                    },
+                    {},
+                  ],
+                ])
                 : [
-                    [
-                      {
-                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                        text: 'No hay otras fuentes de ingreso registradas',
-                        colSpan: 7,
-                        alignment: 'center',
-                        style: 'smallCell',
-                      },
-                      {}, {}, {}, {}, {}, {},
-                    ],
-                  ]
+                  [
+                    {
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'No hay otras fuentes de ingreso registradas',
+                      colSpan: 7,
+                      alignment: 'center',
+                      style: 'smallCell',
+                    },
+                    {}, {}, {}, {}, {}, {},
+                  ],
+                ]
             ),
 
             [
@@ -1037,15 +837,16 @@ export class PdfService {
                 text: 'OTROS PUNTOS DE REFERENCIA',
                 alignment: 'left',
                 style: ['subheader'],
+                colSpan: 2,
               },
+              {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: persona.direccion_residencia || '\n',
                 alignment: 'left',
                 style: 'smallCell',
-                colSpan: 6,
+                colSpan: 5,
               },
-              {},
               {},
               {},
               {},
@@ -1070,15 +871,16 @@ export class PdfService {
                 text: persona?.telefono_1 || '\n',
                 alignment: 'left',
                 style: 'smallCell',
-                colSpan: 2,
+                colSpan: 1,
               },
-              {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: 'CORREO ELECTRÓNICO 1',
                 alignment: 'left',
                 style: ['subheader'],
+                colSpan: 2,
               },
+              {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: persona?.correo_1 || '\n',
@@ -1101,15 +903,16 @@ export class PdfService {
                 text: persona?.telefono_2 || '\n',
                 alignment: 'left',
                 style: 'smallCell',
-                colSpan: 2,
+                colSpan: 1,
               },
-              {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: 'CORREO ELECTRÓNICO 2',
                 alignment: 'left',
                 style: ['subheader'],
+                colSpan: 2,
               },
+              {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text: persona?.correo_2 || '\n',
@@ -1122,7 +925,7 @@ export class PdfService {
             [
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: 'DATOS DE CUENTAS BANCARIAS',
+                text: 'DATOS DE CUENTA BANCARIA',
                 alignment: 'center',
                 colSpan: 7,
                 style: ['header'],
@@ -1151,8 +954,9 @@ export class PdfService {
                         text: `${b?.banco?.nombre_banco || ''}`,
                         alignment: 'left',
                         style: 'smallCell',
-                        colSpan: 2,
+                        colSpan: 3,
                       },
+                      {},
                       {},
                       {
                         borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1165,9 +969,8 @@ export class PdfService {
                         text: b?.num_cuenta || '',
                         alignment: 'left',
                         style: 'smallCell',
-                        colSpan: 3,
+                        colSpan: 2,
                       },
-                      {},
                       {},
                     ],
                   ];
@@ -1209,30 +1012,253 @@ export class PdfService {
               }
             })(),
             // Encabezado de la sección
-          [
-            {
-              borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-              text: 'INSTITUCIONES EDUCATIVAS',
-              alignment: 'center',
-              colSpan: 7,
-              style: ['header'],
-            },
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-          ],
-          // Sección de centros educativos:
-          ...(() => {
-            if (dataCentTrab?.length > 0) {
-              return dataCentTrab.flatMap((b: any, index: number) => {
+            [
+              {
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                text: 'INSTITUCIONES EDUCATIVAS',
+                alignment: 'center',
+                colSpan: 7,
+                style: ['header'],
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+            ],
+            // Sección de centros educativos:
+            ...(() => {
+              if (dataCentTrab?.length > 0) {
+                return dataCentTrab.flatMap((b: any, index: number) => {
+                  return [
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: `CENTRO EDUCATIVO #${index + 1}`,
+                        alignment: 'center',
+                        colSpan: 7,
+                        style: ['subheader'],
+                      },
+                      {}, {}, {}, {}, {}, {},
+                    ],
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'NOMBRE DEL CENTRO EDUCATIVO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                        colSpan: 5,
+                      },
+                      {}, {},
+                      {}, {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'SECTOR',
+                        alignment: 'center',
+                        colSpan: 2,
+                        style: ['subheader'],
+                      },
+                      {},
+                    ],
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.nombre_centro_trabajo || '\n',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 5,
+                      },
+                      {}, {},
+                      {}, {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.sector_economico || '\n',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 2,
+                      },
+                      {},
+                    ],
+                    // Fila 3: Cargo
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'CARGO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.cargo || '',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 6,
+                      },
+                      {}, {}, {}, {}, {},
+                    ],
+                    // Fila 4: Fecha de Ingreso, Fecha de Pago
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'FECHA DE INGRESO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                        colSpan: 2,
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.fecha_ingreso || '',
+                        alignment: 'left',
+                        style: 'smallCell',
+                        colSpan: 2,
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'FECHA DE PAGO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                        colSpan: 2,
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.fecha_pago || '',
+                        alignment: 'left',
+                        style: 'smallCell'
+                      },
+                    ],
+                    // Fila 5: Ingreso / Salario Mensual
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'SALARIO MENSUAL',
+                        alignment: 'center',
+                        colSpan: 3, // 🔹 Se expande más en la fila
+                        style: ['subheader'],
+                      },
+                      {},
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.salario_base ? `L. ${b?.salario_base}` : '',
+                        alignment: 'left',
+                        style: 'smallCell',
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'NÚMERO DE ACUERDO',
+                        alignment: 'left',
+                        style: ['subheader'],
+                        colSpan: 2,
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.numero_acuerdo || 'N/A',
+                        alignment: 'left',
+                        style: 'smallCell',
+                      },
+                    ],
+
+                    // Fila 6: Título dirección
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'DIRECCIÓN DEL CENTRO EDUCATIVO',
+                        alignment: 'center',
+                        colSpan: 7,
+                        style: ['subheader'],
+                      },
+                      {}, {}, {}, {}, {}, {},
+                    ],
+                    // Fila 7: 3 columnas - DEPARTAMENTO, MUNICIPIO, DIRECCIÓN COMPLETA
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'DEPARTAMENTO',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'MUNICIPIO',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'DIRECCIÓN COMPLETA',
+                        alignment: 'center',
+                        style: ['subheader'],
+                        colSpan: 5,
+                      },
+                      {}, {}, {}, {},
+                    ],
+                    // Fila 8: Datos de dirección
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.municipio?.departamento?.nombre_departamento || '',
+                        style: 'smallCell',
+                        alignment: 'center',
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.municipio?.nombre_municipio || '',
+                        style: 'smallCell',
+                        alignment: 'center',
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.direccion_1 || '',
+                        style: 'smallCell',
+                        alignment: 'center',
+                        colSpan: 5,
+                      },
+                      {}, {}, {}, {},
+                    ],
+                    // Fila 9: Teléfonos
+                    [
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'TELÉFONO 1',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.telefono_1 || '',
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 2,
+                      },
+                      {},
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: 'TELÉFONO 2',
+                        alignment: 'center',
+                        style: ['subheader'],
+                      },
+                      {
+                        borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                        text: b?.centroTrabajo?.celular_2 || '',
+                        alignment: 'center',
+                        style: 'smallCell',
+                        colSpan: 3,
+                      },
+                      {}, {},
+                    ]
+                  ];
+                });
+              } else {
                 return [
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: `CENTRO EDUCATIVO #${index + 1}`,
+                      text: 'CENTRO EDUCATIVO #1',
                       alignment: 'center',
                       colSpan: 7,
                       style: ['subheader'],
@@ -1260,7 +1286,7 @@ export class PdfService {
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.centroTrabajo?.nombre_centro_trabajo || '\n',
+                      text: '',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 3,
@@ -1268,14 +1294,13 @@ export class PdfService {
                     {}, {},
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.centroTrabajo?.sector_economico || '\n',
+                      text: '',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 4,
                     },
                     {}, {}, {},
                   ],
-                  // Fila 3: Cargo
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1285,14 +1310,13 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.cargo || '',
+                      text: '',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 6,
                     },
                     {}, {}, {}, {}, {},
                   ],
-                  // Fila 4: Fecha de Ingreso, Fecha de Pago
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1302,7 +1326,7 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.fecha_ingreso || '',
+                      text: '',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 2,
@@ -1316,14 +1340,13 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.fecha_pago || '',
+                      text: '',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 3,
                     },
                     {}, {},
                   ],
-                  // Fila 5: Ingreso / Salario Mensual
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1333,14 +1356,13 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.salario_base ? `L. ${b?.salario_base}` : '',
+                      text: '',
                       alignment: 'left',
                       style: 'smallCell',
                       colSpan: 6,
                     },
                     {}, {}, {}, {}, {},
                   ],
-                  // Fila 6: Título dirección
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1351,7 +1373,6 @@ export class PdfService {
                     },
                     {}, {}, {}, {}, {}, {},
                   ],
-                  // Fila 7: 3 columnas - DEPARTAMENTO, MUNICIPIO, DIRECCIÓN COMPLETA
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1374,30 +1395,25 @@ export class PdfService {
                     },
                     {}, {}, {}, {},
                   ],
-                  // Fila 8: Datos de dirección
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.centroTrabajo?.municipio?.departamento?.nombre_departamento || '',
-                      style: 'smallCell',
+                      text: '',
                       alignment: 'center',
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.centroTrabajo?.municipio?.nombre_municipio || '',
-                      style: 'smallCell',
+                      text: '',
                       alignment: 'center',
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.centroTrabajo?.direccion_1 || '',
-                      style: 'smallCell',
+                      text: '',
                       alignment: 'center',
                       colSpan: 5,
                     },
                     {}, {}, {}, {},
                   ],
-                  // Fila 9: Teléfonos
                   [
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
@@ -1407,7 +1423,7 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.centroTrabajo?.telefono_1 || '',
+                      text: '',
                       alignment: 'center',
                       style: 'smallCell',
                       colSpan: 2,
@@ -1421,7 +1437,7 @@ export class PdfService {
                     },
                     {
                       borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: b?.centroTrabajo?.celular_2 || '',
+                      text: '',
                       alignment: 'center',
                       style: 'smallCell',
                       colSpan: 3,
@@ -1429,201 +1445,8 @@ export class PdfService {
                     {}, {},
                   ]
                 ];
-              });
-            } else {
-              return [
-                [
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'CENTRO EDUCATIVO #1',
-                    alignment: 'center',
-                    colSpan: 7,
-                    style: ['subheader'],
-                  },
-                  {}, {}, {}, {}, {}, {},
-                ],
-                [
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'NOMBRE DEL CENTRO EDUCATIVO',
-                    alignment: 'left',
-                    style: ['subheader'],
-                    colSpan: 3,
-                  },
-                  {}, {},
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'SECTOR',
-                    alignment: 'center',
-                    colSpan: 4,
-                    style: ['subheader'],
-                  },
-                  {}, {}, {},
-                ],
-                [
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'left',
-                    style: 'smallCell',
-                    colSpan: 3,
-                  },
-                  {}, {},
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'left',
-                    style: 'smallCell',
-                    colSpan: 4,
-                  },
-                  {}, {}, {},
-                ],
-                [
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'CARGO',
-                    alignment: 'left',
-                    style: ['subheader'],
-                  },
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'left',
-                    style: 'smallCell',
-                    colSpan: 6,
-                  },
-                  {}, {}, {}, {}, {},
-                ],
-                [
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'FECHA DE INGRESO',
-                    alignment: 'left',
-                    style: ['subheader'],
-                  },
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'left',
-                    style: 'smallCell',
-                    colSpan: 2,
-                  },
-                  {},
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'FECHA DE PAGO',
-                    alignment: 'left',
-                    style: ['subheader'],
-                  },
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'left',
-                    style: 'smallCell',
-                    colSpan: 3,
-                  },
-                  {}, {},
-                ],
-                [
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'INGRESO / SALARIO MENSUAL',
-                    alignment: 'left',
-                    style: ['subheader'],
-                  },
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'left',
-                    style: 'smallCell',
-                    colSpan: 6,
-                  },
-                  {}, {}, {}, {}, {},
-                ],
-                [
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'DIRECCIÓN DEL CENTRO EDUCATIVO',
-                    alignment: 'center',
-                    colSpan: 7,
-                    style: ['subheader'],
-                  },
-                  {}, {}, {}, {}, {}, {},
-                ],
-                [
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'DEPARTAMENTO',
-                    alignment: 'center',
-                    style: ['subheader'],
-                  },
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'MUNICIPIO',
-                    alignment: 'center',
-                    style: ['subheader'],
-                  },
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'DIRECCIÓN COMPLETA',
-                    alignment: 'center',
-                    style: ['subheader'],
-                    colSpan: 5,
-                  },
-                  {}, {}, {}, {},
-                ],
-                [
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'center',
-                  },
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'center',
-                  },
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'center',
-                    colSpan: 5,
-                  },
-                  {}, {}, {}, {},
-                ],
-                [
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'TELÉFONO 1',
-                    alignment: 'center',
-                    style: ['subheader'],
-                  },
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'center',
-                    style: 'smallCell',
-                    colSpan: 2,
-                  },
-                  {},
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: 'TELÉFONO 2',
-                    alignment: 'center',
-                    style: ['subheader'],
-                  },
-                  {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                    text: '',
-                    alignment: 'center',
-                    style: 'smallCell',
-                    colSpan: 3,
-                  },
-                  {}, {},
-                ]
-              ];
-            }
-          })(),
+              }
+            })(),
 
             [
               {
@@ -1646,33 +1469,33 @@ export class PdfService {
                 text: 'NOMBRE COMPLETO DEL CÓNYUGE',
                 alignment: 'center',
                 style: ['subheader'],
+                colSpan: 3,
               },
+              {}, {},
               {
                 ...(conyuge?.primer_apellido
                   ? {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: [
-                        conyuge?.primer_apellido,
-                        conyuge?.segundo_apellido,
-                        conyuge?.primer_nombre,
-                        conyuge?.segundo_nombre,
-                      ]
-                        .filter((name) => name && name.trim() !== "")
-                        .join(" "),
-                      alignment: 'center',
-                      style: 'smallCell',
-                      colSpan: 6,
-                    }
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: [
+                      conyuge?.primer_apellido,
+                      conyuge?.segundo_apellido,
+                      conyuge?.primer_nombre,
+                      conyuge?.segundo_nombre,
+                    ]
+                      .filter((name) => name && name.trim() !== "")
+                      .join(" "),
+                    alignment: 'center',
+                    style: 'smallCell',
+                    colSpan: 4,
+                  }
                   : {
-                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                      text: '',
-                      alignment: 'center',
-                      style: 'smallCell',
-                      colSpan: 6,
-                    }),
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                    text: '',
+                    alignment: 'center',
+                    style: 'smallCell',
+                    colSpan: 4,
+                  }),
               },
-              {},
-              {},
               {},
               {},
               {},
@@ -1720,7 +1543,7 @@ export class PdfService {
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: conyuge?.telefono_1 || '',
+                text: conyuge?.telefono_3 || '',
                 alignment: 'center',
                 style: 'smallCell',
                 colSpan: 4,
@@ -1740,7 +1563,7 @@ export class PdfService {
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: conyuge?.telefono_2 || '',
+                text: conyuge?.telefono_1 || '',
                 alignment: 'center',
                 style: 'smallCell',
                 colSpan: 4,
@@ -1765,7 +1588,7 @@ export class PdfService {
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: conyuge?.telefono_3 || '',
+                text: conyuge?.telefono_2 || '',
                 alignment: 'center',
                 style: 'smallCell',
                 colSpan: 4,
@@ -1847,7 +1670,9 @@ export class PdfService {
                         text: 'NOMBRE COMPLETO',
                         alignment: 'center',
                         style: ['subheader'],
+                        colSpan: 2,
                       },
+                      {},
                       {
                         borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                         text: [
@@ -1857,18 +1682,12 @@ export class PdfService {
                           b?.segundo_nombre,
                         ]
                           .filter((name) => name && name.trim() !== "")
-                          .join(" "),                        
+                          .join(" "),
                         alignment: 'center',
                         style: 'smallCell',
-                        colSpan: 6,
+                        colSpan: 2,
                       },
                       {},
-                      {},
-                      {},
-                      {},
-                      {},
-                    ],
-                    [
                       {
                         borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                         text: 'DIRECCIÓN',
@@ -1880,12 +1699,8 @@ export class PdfService {
                         text: formatText(b?.direccion),
                         alignment: 'center',
                         style: 'smallCell',
-                        colSpan: 6,
+                        colSpan: 2,
                       },
-                      {},
-                      {},
-                      {},
-                      {},
                       {},
                     ],
                     [
@@ -2108,7 +1923,80 @@ export class PdfService {
         },
       },
     ];
-  
+
+    if (cargos_publicos.length > 0) {
+      content.push({
+        table: {
+          widths: ['14%', '14%', '14%', '14%', '14%', '14%', '14%'], // 7 columnas exactas
+          body: [
+            // Encabezado principal
+            [
+              { text: 'DECLARACIÓN DE PERSONA POLÍTICAMENTE EXPUESTA (PEPS)', colSpan: 7, style: 'header', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+              {}, {}, {}, {}, {}, {} // Completar el colSpan con celdas vacías
+            ],
+            // Pregunta general
+             [
+              { text: '¿ACTUALMENTE DESEMPEÑA O HA DESEMPEÑADO ALGÚN CARGO PÚBLICO?', colSpan: 6, style: 'subheader' ,borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],},
+              {}, {}, {}, {}, {}, // Espacios para el colSpan
+              { text: 'SI', style: 'smallCell', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], }
+            ],
+            ...cargos_publicos.map((cargo: any, index: number) => {
+              return [
+                { text: `CARGO #${index + 1}`, colSpan: 2, style: 'subheader', alignment: 'center', fillColor: '#1c9588',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],},
+                {},
+                { text: cargo?.cargo || 'N/A', style: 'smallCell', alignment: 'center' ,borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],},
+                { text: 'PERÍODO', style: 'subheader', fillColor: '#1c9588', colSpan: 2, alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],},
+                {},
+                { text: `${cargo?.fecha_inicio || 'N/A'} - ${cargo?.fecha_fin || 'N/A'}`, colSpan: 2, style: 'smallCell', alignment: 'center' ,borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],},
+                {}, 
+              ];
+            })
+          ],
+        },
+      });
+    }
+    // ✅ Si hay cargos públicos, se agregan familiares
+    if (cargos_publicos.length > 0 && persona?.familiares?.length > 0) {
+      content.push({
+        table: {
+          widths: ['14%', '14%', '14%', '14%', '14%', '14%', '14%'], // 7 columnas fijas
+          body: [
+            // Encabezado principal
+            [
+              { text: 'EN CASO AFIRMATIVO: INDIQUE EL NOMBRE DE SUS FAMILIARES', colSpan: 7, style: 'header', alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+              {}, {}, {}, {}, {}, {} // Completar el colSpan con celdas vacías
+            ],
+            [
+              { text: 'NOMBRES Y APELLIDOS', colSpan: 3, style: 'subheader', alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+              {},
+              {},
+              { text: 'NÚMERO DE IDENTIFICACIÓN', colSpan: 2, style: 'subheader', alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+              {},
+              { text: 'PARENTESCO', style: 'subheader',  colSpan: 2, alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+              {},
+            ],
+            ...persona.familiares.map((familiar: any, index: number) => {
+              return [
+                { 
+                  text: `${familiar?.referenciada?.primer_nombre || ''} ${familiar?.referenciada?.segundo_nombre || ''} ${familiar?.referenciada?.primer_apellido || ''} ${familiar?.referenciada?.segundo_apellido || ''}`, 
+                  colSpan: 3, style: 'smallCell', alignment: 'center' ,borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                },
+                {},
+                {},
+                { text: familiar?.referenciada?.n_identificacion || 'N/A', colSpan: 2, style: 'smallCell', alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+                {},
+                { text: familiar?.parentesco || 'N/A', colSpan: 2, style: 'smallCell', alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+                {}
+              ];
+            })
+          ],
+        },
+      });
+    }
+    
+    
+    
+
     /* 
      Si quieres incluir el QR, descomenta y ajusta a tu necesidad:
      if (includeQR) {
@@ -2117,14 +2005,14 @@ export class PdfService {
      }
     */
 
-     content.push(
+    content.push(
       {
         table: {
           widths: ['33%', '33%', '34%'],
           body: [
             [
               {
-                margin: [0, 50, 0, 0],
+                margin: [0, 30, 0, 0],
                 stack: [
                   { text: `${municipio}, ${formattedDate}`, style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
@@ -2133,7 +2021,7 @@ export class PdfService {
                 border: [false, false, false, false],
               },
               {
-                margin: [0, 50, 0, 0],
+                margin: [0, 30, 0, 0],
                 stack: [
                   { text: ' ', style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
@@ -2142,7 +2030,7 @@ export class PdfService {
                 border: [false, false, false, false],
               },
               {
-                margin: [0, 50, 0, 0], // Ajustado para que quede alineado con las demás firmas
+                margin: [0, 30, 0, 0], // Ajustado para que quede alineado con las demás firmas
                 stack: [
                   {
                     canvas: [
@@ -2184,7 +2072,7 @@ export class PdfService {
             ],
           ],
         },
-        margin: [0, 20, 0, 0],
+        margin: [0, 5, 0, 0],
       },
       {
         table: {
@@ -2192,7 +2080,7 @@ export class PdfService {
           body: [
             [
               {
-                margin: [0, 50, 0, 0], // Ajustado para alineación
+                margin: [0, 20, 0, 0], // Ajustado para alineación
                 stack: [
                   { text: dto.nombreEmpleado || 'NOMBRE NO DISPONIBLE', style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
@@ -2201,7 +2089,7 @@ export class PdfService {
                 border: [false, false, false, false],
               },
               {
-                margin: [0, 50, 0, 0], // Ajustado para alineación
+                margin: [0, 20, 0, 0], // Ajustado para alineación
                 stack: [
                   { text: dto.numero_empleado || 'CÓDIGO NO DISPONIBLE', style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
@@ -2210,7 +2098,7 @@ export class PdfService {
                 border: [false, false, false, false],
               },
               {
-                margin: [0, 50, 0, 0], // Alineado con las demás firmas
+                margin: [0, 20, 0, 0], // Alineado con las demás firmas
                 stack: [
                   { text: ' ', style: 'footer', alignment: 'center', margin: [0, 0, 0, 5] },
                   { text: '_______________________________', style: 'footer', alignment: 'center' },
@@ -2224,12 +2112,12 @@ export class PdfService {
         layout: 'noBorders',
       }
     );
-    
-    
-    
+
+
+
     return {
       pageSize: 'letter',
-      pageMargins: [40, 100, 40, 60],
+      pageMargins: [40, 85, 40, 60],
       background: {
         image: data.base64data,
         width: 595.28,
@@ -2286,24 +2174,24 @@ export class PdfService {
           alignment: 'right',
         },
         smallCell: {
-          fontSize: 8, 
+          fontSize: 8,
         },
         leyenda: {
-          fontSize: 10, 
+          fontSize: 10,
         },
       },
     };
   }
-  
+
   async generateConstanciaAfiliacion(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
-    return this.generateConstancia({ ...data, dto }, includeQR, (data, includeQR) => 
-        this.generateConstanciaAfiliacionTemplate(data, includeQR, dto)
+    return this.generateConstancia({ ...data, dto }, includeQR, (data, includeQR) =>
+      this.generateConstanciaAfiliacionTemplate(data, includeQR, dto)
     );
   }
 
   async generateConstanciaAfiliacion2(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
     return this.generateConstancia({ ...data, dto }, includeQR, (data, includeQR) =>
-       this.generateConstanciaAfiliacionTemplate2(data, includeQR, dto)
+      this.generateConstanciaAfiliacionTemplate2(data, includeQR, dto)
     );
   }
 
@@ -2319,7 +2207,7 @@ export class PdfService {
     const nombreCompleto = `${data.primer_nombre}_${data.primer_apellido}`;
     const fechaActual = new Date().toISOString().split('T')[0];
     const fileName = `${nombreCompleto}_${fechaActual}_constancia_${type}`;
-  
+
     let pdfBufferWithoutQR;
     switch (type) {
       case 'afiliacion':
@@ -2346,60 +2234,60 @@ export class PdfService {
       default:
         throw new Error('Invalid constancia type');
     }
-  
+
     const fileId = await this.driveService.uploadFile(`${fileName}_sin_qr.pdf`, pdfBufferWithoutQR);
-  
+
     let pdfBufferWithQR;
-   /*  switch (type) {
-      case 'afiliacion':
-        pdfBufferWithQR = await this.generateConstanciaAfiliacion({ ...data, fileId }, true, dto);
-        break;
-      case 'afiliacion2':
-        pdfBufferWithQR = await this.generateConstanciaAfiliacion2({ ...data, dto, fileId }, true, dto);
-        break;
-      case 'renuncia-cap':
-        pdfBufferWithQR = await this.generateConstanciaRenunciaCap({ ...data, dto, fileId }, true);
-        break;
-      case 'no-cotizar':
-        pdfBufferWithQR = await this.generateConstanciaNoCotizar({ ...data, dto, fileId }, true);
-        break;
-      case 'debitos':
-        pdfBufferWithQR = await this.generateConstanciaDebitos({ ...data, dto, fileId }, true);
-        break;
-      case 'tiempo-cotizar-con-monto':
-        pdfBufferWithQR = await this.generateConstanciaTiempoCotizarConMonto({ ...data, dto, fileId }, true);
-        break;
-      case 'beneficios': // Nuevo caso para constancia de beneficios con QR
-        pdfBufferWithQR = await this.generateConstanciaBeneficios({ ...data, fileId }, true, dto);
-        break;
-      default:
-        throw new Error('Invalid constancia type');
-    }
-  
-    fs.writeFileSync(`${fileName}_con_qr.pdf`, pdfBufferWithQR); */
-  
+    /*  switch (type) {
+       case 'afiliacion':
+         pdfBufferWithQR = await this.generateConstanciaAfiliacion({ ...data, fileId }, true, dto);
+         break;
+       case 'afiliacion2':
+         pdfBufferWithQR = await this.generateConstanciaAfiliacion2({ ...data, dto, fileId }, true, dto);
+         break;
+       case 'renuncia-cap':
+         pdfBufferWithQR = await this.generateConstanciaRenunciaCap({ ...data, dto, fileId }, true);
+         break;
+       case 'no-cotizar':
+         pdfBufferWithQR = await this.generateConstanciaNoCotizar({ ...data, dto, fileId }, true);
+         break;
+       case 'debitos':
+         pdfBufferWithQR = await this.generateConstanciaDebitos({ ...data, dto, fileId }, true);
+         break;
+       case 'tiempo-cotizar-con-monto':
+         pdfBufferWithQR = await this.generateConstanciaTiempoCotizarConMonto({ ...data, dto, fileId }, true);
+         break;
+       case 'beneficios': // Nuevo caso para constancia de beneficios con QR
+         pdfBufferWithQR = await this.generateConstanciaBeneficios({ ...data, fileId }, true, dto);
+         break;
+       default:
+         throw new Error('Invalid constancia type');
+     }
+   
+     fs.writeFileSync(`${fileName}_con_qr.pdf`, pdfBufferWithQR); */
+
     return fileId;
   }
 
   async generateConstanciaWithQR(data: any, type: string, dto: EmpleadoDto): Promise<Buffer> {
-      switch (type) {
-        case 'afiliacion':
-          return await this.generateConstanciaAfiliacion(data, true, dto);
-        case 'renuncia-cap':
-          return await this.generateConstanciaRenunciaCap(data, true);
-        case 'no-cotizar':
-          return await this.generateConstanciaNoCotizar(data, true);
-        case 'debitos':
-          return await this.generateConstanciaDebitos(data, true);
-        case 'tiempo-cotizar-con-monto':
-          return await this.generateConstanciaTiempoCotizarConMonto(data, true);
-        case 'afiliacion2':
-          return await this.generateConstanciaAfiliacion2(data, true, dto);
-        case 'beneficios':
-          return await this.generateConstanciaBeneficios(data, true, dto);
-        default:
-          throw new Error('Invalid constancia type');
-      }
+    switch (type) {
+      case 'afiliacion':
+        return await this.generateConstanciaAfiliacion(data, true, dto);
+      case 'renuncia-cap':
+        return await this.generateConstanciaRenunciaCap(data, true);
+      case 'no-cotizar':
+        return await this.generateConstanciaNoCotizar(data, true);
+      case 'debitos':
+        return await this.generateConstanciaDebitos(data, true);
+      case 'tiempo-cotizar-con-monto':
+        return await this.generateConstanciaTiempoCotizarConMonto(data, true);
+      case 'afiliacion2':
+        return await this.generateConstanciaAfiliacion2(data, true, dto);
+      case 'beneficios':
+        return await this.generateConstanciaBeneficios(data, true, dto);
+      default:
+        throw new Error('Invalid constancia type');
+    }
   }
 
   async generateConstanciaRenunciaCap(data: any, includeQR: boolean): Promise<Buffer> {
@@ -2750,137 +2638,137 @@ export class PdfService {
 
   async generateConstanciaBeneficios(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
     const templateFunction = async (data: any, includeQR: boolean) => {
-        const content: Array<any> = [
-            { text: 'A QUIEN INTERESE', style: 'header' },
-            {
-                text: `El Instituto Nacional de Previsión del Magisterio (INPREMA) informa que:`,
-                style: 'subheader',
-            },
-            {
-                text: `*************${data.nombre_completo.toUpperCase()}*************`,
-                style: 'highlightedName',
-            },
-            {
-                text: `Con tarjeta de identidad número ${data.n_identificacion}`,
-                style: 'body',
-            },
-            {
-                text: `Goza del Beneficio **${data.beneficio.toUpperCase()}**`,
-                style: 'benefit',
-            },
-            {
-                text: `Con residencia en el Departamento de: ********${data.departamento.toUpperCase()}********`,
-                style: 'body',
-            },
-            {
-                text: `Cuyo monto asciende a la cantidad de Lps. ***${data.monto.toFixed(2)} ${data.monto_letras.toUpperCase()}***`,
-                style: 'body',
-            },
-            {
-                text: `Beneficio otorgado a partir del ${data.fecha_inicio} y para los fines que el interesado estime conveniente, se le extiende el presente documento en la ciudad de ${dto.municipio}, el ${new Date().getDate()} de ${new Date().toLocaleString('es-HN', { month: 'long' })} del ${new Date().getFullYear()}.`,
-                style: 'body',
-            },
-            { text: '\n\n\n' },
-            // Espaciado adicional para empujar la firma hacia abajo
-            { text: '\n\n\n\n\n\n\n\n\n' },
-            { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
-            { text: dto.nombreEmpleado, style: 'signature' }, // Nombre del empleado
-            { text: dto.nombrePuesto, style: 'signatureTitle' }, // Puesto del empleado
-        ];
+      const content: Array<any> = [
+        { text: 'A QUIEN INTERESE', style: 'header' },
+        {
+          text: `El Instituto Nacional de Previsión del Magisterio (INPREMA) informa que:`,
+          style: 'subheader',
+        },
+        {
+          text: `*************${data.nombre_completo.toUpperCase()}*************`,
+          style: 'highlightedName',
+        },
+        {
+          text: `Con tarjeta de identidad número ${data.n_identificacion}`,
+          style: 'body',
+        },
+        {
+          text: `Goza del Beneficio **${data.beneficio.toUpperCase()}**`,
+          style: 'benefit',
+        },
+        {
+          text: `Con residencia en el Departamento de: ********${data.departamento.toUpperCase()}********`,
+          style: 'body',
+        },
+        {
+          text: `Cuyo monto asciende a la cantidad de Lps. ***${data.monto.toFixed(2)} ${data.monto_letras.toUpperCase()}***`,
+          style: 'body',
+        },
+        {
+          text: `Beneficio otorgado a partir del ${data.fecha_inicio} y para los fines que el interesado estime conveniente, se le extiende el presente documento en la ciudad de ${dto.municipio}, el ${new Date().getDate()} de ${new Date().toLocaleString('es-HN', { month: 'long' })} del ${new Date().getFullYear()}.`,
+          style: 'body',
+        },
+        { text: '\n\n\n' },
+        // Espaciado adicional para empujar la firma hacia abajo
+        { text: '\n\n\n\n\n\n\n\n\n' },
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
+        { text: dto.nombreEmpleado, style: 'signature' }, // Nombre del empleado
+        { text: dto.nombrePuesto, style: 'signatureTitle' }, // Puesto del empleado
+      ];
 
-        // QR opcional
-        /* if (includeQR) {
-            const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
-            content.push({ image: qrCode, width: 100, alignment: 'center', margin: [0, 20, 0, 0] });
-        } */
+      // QR opcional
+      /* if (includeQR) {
+          const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
+          content.push({ image: qrCode, width: 100, alignment: 'center', margin: [0, 20, 0, 0] });
+      } */
 
-        return {
-            pageSize: 'A4',
-            pageMargins: [40, 120, 40, 85],
-            background: {
-                image: data.base64data, // Base64 del fondo
-                width: 595.28, // Ancho en puntos para A4
-                height: 841.89, // Alto en puntos para A4
-            },
-            content: content,
-            footer: function (currentPage, pageCount) {
-                const user = dto.correo.split('@')[0]; // Usuario antes de la arroba
-                return {
-                    table: {
-                        widths: ['*', '*', '*'],
-                        body: [
-                            [
-                                {
-                                    text: `Fecha y Hora: ${new Date().toLocaleString()}`,
-                                    alignment: 'left',
-                                    border: [false, false, false, false],
-                                    style: { fontSize: 8 },
-                                },
-                                {
-                                    text: `Generó: ${user}`,
-                                    alignment: 'center',
-                                    border: [false, false, false, false],
-                                    style: { fontSize: 8 },
-                                },
-                                {
-                                    text: `Página: ${currentPage} de ${pageCount}`,
-                                    alignment: 'right',
-                                    border: [false, false, false, false],
-                                    style: { fontSize: 8 },
-                                },
-                            ],
-                        ],
-                    },
-                    margin: [20, 0, 20, 20],
-                };
-            },
-            styles: {
-                header: {
-                    fontSize: 18,
-                    bold: true,
-                    alignment: 'center',
-                    margin: [0, 20, 0, 20],
-                },
-                subheader: {
-                    fontSize: 11,
+      return {
+        pageSize: 'A4',
+        pageMargins: [40, 120, 40, 85],
+        background: {
+          image: data.base64data, // Base64 del fondo
+          width: 595.28, // Ancho en puntos para A4
+          height: 841.89, // Alto en puntos para A4
+        },
+        content: content,
+        footer: function (currentPage, pageCount) {
+          const user = dto.correo.split('@')[0]; // Usuario antes de la arroba
+          return {
+            table: {
+              widths: ['*', '*', '*'],
+              body: [
+                [
+                  {
+                    text: `Fecha y Hora: ${new Date().toLocaleString()}`,
                     alignment: 'left',
-                    margin: [40, 10, 40, 5],
-                },
-                highlightedName: {
-                    fontSize: 14,
-                    bold: true,
+                    border: [false, false, false, false],
+                    style: { fontSize: 8 },
+                  },
+                  {
+                    text: `Generó: ${user}`,
                     alignment: 'center',
-                    margin: [40, 10, 40, 5],
-                },
-                benefit: {
-                    fontSize: 12,
-                    bold: true,
-                    alignment: 'center',
-                    margin: [0, 10, 0, 10],
-                },
-                body: {
-                    fontSize: 11,
-                    alignment: 'left',
-                    margin: [40, 10, 40, 5],
-                },
-                signature: {
-                    fontSize: 12,
-                    bold: true,
-                    alignment: 'center',
-                    margin: [0, 10, 0, 0],
-                },
-                signatureTitle: {
-                    fontSize: 12,
-                    alignment: 'center',
-                },
+                    border: [false, false, false, false],
+                    style: { fontSize: 8 },
+                  },
+                  {
+                    text: `Página: ${currentPage} de ${pageCount}`,
+                    alignment: 'right',
+                    border: [false, false, false, false],
+                    style: { fontSize: 8 },
+                  },
+                ],
+              ],
             },
-        };
+            margin: [20, 0, 20, 20],
+          };
+        },
+        styles: {
+          header: {
+            fontSize: 18,
+            bold: true,
+            alignment: 'center',
+            margin: [0, 20, 0, 20],
+          },
+          subheader: {
+            fontSize: 11,
+            alignment: 'left',
+            margin: [40, 10, 40, 5],
+          },
+          highlightedName: {
+            fontSize: 14,
+            bold: true,
+            alignment: 'center',
+            margin: [40, 10, 40, 5],
+          },
+          benefit: {
+            fontSize: 12,
+            bold: true,
+            alignment: 'center',
+            margin: [0, 10, 0, 10],
+          },
+          body: {
+            fontSize: 11,
+            alignment: 'left',
+            margin: [40, 10, 40, 5],
+          },
+          signature: {
+            fontSize: 12,
+            bold: true,
+            alignment: 'center',
+            margin: [0, 10, 0, 0],
+          },
+          signatureTitle: {
+            fontSize: 12,
+            alignment: 'center',
+          },
+        },
+      };
     };
 
     // Utiliza generateConstancia para manejar el fondo y la firma
     return this.generateConstancia(data, includeQR, templateFunction);
-  } 
-  
+  }
+
   async generateMovimientosPdf(data: any): Promise<Buffer> {
     try {
       const base64data = await this.getMembreteHorizontalBase64();
@@ -2903,104 +2791,282 @@ export class PdfService {
   }
 
   getMovimientosPdfTemplate(data: any, base64data: string) {
-      const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-      const tipoCuenta = data.tipoCuenta || 'N/A';
-      const numeroCuenta = data.numeroCuenta || 'N/A';
-      const nombreCompleto = `${data.PRIMER_NOMBRE || ''} ${data.SEGUNDO_NOMBRE || ''} ${data.PRIMER_APELLIDO || ''} ${data.SEGUNDO_APELLIDO || ''}`.trim();
-      const identificacion = data.N_IDENTIFICACION || 'N/A';
+    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const tipoCuenta = data.tipoCuenta || 'N/A';
+    const numeroCuenta = data.numeroCuenta || 'N/A';
+    const nombreCompleto = `${data.PRIMER_NOMBRE || ''} ${data.SEGUNDO_NOMBRE || ''} ${data.PRIMER_APELLIDO || ''} ${data.SEGUNDO_APELLIDO || ''}`.trim();
+    const identificacion = data.N_IDENTIFICACION || 'N/A';
 
-      const tableBody = [
-        [{ text: 'Año', style: 'tableHeader' }, ...months.map(month => ({ text: month, style: 'tableHeader' })), { text: 'Total', style: 'tableHeader' }],
-        ...Object.keys(data.movimientos).map(year => {
-          const yearTotal = Array(12).fill(0).reduce((acc, _, i) => {
-            const movimientos = data.movimientos[year][i + 1] || [];
-            const totalMes = movimientos.reduce((sum, mov) => sum + mov.MONTO, 0);
-            return acc + totalMes;
-          }, 0);
-
-          return [
-            { text: year, style: 'year' },
-            ...Array(12).fill('').map((_, i) => {
-              const movimientos = data.movimientos[year][i + 1] || [];
-              return {
-                text: movimientos.length ? movimientos.map(mov => mov.MONTO.toLocaleString('en-US', { minimumFractionDigits: 2 })).join('\n') : '-',
-                style: 'movementCell'
-              };
-            }),
-            { text: yearTotal.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
-          ];
-        })
-      ];
-
-      // Totales calculados
-      const totalAportaciones = Object.keys(data.movimientos).reduce((acc, year) => {
-        const yearTotal = Array(12).fill(0).reduce((sum, _, i) => {
+    const tableBody = [
+      [{ text: 'Año', style: 'tableHeader' }, ...months.map(month => ({ text: month, style: 'tableHeader' })), { text: 'Total', style: 'tableHeader' }],
+      ...Object.keys(data.movimientos).map(year => {
+        const yearTotal = Array(12).fill(0).reduce((acc, _, i) => {
           const movimientos = data.movimientos[year][i + 1] || [];
-          return sum + movimientos.reduce((mesSum, mov) => mesSum + mov.MONTO, 0);
+          const totalMes = movimientos.reduce((sum, mov) => sum + mov.MONTO, 0);
+          return acc + totalMes;
         }, 0);
-        return acc + yearTotal;
-      }, 0);
 
-      return {
-        pageSize: 'A3',
-        pageOrientation: 'landscape',
-        pageMargins: [40, 100, 40, 40],
-        background: {
-          image: base64data,
-          width: 900,
-          height: 600,
-          alignment: 'center',
-          margin: [0, -10, 0, 0]
+        return [
+          { text: year, style: 'year' },
+          ...Array(12).fill('').map((_, i) => {
+            const movimientos = data.movimientos[year][i + 1] || [];
+            return {
+              text: movimientos.length ? movimientos.map(mov => mov.MONTO.toLocaleString('en-US', { minimumFractionDigits: 2 })).join('\n') : '-',
+              style: 'movementCell'
+            };
+          }),
+          { text: yearTotal.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
+        ];
+      })
+    ];
+
+    // Totales calculados
+    const totalAportaciones = Object.keys(data.movimientos).reduce((acc, year) => {
+      const yearTotal = Array(12).fill(0).reduce((sum, _, i) => {
+        const movimientos = data.movimientos[year][i + 1] || [];
+        return sum + movimientos.reduce((mesSum, mov) => mesSum + mov.MONTO, 0);
+      }, 0);
+      return acc + yearTotal;
+    }, 0);
+
+    return {
+      pageSize: 'A3',
+      pageOrientation: 'landscape',
+      pageMargins: [40, 100, 40, 40],
+      background: {
+        image: base64data,
+        width: 900,
+        height: 600,
+        alignment: 'center',
+        margin: [0, -10, 0, 0]
+      },
+      content: [
+        {
+          columns: [
+            { text: `Nombre: ${nombreCompleto}`, style: 'personaInfo' },
+            { text: `Identidad: ${identificacion}`, style: 'personaInfo' },
+            { text: `Tipo de Cuenta: ${tipoCuenta}`, style: 'personaInfo' },
+            { text: `Número de Cuenta: ${numeroCuenta}`, style: 'personaInfo' }
+          ],
+          columnGap: 20,
+          margin: [0, 10, 0, 10]
         },
-        content: [
-          {
-            columns: [
-              { text: `Nombre: ${nombreCompleto}`, style: 'personaInfo' },
-              { text: `Identidad: ${identificacion}`, style: 'personaInfo' },
-              { text: `Tipo de Cuenta: ${tipoCuenta}`, style: 'personaInfo' },
-              { text: `Número de Cuenta: ${numeroCuenta}`, style: 'personaInfo' }
-            ],
-            columnGap: 20,
-            margin: [0, 10, 0, 10]
-          },
-          {
-            table: {
-              widths: Array(14).fill('*'),
-              body: tableBody
-            },
-            layout: {
-              hLineWidth: function () { return 0.5; },
-              vLineWidth: function () { return 0.5; },
-              hLineColor: function () { return '#aaaaaa'; },
-              vLineColor: function () { return '#aaaaaa'; },
-            },
-            margin: [0, 0, 0, 10]
-          }
-        ],
-        footer: (currentPage, pageCount) => ({
+        {
           table: {
-            widths: ['*', '*', '*'],
+            widths: Array(14).fill('*'),
+            body: tableBody
+          },
+          layout: {
+            hLineWidth: function () { return 0.5; },
+            vLineWidth: function () { return 0.5; },
+            hLineColor: function () { return '#aaaaaa'; },
+            vLineColor: function () { return '#aaaaaa'; },
+          },
+          margin: [0, 0, 0, 10]
+        }
+      ],
+      footer: (currentPage, pageCount) => ({
+        table: {
+          widths: ['*', '*', '*'],
+          body: [
+            [
+              { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
+              { text: 'GENERÓ: INPRENET', alignment: 'center', border: [false, false, false, false], fontSize: 8 },
+              { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
+            ]
+          ]
+        },
+        margin: [20, 0, 20, 20]
+      }),
+      styles: {
+        personaInfo: { fontSize: 12, bold: true },
+        year: { fontSize: 10, bold: true, alignment: 'center' },
+        tableHeader: { bold: true, fontSize: 10, alignment: 'center', fillColor: '#eeeeee' },
+        movementCell: { fontSize: 9, alignment: 'center' },
+        totalCell: { fontSize: 10, alignment: 'center', bold: true, color: '#000' }
+      }
+    };
+  }
+
+  async generarConstanciaBeneficiarios(idPersona: string, dto: EmpleadoDto): Promise<Buffer> {
+    const datos = await this.afiliacionService.getPersonaConPerfilYBeneficiarios(idPersona);
+
+    if (!datos.data) {
+      throw new Error(`No se encontraron datos para la persona con ID: ${idPersona}`);
+    }
+
+    const { persona, perfil, beneficiarios } = datos.data;
+    const backgroundImageBase64 = await this.getMembreteBase64();
+    const documentDefinition = this.getDocumentDefinition(persona, perfil, beneficiarios, backgroundImageBase64, dto);
+
+    return new Promise((resolve, reject) => {
+      const pdfDocGenerator = pdfMake.createPdf(documentDefinition);
+      pdfDocGenerator.getBuffer((buffer) => {
+        resolve(buffer);
+      });
+    });
+  }
+
+  getDocumentDefinition(
+    persona: any,
+    perfil: any,
+    beneficiarios: any[],
+    backgroundImageBase64: string,
+    dto: EmpleadoDto
+  ): any {
+    beneficiarios.forEach(item => {
+      item.nombre = item.nombre_completo || 'N/A';
+      item.fechaNacimiento = item.fecha_nacimiento || 'N/A';
+      item.identidad = item.n_identificacion || 'N/A';
+      item.parentesco = item.parentesco || 'N/A';
+      item.porcentaje = item.porcentaje || 'N/A';
+      item.direccion_residencia = item.direccion_residencia || 'N/A';
+      item.telefono_1 = item.telefono_1 || 'N/A';
+    });
+
+    const opcionesFecha: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+    const fechaFormateada = new Date().toLocaleDateString('es-ES', opcionesFecha).toUpperCase();
+
+    const afiliado = {
+      nombre: persona.nombre_completo || 'N/A',
+      grado_academico: persona.grado_academico || 'N/A',
+      centroEducativo: perfil.nombre_centro_trabajo || 'N/A',
+      municipioResidencia: perfil.nombre_municipio || 'N/A',
+      departamentoResidencia: perfil.nombre_departamento || 'N/A',
+      n_identificacion: persona.n_identificacion || 'N/A'
+    };
+
+    const body: any[][] = [
+      [
+        { text: 'N°', style: 'tableHeader', fillColor: '#CCCCCC', alignment: 'center' },
+        { text: 'NOMBRE COMPLETO', style: 'tableHeader', alignment: 'center' },
+        { text: 'FECHA DE NACIMIENTO', style: 'tableHeader', alignment: 'center' },
+        { text: 'IDENTIDAD', style: 'tableHeader', alignment: 'center' },
+        { text: 'PARENTESCO', style: 'tableHeader', alignment: 'center' },
+        { text: '%', style: 'tableHeader', alignment: 'center' },
+      ]
+    ];
+
+    beneficiarios.forEach((item, index) => {
+      const fechaNacimiento = item.fechaNacimiento
+        ? new Date(item.fechaNacimiento).toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })
+        : 'N/A';
+
+      body.push(
+        [
+          { text: (index + 1).toString(), rowSpan: 2, style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+          { text: item.nombre, style: 'tableRowLarge', alignment: 'center' },
+          { text: fechaNacimiento, style: 'tableRowLarge', alignment: 'center' },
+          { text: item.identidad, style: 'tableRowLarge', alignment: 'center' },
+          { text: item.parentesco, style: 'tableRowLarge', alignment: 'center' },
+          { text: item.porcentaje, style: 'tableRowLarge', alignment: 'center' },
+        ],
+        [
+          {},
+          { text: 'DIRECCIÓN', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+          { text: item.direccion_residencia, style: 'tableRowLarge', colSpan: 2, alignment: 'center' },
+          { text: '', style: 'tableRowLarge' },
+          { text: 'TELÉFONO/CEL', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+          { text: item.telefono_1, style: 'tableRowLarge', alignment: 'center' },
+        ]
+      );
+    });
+
+    return {
+      pageMargins: [40, 100, 40, 10], // 📌 Subí un poco más la posición general
+      background: function (currentPage: any, pageSize: any) {
+        return {
+          image: backgroundImageBase64,
+          width: pageSize.width,
+          height: pageSize.height,
+          absolutePosition: { x: 0, y: 0 }
+        };
+      },
+      content: [
+        {
+          text: [
+            'Señores de la Comisión Interventora del INPREMA\nPresente.\n\nYo ',
+            { text: afiliado.nombre, bold: true },
+            ', mayor de edad, laborando como docente en el nivel ',
+            { text: afiliado.grado_academico, bold: true },
+            ', del Centro Educativo ',
+            { text: afiliado.centroEducativo || 'NOMBRE NO DISPONIBLE', bold: true },
+            ', ubicado en el Municipio ',
+            { text: afiliado.municipioResidencia, bold: true },
+            ' del Departamento ',
+            { text: afiliado.departamentoResidencia, bold: true },
+            ', con Identidad N°. ',
+            { text: afiliado.n_identificacion, bold: true },
+            ', comparezco ante el Instituto Nacional de Previsión del magisterio a registrar mis beneficiarios legales de la manera siguiente:\n\n'
+          ],
+          style: 'introText',
+          margin: [0, 5, 0, 10] // 📌 Ajusté la separación superior
+        },
+        {
+          table: {
+            widths: [20, '*', '*', '*', '*', '*'],
+            body: body
+          }
+        },
+        {
+          text: '',
+          margin: [0, 15, 0, 0] // 📌 Reducí espacio antes de "Lugar y Fecha"
+        },
+        {
+          text: `LUGAR Y FECHA: ${dto.municipio}, ${dto.departamento}, ${fechaFormateada}`,
+          style: 'subHeader',
+          margin: [0, 10, 0, 5] // 📌 Subí la ubicación y fecha
+        },
+        {
+          text: '(F) _______________________________',
+          margin: [0, 20, 0, 15] // 📌 Subí la firma
+        },
+        {
+          style: 'usoExclusivo',
+          table: {
+            widths: ['*'],
             body: [
+              [{ text: 'PARA USO EXCLUSIVO DEL INPREMA', style: 'tableHeader', alignment: 'center', fillColor: '#CCCCCC' }],
               [
-                { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
-                { text: 'GENERÓ: INPRENET', alignment: 'center', border: [false, false, false, false], fontSize: 8 },
-                { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
+                {
+                  columns: [
+                    {
+                      width: '50%',
+                      stack: [
+                        { text: `NOMBRE DE EMPLEADO: ${dto.nombreEmpleado}`, margin: [0, 5] }, // 📌 Subí el texto del empleado
+                        { text: `CÓDIGO DE EMPLEADO: ${dto.numero_empleado}`, margin: [0, 5] } // 📌 Subí el código
+                      ],
+                      style: 'subHeader'
+                    },
+                    {
+                      width: '50%',
+                      stack: [
+                        { text: '________________________________', alignment: 'center', margin: [0, 25, 0, 0] }, // 📌 Subí la firma
+                        { text: 'FIRMA Y SELLO', alignment: 'center', margin: [-10, 10, 0, 0] }
+                      ],
+                      style: 'subHeader'
+                    }
+                  ]
+                }
               ]
             ]
           },
-          margin: [20, 0, 20, 20]
-        }),
-        styles: {
-          personaInfo: { fontSize: 12, bold: true },
-          year: { fontSize: 10, bold: true, alignment: 'center' },
-          tableHeader: { bold: true, fontSize: 10, alignment: 'center', fillColor: '#eeeeee' },
-          movementCell: { fontSize: 9, alignment: 'center' },
-          totalCell: { fontSize: 10, alignment: 'center', bold: true, color: '#000' }
+          margin: [0, 5, 0, 0] // 📌 Subí el bloque "Para Uso Exclusivo del INPREMA"
         }
-      };
+      ],
+      styles: {
+        introText: { fontSize: 12, margin: [0, 0, 0, 10] },
+        subHeader: { fontSize: 12, italics: true, margin: [0, 0, 0, 5] },
+        tableHeader: { bold: true, fontSize: 12, fillColor: '#DDDDDD' },
+        usoExclusivo: { margin: [0, 15, 0, 0] } // 📌 Ajusté el margen del bloque final
+      }
+    };
   }
 
-  
 
 
 

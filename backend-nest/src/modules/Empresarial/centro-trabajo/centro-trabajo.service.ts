@@ -3,7 +3,7 @@ import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Net_Departamento } from '../../Regional/provincia/entities/net_departamento.entity';
 import { CreatePrivateCentroTrabajoDto } from './dto/create-private-centro-trabajo.dto';
 import { Net_Nivel_Educativo } from '../entities/net_nivel_educativo.entity';
@@ -66,6 +66,16 @@ export class CentroTrabajoService {
     @InjectRepository(Net_Usuario_Empresa)
     private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>
   ) { }
+
+  async buscarCentroTrabajo(termino: string): Promise<Net_Centro_Trabajo[]> {
+    return await this.centroTrabajoRepository.find({
+      where: [
+        { codigo: ILike(`%${termino}%`), tipo: 'EDUCACION' },
+        { nombre_centro_trabajo: ILike(`%${termino}%`), tipo: 'EDUCACION' },
+      ],
+      relations: ['municipio', 'municipio.departamento'],
+    });
+  }
 
   async updateArchivoIdentificacion(id_empleado: number, archivoBuffer: Buffer): Promise<Net_Empleado> {
     const empleado = await this.empleadoRepository.findOne({ where: { id_empleado } });

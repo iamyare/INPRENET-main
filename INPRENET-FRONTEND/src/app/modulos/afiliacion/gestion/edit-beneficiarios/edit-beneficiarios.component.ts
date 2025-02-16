@@ -327,7 +327,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     const beneficiarios = this.filas.map((b, index) => [
         { text: `${index + 1}`, alignment: 'center' }, // Índice
         { text: b.n_identificacion, alignment: 'center' }, // Identificación
-        { text: `${b.nombres} ${b.apellidos}`, alignment: 'center' }, // Nombre completo
+        { text: `${b.nombre_completo}`, alignment: 'center' }, // Nombre completo
         { text: b.parentesco, alignment: 'center' }, // Parentesco
         { text: `${b.porcentaje}`, alignment: 'center' } // Porcentaje con el signo %
     ]);

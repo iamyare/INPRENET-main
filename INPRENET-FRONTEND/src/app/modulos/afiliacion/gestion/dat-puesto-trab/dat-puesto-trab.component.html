@@ -22,9 +22,12 @@
               <mat-icon>search</mat-icon> Buscar
             </button>
           </div>
+          <p *ngIf="trabajo.get('centroSeleccionado')?.invalid && trabajo.get('centroSeleccionado')?.touched" class="text-danger">
+            <mat-icon>error_outline</mat-icon> Debe seleccionar un Centro de Trabajo.
+          </p>
           
           <!-- Listado de centros encontrados -->
-          <div *ngIf="trabajo.get('centrosFiltrados')?.value?.length">
+          <div *ngIf="trabajo.get('centrosFiltrados')?.value?.length; else noResultsTemplate">
             <p>Centros encontrados:</p>
             <mat-list>
               <mat-list-item *ngFor="let centro of trabajo.get('centrosFiltrados')?.value">
@@ -34,11 +37,18 @@
               </mat-list-item>
             </mat-list>
           </div>
+          
+          <!-- Template para mensaje de "No se encontraron resultados" -->
+          <ng-template #noResultsTemplate>
+            <p *ngIf="trabajo.get('noResults')?.value" class="text-danger">
+              <mat-icon>error_outline</mat-icon> No se encontraron centros de trabajo con el criterio ingresado.
+            </p>
+          </ng-template>
           <!-- Información del Centro de Trabajo -->
           <div class="info-container">
             <div class="info-field">
               <mat-icon class="info-icon">business</mat-icon>
-              <p><strong class="info-label">Código del Centro de Trabajo:</strong> {{ trabajo.get('codigo_centro')?.value || 'No asignado' }}</p>
+              <p><strong class="info-label">Código del Centro de Trabajo:</strong> {{ trabajo.get('codigo')?.value || 'No asignado' }}</p>
             </div>
 
             <div class="info-field">

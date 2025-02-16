@@ -59,23 +59,29 @@ export class DatPuestoTrabComponent implements OnInit {
     const searchValue = trabajoControl.get('buscarCentro')?.value;
   
     if (!searchValue) {
-      trabajoControl.patchValue({ centrosFiltrados: [] }, { emitEvent: false });
+      trabajoControl.patchValue({ centrosFiltrados: [], noResults: false }, { emitEvent: false });
       return;
     }
+  
     this.centrosTrabSVC.buscarCentroTrabajo(searchValue).subscribe({
       next: (centros) => {
-        trabajoControl.patchValue({ centrosFiltrados: centros }, { emitEvent: false });
+        trabajoControl.patchValue({ 
+          centrosFiltrados: centros, 
+          noResults: centros.length === 0 // ✅ Si no hay centros, actualizar noResults
+        }, { emitEvent: false });
+  
         this.changeDetectorRef.detectChanges();
       },
       error: (error) => {
         console.error('Error al buscar centro de trabajo:', error);
-        trabajoControl.patchValue({ centrosFiltrados: [] }, { emitEvent: false });
+        trabajoControl.patchValue({ centrosFiltrados: [], noResults: true }, { emitEvent: false });
         this.changeDetectorRef.detectChanges();
       }
     });
   }
   
   async seleccionarCentro(index: number, centro: any): Promise<void> {
+    
     const trabajoControl = this.trabajosArray.at(index) as FormGroup;
     const municipio = centro.municipio || {};
     const departamento = municipio.departamento || {};
@@ -84,18 +90,16 @@ export class DatPuestoTrabComponent implements OnInit {
   
     // 🔹 Asignar valores correctamente
     trabajoControl.patchValue({
-      codigo_centro: centro.codigo,
+      codigo: centro.codigo,
       id_centro_trabajo: centro.id_centro_trabajo,
       nombre_centro_trabajo: centro.nombre_centro_trabajo,
       telefono_1: centro.telefono_1,
       sectorEconomico: centro.sector_economico,
       direccionCentro: centro.direccion_1 || centro.direccion_2,
-      salario_base: centro.salario_base || '',
-      fecha_ingreso: centro.fecha_ingreso || '',
-      fecha_egreso: centro.fecha_egreso || '',
       id_departamento: departamento.id_departamento || '',
       id_municipio: null,
-      showNumeroAcuerdo: esPublicoOProheco, // ✅ Se actualiza la visibilidad aquí
+      showNumeroAcuerdo: esPublicoOProheco,
+      centroSeleccionado: true,
     });
   
     // 🔹 Forzar la actualización del input `numero_acuerdo`
@@ -130,14 +134,17 @@ export class DatPuestoTrabComponent implements OnInit {
   agregarTrabajo(): void {
     const trabajoFormGroup = this.fb.group({
       buscarCentro: [''],
-    centrosFiltrados: [[]],
-    id_centro_trabajo: [''],
-    nombre_centro_trabajo: [{ value: '', disabled: true }, Validators.required],
-      cargo: ['', [
-        Validators.required,
-        Validators.maxLength(40),
-        Validators.pattern('^[a-zA-ZÀ-ÿ\u00f1\u00d1 ]+$')
-      ]],
+      centroSeleccionado: [false, Validators.requiredTrue],
+      centrosFiltrados: [[]],
+      noResults: [false],
+      codigo: [''],
+      id_centro_trabajo: [''],
+      nombre_centro_trabajo: [{ value: '', disabled: true }, Validators.required],
+        cargo: ['', [
+          Validators.required,
+          Validators.maxLength(40),
+          Validators.pattern('^[a-zA-ZÀ-ÿ\u00f1\u00d1 ]+$')
+        ]],
       telefono_1: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
       numero_acuerdo: ['', Validators.maxLength(40)],
       salario_base: ['', [Validators.required, Validators.min(0), Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)]],

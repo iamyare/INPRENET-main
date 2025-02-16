@@ -149,3 +149,11 @@ button:focus {
   font-size: 16px;
   color: #333;
 }
+
+.no-results {
+  color: red;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

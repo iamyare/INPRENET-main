@@ -59,15 +59,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     private authService: AuthService,
     private http: HttpClient,
 
-  ) {
-    this.convertirImagenABase64('../../../../../assets/images/membratadoFinal.jpg').then(base64 => {
-      this.backgroundImageBase64 = base64;
-    }).catch(error => {
-      console.error('Error al enviar los datos:', error);
-      const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
-      this.toastr.error(errorMessage, 'Error');
-    });
-   }
+  ) {}
 
   ngOnInit(): void {
     this.initializeComponent();
@@ -100,14 +92,15 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
     this.myColumns = [
       { header: 'Número De Identificación', col: 'n_identificacion', validationRules: [Validators.required, Validators.minLength(3)] },
-      { header: 'Nombres', col: 'nombres' },
-      { header: 'Apellidos', col: 'apellidos' },
-      { header: 'Dirección', col: 'direccion_residencia' }, 
+      { header: 'Nombre Completo', col: 'nombre_completo' },
+      { header: 'Dirección', col: 'direccion_residencia' },
+      { header: 'Lugar de Nacimiento', col: 'lugar_nacimiento' }, // Nueva columna
+      { header: 'Lugar de Residencia', col: 'lugar_residencia' },
       { header: 'Teléfono', col: 'telefono_1' },
       { header: 'Parentesco', col: 'parentesco' },
       { header: 'Porcentaje', col: 'porcentaje' },
-      { header: 'Genero', col: 'genero' },
       { header: 'Fecha de Nacimiento', col: 'fecha_nacimiento' },
+      { header: 'Genero', col: 'genero' },
       { header: 'Discapacidades', col: 'discapacidades' },
       
     ];
@@ -123,6 +116,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     if (this.persona) {
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
+        
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
@@ -136,8 +130,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
             id_causante: item.ID_CAUSANTE_PADRE,
             id_persona: item.idPersona,
             n_identificacion: item.nIdentificacion,
-            nombres,
-            apellidos,
+            nombre_completo: `${nombres} ${apellidos}`.trim(),
             genero: item.genero,
             sexo: item.sexo,
             cantidad_dependientes: item.cantidadDependientes,
@@ -159,6 +152,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
             tercer_nombre: item.tercerNombre,
             primer_apellido: item.primerApellido,
             segundo_apellido: item.segundoApellido,
+            lugar_nacimiento: `${item.nombreDepartamentoNacimiento} - ${item.nombreMunicipioNacimiento}`,
+            lugar_residencia: `${item.nombreDepartamentoResidencia} - ${item.nombreMunicipioResidencia}`
           };
         });
 
@@ -208,38 +203,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        
         this.svcAfiliado.updateBeneficiario(row.id_persona, result).subscribe(
-          () => {
-            this.toastr.success('Beneficiario actualizado exitosamente');
-            this.getFilas();
-          },
-          (error) => {
-            this.toastr.error('Error al actualizar beneficiario');
-            console.error('Error al actualizar beneficiario', error);
-          }
-        );
-      }
-    });
-  }
-
-  openDialog(campos: any, row: any, validacionesDinamicas: any = {}): void {
-    const dialogRef = this.dialog.open(EditarDialogComponent, {
-      width: '500px',
-      data: { campos, valoresIniciales: row, validacionesDinamicas }
-    });
-  
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        const updatedBeneficiario = {
-          id_causante_padre: this.persona.id_persona,
-          id_persona: row.id_persona,
-          porcentaje: result.porcentaje,
-          direccion_residencia: result.direccion_residencia, 
-          parentesco: result.parentesco, 
-          telefono_1: result.telefono_1
-        };
-  
-        this.svcAfiliado.updateBeneficiario(row.idDetallePersona, updatedBeneficiario).subscribe(
           () => {
             this.toastr.success('Beneficiario actualizado exitosamente');
             this.getFilas().then(() => this.cargar());
@@ -480,21 +445,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
         resolve(dataURL);
       };
       img.onerror = (error) => reject(error);
-    });
-  }
-
-  convertirImagenABase64(url: string): Promise<string> {
-    return this.http.get(url, { responseType: 'blob' }).toPromise().then((blob:any) => {
-      return new Promise<string>((resolve, reject) => {
-        if (blob) {
-          const reader = new FileReader();
-          reader.readAsDataURL(blob);
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = error => reject(error);
-        } else {
-          reject('No se pudo cargar la imagen. El blob es undefined.');
-        }
-      });
     });
   }
 

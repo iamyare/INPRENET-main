@@ -31,12 +31,12 @@
             {{ col.header }}
           </th>
           <th *ngIf="verBotEditar" class="custom-header">Acciones</th>
-          <th *ngIf="mostrarBotonUno" class="custom-header">{{ nombreEncabezadoUno }}</th>
-          <th *ngIf="mostrarBotonDos" class="custom-header">{{ nombreEncabezadoDos }}</th>
-          <th *ngIf="mostrarBotonTres" class="custom-header">{{ nombreEncabezadoTres }}</th>
           <th *ngIf="mostrarBotonEditar" class="custom-header">Editar</th>
           <th *ngIf="mostrarBotonEliminar" class="custom-header">Eliminar</th>
           <th *ngIf="mostrarBotonInhabilitar" class="custom-header">Inhabilitar</th>
+          <th *ngIf="mostrarBotonUno" class="custom-header">{{ nombreEncabezadoUno }}</th>
+          <th *ngIf="mostrarBotonDos" class="custom-header">{{ nombreEncabezadoDos }}</th>
+          <th *ngIf="mostrarBotonTres" class="custom-header">{{ nombreEncabezadoTres }}</th>
         </tr>
       </thead>
       <tbody>
@@ -74,6 +74,21 @@
               </ng-container>
             </div>
           </td>
+          <td *ngIf="mostrarBotonEditar">
+            <button style="height: auto" mat-icon-button (click)="editarFila(row)" class="boton-editar">
+              <mat-icon class="icono-editar">edit</mat-icon>
+            </button>
+          </td>
+          <td *ngIf="mostrarBotonEliminar">
+            <button style="height: auto" mat-icon-button (click)="eliminarFila(row)" class="boton-eliminar">
+              <mat-icon class="icono-eliminar">delete</mat-icon>
+            </button>
+          </td>
+          <td *ngIf="mostrarBotonInhabilitar" class="custom-actions">
+            <button mat-icon-button (click)="inhabilitarFila(row)" class="boton-inhabilitar">
+              <mat-icon>remove_circle_outline</mat-icon>
+            </button>
+          </td>
           <td *ngIf="verBotEditar">
             <button style="height: auto" color="primary" mat-icon-button *ngIf="!row.isEditing"
               (click)="startEditing(row)" class="boton-editar">
@@ -96,21 +111,7 @@
             <button mat-raised-button style="height: auto" *ngIf="mostrarBotonTres" mat-raised-button
               (click)="ejecutarAccionTres(row)">{{ etiquetaBotonTres }}</button>
           </td>
-          <td *ngIf="mostrarBotonEditar">
-            <button style="height: auto" mat-icon-button (click)="editarFila(row)" class="boton-editar">
-              <mat-icon class="icono-editar">edit</mat-icon>
-            </button>
-          </td>
-          <td *ngIf="mostrarBotonEliminar">
-            <button style="height: auto" mat-icon-button (click)="eliminarFila(row)" class="boton-eliminar">
-              <mat-icon class="icono-eliminar">delete</mat-icon>
-            </button>
-          </td>
-          <td *ngIf="mostrarBotonInhabilitar" class="custom-actions">
-            <button mat-icon-button (click)="inhabilitarFila(row)" class="boton-inhabilitar">
-              <mat-icon>remove_circle_outline</mat-icon>
-            </button>
-          </td>
+          
         </tr>
       </tbody>
     </table>

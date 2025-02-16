@@ -283,8 +283,6 @@ export class DatosGeneralesComponent implements OnInit {
     await this.cargarTiposIdentificacion();
     this.cargarGenero();
     await this.cargarNacionalidades();
-    console.log(this.initialData);
-    
     
     this.formGroup.patchValue({
       id_profesion: this.initialData?.id_profesion || '',

@@ -69,6 +69,10 @@ export class UpdateBeneficiarioDto {
 
   @IsInt()
   @IsNotEmpty()
+  id_municipio_nacimiento: number;
+
+  @IsInt()
+  @IsNotEmpty()
   id_estado_persona: number;
 
   @IsString()

@@ -191,7 +191,8 @@ export class AfiliadoService {
         fecha_nacimiento: fechaNacimientoFormatted, // ✅ Fecha corregida
         telefono_1: updatePersonaDto.telefono_1,
         direccion_residencia: updatePersonaDto.direccion_residencia,
-        id_municipio_residencia: updatePersonaDto.id_municipio_residencia,
+        municipio: updatePersonaDto.id_municipio_residencia,
+        municipio_nacimiento: updatePersonaDto.id_municipio_nacimiento,
       });
   
       await this.personaRepository.save(persona);

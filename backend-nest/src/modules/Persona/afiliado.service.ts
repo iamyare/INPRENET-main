@@ -44,8 +44,6 @@ export class AfiliadoService {
     private estadoAfiliacionRepository: Repository<net_estado_afiliacion>,
     @InjectRepository(Net_Centro_Trabajo)
     private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
-    @InjectRepository(Net_Empleado_Centro_Trabajo)
-    private empCentTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
     @InjectRepository(Net_Persona_Colegios)
     private readonly netPersonaColegiosRepository: Repository<Net_Persona_Colegios>,
     @InjectRepository(Net_Persona_Por_Banco)
@@ -95,8 +93,8 @@ export class AfiliadoService {
       const movimientos = await this.movimientoCuentaRepository.find({
         where: {
           cuentaPersona: {
-            persona: { id_persona },
-            tipoCuenta: { ID_TIPO_CUENTA: id_tipo_cuenta }
+           /*  persona: { id_persona },
+            tipoCuenta: { ID_TIPO_CUENTA: id_tipo_cuenta } */
           }
         },
         order: { ANO: 'ASC', MES: 'ASC' },
@@ -104,7 +102,7 @@ export class AfiliadoService {
       });
 
       const tipoCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.tipoCuenta.DESCRIPCION : null;
-      const numeroCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.NUMERO_CUENTA : null;
+      //const numeroCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.NUMERO_CUENTA : null;
 
       const movimientosOrdenados = movimientos.reduce((acc, movimiento) => {
         const { ANO: year, MES: month } = movimiento;
@@ -133,7 +131,7 @@ export class AfiliadoService {
 
       return {
         tipoCuenta,
-        numeroCuenta,
+        //numeroCuenta,
         movimientos: movimientosOrdenados
       };
     } catch (error) {
@@ -298,8 +296,8 @@ export class AfiliadoService {
     }));
 
     // Convierte archivos de identificación y defunción a base64 si existen
-    const archivoIdentificacionBase64 = persona.archivo_identificacion
-      ? Buffer.from(persona.archivo_identificacion).toString('base64')
+    const carnetDiscapacidadBase64 = persona.carnet_discapacidad
+      ? Buffer.from(persona.carnet_discapacidad).toString('base64')
       : null;
     const certificadoDefuncionBase64 = persona.certificado_defuncion
       ? Buffer.from(persona.certificado_defuncion).toString('base64')
@@ -317,8 +315,6 @@ export class AfiliadoService {
       return fechaDate.toISOString().split('T')[0];
     };
 
-
-    // Construye el resultado con valores por defecto en caso de que no haya `detallePersona`
     const result = {
       ID_TIPO_IDENTIFICACION: persona.tipoIdentificacion.id_identificacion,
       N_IDENTIFICACION: persona.n_identificacion,
@@ -353,7 +349,7 @@ export class AfiliadoService {
       ID_MUNICIPIO_NACIMIENTO: persona.municipio_nacimiento?.id_municipio,
       fecha_defuncion: persona.fecha_defuncion,
       certificado_defuncion: certificadoDefuncionBase64,
-      archivo_identificacion: archivoIdentificacionBase64,
+      carnet_discapacidad: carnetDiscapacidadBase64,
       ID_MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.id_municipio,
       MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.nombre_municipio,
       ID_DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.id_departamento,
@@ -362,10 +358,8 @@ export class AfiliadoService {
       NUMERO_CERTIFICADO_DEFUNCION: persona?.numero_certificado_defuncion,
       FECHA_REPORTE_FALLECIDO: persona?.fechaReporteFallecido,
       CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.nombre,
-
       FECHA_AFILIACION: formatFecha(persona.fecha_afiliacion),
       ULTIMA_FECHA_ACTUALIZACION: persona.ultima_fecha_actualizacion,
-
       fallecido: persona.fallecido,
       fecha_reporte_fallecido: persona.fechaReporteFallecido,
       estadoAfiliacion: {
@@ -903,14 +897,14 @@ export class AfiliadoService {
       };
     }
 
-    const movimientos = persona.cuentas.flatMap(cuenta => cuenta.movimientos);
+    //const movimientos = persona.cuentas.flatMap(cuenta => cuenta.movimientos);
 
     return {
       status: 'success',
       message: 'Datos y movimientos de la persona encontrados con éxito',
       data: {
         persona,
-        movimientos,
+        //movimientos,
       },
     };
   }
@@ -974,14 +968,14 @@ export class AfiliadoService {
       };
     }
 
-    const movimientos = persona.cuentas.flatMap(cuenta => cuenta.movimientos);
+    //const movimientos = persona.cuentas.flatMap(cuenta => cuenta.movimientos);
 
     return {
       status: 'success',
       message: 'Datos y movimientos de la persona encontrados con éxito',
       data: {
         persona,
-        movimientos,
+        //movimientos,
       },
     };
   }
@@ -991,19 +985,36 @@ export class AfiliadoService {
       const persona = await this.personaRepository.createQueryBuilder('persona')
         .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfPersCentTrabs')
         .leftJoinAndSelect('perfPersCentTrabs.centroTrabajo', 'centroTrabajo')
+        .leftJoinAndSelect('centroTrabajo.municipio', 'municipio') // Incluir municipio
+        .leftJoinAndSelect('municipio.departamento', 'departamento') // Incluir departamento
         .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
         .orderBy('perfPersCentTrabs.estado', 'ASC')
         .getOne();
-
+  
       if (!persona || !persona.perfPersCentTrabs) {
         return [];
       }
-      return persona.perfPersCentTrabs;
+  
+      return persona.perfPersCentTrabs.map(perfil => ({
+        ...perfil,
+        centroTrabajo: {
+          ...perfil.centroTrabajo,
+          municipio: perfil.centroTrabajo?.municipio ? {
+            id: perfil.centroTrabajo.municipio.id_municipio,
+            nombre: perfil.centroTrabajo.municipio.nombre_municipio
+          } : null,
+          departamento: perfil.centroTrabajo?.municipio?.departamento ? {
+            id: perfil.centroTrabajo.municipio.departamento.id_departamento,
+            nombre: perfil.centroTrabajo.municipio.departamento.nombre_departamento
+          } : null
+        }
+      }));
     } catch (error) {
       console.error('Error al obtener los perfiles de la persona:', error);
       throw new Error('Error al obtener los perfiles de la persona');
     }
   }
+  
 
   async getAllCargoPublicPeps(n_identificacion: string): Promise<any> {
     try {
@@ -1287,18 +1298,49 @@ export class AfiliadoService {
   }
 
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
-    const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
+    const existingPerf = await this.perfPersoCentTrabRepository.findOne({ 
+        where: { id_perf_pers_centro_trab: id }, 
+        relations: ['centroTrabajo'] // Asegura que se traiga el centro de trabajo
+    });
+
     if (!existingPerf) {
-      throw new NotFoundException(`Perfil centro trabajo con ID ${id} no encontrado`);
+        throw new NotFoundException(`Perfil centro trabajo con ID ${id} no encontrado`);
     }
 
+    // Si viene idCentroTrabajo, verificamos que exista el centro de trabajo
     if (updateDto.idCentroTrabajo) {
-      const centroTrabajoExistente = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: updateDto.idCentroTrabajo } });
-      if (!centroTrabajoExistente) {
-        throw new NotFoundException(`El centro de trabajo con ID ${updateDto.idCentroTrabajo} no existe`);
-      }
-      existingPerf.centroTrabajo = centroTrabajoExistente;
+        const centroTrabajoExistente = await this.centroTrabajoRepository.findOne({ 
+            where: { id_centro_trabajo: updateDto.idCentroTrabajo } 
+        });
+
+        if (!centroTrabajoExistente) {
+            throw new NotFoundException(`El centro de trabajo con ID ${updateDto.idCentroTrabajo} no existe`);
+        }
+
+        // Si vienen datos de dirección o teléfono, actualizarlos en net_centro_trabajo
+        let updatedCentro = false;
+        if (updateDto.direccion_1) {
+            centroTrabajoExistente.direccion_1 = updateDto.direccion_1;
+            updatedCentro = true;
+        }
+        if (updateDto.direccion_2 !== undefined) { // Permite vaciar el campo si es necesario
+            centroTrabajoExistente.direccion_2 = updateDto.direccion_2;
+            updatedCentro = true;
+        }
+        if (updateDto.telefono_1) {
+            centroTrabajoExistente.telefono_1 = updateDto.telefono_1;
+            updatedCentro = true;
+        }
+
+        // Guardar cambios en centro de trabajo si hubo actualización
+        if (updatedCentro) {
+            await this.centroTrabajoRepository.save(centroTrabajoExistente);
+        }
+
+        existingPerf.centroTrabajo = centroTrabajoExistente;
     }
+
+    // Actualizar datos en net_perf_pers_cent_trab
     existingPerf.fecha_ingreso = this.formatFechaYYYYMMDD(updateDto.fecha_ingreso);
     existingPerf.fecha_egreso = updateDto.fecha_egreso ? this.formatFechaYYYYMMDD(updateDto.fecha_egreso) : null;
     existingPerf.cargo = updateDto.cargo;
@@ -1309,7 +1351,8 @@ export class AfiliadoService {
     existingPerf.jornada = updateDto.jornada;
 
     return this.perfPersoCentTrabRepository.save(existingPerf);
-  }
+}
+
 
   async desactivarPerfCentroTrabajo(id: number): Promise<void> {
     const perfil = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });

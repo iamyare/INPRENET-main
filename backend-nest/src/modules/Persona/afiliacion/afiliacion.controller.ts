@@ -27,6 +27,11 @@ export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
 
+  @Get('tiene-banco-activo/:idPersona')
+  async tieneBancoActivo(@Param('idPersona', ParseIntPipe) idPersona: number) {
+    return await this.afiliacionService.tieneBancoActivo(idPersona);
+  }
+
   @Post('convertir-afiliado')
   async convertirEnAfiliado(
     @Body() body: { idPersona: number; idTipoPersona: number }
@@ -284,22 +289,27 @@ async obtenerFallecidos(@Query('mes') mes: number, @Query('anio') anio: number) 
   }
 
   @Post('/crear')
-  @UseInterceptors(AnyFilesInterceptor())  // Para manejar múltiples archivos de varios campos
+  @UseInterceptors(AnyFilesInterceptor()) 
   async crear(
     @Body('datos') datos: any,
-    @UploadedFiles() files?: Express.Multer.File[],  // Todos los archivos serán capturados aquí
+    @UploadedFiles() files?: Express.Multer.File[],
   ): Promise<any> {
     try {
       const crearDatosDto: CrearDatosDto = JSON.parse(datos);
-
-      // Filtrar cada archivo por su campo de entrada (fieldname)
       const fotoPerfil = files?.find(file => file.fieldname === 'foto_perfil');
-      const fileIdent = files?.find(file => file.fieldname === 'file_ident');
-      return await this.afiliacionService.crearDatos(crearDatosDto, fotoPerfil, fileIdent, files);
+      const carnetDiscapacidad = files?.find(file => file.fieldname === 'carnet_discapacidad');
+
+      return await this.afiliacionService.crearDatos(
+        crearDatosDto,
+        fotoPerfil,
+        carnetDiscapacidad,
+        files
+      );
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
+
 
   @Patch('referencia/actualizar/:idReferencia')
   async actualizarReferencia(

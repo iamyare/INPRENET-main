@@ -44,4 +44,18 @@ export class CentroTrabajoDTO {
     @MaxLength(50)
     @IsOptional()
     jornada?: string;
+
+    @IsString()
+    @MaxLength(200)
+    direccion_1: string;
+
+    @IsString()
+    @MaxLength(200)
+    @IsOptional()
+    direccion_2: string;
+
+    @IsString()
+    @MaxLength(15)
+    @IsOptional()
+    telefono_1: string;
 }

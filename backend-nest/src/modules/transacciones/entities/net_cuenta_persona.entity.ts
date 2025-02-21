@@ -1,21 +1,21 @@
-import { net_persona } from "../../Persona/entities/net_persona.entity";
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn} from "typeorm";
 import { NET_TIPO_CUENTA } from "./net_tipo_cuenta.entity";
 import { NET_MOVIMIENTO_CUENTA } from "./net_movimiento_cuenta.entity";
+import { Net_perf_pers_cent_trab } from "src/modules/Persona/entities/net_perf_pers_cent_trab.entity";
 
 @Entity({ name: 'NET_CUENTA_PERSONA' })
 @Check("CK1_NET_CUENTA_PERSONA", `ACTIVA_B IN ('A', 'I')`)
 export class NET_CUENTA_PERSONA {
-    @ManyToOne(() => net_persona, persona => persona.cuentas, { cascade: true })
-    @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'id_persona', foreignKeyConstraintName: "FK1_NET_CUENTA_PERSONA" })
-    persona: net_persona;
+    @PrimaryColumn({ primaryKeyConstraintName: 'PK_NET_CUENTA_PERSONA' })
+    ID_CUENTA_PERSONA: number;
 
     @ManyToOne(() => NET_TIPO_CUENTA, tipoCuenta => tipoCuenta.cuentas, { cascade: true })
     @JoinColumn({ name: 'ID_TIPO_CUENTA', referencedColumnName: 'ID_TIPO_CUENTA', foreignKeyConstraintName: "FK2_NET_CUENTA_PERSONA" })
     tipoCuenta: NET_TIPO_CUENTA;
 
-    @PrimaryColumn({ primaryKeyConstraintName: 'PK_NET_CUENTA_PERSONA' })
-    NUMERO_CUENTA: string;
+    @ManyToOne(() => Net_perf_pers_cent_trab, perfPersCentTrab => perfPersCentTrab.cuentasPersona)
+    @JoinColumn({ name: 'ID_PERF_PERS_CENTR_TRAB', referencedColumnName: 'id_perf_pers_centro_trab', foreignKeyConstraintName: "FK3_NET_CUENTA_PERSONA" })
+    perfPersCentTrab: Net_perf_pers_cent_trab;
 
     @Column({ length: 1, default: "A" })
     ACTIVA_B: string;

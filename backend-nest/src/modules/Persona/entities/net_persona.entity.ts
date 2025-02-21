@@ -2,7 +2,6 @@ import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
 import { Check, Column, Entity, Index, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
-import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
@@ -146,6 +145,9 @@ export class net_persona {
     @Column('blob', { nullable: true, name: 'FOTO_PERFIL' })
     foto_perfil: any;
 
+    @Column('blob', { nullable: true, name: 'CARNET_DISCAPACIDAD' })
+    carnet_discapacidad: any;
+
     @OneToMany(() => net_detalle_persona, detallePersona => detallePersona.persona)
     detallePersona: net_detalle_persona[];
 
@@ -172,9 +174,6 @@ export class net_persona {
         (perfPersCentTrab) => perfPersCentTrab.persona,
         { cascade: true })
     perfPersCentTrabs: Net_perf_pers_cent_trab[];
-
-    @OneToMany(() => NET_CUENTA_PERSONA, cuentaPersona => cuentaPersona.persona)
-    cuentas: NET_CUENTA_PERSONA[];
 
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanIngreso => detallePlanIngreso.persona)
     detallePlanIngreso: Net_Detalle_planilla_ingreso[];

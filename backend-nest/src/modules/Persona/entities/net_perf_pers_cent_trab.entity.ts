@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Centro_Trabajo } from "../../Empresarial/entities/net_centro_trabajo.entity";
 import { net_persona } from "./net_persona.entity";
+import { NET_CUENTA_PERSONA } from "src/modules/transacciones/entities/net_cuenta_persona.entity";
 
 @Entity({ name: 'NET_PERF_PERS_CENT_TRAB' })
 export class Net_perf_pers_cent_trab {
@@ -41,4 +42,7 @@ export class Net_perf_pers_cent_trab {
     @ManyToOne(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.perfAfilCentTrabs)
     @JoinColumn({ name: 'ID_CENTRO_TRABAJO', foreignKeyConstraintName: "FK_ID_CENT_TRAB_PERAFCET" })
     centroTrabajo: Net_Centro_Trabajo;
+
+    @OneToMany(() => NET_CUENTA_PERSONA, cuentaPersona => cuentaPersona.perfPersCentTrab)
+    cuentasPersona: NET_CUENTA_PERSONA[];
 }

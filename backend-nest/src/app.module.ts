@@ -71,7 +71,8 @@ import { WhatsappPruebaModule } from './modules/whatsapp-prueba/whatsapp-prueba.
     EscalafonModule,
     PrestamosModule,
     ConasaModule,
-    WhatsappPruebaModule
+    WhatsappPruebaModule,
+    BitacoraModule
   ],
   providers: [MantenimientoAfiliacionService],
 })

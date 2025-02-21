@@ -74,8 +74,48 @@ export class AfiliacionService {
     private readonly familiaRepository: Repository<Net_Familia>,
     @InjectRepository(net_otra_fuente_ingreso)
     private readonly otraFuenteIngresoRepository: Repository<net_otra_fuente_ingreso>,
+    @InjectRepository(Net_perf_pers_cent_trab)
+    private readonly perfilCentroTrabajoRepository: Repository<Net_perf_pers_cent_trab>,
     private readonly entityManager: EntityManager,
   ) { }
+
+  async tieneBancoActivo(idPersona: number): Promise<{ 
+    tieneBancoActivo: boolean; 
+    tieneBeneficiarios: boolean;
+    tieneReferencias: boolean;
+    tieneCentroTrabajo: boolean;
+  }> {
+      const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
+  
+      if (!persona) {
+        throw new NotFoundException(`La persona con ID ${idPersona} no existe.`);
+      }
+  
+      const tieneBancoActivo = await this.personaBancoRepository.count({
+        where: { persona: { id_persona: idPersona }, estado: 'ACTIVO' },
+      });
+  
+      const tieneBeneficiarios = await this.detallePersonaRepository.count({
+        where: { ID_CAUSANTE_PADRE: idPersona, eliminado: 'NO' }, // Solo cuenta beneficiarios no eliminados
+      });
+  
+      const tieneReferencias = await this.referenciaRepository.count({
+        where: { persona: { id_persona: idPersona }, estado: 'ACTIVO' }, // Solo referencias activas
+      });
+  
+      const tieneCentroTrabajo = await this.perfilCentroTrabajoRepository.count({
+        where: { persona: { id_persona: idPersona }, estado: 'ACTIVO' }, // Solo perfiles activos
+      });
+  
+      return {
+        tieneBancoActivo: tieneBancoActivo > 0,
+        tieneBeneficiarios: tieneBeneficiarios > 0,
+        tieneReferencias: tieneReferencias > 0,
+        tieneCentroTrabajo: tieneCentroTrabajo > 0, // True si tiene un perfil de centro de trabajo activo
+      };
+  }
+  
+
 
   async convertirEnAfiliado(idPersona: number, idTipoPersona: number): Promise<{ message: string }> {
     const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
@@ -347,8 +387,9 @@ export class AfiliacionService {
     return this.discapacidadRepository.find();
   }
 
-  async crearPersona(crearPersonaDto: CrearPersonaDto, fotoPerfil: Express.Multer.File, fileIdent: Express.Multer.File, entityManager: EntityManager): Promise<net_persona> {
+  async crearPersona(crearPersonaDto: CrearPersonaDto, fotoPerfil: Express.Multer.File, carnetDiscapacidad: Express.Multer.File, entityManager: EntityManager): Promise<net_persona> {
     // Verificar si la persona ya existe
+    
     let persona = await this.personaRepository.findOne({ where: { n_identificacion: crearPersonaDto.n_identificacion } });
 
     if (persona) {
@@ -383,7 +424,7 @@ export class AfiliacionService {
         fecha_defuncion: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_defuncion),
         fecha_afiliacion: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_afiliacion),
         foto_perfil: fotoPerfil?.buffer,
-        archivo_identificacion: fileIdent?.buffer,
+        carnet_discapacidad: carnetDiscapacidad?.buffer,
         tipoIdentificacion,
         pais,
         municipio: municipioResidencia,
@@ -394,7 +435,6 @@ export class AfiliacionService {
       });
       await entityManager.save(net_persona, persona);
     }
-
     return persona;
   }
 
@@ -765,7 +805,7 @@ export class AfiliacionService {
   async crearDatos(
     crearDatosDto: CrearDatosDto,
     fotoPerfil: Express.Multer.File,
-    fileIdent: Express.Multer.File,
+    carnetDiscapacidad: Express.Multer.File,
     files: any
 ): Promise<any> {
     return await this.personaRepository.manager.transaction(async (transactionalEntityManager) => {
@@ -774,7 +814,7 @@ export class AfiliacionService {
             const personasCreadasMap = new Map<string, net_persona>();
 
             // Crear la persona
-            const persona = await this.crearPersona(crearDatosDto.persona, fotoPerfil, fileIdent, transactionalEntityManager);
+            const persona = await this.crearPersona(crearDatosDto.persona, fotoPerfil, carnetDiscapacidad, transactionalEntityManager);
             resultados.push(persona);
 
             // Crear el detalle de la persona

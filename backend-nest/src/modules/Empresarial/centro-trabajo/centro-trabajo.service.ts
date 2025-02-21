@@ -67,15 +67,22 @@ export class CentroTrabajoService {
     private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>
   ) { }
 
-  async buscarCentroTrabajo(termino: string): Promise<Net_Centro_Trabajo[]> {
-    return await this.centroTrabajoRepository.find({
-      where: [
+  async buscarCentroTrabajo(termino: string, idMunicipio?: number): Promise<Net_Centro_Trabajo[]> {
+    const whereCondition: any = [
         { codigo: ILike(`%${termino}%`), tipo: 'EDUCACION' },
         { nombre_centro_trabajo: ILike(`%${termino}%`), tipo: 'EDUCACION' },
-      ],
-      relations: ['municipio', 'municipio.departamento'],
+    ];
+    if (idMunicipio) {
+        whereCondition.forEach((condition: any) => {
+            condition.municipio = { id_municipio: idMunicipio };
+        });
+    }
+    return await this.centroTrabajoRepository.find({
+        where: whereCondition,
+        relations: ['municipio', 'municipio.departamento'],
     });
-  }
+}
+
 
   async updateArchivoIdentificacion(id_empleado: number, archivoBuffer: Buffer): Promise<Net_Empleado> {
     const empleado = await this.empleadoRepository.findOne({ where: { id_empleado } });

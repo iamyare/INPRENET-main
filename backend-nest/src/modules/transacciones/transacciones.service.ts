@@ -73,7 +73,7 @@ export class TransaccionesService {
     return data;
   }
 
-  async obtenerCuentasPorIdentificacion(n_identificacion: string): Promise<any[]> {
+  async obtenerCuentasPorIdentificacion(n_identificacion: string){
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion },
       relations: ['cuentas', 'cuentas.tipoCuenta'],
@@ -83,13 +83,13 @@ export class TransaccionesService {
       throw new NotFoundException(`Persona con identificación ${n_identificacion} no encontrada.`);
     }
   
-    if (!persona.cuentas || persona.cuentas.length === 0) {
+    /* if (!persona.cuentas || persona.cuentas.length === 0) {
       throw new NotFoundException(`La persona con identificación ${n_identificacion} no tiene cuentas asociadas.`);
     }
   
     // Mapear los datos para incluir información del tipo de cuenta
     return persona.cuentas.map(cuenta => ({
-      numeroCuenta: cuenta.NUMERO_CUENTA,
+      //numeroCuenta: cuenta.NUMERO_CUENTA,
       activa: cuenta.ACTIVA_B,
       fechaCreacion: cuenta.FECHA_CREACION,
       creadaPor: cuenta.CREADA_POR,
@@ -97,7 +97,7 @@ export class TransaccionesService {
         id: cuenta.tipoCuenta?.ID_TIPO_CUENTA,
         descripcion: cuenta.tipoCuenta?.DESCRIPCION,
       },
-    }));
+    })); */
   }
   
   private generarNumeroCuenta(idPersona: number): string {
@@ -128,17 +128,17 @@ export class TransaccionesService {
     const numeroCuenta = this.generarNumeroCuenta(persona.id_persona);
 
     const nuevaCuenta = this.cuentaPersonaRepository.create({
-        persona: persona,
+        /* persona: persona,
         tipoCuenta: tipoCuenta,
         CREADA_POR: dto.creado_por,
-        NUMERO_CUENTA: numeroCuenta,
+        NUMERO_CUENTA: numeroCuenta, */
     });
 
     const cuentaGuardada = await this.cuentaPersonaRepository.save(nuevaCuenta);
 
     // Retorna un objeto con el formato esperado por el frontend
     return {
-        numero_cuenta: cuentaGuardada.NUMERO_CUENTA,
+        //numero_cuenta: cuentaGuardada.NUMERO_CUENTA,
         tipo_cuenta: {
             descripcion: cuentaGuardada.tipoCuenta.DESCRIPCION,
         },
@@ -255,7 +255,7 @@ export class TransaccionesService {
 
   async crearMovimiento(dto: CrearMovimientoDTO): Promise<NET_MOVIMIENTO_CUENTA> {
     const cuentaExistente = await this.cuentaPersonaRepository.findOne({
-      where: { NUMERO_CUENTA: dto.numeroCuenta },
+    /*   where: { NUMERO_CUENTA: dto.numeroCuenta }, */
     });
   
     if (!cuentaExistente) {
@@ -293,8 +293,8 @@ export class TransaccionesService {
       throw new Error('Persona no encontrada');
     }
     const cuentasPersona = await this.cuentaPersonaRepository.find({
-      where: { persona: { id_persona: persona.id_persona } },
-      relations: ['tipoCuenta']
+      /* where: { persona: { id_persona: persona.id_persona } },
+      relations: ['tipoCuenta'] */
     });
 
     if (cuentasPersona.length === 0) {
@@ -302,7 +302,7 @@ export class TransaccionesService {
     }
 
     const cuentasConDescripcion = cuentasPersona.map(cuenta => ({
-      NUMERO_CUENTA: cuenta.NUMERO_CUENTA,
+      //NUMERO_CUENTA: cuenta.NUMERO_CUENTA,
       DESCRIPCION: cuenta.tipoCuenta.DESCRIPCION
     }));
 
@@ -365,18 +365,18 @@ export class TransaccionesService {
   }
 
   async ActivarCuenta(numCuenta: string): Promise<void> {
-    const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
+    /* const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
 
     cuenta.ACTIVA_B = 'A';
 
-    await this.cuentaPersonaRepository.save(cuenta);
+    await this.cuentaPersonaRepository.save(cuenta); */
   }
 
   async desactivarCuenta(numCuenta: string): Promise<void> {
-    const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
+   /*  const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
 
     cuenta.ACTIVA_B = 'I';
 
-    await this.cuentaPersonaRepository.save(cuenta);
+    await this.cuentaPersonaRepository.save(cuenta); */
   }
 }

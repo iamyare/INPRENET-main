@@ -1,7 +1,6 @@
-import { Net_Tipo_Persona } from "src/modules/Persona/entities/net_tipo_persona.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Net_Tipo_Persona } from "../../../Persona/entities/net_tipo_persona.entity";
+import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
-import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
 import { Net_TipoPlanilla } from "../../tipo-planilla/entities/tipo-planilla.entity";
 
 @Entity({ name: 'NET_BENEFICIO_TIPO_PERSONA' })

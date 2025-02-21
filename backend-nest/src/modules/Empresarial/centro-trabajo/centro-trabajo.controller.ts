@@ -17,19 +17,22 @@ export class CentroTrabajoController {
   constructor(private readonly centroTrabajoService: CentroTrabajoService) { }
 
   @Get('buscar')
-  async buscarCentroTrabajo(@Query('termino') termino: string) {
-    if (!termino || termino.trim().length === 0) {
-      throw new NotFoundException('Debe proporcionar un término de búsqueda.');
-    }
-
-    const centros = await this.centroTrabajoService.buscarCentroTrabajo(termino);
-    
-    if (centros.length === 0) {
-      throw new NotFoundException(`No se encontraron coincidencias para: ${termino}`);
-    }
-
-    return centros;
+async buscarCentroTrabajo(
+  @Query('termino') termino: string,
+  @Query('idMunicipio') idMunicipio?: number
+) {
+  if (!termino || termino.trim().length === 0) {
+    throw new NotFoundException('Debe proporcionar un término de búsqueda.');
   }
+  const centros = await this.centroTrabajoService.buscarCentroTrabajo(termino, idMunicipio);
+
+  if (centros.length === 0) {
+    throw new NotFoundException(`No se encontraron coincidencias para: ${termino}`);
+  }
+
+  return centros;
+}
+
 
   @Patch('empleado/:id/archivo-identificacion')
   @UseInterceptors(FileInterceptor('archivo_identificacion'))

@@ -43,6 +43,44 @@ export class ConasaService {
     private readonly facturasRepository: Repository<Net_Facturas_Conasa>,
   ) { }
 
+  async obtenerConsultasConNombre(): Promise<any[]> {
+    const consultas = await this.consultaRepository
+      .createQueryBuilder('c')
+      .leftJoin(net_persona, 'p', 'p.n_identificacion = c.dni')
+      .select([
+        'c.dni AS dni',
+        'c.fecha_consulta AS fecha_consulta',
+        'c.motivo_consulta AS motivo_consulta',
+        'c.tiempo_sintomas AS tiempo_sintomas',
+        'c.tipo_atencion AS tipo_atencion',
+        'c.triage AS triage',
+        'c.diagnostico_presuntivo AS diagnostico_presuntivo',
+        'c.detalle_atencion AS detalle_atencion',
+        'c.fecha_cierre AS fecha_cierre',
+        'p.primer_nombre AS primer_nombre',
+        'p.segundo_nombre AS segundo_nombre',
+        'p.primer_apellido AS primer_apellido',
+        'p.segundo_apellido AS segundo_apellido',
+      ])
+      .orderBy('c.fecha_consulta', 'DESC')
+      .getRawMany();
+
+      return consultas.map((row) => ({
+        dni: row.DNI ? row.DNI : '',
+        fecha_consulta: row.FECHA_CONSULTA ? row.FECHA_CONSULTA: '',
+        motivo_consulta: row.MOTIVO_CONSULTA ? row.MOTIVO_CONSULTA.toUpperCase() : '',
+        tiempo_sintomas: row.TIEMPO_SINTOMAS ? row.TIEMPO_SINTOMAS.toUpperCase() : '',
+        tipo_atencion: row.TIPO_ATENCION ? row.TIPO_ATENCION: '',
+        triage: row.TRIAGE ? row.TRIAGE.toUpperCase() : '',
+        diagnostico_presuntivo: row.DIAGNOSTICO_PRESUNTIVO ? row.DIAGNOSTICO_PRESUNTIVO.toUpperCase() : '',
+        detalle_atencion: row.DETALLE_ATENCION ? row.DETALLE_ATENCION.toUpperCase() : '',
+        fecha_cierre: row.FECHA_CIERRE ? row.FECHA_CIERRE : '',
+        nombre_completo: row.PRIMER_NOMBRE
+          ? `${row.PRIMER_NOMBRE || ''} ${row.SEGUNDO_NOMBRE || ''} ${row.PRIMER_APELLIDO || ''} ${row.SEGUNDO_APELLIDO || ''}`.trim().toUpperCase()
+          : '',
+      }));
+    }
+  
   async obtenerAfiliadosMesAnterior() {
     return this.dataSource.query(`
       WITH planillas_filtradas AS (
@@ -92,14 +130,11 @@ export class ConasaService {
     periodo_factura: string;
     archivo_pdf: Buffer;
   }): Promise<Net_Facturas_Conasa> {
-    // Validaciones adicionales si son necesarias
     if (data.tipo_factura !== 1 && data.tipo_factura !== 2) {
       throw new BadRequestException(
         'El tipo de factura debe ser 1 o 2 (Asistencia Médica o Contratos Funerarios).',
       );
     }
-
-    // Crear y guardar la nueva factura
     const nuevaFactura = this.facturasRepository.create({
       tipo_factura: data.tipo_factura,
       periodo_factura: data.periodo_factura,

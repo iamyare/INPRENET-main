@@ -717,43 +717,43 @@ export class PdfService {
             [
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: jsonObj?.['BARRIO_COLONIA'] || '\n',
+                text: jsonObj?.['BARRIO_COLONIA'] || 'N/A',
                 alignment: 'center',
                 style: 'smallCell',
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: jsonObj?.AVENIDA || '\n',
+                text: jsonObj?.AVENIDA || 'N/A',
                 alignment: 'center',
                 style: 'smallCell',
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: jsonObj?.CALLE || '\n',
+                text: jsonObj?.CALLE || 'N/A',
                 alignment: 'center',
                 style: 'smallCell',
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: jsonObj?.SECTOR || '\n',
+                text: jsonObj?.SECTOR || 'N/A',
                 alignment: 'center',
                 style: 'smallCell',
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: jsonObj?.BLOQUE || '\n',
+                text: jsonObj?.BLOQUE || 'N/A',
                 alignment: 'center',
                 style: 'smallCell',
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: jsonObj?.['N° DE CASA'] || '\n',
+                text: jsonObj?.['N° DE CASA'] || 'N/A',
                 alignment: 'center',
                 style: 'smallCell',
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: jsonObj?.['COLOR CASA'] || '\n',
+                text: jsonObj?.['COLOR CASA'] || 'N/A',
                 alignment: 'center',
                 style: 'smallCell',
               },
@@ -797,13 +797,13 @@ export class PdfService {
             [
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: jsonObj?.ALDEA || '\n',
+                text: jsonObj?.ALDEA || 'N/A',
                 alignment: 'center',
                 style: 'smallCell',
               },
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: jsonObj?.CASERIO || '\n',
+                text: jsonObj?.CASERIO || 'N/A',
                 alignment: 'center',
                 style: 'smallCell',
               },
@@ -811,7 +811,7 @@ export class PdfService {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 text:
                   persona?.municipio?.departamento?.nombre_departamento ||
-                  '',
+                  'N/A',
                 alignment: 'center',
                 style: 'smallCell',
                 colSpan: 2,
@@ -819,7 +819,7 @@ export class PdfService {
               {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: persona?.municipio?.nombre_municipio || '\n',
+                text: persona?.municipio?.nombre_municipio || 'N/A',
                 alignment: 'center',
                 style: 'smallCell',
                 colSpan: 2,
@@ -827,8 +827,9 @@ export class PdfService {
               {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: '',
+                text: 'N/A',
                 alignment: 'center',
+                style: 'smallCell',
               },
             ],
             [
@@ -842,7 +843,7 @@ export class PdfService {
               {},
               {
                 borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
-                text: persona.direccion_residencia || '\n',
+                text: persona.direccion_residencia || 'N/A',
                 alignment: 'left',
                 style: 'smallCell',
                 colSpan: 5,

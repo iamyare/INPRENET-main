@@ -10,12 +10,13 @@ import { MunicipioService } from './municipio/municipio.service';
 import { DepartamentoController } from './provincia/departamento.controller';
 import { DepartamentoService } from './provincia/departamento.service';
 import { Net_Aldea } from './provincia/entities/net_aldea.entity';
+import { Net_Colonia } from './provincia/entities/net_colonia.entity';
 
 @Module({
     controllers: [PaisController, DepartamentoController ,MunicipioController],
     providers: [PaisService, DepartamentoService, MunicipioService],
     imports: [
-        TypeOrmModule.forFeature([Net_Pais, Net_Departamento, Net_Municipio, Net_Aldea])
+        TypeOrmModule.forFeature([Net_Pais, Net_Departamento, Net_Municipio, Net_Aldea, Net_Colonia])
       ],
       exports: [TypeOrmModule,PaisService, DepartamentoService, MunicipioService]
 })

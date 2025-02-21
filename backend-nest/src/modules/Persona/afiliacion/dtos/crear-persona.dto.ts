@@ -122,6 +122,10 @@ export class CrearPersonaDto {
 
   @IsOptional()
   @IsString()
+  carnet_discapacidad?: string;
+
+  @IsOptional()
+  @IsString()
   direccion_residencia?: string;
 
   @IsOptional()

@@ -11,6 +11,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class ConasaController {
   constructor(private readonly conasaService: ConasaService) {}
 
+  @Get('consultas-medicas')
+  async obtenerConsultas(): Promise<any[]> {
+    return this.conasaService.obtenerConsultasConNombre();
+  }
+
   @Get('afiliados-mes-anterior')
   async obtenerAfiliadosMesAnterior(@Res() res) {
     try {

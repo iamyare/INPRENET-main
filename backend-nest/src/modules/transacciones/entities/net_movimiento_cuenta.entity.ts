@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { NET_TIPO_MOVIMIENTO } from "./net_tipo_movimiento.entity";
 import { NET_CUENTA_PERSONA } from "./net_cuenta_persona.entity";
+import { Net_Planilla_Ingresos } from "src/modules/Planilla/planilla/entities/net_planilla_ingresos.entity";
 
 @Entity({ name: 'NET_MOVIMIENTO_CUENTA' })
 export class NET_MOVIMIENTO_CUENTA {
@@ -32,4 +33,8 @@ export class NET_MOVIMIENTO_CUENTA {
 
     @Column({ precision: 2, scale: 0  })
     MES: number;
+
+    @ManyToOne(() => Net_Planilla_Ingresos, planillaIngresos => planillaIngresos.id_planilla_ingresos)
+    @JoinColumn({ name: 'ID_PLANILLA_INGRESOS', referencedColumnName: 'id_planilla_ingresos', foreignKeyConstraintName: 'FK_ID_PLANILLA_INGRESOS_NET_MOV_CUEN' })
+    planillaIngresos: Net_Planilla_Ingresos;
 }

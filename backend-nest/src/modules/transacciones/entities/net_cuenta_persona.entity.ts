@@ -26,6 +26,9 @@ export class NET_CUENTA_PERSONA {
     @Column({ length: 12 })
     CREADA_POR: string;
 
+    @Column('nvarchar2', { length: 50, nullable: false, name: 'NUMERO_CUENTA' })
+    NUMERO_CUENTA: string;
+
     @OneToMany(() => NET_MOVIMIENTO_CUENTA, movimientoCuenta => movimientoCuenta.cuentaPersona)
     movimientos: NET_MOVIMIENTO_CUENTA[];
 }

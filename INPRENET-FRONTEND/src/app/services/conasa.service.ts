@@ -12,6 +12,17 @@ export class ConasaService {
 
   constructor(private http: HttpClient) { }
 
+  obtenerConsultasMedicas(): Observable<any[]> {
+    const url = `${this.baseUrl}/consultas-medicas`;
+
+    return this.http.get<any[]>(url).pipe(
+      catchError((error) => {
+        console.error('Error al obtener consultas médicas', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   obtenerAfiliadosMesAnterior(): Observable<any> {
     const url = `${this.baseUrl}/afiliados-mes-anterior`;
     

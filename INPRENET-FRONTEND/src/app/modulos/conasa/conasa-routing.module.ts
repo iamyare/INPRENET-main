@@ -12,6 +12,7 @@ import { CancelarAsistenciasComponent } from './cancelar-asistencias/cancelar-as
 import { SubirFacturaComponent } from './subir-factura/subir-factura.component';
 import { VerFacturasComponent } from './ver-facturas/ver-facturas.component';
 import { FacturasMenuComponent } from './facturas-menu/facturas-menu.component';
+import { VerConsultasMedicasComponent } from './ver-consultas-medicas/ver-consultas-medicas.component';
 
 const routes: Routes = [
   { path: 'ver-afiliado',
@@ -69,6 +70,11 @@ const routes: Routes = [
     component: VerFacturasComponent,
     canActivate: [RoleGuard],
     data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-facturas-conasa/ver-facturas') }
+  },
+  { path: 'ver-consultas-medicas',
+    component: VerConsultasMedicasComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/ver-consultas-medicas') }
   },
 ];
 

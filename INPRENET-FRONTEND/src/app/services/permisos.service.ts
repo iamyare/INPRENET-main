@@ -30,6 +30,9 @@ export class PermisosService {
         }
       }
     },
+
+
+    
     'GESTIÓN DE PERSONAL': {
       rutas: {
         'gestion/usuarios/editar-usuarios': {
@@ -185,7 +188,7 @@ export class PermisosService {
           permisos: [
             { role: 'ADMINISTRADOR', module: 'PLANILLA' },
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
-            { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
+            { role: 'CREAR VOUCHER', module: 'PLANILLA' },
             { role: 'CONSULTA COBROS', module: 'COBROS' },
             { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }
           ]
@@ -213,6 +216,14 @@ export class PermisosService {
     },
     CONASA: {
       rutas: {
+        'conasa/ver-consultas-medicas': {
+          title: 'Buscar Afiliado',
+          permisos: [
+            { role: 'CONSULTA', module: 'CONASA' },
+            { role: 'ADMINISTRADOR', module: 'CONASA' },
+            { role: 'CONSULTAS MEDICAS', module: 'CONASA' }
+          ]
+        },
         'conasa/ver-afiliado': {
           title: 'Buscar Afiliado',
           permisos: [
@@ -323,7 +334,7 @@ export class PermisosService {
       rolesForRoute.some((role:any) =>
         role.role.toLowerCase().trim() === userRole.rol.toLowerCase().trim() &&
         role.module.toLowerCase().trim() === userRole.modulo.toLowerCase().trim() &&
-        permisosArray.includes(role.permiso) // Verificar si el permiso está en la lista
+        permisosArray.includes(role.permiso)
       )
     );
   }

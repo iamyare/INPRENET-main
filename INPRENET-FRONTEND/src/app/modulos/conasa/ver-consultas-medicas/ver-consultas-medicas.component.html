@@ -1,0 +1,94 @@
+<div class="table-container">
+    <h2 class="table-title">Historial de Consultas Médicas</h2>
+  
+    <div class="filters-container">
+        <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Buscar</mat-label>
+            <input matInput (keyup)="applyFilter($event)" placeholder="Buscar consulta">
+        </mat-form-field>
+
+        <div class="export-container">
+            <mat-form-field appearance="outline" class="month-picker">
+                <mat-label>Selecciona el mes</mat-label>
+                <mat-select [(value)]="selectedMonth">
+                    <mat-option *ngFor="let month of months" [value]="month.value">
+                        {{ month.label }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="year-picker">
+                <mat-label>Selecciona el año</mat-label>
+                <input matInput type="number" [(ngModel)]="selectedYear" min="2000" max="2030">
+            </mat-form-field>
+
+            <button mat-raised-button class="excel-button" (click)="exportToExcel()">
+                Descargar Excel
+              </button>
+              
+        </div>
+    </div>
+  
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+      
+      <!-- DNI -->
+      <ng-container matColumnDef="dni">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="dni-col">DNI</th>
+        <td mat-cell *matCellDef="let element" class="dni-col">{{ element.dni }}</td>
+      </ng-container>
+  
+      <!-- Fecha de Consulta -->
+      <ng-container matColumnDef="fecha_consulta">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="fecha-col">Fecha Consulta</th>
+        <td mat-cell *matCellDef="let element" class="fecha-col">{{ element.fecha_consulta }}</td>
+      </ng-container>
+  
+      <!-- Motivo Consulta -->
+      <ng-container matColumnDef="motivo_consulta">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Motivo</th>
+        <td mat-cell *matCellDef="let element">{{ element.motivo_consulta }}</td>
+      </ng-container>
+  
+      <!-- Tipo de Atención -->
+      <ng-container matColumnDef="tipo_atencion">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo Atención</th>
+        <td mat-cell *matCellDef="let element">{{ element.tipo_atencion }}</td>
+      </ng-container>
+  
+      <!-- TRIAGE -->
+      <ng-container matColumnDef="triage">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>TRIAGE</th>
+        <td mat-cell *matCellDef="let element">{{ element.triage }}</td>
+      </ng-container>
+  
+      <!-- Diagnóstico Presuntivo (Columna más ancha) -->
+      <ng-container matColumnDef="diagnostico_presuntivo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="diagnostico-col">Diagnóstico</th>
+        <td mat-cell *matCellDef="let element" class="diagnostico-col">{{ element.diagnostico_presuntivo }}</td>
+      </ng-container>
+  
+      <!-- Detalle Atención -->
+      <ng-container matColumnDef="detalle_atencion">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Detalle</th>
+        <td mat-cell *matCellDef="let element">{{ element.detalle_atencion }}</td>
+      </ng-container>
+  
+      <!-- Fecha Cierre -->
+      <ng-container matColumnDef="fecha_cierre">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="fecha-col">Fecha Cierre</th>
+        <td mat-cell *matCellDef="let element" class="fecha-col">{{ element.fecha_cierre }}</td>
+      </ng-container>
+  
+      <!-- Nombre Completo -->
+      <ng-container matColumnDef="nombre_completo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre Completo</th>
+        <td mat-cell *matCellDef="let element">{{ element.nombre_completo }}</td>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    
+  </div>

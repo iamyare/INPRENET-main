@@ -16,6 +16,7 @@ import { VerContratosComponent } from '../conasa/ver-contratos/ver-contratos.com
 import { SubirFacturaComponent } from './subir-factura/subir-factura.component';
 import { FacturasMenuComponent } from './facturas-menu/facturas-menu.component';
 import { VerFacturasComponent } from './ver-facturas/ver-facturas.component';
+import { VerConsultasMedicasComponent } from './ver-consultas-medicas/ver-consultas-medicas.component';
 
 
 @NgModule({
@@ -31,7 +32,8 @@ import { VerFacturasComponent } from './ver-facturas/ver-facturas.component';
     VerContratosComponent,
     SubirFacturaComponent,
     FacturasMenuComponent,
-    VerFacturasComponent
+    VerFacturasComponent,
+    VerConsultasMedicasComponent
   ],
   imports: [
     CommonModule,

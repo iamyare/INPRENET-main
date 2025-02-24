@@ -128,6 +128,7 @@ export const MENU_CONFIG: Section[] = [
           { title: 'Buscar Afiliado', route: 'conasa/ver-afiliado', icon: 'person_search' },
           { title: 'Gestion De Contratos', route: 'conasa/menu-conasa', icon: 'description' },
           { title: 'Menu de Facturas', route: 'conasa/menu-facturas-conasa', icon: 'description' },
+          { title: 'Consultas Medicas', route: 'conasa/ver-consultas-medicas', icon: 'description' },
         ],
       },
     ],

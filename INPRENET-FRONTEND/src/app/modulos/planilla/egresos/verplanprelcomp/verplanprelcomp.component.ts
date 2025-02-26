@@ -12,6 +12,7 @@ import { DynamicDialogComponent } from 'src/app/components/dinamicos/dynamic-dia
 import { saveAs } from 'file-saver';
 import { firstValueFrom } from 'rxjs';
 import { DialogSuboptionsComponent } from 'src/app/modulos/afiliacion/constancias/dialog-suboptions/dialog-suboptions.component';
+import { format, subMonths } from 'date-fns';
 
 @Component({
   selector: 'app-verplanprelcomp',
@@ -38,6 +39,10 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   detallePlanilla: any = {};
 
   data: any[] = [];
+  mostrarBajasAltas: boolean = false;
+  hayTotalNegativo: boolean = false;
+  planillaSelected: any;
+
   constructor(
     private planillaService: PlanillaService,
     private toastr: ToastrService,
@@ -77,6 +82,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     }
     try {
       const response = await this.planillaService.getPlanillaPrelimiar(this.codigoPlanilla).toPromise();
+      console.log(response);
 
       if (response) {
         this.detallePlanilla = { ...response };
@@ -84,7 +90,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
         await this.getFilas(response.codigo_planilla);
         this.cargar();
 
-        this.idPlanilla = response.id_planilla;
+        /* this.idPlanilla = response.id_planilla; */
         this.verDat = true;
       } else {
         this.toastr.error(`La planilla con el código de planilla: ${this.codigoPlanilla} no existe`);
@@ -165,6 +171,17 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
           num_cuenta: item.NUM_CUENTA,
           nombre_banco: item.NOMBRE_BANCO,
         }));
+
+        this.hayTotalNegativo = this.datosTabl.some(
+          (item) =>
+            (item.total ?? 0) <= 0
+        );
+
+        if (this.hayTotalNegativo) {
+          console.log("Hay al menos un total negativo");
+        } else {
+          console.log("Todos los totales son positivos o cero");
+        }
       } else {
         this.datosTabl = [];
         this.toastr.warning('No se encontraron datos para la planilla proporcionada.');
@@ -216,7 +233,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     logs.push({ message: `DNI:${row.n_identificacion}`, detail: row });
     logs.push({ message: `Nombre Completo:${row.nombre_completo}`, detail: row });
 
-    this.deduccionSVC.getDeduccionesByPersonaAndBenef(row.id_afiliado, row.ID_BENEFICIO, this.idPlanilla).subscribe({
+    this.deduccionSVC.getDeduccionesByPersonaAndBenef(row.id_afiliado, row.ID_BENEFICIO, this.planillaSelected.id_planilla).subscribe({
       next: (response1) => {
         if (response1) {
           const data = response1;
@@ -279,7 +296,9 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   }
 
   getElemSeleccionados(event: any) {
-    this.codigoPlanilla = event.codigo_planilla;
+    console.log(event);
+    this.planillaSelected = event
+    this.codigoPlanilla = this.planillaSelected?.codigo_planilla;
 
 
     if (this.codigoPlanilla) {
@@ -290,24 +309,24 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   }
 
   async descargarExcelCompleto(): Promise<void> {
-    if (!this.idPlanilla) {
+    if (!this.planillaSelected) {
       this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
       return;
     }
 
-    this.isLoading = true;
+    /* this.isLoading = true; */
 
     try {
       // Siempre envía el estado 1 al método del servicio
       const response: any = await firstValueFrom(
-        this.planillaService.exportarDetallesCompletosExcel(this.idPlanilla, 1)
+        this.planillaService.exportarDetallesCompletosExcel(this.planillaSelected.id_planilla, 1)
       );
 
       const blob = new Blob([response], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
 
-      const nombreArchivo = `PlanillaCompleta_${this.idPlanilla}.xlsx`;
+      const nombreArchivo = `PlanillaCompleta_${this.planillaSelected.id_planilla}.xlsx`;
       saveAs(blob, nombreArchivo);
 
       this.toastr.success('Archivo Excel completo generado y descargado con éxito');
@@ -320,15 +339,35 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   }
 
   async descargarExcelPorPlanilla() {
-    if (!this.idPlanilla) {
+    if (!this.planillaSelected) {
       this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
       return;
     }
-    this.isLoading = true;
+    /* this.isLoading = true; */
     try {
-      const response: any = await this.planillaService.descargarReporteDetallePagoPreliminar(this.idPlanilla).toPromise();
+      const response: any = await this.planillaService.descargarReporteDetallePagoPreliminar(this.planillaSelected.id_planilla).toPromise();
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      saveAs(blob, `Detalle_Pago_Planilla_${this.idPlanilla}.xlsx`);
+      saveAs(blob, `Detalle_Pago_Planilla_${this.planillaSelected.id_planilla}.xlsx`);
+      this.toastr.success('Archivo Excel descargado con éxito');
+    } catch (error) {
+      console.error('Error al descargar el Excel:', error);
+      this.toastr.error('Error al descargar el archivo Excel');
+    }
+    finally {
+      this.isLoading = false;
+    }
+  }
+
+  async descargarReporteCompleto() {
+    if (!this.planillaSelected) {
+      this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
+      return;
+    }
+    /* this.isLoading = true; */
+    try {
+      const response: any = await this.planillaService.descargarReporteCompleto(this.planillaSelected.id_planilla, this.planillaSelected.idTipoPlanilla).toPromise();
+      const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, `Reporte_Completo_Planilla_${this.planillaSelected.id_planilla}.xlsx`);
       this.toastr.success('Archivo Excel descargado con éxito');
     } catch (error) {
       console.error('Error al descargar el Excel:', error);
@@ -354,12 +393,12 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   }
 
   async eliminarPlanillaPrelByIdPlanilla(codigoPlanilla: string) {
-    if (!this.idPlanilla) {
+    if (!this.planillaSelected) {
       this.toastr.warning('Debe seleccionar una planilla para poderla eliminar.');
       return;
     }
     this.isLoading = true;
-    let data = { codigoPlanilla: codigoPlanilla, id_planilla: this.idPlanilla }
+    let data = { codigoPlanilla: codigoPlanilla, id_planilla: this.planillaSelected.id_planilla }
     try {
       const response: any = await this.planillaService.eliminarPlanillaPrelByIdPlanilla(data.id_planilla).toPromise();
       this.toastr.success(`Planilla con codigo ${codigoPlanilla} Eliminada con éxito`);
@@ -413,7 +452,19 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
 
 
   bajas() {
-    /* this.planillaService.obtenerBajasPorPeriodoExcel().subscribe({
+
+    const fechaActual = new Date();
+
+    // Obtener el mes y año de inicio del mes anterior
+    const fechaAnterior = subMonths(fechaActual, 1);
+    const mes_inicio_ant = format(fechaAnterior, "MM");
+    const anio_inicio_ant = format(fechaAnterior, "yyyy");
+
+    // Obtener el mes y año de finalización del mes actual
+    const mes_finalizacion_act = format(fechaActual, "MM");
+    const anio_finalizacion_act = format(fechaActual, "yyyy");
+
+    this.planillaService.obtenerBajasPorPeriodoExcel(mes_inicio_ant, anio_inicio_ant, mes_finalizacion_act, anio_finalizacion_act).subscribe({
       next: (response) => {
         const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const url = window.URL.createObjectURL(blob);
@@ -427,11 +478,22 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
         console.error('Error al descargar el archivo:', err);
         alert('Hubo un error al intentar descargar el archivo.');
       },
-    }); */
+    });
   }
 
   altas() {
-    /* this.planillaService.obtenerAltaPorPeriodoExcel().subscribe({
+    const fechaActual = new Date();
+
+    // Obtener el mes y año de inicio del mes anterior
+    const fechaAnterior = subMonths(fechaActual, 1);
+    const mes_finalizacion_act = format(fechaAnterior, "MM");
+    const anio_finalizacion_act = format(fechaAnterior, "yyyy");
+
+    // Obtener el mes y año de finalización del mes actual
+    const mes_inicio_ant = format(fechaActual, "MM");
+    const anio_inicio_ant = format(fechaActual, "yyyy");
+
+    this.planillaService.obtenerAltaPorPeriodoExcel(mes_inicio_ant, anio_inicio_ant, mes_finalizacion_act, anio_finalizacion_act).subscribe({
       next: (response) => {
         const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const url = window.URL.createObjectURL(blob);
@@ -445,7 +507,12 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
         console.error('Error al descargar el archivo:', err);
         alert('Hubo un error al intentar descargar el archivo.');
       },
-    }); */
+    });
+  }
+
+  getPlanillasActivas(event: any) {
+    console.log(event);
+    this.mostrarBajasAltas = true
   }
 
 }

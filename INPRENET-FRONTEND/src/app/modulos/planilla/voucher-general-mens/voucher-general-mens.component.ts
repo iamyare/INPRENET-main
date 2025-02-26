@@ -337,9 +337,13 @@ export class VoucherGeneralMensComponent {
 
 
         const neto = sumaBeneficios - sumaDeducciones;
+        let mesAnioArray: string[] = []; // Definir como un array de strings
+        mesAnioArray = mesAnio.split(" ");
+
         const qrData = `https://script.google.com/macros/s/AKfycbwkPhOJeCFvI2dvsU_o6m3d5pn_1XJoJzGhMoom7FeORLeIU_LovB-2fNeHwf1Hgl6wzQ/exec?name=${encodeURIComponent(
-          nombreCompleto,
-        )}&dni=${encodeURIComponent(dniPersona)}&mesAnio=${encodeURIComponent(mesAnio)}`;
+          nombreCompleto
+        )}&dni=${encodeURIComponent(dniPersona)}&mes=${encodeURIComponent(mesAnioArray[0])}&Anio=${encodeURIComponent(mesAnioArray[1])}`;
+
 
         const qrImage = await QRCode.toDataURL(qrData);
 

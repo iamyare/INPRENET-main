@@ -32,6 +32,12 @@ export class Net_Detalle_Deduccion {
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP', name: 'FECHA_APLICADO' })
     fecha_aplicado: Date;
 
+    @Column('varchar2', { length: 20, nullable: true, name: 'N_PRESTAMO_INPREMA' })
+    n_prestamo_inprema: string;
+
+    @Column('varchar2', { length: 20, nullable: true, name: 'TIPO_PRESTAMO_INPREMA' })
+    tipo_prestamo_inprema: string;
+
     @ManyToOne(() => net_persona, persona => persona.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETDED" })
     persona: net_persona;

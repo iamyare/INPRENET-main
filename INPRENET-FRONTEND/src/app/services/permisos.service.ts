@@ -5,295 +5,292 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class PermisosService {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   private static permisosPorModulo: Record<string, {
     rutas: Record<string, { title: string; permisos: { role: string; module: string, permiso?: string }[] }>;
   }> = {
-    DOCUMENTOS: {
-      rutas: {
-        'documentos/menu-documentos': {
-          title: 'Menu',
-          permisos: [
-            //{ role: 'OFICIAL DE PLANILLA', module: 'PLANILLA'},
-          ]
+      DOCUMENTOS: {
+        rutas: {
+          'documentos/menu-documentos': {
+            title: 'Menu',
+            permisos: [
+              //{ role: 'OFICIAL DE PLANILLA', module: 'PLANILLA'},
+            ]
+          }
         }
-      }
-    },
-    MANTENIMIENTO: {
-      rutas: {
-        'afiliacion/mantenimiento': {
-          title: 'Mantenimiento',
-          permisos: [
-            //{ role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }
-          ]
+      },
+      MANTENIMIENTO: {
+        rutas: {
+          'afiliacion/mantenimiento': {
+            title: 'Mantenimiento',
+            permisos: [
+              //{ role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }
+            ]
+          }
         }
-      }
-    },
-
-
-    
-    'GESTIÓN DE PERSONAL': {
-      rutas: {
-        'gestion/usuarios/editar-usuarios': {
-          title: 'Gestión de Usuarios',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
-          ]
-        },
-        'gestion/usuarios/nuevo-usuario': {
-          title: 'Nuevo Usuario',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
-          ]
+      },
+      'GESTIÓN DE PERSONAL': {
+        rutas: {
+          'gestion/usuarios/editar-usuarios': {
+            title: 'Gestión de Usuarios',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
+            ]
+          },
+          'gestion/usuarios/nuevo-usuario': {
+            title: 'Nuevo Usuario',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
+            ]
+          }
         }
-      }
-    },
-    AFILIACIONES: {
-      rutas: {
-        'afiliacion/nueva-afiliacion': {
-          title: 'Nueva Afiliación',
-          permisos: [
-            { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
-            { role: 'ADMINISTRADOR', module: 'AFILIACION', permiso: 'editar' },
-            { role: 'MODIFICACION AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'editarDos' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
-            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }
-          ]
-        },
-        'afiliacion/buscar-persona': {
-          title: 'Buscar Persona',
-          permisos: [
-            { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
-            { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
-            { role: 'CONSULTA AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'verpago' },
-            { role: 'MODIFICACION AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'editarDos' },
-            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' },
-          ]
-        },
-        'afiliacion/constancias-afiliados': {
-          title: 'Ver Centro Educativo',
-          permisos: [
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
-            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' },
-            { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
-            { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
-            { role: 'CONSULTA AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'verpago' },
-            { role: 'MODIFICACION AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'editarDos' },
-          ]
-        },
-        'afiliacion/nuevo-centro': {
-          title: 'Nuevo Centro Educativo',
-          permisos: [
-            /* { role: 'MODIFICACION AFILIACION', module: 'AFILIACION' },
-            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' } */
-          ]
-        },
-        'afiliacion/ver-datos-centro': {
-          title: 'Ver Centro Educativo',
-          permisos: [
-            /* { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
-            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' } */
-          ]
+      },
+      AFILIACIONES: {
+        rutas: {
+          'afiliacion/nueva-afiliacion': {
+            title: 'Nueva Afiliación',
+            permisos: [
+              { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
+              { role: 'ADMINISTRADOR', module: 'AFILIACION', permiso: 'editar' },
+              { role: 'MODIFICACION AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'editarDos' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
+              { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }
+            ]
+          },
+          'afiliacion/buscar-persona': {
+            title: 'Buscar Persona',
+            permisos: [
+              { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
+              { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
+              { role: 'CONSULTA AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'verpago' },
+              { role: 'MODIFICACION AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'editarDos' },
+              { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' },
+            ]
+          },
+          'afiliacion/constancias-afiliados': {
+            title: 'Ver Centro Educativo',
+            permisos: [
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
+              { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' },
+              { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
+              { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
+              { role: 'CONSULTA AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'verpago' },
+              { role: 'MODIFICACION AFILIACION EXTERNO', module: 'AFILIACION', permiso: 'editarDos' },
+            ]
+          },
+          'afiliacion/nuevo-centro': {
+            title: 'Nuevo Centro Educativo',
+            permisos: [
+              /* { role: 'MODIFICACION AFILIACION', module: 'AFILIACION' },
+              { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' } */
+            ]
+          },
+          'afiliacion/ver-datos-centro': {
+            title: 'Ver Centro Educativo',
+            permisos: [
+              /* { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
+              { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' } */
+            ]
+          }
         }
-      }
-    },
-    BENEFICIOS: {
-      rutas: {
-        'planilla/Beneficios/nuevo-beneficio-afil': {
-          title: 'Asignar Beneficio',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }
-          ]
-        },
-        'planilla/Beneficios/Ver-editar-beneficio-afil': {
-          title: 'Ver Beneficios Asignados',
-          permisos: [
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
-            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'CONSULTA PLANILLA', module: 'PLANILLA' }
-          ]
+      },
+      BENEFICIOS: {
+        rutas: {
+          'planilla/Beneficios/nuevo-beneficio-afil': {
+            title: 'Asignar Beneficio',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }
+            ]
+          },
+          'planilla/Beneficios/Ver-editar-beneficio-afil': {
+            title: 'Ver Beneficios Asignados',
+            permisos: [
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+              { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'CONSULTA PLANILLA', module: 'PLANILLA' }
+            ]
+          }
         }
-      }
-    },
-    PLANILLA: {
-      rutas: {
+      },
+      PLANILLA: {
+        rutas: {
           'planilla/Egresos/planilla-definitivas': {
-          title: 'PLANILLAS DEFINITIVAS',
-          permisos: [
-            { role: 'CONSULTA COBROS', module: 'COBROS' }
-          ]
-        },
-        'planilla/Egresos/cargar-fallecidos': {
-          title: 'Cargar Bajas (FALLECIDOS)',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
-          ]
-        },
-        'planilla/Egresos/proceso-planilla': {
-          title: 'Proceso de Planilla',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
-          ]
-        },
-        'planilla/Egresos/ver-planillas': {
-          title: 'Ver Todas Las Planillas',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
-            { role: 'CONSULTA PLANILLA', module: 'PLANILLA' },
-          ]
-        },
-        'planilla/Egresos/documentos-planilla': {
-          title: 'Generación de Documentos',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
-          ]
-        },
-        'planilla/Egresos/ver_estatus_60_rentas': {
-          title: '60 Rentas',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'CONSULTA A 60 RENTAS', module: 'PLANILLA' },
-          ]
-        },
-        'planilla/Ingresos/planilla-colegios-privados': {
-          title: 'Privados',
-          permisos: [
-            /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
-          ]
-        },
-        'planilla/Ingresos/cargar-planilla-privados': {
-          title: 'Privados',
-          permisos: [
-            /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
-          ]
-        },
-        'planilla/Ingresos/cotizacion-aportacion': {
-          title: 'Privados',
-          permisos: [
-            /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
-          ]
-        },
-        'planilla/Egresos/voucher-general-mens': {
-          title: 'Privados',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
-            { role: 'CREAR VOUCHER', module: 'PLANILLA' },
-            { role: 'CONSULTA COBROS', module: 'COBROS' },
-            { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }
-          ]
+            title: 'PLANILLAS DEFINITIVAS',
+            permisos: [
+              { role: 'CONSULTA COBROS', module: 'COBROS' }
+            ]
+          },
+          'planilla/Egresos/cargar-fallecidos': {
+            title: 'Cargar Bajas (FALLECIDOS)',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+            ]
+          },
+          'planilla/Egresos/proceso-planilla': {
+            title: 'Proceso de Planilla',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+            ]
+          },
+          'planilla/Egresos/ver-planillas': {
+            title: 'Ver Todas Las Planillas',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+              { role: 'CONSULTA PLANILLA', module: 'PLANILLA' },
+            ]
+          },
+          'planilla/Egresos/documentos-planilla': {
+            title: 'Generación de Documentos',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+            ]
+          },
+          'planilla/Egresos/ver_estatus_60_rentas': {
+            title: '60 Rentas',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'CONSULTA A 60 RENTAS', module: 'PLANILLA' },
+            ]
+          },
+          'planilla/Ingresos/planilla-colegios-privados': {
+            title: 'Privados',
+            permisos: [
+              /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
+            ]
+          },
+          'planilla/Ingresos/cargar-planilla-privados': {
+            title: 'Privados',
+            permisos: [
+              /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
+            ]
+          },
+          'planilla/Ingresos/cotizacion-aportacion': {
+            title: 'Privados',
+            permisos: [
+              /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
+            ]
+          },
+          'planilla/Egresos/voucher-general-mens': {
+            title: 'Privados',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+              { role: 'CREAR VOUCHER', module: 'PLANILLA' },
+              { role: 'CONSULTA COBROS', module: 'COBROS' },
+              { role: 'ADMINISTRADOR AFILIACION', module: 'AFILIACION', permiso: 'administrar' }
+            ]
+          }
+        }
+      },
+      ESCALAFÓN: {
+        rutas: {
+          'escalafon/detalle-envio': {
+            title: 'Detalle Envío',
+            permisos: [
+              { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
+              { role: 'ADMINISTRADOR', module: 'ESCALAFON' },
+              { role: 'CONSULTA COBROS', module: 'COBROS' }
+            ]
+          },
+          'escalafon/Ver-movimientos': {
+            title: 'Ver Movimiento',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CUENTAS INPREMA' },
+              { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
+            ]
+          }
+        }
+      },
+      CONASA: {
+        rutas: {
+          'conasa/ver-consultas-medicas': {
+            title: 'Buscar Afiliado',
+            permisos: [
+              { role: 'CONSULTA', module: 'CONASA' },
+              { role: 'ADMINISTRADOR', module: 'CONASA' },
+              { role: 'CONSULTAS MEDICAS', module: 'CONASA' }
+            ]
+          },
+          'conasa/ver-afiliado': {
+            title: 'Buscar Afiliado',
+            permisos: [
+              { role: 'CONSULTA', module: 'CONASA' },
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          },
+          'conasa/subir-factura': {
+            title: 'Subir Factura',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          },
+          'conasa/menu-conasa': {
+            title: 'Detalle Envío',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          },
+          'conasa/menu-conasa/ingresar-asistencia': {
+            title: 'Ingresar Asistencia',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          },
+          'conasa/menu-conasa/reporte-asistencias': {
+            title: 'Reporte de Asistencias',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          },
+          'conasa/menu-conasa/anular-asistencias': {
+            title: 'Anular Asistencias',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          },
+          'conasa/menu-conasa/modificar-asistencias': {
+            title: 'Modificar Asistencias',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          },
+          'conasa/menu-conasa/cancelar-asistencias': {
+            title: 'Cancelar Asistencias',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          },
+          'conasa/menu-facturas-conasa': {
+            title: 'Menu de Facturas',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          },
+          'conasa/menu-facturas-conasa/subir-factura': {
+            title: 'Subir Facturas',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          },
+          'conasa/menu-facturas-conasa/ver-facturas': {
+            title: 'Ver Facturas',
+            permisos: [
+              { role: 'ADMINISTRADOR', module: 'CONASA' }
+            ]
+          }
         }
       }
-    },
-    ESCALAFÓN: {
-      rutas: {
-        'escalafon/detalle-envio': {
-          title: 'Detalle Envío',
-          permisos: [
-            { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
-            { role: 'ADMINISTRADOR', module: 'ESCALAFON' },
-            { role: 'CONSULTA COBROS', module: 'COBROS' }
-          ]
-        },
-        'escalafon/Ver-movimientos': {
-          title: 'Ver Movimiento',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'CUENTAS INPREMA' },
-            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
-          ]
-        }
-      }
-    },
-    CONASA: {
-      rutas: {
-        'conasa/ver-consultas-medicas': {
-          title: 'Buscar Afiliado',
-          permisos: [
-            { role: 'CONSULTA', module: 'CONASA' },
-            { role: 'ADMINISTRADOR', module: 'CONASA' },
-            { role: 'CONSULTAS MEDICAS', module: 'CONASA' }
-          ]
-        },
-        'conasa/ver-afiliado': {
-          title: 'Buscar Afiliado',
-          permisos: [
-            { role: 'CONSULTA', module: 'CONASA' },
-            { role: 'ADMINISTRADOR', module: 'CONASA' }
-          ]
-        },
-        'conasa/subir-factura': {
-          title: 'Subir Factura',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'CONASA' }
-          ]
-        },
-        'conasa/menu-conasa': {
-          title: 'Detalle Envío',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'CONASA' }
-          ]
-        },
-        'conasa/menu-conasa/ingresar-asistencia': {
-        title: 'Ingresar Asistencia',
-        permisos: [
-          { role: 'ADMINISTRADOR', module: 'CONASA' }
-        ]
-      },
-      'conasa/menu-conasa/reporte-asistencias': {
-        title: 'Reporte de Asistencias',
-        permisos: [
-          { role: 'ADMINISTRADOR', module: 'CONASA' }
-        ]
-      },
-      'conasa/menu-conasa/anular-asistencias': {
-        title: 'Anular Asistencias',
-        permisos: [
-          { role: 'ADMINISTRADOR', module: 'CONASA' }
-        ]
-      },
-      'conasa/menu-conasa/modificar-asistencias': {
-        title: 'Modificar Asistencias',
-        permisos: [
-          { role: 'ADMINISTRADOR', module: 'CONASA' }
-        ]
-      },
-      'conasa/menu-conasa/cancelar-asistencias': {
-        title: 'Cancelar Asistencias',
-        permisos: [
-          { role: 'ADMINISTRADOR', module: 'CONASA' }
-        ]
-      },
-      'conasa/menu-facturas-conasa': {
-          title: 'Menu de Facturas',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'CONASA' }
-          ]
-        },
-        'conasa/menu-facturas-conasa/subir-factura': {
-          title: 'Subir Facturas',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'CONASA' }
-          ]
-        },
-        'conasa/menu-facturas-conasa/ver-facturas': {
-          title: 'Ver Facturas',
-          permisos: [
-            { role: 'ADMINISTRADOR', module: 'CONASA' }
-          ]
-        }
-      }
-    }
-  };
+    };
 
   static getExpectedRolesForRoute(module: keyof typeof PermisosService.permisosPorModulo, route: string) {
     return PermisosService.permisosPorModulo[module]?.rutas[route]?.permisos || [];
@@ -324,20 +321,20 @@ export class PermisosService {
     const hasGlobalAccess = userRolesAndModules.some(userRole =>
       userRole.rol === 'TODO' && userRole.modulo === 'TODO'
     );
-  
+
     if (hasGlobalAccess) {
       return true;
     }
     const permisosArray = Array.isArray(permisos) ? permisos : [permisos];
-  
+
     return userRolesAndModules.some(userRole =>
-      rolesForRoute.some((role:any) =>
+      rolesForRoute.some((role: any) =>
         role.role.toLowerCase().trim() === userRole.rol.toLowerCase().trim() &&
         role.module.toLowerCase().trim() === userRole.modulo.toLowerCase().trim() &&
         permisosArray.includes(role.permiso)
       )
     );
   }
-  
+
 
 }

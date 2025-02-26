@@ -195,10 +195,10 @@ export class CentroTrabajoService {
 
   async findAll(): Promise<Net_Centro_Trabajo[]> {
     return this.centroTrabajoRepository.find({
-        where: { tipo: 'EDUCACION' },
-        relations: ['municipio'], 
+      where: { tipo: 'EDUCACION' },
+      relations: ['municipio'],
     });
-}
+  }
 
   async getPropietarioByCentro(idCentroTrabajo: number): Promise<any> {
     try {

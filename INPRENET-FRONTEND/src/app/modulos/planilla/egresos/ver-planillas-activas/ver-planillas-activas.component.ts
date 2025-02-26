@@ -78,7 +78,7 @@ export class VerPlanillasActivasComponent {
         tipoPlanilla: item.tipoPlanilla.nombre_planilla,
         idTipoPlanilla: item.tipoPlanilla.id_tipo_planilla
       }));
-
+      this.planActivas.emit(this.filas);
       return data;
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);
@@ -101,6 +101,5 @@ export class VerPlanillasActivasComponent {
     this.mostrarB = false;
     this.desOBenSeleccionado = row;
     this.getElemSeleccionados.emit(this.desOBenSeleccionado);
-    this.planActivas.emit(this.filas);
   }
 }

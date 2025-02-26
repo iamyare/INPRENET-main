@@ -37,7 +37,7 @@ export class BenefComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    
+
     if (this.porcentajeDisponible == null || this.porcentajeDisponible == undefined) {
       this.porcentajeDisponible = 100;
     }
@@ -45,77 +45,77 @@ export class BenefComponent implements OnInit {
     if (!this.formGroup.get('beneficiario')) {
       this.formGroup.addControl('beneficiario', this.fb.array([]));
     }
-  
+
     this.genero = this.datosEstaticosService.genero;
-  
+
     if (!this.formGroup.get('beneficiario')) {
       const beneficiariosArray = this.fb.array([]);
       beneficiariosArray.setValidators(this.identidadUnicaValidator.bind(this));
       this.formGroup.addControl('beneficiario', beneficiariosArray);
     }
-  
+
     this.cargarDepartamentos();
     this.cargarDepartamentosNacimiento();
     this.loadDiscapacidades();
-  
+
     this.parentesco = this.datosEstaticosService.parentesco;
     const nuevoParentesco = { value: "OTRO", label: "OTRO" };
     if (!this.parentesco.some((item: { value: string }) => item.value === nuevoParentesco.value)) {
       this.parentesco.push(nuevoParentesco);
     }
-  
+
     if (this.beneficiarios.length === 0) {
       this.agregarBeneficiario();
     }
     this.beneficiarios.valueChanges.subscribe(() => {
-      this.revalidarPorcentajes();
+      /* this.revalidarPorcentajes(); */
     });
   }
-  
+
   revalidarPorcentajes(): void {
     this.beneficiarios.controls.forEach((control, index) => {
       this.validarPorcentaje(index);
     });
   }
-  
+
 
   validarPorcentaje(index: number): void {
     const control = this.beneficiarios.at(index).get('porcentaje');
 
     if (control) {
-        const valorIngresado = Number(control.value) || 0;
+      const valorIngresado = Number(control.value) || 0;
 
-        // Sumar los porcentajes de todos los beneficiarios excepto el actual
-        const totalAsignado = this.beneficiarios.controls.reduce((acc, beneficiario, i) => {
-            if (i !== index) {
-                const porcentaje = Number(beneficiario.get('porcentaje')?.value) || 0;
-                return acc + porcentaje;
-            }
-            return acc;
-        }, 0);
-
-        const disponible = this.porcentajeDisponible - totalAsignado; 
-
-        // Validar que el porcentaje ingresado no exceda el disponible
-        if (valorIngresado > disponible) {
-            control.setErrors({ excedeTotal: true });
-        } 
-        // Validar que el mínimo permitido es exactamente el disponible si es el último beneficiario
-        else if (disponible === valorIngresado) {
-            control.setErrors(null);
-        } 
-        // Si aún queda espacio, pero el usuario ingresa menos del disponible, forzarlo a usarlo todo
-        else if (valorIngresado < 1) {
-            control.setErrors({ minimoInvalido: true });
-        } 
-        else if (totalAsignado + valorIngresado !== 100) {
-            control.setErrors({ noCumpleTotal: true });
-        } 
-        else {
-            control.setErrors(null);
+      // Sumar los porcentajes de todos los beneficiarios excepto el actual
+      const totalAsignado = this.beneficiarios.controls.reduce((acc, beneficiario, i) => {
+        if (i !== index) {
+          const porcentaje = Number(beneficiario.get('porcentaje')?.value) || 0;
+          return acc + porcentaje;
         }
+        return acc;
+      }, 0);
+
+      const disponible = this.porcentajeDisponible - totalAsignado;
+
+      // Validar que el porcentaje ingresado no exceda el disponible
+      if (valorIngresado > disponible) {
+        control.setErrors({ excedeTotal: true });
+      }
+      // Validar que el mínimo permitido es exactamente el disponible si es el último beneficiario
+      else if (disponible === valorIngresado) {
+        control.setErrors(null);
+      }
+      // Si aún queda espacio, pero el usuario ingresa menos del disponible, forzarlo a usarlo todo
+      else if (valorIngresado < 1) {
+        control.setErrors({ minimoInvalido: true });
+      }
+      else if (totalAsignado + valorIngresado !== 100) {
+        control.setErrors({ noCumpleTotal: true });
+      }
+      else {
+        control.setErrors(null);
+      }
     }
-}
+  }
 
 
 
@@ -143,20 +143,20 @@ export class BenefComponent implements OnInit {
       primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.maxLength(40)]),
       segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
       genero: new FormControl(datosBeneficiario?.genero || '', [Validators.required]),
-      telefono_1: new FormControl('',[Validators.required]),
+      telefono_1: new FormControl('', [Validators.required]),
       correo_1: new FormControl(''),
       correo_2: new FormControl(''),
       fecha_nacimiento: new FormControl('', [Validators.required]),
-      direccion_residencia: new FormControl('',[Validators.required]),
-      id_municipio_residencia: new FormControl(null,[Validators.required]),
-      id_departamento_residencia: new FormControl(null,[Validators.required]),
-      id_departamento_nacimiento: new FormControl(null,[Validators.required]),
-      id_municipio_nacimiento: new FormControl(null,[Validators.required]),
+      direccion_residencia: new FormControl('', [Validators.required]),
+      id_municipio_residencia: new FormControl(null, [Validators.required]),
+      id_departamento_residencia: new FormControl(null, [Validators.required]),
+      id_departamento_nacimiento: new FormControl(null, [Validators.required]),
+      id_municipio_nacimiento: new FormControl(null, [Validators.required]),
       porcentaje: new FormControl('', [
         Validators.required,
         Validators.min(1),
-        this.validarPorcentajeDisponible()
-    ]),
+        /* this.validarPorcentajeDisponible() */
+      ]),
       parentesco: new FormControl(datosBeneficiario?.parentesco || '', [
         Validators.required,
         Validators.minLength(2),
@@ -166,7 +166,7 @@ export class BenefComponent implements OnInit {
       discapacidades: discapacidadesFormArray,
       archivo_identificacion: [null]
     });
-  
+
     // Escuchar cambios en `n_identificacion`
     beneficiarioForm.get('n_identificacion')?.valueChanges.subscribe(value => {
       if (value) {
@@ -175,32 +175,32 @@ export class BenefComponent implements OnInit {
         this.limpiarCamposBeneficiario(beneficiarioForm);
       }
     });
-  
+
     this.beneficiarios.push(beneficiarioForm);
     this.markAllAsTouched(beneficiarioForm);
   }
 
   validarPorcentajeDisponible(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-        if (!control || !control.value) return null;
+      if (!control || !control.value) return null;
 
-        const nuevoPorcentaje = Number(control.value);
-        if (isNaN(nuevoPorcentaje) || nuevoPorcentaje < 1) return { minimoInvalido: true };
+      const nuevoPorcentaje = Number(control.value);
+      if (isNaN(nuevoPorcentaje) || nuevoPorcentaje < 1) return { minimoInvalido: true };
 
-        // Calcular cuánto porcentaje ya ha sido asignado
-        const totalAsignado = this.beneficiarios.controls.reduce((acc, b) => {
-            const porcentaje = Number(b.get('porcentaje')?.value) || 0;
-            return acc + porcentaje;
-        }, 0);
+      // Calcular cuánto porcentaje ya ha sido asignado
+      const totalAsignado = this.beneficiarios.controls.reduce((acc, b) => {
+        const porcentaje = Number(b.get('porcentaje')?.value) || 0;
+        return acc + porcentaje;
+      }, 0);
 
-        const disponible = this.porcentajeDisponible - (totalAsignado - nuevoPorcentaje);
+      const disponible = this.porcentajeDisponible - (totalAsignado - nuevoPorcentaje);
 
-        if (nuevoPorcentaje > disponible) return { excedeTotal: true };
-        if (nuevoPorcentaje < disponible) return { noCumpleTotal: true };
+      if (nuevoPorcentaje > disponible) return { excedeTotal: true };
+      if (nuevoPorcentaje < disponible) return { noCumpleTotal: true };
 
-        return null;
+      return null;
     };
-}
+  }
 
 
 
@@ -225,13 +225,13 @@ export class BenefComponent implements OnInit {
       parentesco: '',
       discapacidad: 'no'
     });
-  
+
     // Limpiar FormArray de discapacidades
     const discapacidadesArray = beneficiarioForm.get('discapacidades') as FormArray;
     discapacidadesArray.clear();
     this.tipo_discapacidad.forEach(() => discapacidadesArray.push(new FormControl(false)));
   }
-  
+
 
   // Función para marcar todos los controles como "tocados"
   markAllAsTouched(control: FormGroup | FormArray): void {
@@ -421,7 +421,7 @@ export class BenefComponent implements OnInit {
   }
 
   reset(): void {
-    this.beneficiarios.clear(); 
+    this.beneficiarios.clear();
     this.formGroup.reset();
     this.cargarDepartamentos();
     this.cargarDepartamentosNacimiento();
@@ -430,35 +430,35 @@ export class BenefComponent implements OnInit {
   }
 
   verificarAfiliadoBeneficiario(n_identificacion: string, beneficiarioForm: FormGroup): void {
-  if (!n_identificacion) return;
+    if (!n_identificacion) return;
 
-  this.beneficiosService.verificarSiEsAfiliado(n_identificacion).subscribe({
-    next: (response: any) => {
-      const datosPersona = response?.esAfiliado?.datosPersona;
-      if (datosPersona) {
-        const fechaAjustada = datosPersona.fecha_nacimiento
-          ? new Date(datosPersona.fecha_nacimiento + 'T00:00:00')
-          : null;
+    this.beneficiosService.verificarSiEsAfiliado(n_identificacion).subscribe({
+      next: (response: any) => {
+        const datosPersona = response?.esAfiliado?.datosPersona;
+        if (datosPersona) {
+          const fechaAjustada = datosPersona.fecha_nacimiento
+            ? new Date(datosPersona.fecha_nacimiento + 'T00:00:00')
+            : null;
 
-        beneficiarioForm.patchValue({
-          primer_nombre: datosPersona.primer_nombre,
-          segundo_nombre: datosPersona.segundo_nombre,
-          tercer_nombre: datosPersona.tercer_nombre,
-          primer_apellido: datosPersona.primer_apellido,
-          segundo_apellido: datosPersona.segundo_apellido,
-          fecha_nacimiento: fechaAjustada,
-          telefono_1: datosPersona.telefono_domicilio,
-        });
-      } else {
+          beneficiarioForm.patchValue({
+            primer_nombre: datosPersona.primer_nombre,
+            segundo_nombre: datosPersona.segundo_nombre,
+            tercer_nombre: datosPersona.tercer_nombre,
+            primer_apellido: datosPersona.primer_apellido,
+            segundo_apellido: datosPersona.segundo_apellido,
+            fecha_nacimiento: fechaAjustada,
+            telefono_1: datosPersona.telefono_domicilio,
+          });
+        } else {
+          this.limpiarCamposBeneficiario(beneficiarioForm);
+        }
+      },
+      error: (error) => {
+        console.error('Error al verificar afiliado:', error);
         this.limpiarCamposBeneficiario(beneficiarioForm);
       }
-    },
-    error: (error) => {
-      console.error('Error al verificar afiliado:', error);
-      this.limpiarCamposBeneficiario(beneficiarioForm);
-    }
-  });
-}
+    });
+  }
 
   getGroup(control: AbstractControl): FormGroup {
     return control as FormGroup;
@@ -467,6 +467,6 @@ export class BenefComponent implements OnInit {
   get beneficiariosControls(): FormGroup[] {
     return this.beneficiarios.controls as FormGroup[];
   }
-  
-  
+
+
 }

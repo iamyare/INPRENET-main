@@ -86,3 +86,22 @@ button.selected {
 .button {
   height: auto
 }
+
+
+.new-badge {
+  position: relative;
+}
+
+.new-badge::after {
+  content: "NEW";
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: red;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+  text-transform: uppercase;
+}

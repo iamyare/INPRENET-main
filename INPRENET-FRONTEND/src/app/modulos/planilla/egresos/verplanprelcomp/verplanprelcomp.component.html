@@ -1,13 +1,13 @@
-  <app-ver-planillas-activas (getElemSeleccionados)="getElemSeleccionados($event) "></app-ver-planillas-activas>
+  <app-ver-planillas-activas (planActivas)="getPlanillasActivas($event)" (getElemSeleccionados)="getElemSeleccionados($event) "></app-ver-planillas-activas>
 
-  <mat-grid-list cols="2" rowHeight="50px">
+  <!-- <mat-grid-list cols="2" rowHeight="50px">
     <mat-grid-tile>
       <button color="primary" (click)="bajas()" mat-raised-button>Bajas</button>
     </mat-grid-tile>
     <mat-grid-tile>
       <button color="primary" (click)="altas()" mat-raised-button>Altas</button>
     </mat-grid-tile>
-  </mat-grid-list>
+  </mat-grid-list> -->
 
 <div class="basic-container">
   <div class=" card " *ngIf="detallePlanilla">
@@ -46,6 +46,21 @@
           <th>Deducciones Terceros</th>
           <td>L {{ detallePlanilla?.deduccionesT  | number: '1.2-2':'en-HN'}}</td>
         </tr>
+
+        <tr >
+          <th>Total Neto</th>
+          <td>L {{ detallePlanilla?.totalNeto  | number: '1.2-2':'en-HN'}}</td>
+          <th>Deducciones Terceros</th>
+          <td>L {{ detallePlanilla?.deduccionesT  | number: '1.2-2':'en-HN'}}</td>
+        </tr>
+
+        <tr style="background-color: #f2f2f2">
+          <th>Cantidad Personas</th>
+          <td>{{ datosTabl.length }}</td>
+          <th></th>
+          <td></td>
+        </tr>
+
       </table>
     </div>
 
@@ -55,6 +70,77 @@
     <h4 class="custom-header card-title" style="text-align: center">
       Personas en la Planilla
     </h4>
+    <div style="display: flex; justify-content: space-between; gap: 10px; align-items: start;">
+      <!-- Descargar detalles en Excel -->
+      <div style="flex: 1; text-align: center;">
+        <button mat-raised-button color="accent" (click)="descargarExcelCompleto()">
+          Descargar detalles en Excel
+        </button>
+      </div>
+
+      <!-- Descargar Reporte de Pago Preliminar -->
+      <div style="flex: 1; text-align: center;">
+        <button mat-raised-button color="accent" (click)="descargarExcelPorPlanilla()">
+          Descargar Reporte de Pago Preliminar
+        </button>
+      </div>
+
+      <div style="flex: 1; text-align: center;">
+        <button  class="button new-badge" mat-raised-button color="accent" (click)="descargarReporteCompleto()">
+          Descargar Reporte completo
+        </button>
+      </div>
+
+      <!-- Eliminar toda la planilla preliminar -->
+      <div style="flex: 1; text-align: center;">
+        <button mat-raised-button color="warn" (click)="confirmarEliminarPlanilla()">
+          Eliminar toda la planilla preliminar
+        </button>
+
+        <!-- Modal de confirmación -->
+        <ng-template #confirmacionEliminarPlanillaModal>
+          <h2 mat-dialog-title>Confirmar Eliminar beneficios de planilla</h2>
+          <mat-dialog-content>
+            <p>¿Estás seguro de eliminar beneficios de la planilla?</p>
+          </mat-dialog-content>
+          <mat-dialog-actions align="end">
+            <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+            <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+          </mat-dialog-actions>
+        </ng-template>
+
+        <div class="spinner-container" *ngIf="isLoading" style="text-align: center; margin-top: 10px;">
+          <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          <p>Eliminando beneficios de la planilla {{this.planillaSelected.id_planilla}}, por favor espere ... </p>
+        </div>
+      </div>
+
+      <!-- Cerrar Planilla -->
+      <div style="flex: 1; text-align: center;">
+        <button mat-raised-button color="primary"
+          [disabled]="hayTotalNegativo"
+          (click)="actualizarFechaCierrePlanilla()"
+          style="padding: 10px 20px; color: #ffffff; border-radius: 5px;">
+          Cerrar planilla
+        </button>
+        <div  class="anaranjado desapareciendo" *ngIf="hayTotalNegativo">No se puede cerrar la planilla debido a que hay al menos un valor negativo.</div>
+
+        <!-- Modal de confirmación -->
+        <ng-template #confirmacionModal>
+          <h2 mat-dialog-title>Confirmar cierre de planilla</h2>
+          <mat-dialog-content>
+            <p>¿Estás seguro de cerrar la planilla?</p>
+          </mat-dialog-content>
+          <mat-dialog-actions align="end">
+            <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+            <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+          </mat-dialog-actions>
+        </ng-template>
+      </div>
+    </div>
+
+
+
 
     <div style="padding: 1% 1% 1% 1%">
       <app-dynamic-table
@@ -73,61 +159,7 @@
         (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)">
       </app-dynamic-table>
 
-      <div style="background-color: white; margin-bottom: 1%; text-align: center">
-        <!-- Botón que abre la modal -->
-        <button mat-raised-button color="primary"
-        [disabled]="detallePlanilla.beneficios_cargados == 'NO'"
-        (click)="actualizarFechaCierrePlanilla()"
-        style="margin: 2% 2%; padding: 10px 20px; color: #ffffff; border-radius: 5px;">
-        Cerrar planilla
-        </button>
-
-        <!-- Modal de confirmación -->
-        <ng-template #confirmacionModal>
-        <h2 mat-dialog-title>Confirmar cierre de planilla</h2>
-        <mat-dialog-content>
-        <p>¿Estás seguro de cerrar la planilla?</p>
-        </mat-dialog-content>
-        <mat-dialog-actions align="end">
-        <button mat-button mat-dialog-close="cancelar">Cancelar</button>
-        <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
-        </mat-dialog-actions>
-        </ng-template>
-      </div>
-      <div style="text-align: right; margin: 10px;">
-        <button mat-raised-button color="accent" (click)="descargarExcelCompleto()">
-          Descargar detalles en Excel
-        </button>
-      </div>
-      <div style="text-align: right; margin: 10px;">
-        <button mat-raised-button color="accent" (click)="descargarExcelPorPlanilla()">
-            Descargar Reporte de Pago Preliminar
-        </button>
-    </div>
-      <div style="text-align: right; margin: 10px;">
-        <button mat-raised-button color="accent" (click)="confirmarEliminarPlanilla()">
-            Eliminar toda la planilla preliminiar
-        </button>
-    </div>
-    <!-- Modal de confirmación -->
-    <ng-template #confirmacionEliminarPlanillaModal>
-      <h2 mat-dialog-title>Confirmar Eliminar beneficios de planilla</h2>
-      <mat-dialog-content>
-      <p>¿Estás seguro de eliminar beneficios de la planilla?</p>
-      </mat-dialog-content>
-      <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close="cancelar">Cancelar</button>
-      <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
-      </mat-dialog-actions>
-      </ng-template>
-    <div class="spinner-container" *ngIf="isLoading" style="text-align: center; margin: 20px;">
-      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
-      <p>Eliminando beneficios de la planilla {{idPlanilla}}, por favor espere ... </p>
-    </div>
-    </div>
   </div>
-
-
 
   <!-- || detallePlanilla.deducc_inprema_cargadas == 'NO' || detallePlanilla.deducc_terceros_cargadas == 'NO' -->
 </div>

@@ -12,6 +12,7 @@ import { DynamicInputDialogComponent } from 'src/app/components/dinamicos/dynami
 import * as XLSX from 'xlsx';
 import saveAs from 'file-saver';
 import { ConasaService } from '../../../../services/conasa.service';
+import { ToastrService } from 'ngx-toastr';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
@@ -45,7 +46,7 @@ export class DocumentosPlanillaComponent implements OnInit {
   fechaInicioFormateada: any;
   fechaFinFormateada: any;
 
-  constructor(private conasaService: ConasaService, private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService, public dialog: MatDialog) {
+  constructor(private toastr: ToastrService, private conasaService: ConasaService, private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService, public dialog: MatDialog) {
     this.planillaForm = this.fb.group({
       rangoFechas: this.fb.group({
         fechaInicio: ['', Validators.required],
@@ -95,11 +96,11 @@ export class DocumentosPlanillaComponent implements OnInit {
   manejarRowClick(row: any) {
     this.desOBenSeleccionado = row;
     this.getElemSeleccionados.emit(this.desOBenSeleccionado);
-  
+
     // Asegurarse de que la planilla seleccionada se guarda correctamente
     this.tipoPlanilla = row.tipoPlanilla;
   }
-  
+
 
   cargar() {
     if (this.ejecF) {
@@ -147,7 +148,7 @@ export class DocumentosPlanillaComponent implements OnInit {
   seleccionarTipoPlanilla(tipo: string) {
     this.tipoPlanilla = tipo;
   }
-  
+
 
   private obtenerFechasFormateadasDosDigitos() {
     const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
@@ -1764,6 +1765,30 @@ export class DocumentosPlanillaComponent implements OnInit {
       });
   }
 
+  async exportarExcelDetalleCompletoPorPeriodo() {
+    const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
+
+    if (idTiposPlanilla.length === 0) {
+      console.error('Seleccione un tipo de planilla válido.');
+      return;
+    }
+
+    /* this.isLoading = true; */
+    try {
+      const response: any = await this.planillaService.exportarExcelDetalleCompletoPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).toPromise();
+      const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, `Reporte_Completo_Planilla.xlsx`);
+      this.toastr.success('Archivo Excel descargado con éxito');
+    } catch (error) {
+      console.error('Error al descargar el Excel:', error);
+      this.toastr.error('Error al descargar el archivo Excel');
+    }
+    finally {
+      /* this.isLoading = false; */
+    }
+  }
+
   /* async generarReporteJubiladosYPensionadosActivos() {
     try {
         const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
@@ -1911,6 +1936,17 @@ export class DocumentosPlanillaComponent implements OnInit {
         console.error('Error al obtener afiliados:', error);
       }
     });
+  }
+
+  obtenerInformacionPlanillasbyFechas() {
+    /* this.planillaService.obtenerAfiliadosMesAnterior().subscribe({
+      next: (response) => {
+        this.afiliados = response.data;
+      },
+      error: (error) => {
+        console.error('Error al obtener afiliados:', error);
+      }
+    }); */
   }
 
   afiliados: any[] = [];

@@ -300,9 +300,9 @@ export class DeduccionService {
   } */
 
   private async processRow(planilla: any, idTipoPlanilla: number, id_planilla: number, row: any, repositories: any): Promise<any> {
-    const { anio, mes, dni, codigoDeduccion, montoTotal } = row;
+    const { anio, mes, dni, codigoDeduccion, montoTotal, N_PRESTAMO_INPREMA, TIPO_PRESTAMO_INPREMA } = row;
 
-    if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal) {
+    if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal && !N_PRESTAMO_INPREMA && TIPO_PRESTAMO_INPREMA) {
       return { error: `Fila vacía: ${JSON.stringify(row)}`, processed: false };
     }
     if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
@@ -361,9 +361,6 @@ export class DeduccionService {
       })
     ]);
 
-    console.log(detpersonaAfil);
-
-
     if (!deduccion) {
       return { error: `No se encontró deducción con código: ${parsedCodigoDeduccion}`, processed: false };
     }
@@ -398,17 +395,23 @@ export class DeduccionService {
 
       const plan = planilla.find(p => {
         const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
+
         const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
+
         const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
 
-        return (
-          (fechaDeduccion >= periodoInicio &&
-            fechaDeduccion <= periodoFinalizacion &&
-            (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS'))
-          || (fechaDeduccion >= periodoInicio &&
-            fechaDeduccion <= periodoFinalizacion &&
-            (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS') && isComplementaria)
+        const mesAnioDeduccion = fechaDeduccion.getFullYear() * 100 + fechaDeduccion.getMonth();
+        const mesAnioInicio = periodoInicio.getFullYear() * 100 + periodoInicio.getMonth();
 
+        const mesAnioFinalizacion = periodoFinalizacion.getFullYear() * 100 + periodoFinalizacion.getMonth();
+
+        return (
+          (mesAnioDeduccion >= mesAnioInicio &&
+            mesAnioDeduccion <= mesAnioFinalizacion &&
+            (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS'))
+          || (mesAnioDeduccion >= mesAnioInicio &&
+            mesAnioDeduccion <= mesAnioFinalizacion &&
+            (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS') && isComplementaria)
         );
       });
 
@@ -435,6 +438,8 @@ export class DeduccionService {
         const detalleDeduccion = repositories.detalleDeduccionRepository.create({
           anio: parsedAnio,
           mes: parsedMes,
+          n_prestamo_inprema: N_PRESTAMO_INPREMA === '' || N_PRESTAMO_INPREMA === undefined ? null : String(N_PRESTAMO_INPREMA).trim(),
+          tipo_prestamo_inprema: TIPO_PRESTAMO_INPREMA === '' || TIPO_PRESTAMO_INPREMA === undefined ? null : String(TIPO_PRESTAMO_INPREMA).trim(),
           monto_total: parsedMontoTotal,
           monto_aplicado: parsedMontoTotal,
           estado_aplicacion: 'EN PRELIMINAR',
@@ -443,6 +448,9 @@ export class DeduccionService {
           planilla: { id_planilla: plan.id_planilla },
           personaPorBanco: activo,
         });
+        console.log(
+          detalleDeduccion
+        );
 
         await repositories.detalleDeduccionRepository.save(detalleDeduccion);
         return { processed: true };
@@ -451,6 +459,8 @@ export class DeduccionService {
     else if (detpersonaAfil && planilla) {
       const tipoPersonaAfil = detpersonaAfil.detallePersona[0]?.tipoPersona?.tipo_persona;
       const plan = planilla.find(p => {
+
+        // Pendiente: verificar solo mes y anio en la planilla complementaria.
         const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
         const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
         const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
@@ -489,6 +499,8 @@ export class DeduccionService {
           monto_total: parsedMontoTotal,
           monto_aplicado: parsedMontoTotal,
           estado_aplicacion: 'EN PRELIMINAR',
+          n_prestamo_inprema: N_PRESTAMO_INPREMA === '' || N_PRESTAMO_INPREMA === undefined ? null : String(N_PRESTAMO_INPREMA).trim(),
+          tipo_prestamo_inprema: TIPO_PRESTAMO_INPREMA === '' || TIPO_PRESTAMO_INPREMA === undefined ? null : String(TIPO_PRESTAMO_INPREMA).trim(),
           persona: persona.id_persona,
           deduccion,
           planilla: { id_planilla: plan.id_planilla },
@@ -942,7 +954,9 @@ export class DeduccionService {
         .parseString(file.buffer.toString(), { headers: true, delimiter: ';' })  // Asegúrate de especificar el delimitador correcto
         .on('data', row => {
           // Accedemos directamente a las propiedades del objeto fila
-          const { anio, mes, dni, codigoDeduccion, montoTotal } = row;
+          const { anio, mes, dni, codigoDeduccion, montoTotal, N_PRESTAMO_INPREMA, TIPO_PRESTAMO_INPREMA } = row;
+
+          console.log(row);
 
           if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
             failedRows.push({ ...row, error: 'Campos faltantes o inválidos' });
@@ -950,7 +964,7 @@ export class DeduccionService {
           }
 
           // Se agrega cada fila como un objeto con las propiedades necesarias
-          rows.push({ anio, mes, dni, codigoDeduccion, montoTotal });
+          rows.push({ anio, mes, dni, codigoDeduccion, montoTotal, N_PRESTAMO_INPREMA, TIPO_PRESTAMO_INPREMA });
         })
         .on('end', async () => {
           const repositories = {

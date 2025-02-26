@@ -1936,20 +1936,20 @@ export class PdfService {
               {}, {}, {}, {}, {}, {} // Completar el colSpan con celdas vacías
             ],
             // Pregunta general
-             [
-              { text: '¿ACTUALMENTE DESEMPEÑA O HA DESEMPEÑADO ALGÚN CARGO PÚBLICO?', colSpan: 6, style: 'subheader' ,borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],},
+            [
+              { text: '¿ACTUALMENTE DESEMPEÑA O HA DESEMPEÑADO ALGÚN CARGO PÚBLICO?', colSpan: 6, style: 'subheader', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
               {}, {}, {}, {}, {}, // Espacios para el colSpan
               { text: 'SI', style: 'smallCell', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], }
             ],
             ...cargos_publicos.map((cargo: any, index: number) => {
               return [
-                { text: `CARGO #${index + 1}`, colSpan: 2, style: 'subheader', alignment: 'center', fillColor: '#1c9588',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],},
+                { text: `CARGO #${index + 1}`, colSpan: 2, style: 'subheader', alignment: 'center', fillColor: '#1c9588', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
                 {},
-                { text: cargo?.cargo || 'N/A', style: 'smallCell', alignment: 'center' ,borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],},
-                { text: 'PERÍODO', style: 'subheader', fillColor: '#1c9588', colSpan: 2, alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],},
+                { text: cargo?.cargo || 'N/A', style: 'smallCell', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+                { text: 'PERÍODO', style: 'subheader', fillColor: '#1c9588', colSpan: 2, alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
                 {},
-                { text: `${cargo?.fecha_inicio || 'N/A'} - ${cargo?.fecha_fin || 'N/A'}`, colSpan: 2, style: 'smallCell', alignment: 'center' ,borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],},
-                {}, 
+                { text: `${cargo?.fecha_inicio || 'N/A'} - ${cargo?.fecha_fin || 'N/A'}`, colSpan: 2, style: 'smallCell', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+                {},
               ];
             })
           ],
@@ -1964,29 +1964,29 @@ export class PdfService {
           body: [
             // Encabezado principal
             [
-              { text: 'EN CASO AFIRMATIVO: INDIQUE EL NOMBRE DE SUS FAMILIARES', colSpan: 7, style: 'header', alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+              { text: 'EN CASO AFIRMATIVO: INDIQUE EL NOMBRE DE SUS FAMILIARES', colSpan: 7, style: 'header', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
               {}, {}, {}, {}, {}, {} // Completar el colSpan con celdas vacías
             ],
             [
-              { text: 'NOMBRES Y APELLIDOS', colSpan: 3, style: 'subheader', alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+              { text: 'NOMBRES Y APELLIDOS', colSpan: 3, style: 'subheader', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
               {},
               {},
-              { text: 'NÚMERO DE IDENTIFICACIÓN', colSpan: 2, style: 'subheader', alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+              { text: 'NÚMERO DE IDENTIFICACIÓN', colSpan: 2, style: 'subheader', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
               {},
-              { text: 'PARENTESCO', style: 'subheader',  colSpan: 2, alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+              { text: 'PARENTESCO', style: 'subheader', colSpan: 2, alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
               {},
             ],
             ...persona.familiares.map((familiar: any, index: number) => {
               return [
-                { 
-                  text: `${familiar?.referenciada?.primer_nombre || ''} ${familiar?.referenciada?.segundo_nombre || ''} ${familiar?.referenciada?.primer_apellido || ''} ${familiar?.referenciada?.segundo_apellido || ''}`, 
-                  colSpan: 3, style: 'smallCell', alignment: 'center' ,borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                {
+                  text: `${familiar?.referenciada?.primer_nombre || ''} ${familiar?.referenciada?.segundo_nombre || ''} ${familiar?.referenciada?.primer_apellido || ''} ${familiar?.referenciada?.segundo_apellido || ''}`,
+                  colSpan: 3, style: 'smallCell', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
                 },
                 {},
                 {},
-                { text: familiar?.referenciada?.n_identificacion || 'N/A', colSpan: 2, style: 'smallCell', alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+                { text: familiar?.referenciada?.n_identificacion || 'N/A', colSpan: 2, style: 'smallCell', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
                 {},
-                { text: familiar?.parentesco || 'N/A', colSpan: 2, style: 'smallCell', alignment: 'center',borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
+                { text: familiar?.parentesco || 'N/A', colSpan: 2, style: 'smallCell', alignment: 'center', borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], },
                 {}
               ];
             })
@@ -1994,9 +1994,9 @@ export class PdfService {
         },
       });
     }
-    
-    
-    
+
+
+
 
     /* 
      Si quieres incluir el QR, descomenta y ajusta a tu necesidad:
@@ -2846,7 +2846,7 @@ export class PdfService {
           columns: [
             { text: `Nombre: ${nombreCompleto}`, style: 'personaInfo' },
             { text: `Identidad: ${identificacion}`, style: 'personaInfo' },
-            { text: `Tipo de Cuenta: ${tipoCuenta}`, style: 'personaInfo' },
+            { text: `Tipo de Cuenta: COTIZACIONES`, style: 'personaInfo' },
             { text: `Número de Cuenta: ${numeroCuenta}`, style: 'personaInfo' }
           ],
           columnGap: 20,

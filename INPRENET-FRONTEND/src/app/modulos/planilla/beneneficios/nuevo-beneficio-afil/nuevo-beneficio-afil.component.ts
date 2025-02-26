@@ -231,22 +231,26 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             name: 'fecha_presentacion',
             max: new Date().toISOString().split('T')[0],
             validations: [Validators.required, noFutureDateValidator],
-            display: true
+            display: true,
+            col: 6
           },
           {
             type: 'text', label: 'Número de expediente', name: 'n_expediente',
             readOnly: false,
             value: "",
             validations: [Validators.required,], display: true,
+            col: 6
           },
           {
             type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
             options: options.beneficios,
-            validations: [Validators.required], display: true
+            validations: [Validators.required], display: true,
+            col: 6
           },
           {
             type: 'text', label: 'Periodicidad del beneficio', name: 'periodicidad_beneficio',
-            validations: [], display: true
+            validations: [], display: true,
+            col: 6
           },
           {
             type: 'text', label: 'regimen', name: 'regimen',
@@ -257,36 +261,65 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
             options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }],
-            validations: [Validators.required], display: true
+            validations: [Validators.required], display: true,
+            col: 12
           },
-          { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
+          {
+            type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aprobadas', validations: [Validators.min(1)], display: false,
+            col: 12
+          },
           {
             type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
               Validators.min(0),
               Validators.max(31),
-            ], display: false
+            ], display: false,
+            col: 12
           },
-          { type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false },
-          { type: 'number', label: 'Monto correspondiente a los dias restantes', name: 'monto_ultima_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false },
-          { type: 'number', label: 'Monto mensual', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
-          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false, },
-          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+          {
+            type: 'number', label: 'Monto correspondiente a los dias restantes', name: 'monto_ultima_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false,
+            col: 12
+          },
+          {
+            type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false,
+            col: 12
+          },
+          {
+            type: 'number', label: 'Monto mensual', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false,
+            col: 12
+          },
+          {
+            type: 'number', label: 'monto retroactivo', name: 'monto_retroactivo', validations: [Validators.min(0), montoTotalValidator()], display: false,
+            col: 12
+          },
+          {
+            type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false,
+            col: 12
+          },
+          {
+            type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false,
+            col: 12
+          },
           {
             type: 'date',
             label: 'Fecha de efectividad',
-            name: 'fecha_calculo',
+            name: 'fecha_efectividad',
             max: new Date().toISOString().split('T')[0],
             validations: [Validators.required, noFutureDateValidator],
-            display: true
+            display: true,
+            col: 4
           },
           {
             type: 'text',
             label: 'Última Fecha de pago',
             name: 'periodo_finalizacion',
             validations: [],
-            display: false
+            display: false,
+            col: 4
           },
-          { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
+          {
+            type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true,
+            col: 4
+          },
 
         ];
 
@@ -314,7 +347,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           {
             type: 'dropdown', label: 'Tipo persona', name: 'tipo_persona',
             options: options.options,
-            validations: [], display: options.display
+            validations: [], display: options.display,
+            col: 6
           },
           {
             type: 'date',
@@ -322,62 +356,81 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             name: 'fecha_presentacion',
             max: new Date().toISOString().split('T')[0],
             validations: [Validators.required, noFutureDateValidator],
-            display: true
+            display: true,
+            col: 6
           },
           {
             type: 'text', label: 'Número de expediente', name: 'n_expediente',
             readOnly: false,
             value: "",
             validations: [Validators.required,], display: true,
+            col: 6
           },
           {
             type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
             options: [],
-            validations: [Validators.required], display: true
+            validations: [Validators.required], display: true,
+            col: 6
           },
           {
             type: 'text', label: 'Periodicidad del beneficio', name: 'periodicidad_beneficio',
-            validations: [], display: true
+            validations: [], display: true,
+            col: 6
           },
           {
             type: 'text', label: 'regimen', name: 'regimen',
             readOnly: true,
             value: "",
             validations: [], display: true,
+            col: 6
           },
           {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
             options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }],
-            validations: [Validators.required], display: true
+            validations: [Validators.required], display: true,
+            col: 12
           },
-          { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
+          {
+            type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aprobadas', validations: [Validators.min(1)], display: false,
+            col: 6
+          },
           {
             type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
               Validators.min(0),
               Validators.max(31),
-            ], display: false
+            ], display: false,
+            col: 6
           },
-          { type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false },
-          { type: 'number', label: 'Monto correspondiente a los dias restantes', name: 'monto_ultima_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false },
+          {
+            type: 'number', label: 'Monto correspondiente a los dias restantes', name: 'monto_ultima_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false,
+            col: 6
+          },
           { type: 'number', label: 'Monto mensual', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+          { type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false },
+          { type: 'number', label: 'monto retroactivo', name: 'monto_retroactivo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
           { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false, },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
           {
             type: 'date',
             label: 'Fecha de efectividad',
-            name: 'fecha_calculo',
+            name: 'fecha_efectividad',
             max: new Date().toISOString().split('T')[0],
             validations: [Validators.required, noFutureDateValidator],
-            display: true
+            display: true,
+            col: 4
           },
           {
             type: 'text',
             label: 'Última Fecha de pago',
             name: 'periodo_finalizacion',
             validations: [],
-            display: false
+            display: false,
+            col: 4
           },
-          { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
+          {
+            type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true,
+            col: 4
+          },
 
         ];
         //options.beneficios = temp;
@@ -422,13 +475,15 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         {
           type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
           options: temp,
-          validations: [Validators.required], display: true
+          validations: [Validators.required], display: true,
+          col: 6
         },
         {
           type: 'text', label: 'Número de expediente', name: 'n_expediente',
           readOnly: false,
           value: "",
           validations: [Validators.required,], display: true,
+          col: 6
         },
         {
           type: 'date',
@@ -436,11 +491,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           name: 'fecha_presentacion',
           max: new Date().toISOString().split('T')[0],
           validations: [Validators.required, noFutureDateValidator],
-          display: true
+          display: true,
+          col: 6
         },
         {
           type: 'text', label: 'Periodicidad del beneficio', name: 'periodicidad_beneficio',
-          validations: [], display: true
+          validations: [], display: true,
+          col: 6
         },
         {
           type: 'text', label: 'regimen', name: 'regimen',
@@ -448,44 +505,72 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           value: "",
           validations: [], display: true,
         },
-        { type: 'number', label: 'Monto mensual del beneficio', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
-        { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1), noDecimalValidator()], display: false },
+        {
+          type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aprobadas', validations: [Validators.min(1), noDecimalValidator()], display: false,
+          col: 6
+        },
+        {
+          type: 'number', label: 'Monto mensual del beneficio', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false,
+          col: 6
+        },
         {
           type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
-            Validators.min(0),
+            Validators.min(1),
             Validators.max(31),
-          ], display: false
+          ], display: false,
+          col: 6
         },
-        { type: 'number', label: 'Monto última renta', name: 'monto_ultima_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false },
+        {
+          type: 'number', label: 'Monto última renta', name: 'monto_ultima_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false,
+          col: 6
+        },
 
         {
           type: 'date',
           label: 'Fecha de efectividad',
-          name: 'fecha_calculo',
+          name: 'fecha_efectividad',
           max: new Date().toISOString().split('T')[0],
           validations: [Validators.required, noFutureDateValidator],
-          display: true
+          display: true,
+          col: 6
         },
         {
           type: 'text',
           label: 'Última Fecha de pago',
           name: 'periodo_finalizacion',
           validations: [],
-          display: false
+          display: false,
+          col: 6
         },
 
-        { type: 'number', label: 'Número de rentas a pagar en la primera cuota', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false },
+        {
+          type: 'number', label: 'Número de rentas a pagar en la primera cuota', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false,
+          col: 4
+        },
 
-        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+        {
+          type: 'number', label: 'monto_retroactivo', name: 'monto_retroactivo', validations: [Validators.min(0), montoTotalValidator()], display: false,
+          col: 4
+        },
+        {
+          type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false,
+          col: 4
+        },
 
         {
           type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
           options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
         },
 
-        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+        {
+          type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false,
+          col: 6
+        },
 
-        { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
+        {
+          type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true,
+          col: 6
+        },
       ];
 
       // Muestra el formulario después de configurar los campos
@@ -543,10 +628,11 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           id_beneficio: item.id_beneficio,
           monto_total: item.monto_total,
           nombre_beneficio: item.nombre_beneficio,
-          num_rentas_aplicadas: item.num_rentas_aplicadas,
+          num_rentas_aprobadas: item.num_rentas_aprobadas,
           numero_rentas_max: item.numero_rentas_max
         })); */
         //this.cargar();
+
         return data;
       } catch (error) {
         console.error("Error al obtener datos de beneficios", error);
@@ -659,8 +745,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       // Resetear formularios
       const camposReset = [
         "fecha_presentacion", "n_expediente", "nombre_beneficio", "num_rentas_pagar_primer_pago", "periodicidad_beneficio", "regimen",
-        "estado_solicitud", "num_rentas_aplicadas", "ultimo_dia_ultima_renta", "monto_total",
-        "monto_por_periodo", "monto_primera_cuota", "monto_ultima_cuota", "fecha_calculo",
+        "estado_solicitud", "num_rentas_aprobadas", "ultimo_dia_ultima_renta", "monto_total",
+        "monto_por_periodo", "monto_primera_cuota", "monto_retroactivo", "monto_ultima_cuota", "fecha_efectividad",
         "periodo_finalizacion", "observacion"
       ];
 
@@ -674,8 +760,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       // Resetear solo los campos específicos
       const camposBeneficioReset = [
-        "estado_solicitud", "num_rentas_aplicadas", "ultimo_dia_ultima_renta", "monto_total",
-        "monto_por_periodo", "monto_primera_cuota", "monto_ultima_cuota", "fecha_calculo",
+        "estado_solicitud", "num_rentas_aprobadas", "ultimo_dia_ultima_renta", "monto_total", "num_rentas_pagar_primer_pago",
+        "monto_por_periodo", "monto_primera_cuota", "monto_retroactivo", "monto_ultima_cuota", "fecha_efectividad",
         "periodo_finalizacion", "observacion"
       ];
 
@@ -725,8 +811,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.tipoBenefSelected = event.value;
       // Resetear solo los campos específicos
       const camposBeneficioReset = [
-        "fecha_presentacion", "n_expediente", "estado_solicitud", "num_rentas_aplicadas", "ultimo_dia_ultima_renta", "monto_total",
-        "monto_por_periodo", "monto_primera_cuota", "monto_ultima_cuota", "fecha_calculo",
+        "fecha_presentacion", "n_expediente", "estado_solicitud", "num_rentas_aprobadas", "ultimo_dia_ultima_renta", "monto_total",
+        "monto_por_periodo", "monto_primera_cuota", "monto_retroactivo", "monto_ultima_cuota", "fecha_efectividad",
         "periodo_finalizacion", "observacion"
       ];
 
@@ -739,15 +825,36 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   calculoFechasMontos(datosFormateados: any) {
-    if (datosFormateados.monto_por_periodo && datosFormateados.num_rentas_aplicadas) {
+    if (datosFormateados.monto_por_periodo && datosFormateados.num_rentas_aprobadas) {
       let montoultimacuota = datosFormateados.monto_ultima_cuota
         ? parseFloat(datosFormateados.monto_ultima_cuota)
         : 0;
-      const result = (parseFloat(datosFormateados.monto_por_periodo) * parseFloat(datosFormateados.num_rentas_aplicadas)) + montoultimacuota
+      const result = (parseFloat(datosFormateados.monto_por_periodo) * parseFloat(datosFormateados.num_rentas_aprobadas)) + montoultimacuota
 
       this.FormBen?.get("monto_total")?.setValue(result.toFixed(2));
       this.form1?.get("monto_total")?.setValue(result.toFixed(2));
     }
+
+    let num_rentas_pagar_primer_pago: number = datosFormateados.num_rentas_pagar_primer_pago ? Number(datosFormateados.num_rentas_pagar_primer_pago) || 0.00 : 0.00;
+    let monto_por_periodo: number = datosFormateados.monto_por_periodo ? Number(datosFormateados.monto_por_periodo) || 0.00 : 0.00;
+    let monto_retroactivo: number = datosFormateados.monto_retroactivo ? Number(datosFormateados.monto_retroactivo) || 0.00 : 0.00;
+
+
+    if ((datosFormateados.num_rentas_pagar_primer_pago && datosFormateados.monto_por_periodo) || datosFormateados.monto_retroactivo) {
+
+      let monto_por_periodo: number = parseFloat(datosFormateados.monto_por_periodo)
+        ? parseFloat(datosFormateados.monto_por_periodo)
+        : 0;
+
+      let monto_retroactivo: number = parseFloat(datosFormateados.monto_retroactivo)
+        ? parseFloat(datosFormateados.monto_retroactivo)
+        : 0;
+
+      const result2 = parseFloat(datosFormateados.num_rentas_pagar_primer_pago) * monto_por_periodo + monto_retroactivo;
+      this.form1?.get("monto_primera_cuota")?.setValue(result2.toFixed(2));
+      this.FormBen?.get("monto_primera_cuota")?.setValue(result2.toFixed(2));
+    }
+
 
     let fechaFormateada
 
@@ -756,16 +863,16 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     } else if (datosFormateados.periodicidad_beneficio == "P") {
 
       //CALCULO DE FECHAS
-      if (datosFormateados.fecha_calculo) {
-        // Calcular `periodo_finalizacion` basado en `fecha_calculo`
+      if (datosFormateados.fecha_efectividad) {
+        // Calcular `periodo_finalizacion` basado en `fecha_efectividad`
         let startDate: Date = new Date();
-        if (datosFormateados.num_rentas_aplicadas !== undefined) {
+        if (datosFormateados.num_rentas_aprobadas !== undefined) {
           // Ajustar la fecha al próximo mes y día especificado
-          if (datosFormateados.fecha_calculo) {
-            if (typeof datosFormateados.fecha_calculo === 'string') {
-              startDate = parseISO(datosFormateados.fecha_calculo);
-            } else if (datosFormateados.fecha_calculo instanceof Date) {
-              startDate = datosFormateados.fecha_calculo;
+          if (datosFormateados.fecha_efectividad) {
+            if (typeof datosFormateados.fecha_efectividad === 'string') {
+              startDate = parseISO(datosFormateados.fecha_efectividad);
+            } else if (datosFormateados.fecha_efectividad instanceof Date) {
+              startDate = datosFormateados.fecha_efectividad;
             } else {
               console.error('El formato de fecha no es válido.');
               return;
@@ -773,7 +880,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           }
 
           // Asegúrate de que el número de meses no sea negativo
-          let meses: number = Math.max(datosFormateados.num_rentas_aplicadas - 1, 0);
+          let meses: number = Math.max(datosFormateados.num_rentas_aprobadas - 1, 0);
 
           const endDateWithMonths = addMonths(startDate, meses);
 
@@ -868,44 +975,85 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               this.setFieldValue(this.myFormFields1, 'num_rentas_pagar_primer_pago', 'display', true);
               this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'display', true);
               this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'readOnly', true);
-              this.setFieldValue(this.myFormFields1, 'num_rentas_aplicadas', 'display', true);
+              this.setFieldValue(this.myFormFields1, 'num_rentas_aprobadas', 'display', true);
               this.setFieldValue(this.myFormFields1, 'monto_total', 'display', true);
 
               if (i.numero_rentas_max == 1) {
-                this.form1.get("num_rentas_aplicadas")?.setValue(1);
+                this.form1.get('monto_total')?.setValidators([]);
                 this.setFieldValue(this.myFormFields1, 'num_rentas_pagar_primer_pago', 'display', false);
-                this.setFieldValue(this.myFormFields1, 'num_rentas_aplicadas', 'readOnly', true);
+                this.setFieldValue(this.myFormFields1, 'num_rentas_aprobadas', 'readOnly', true);
                 this.setFieldValue(this.myFormFields1, 'ultimo_dia_ultima_renta', 'display', false);
                 this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'display', false);
                 this.setFieldValue(this.myFormFields1, 'monto_total', 'readOnly', false);
                 this.setFieldValue(this.myFormFields1, 'monto_por_periodo', 'display', false);
                 this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'display', false);
                 this.setFieldValue(this.myFormFields1, 'monto_ultima_cuota', 'display', false);
+                this.setFieldValue(this.myFormFields1, 'monto_retroactivo', 'display', false);
+
+                this.form1.get("num_rentas_aprobadas")?.setValue(1);
+                this.form1.get('monto_total')?.setValidators([Validators.required, Validators.min(0), montoTotalValidator()]);
+                this.form1.get('monto_total')?.updateValueAndValidity();
+
+                this.form1.get('monto_retroactivo')?.clearValidators();
+                this.form1.get('monto_por_periodo')?.clearValidators();
+                this.form1.get('num_rentas_pagar_primer_pago')?.clearValidators();
+
+                this.form1.get('monto_retroactivo')?.updateValueAndValidity();
+                this.form1.get('monto_por_periodo')?.updateValueAndValidity();
+                this.form1.get('num_rentas_pagar_primer_pago')?.updateValueAndValidity();
 
               } else if (i.numero_rentas_max > 1 || i.numero_rentas_max == 0) {
                 this.setFieldValue(this.myFormFields1, 'num_rentas_pagar_primer_pago', 'display', true);
-                this.setFieldValue(this.myFormFields1, 'num_rentas_aplicadas', 'readOnly', false);
+                this.setFieldValue(this.myFormFields1, 'num_rentas_aprobadas', 'readOnly', false);
                 this.setFieldValue(this.myFormFields1, 'ultimo_dia_ultima_renta', 'display', true);
                 this.setFieldValue(this.myFormFields1, 'monto_total', 'readOnly', true);
                 this.setFieldValue(this.myFormFields1, 'monto_por_periodo', 'display', true);
                 this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'display', true);
                 this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'readOnly', false);
+                this.setFieldValue(this.myFormFields1, 'monto_retroactivo', 'display', true);
+                this.setFieldValue(this.myFormFields1, 'monto_retroactivo', 'readOnly', false);
                 this.setFieldValue(this.myFormFields1, 'monto_ultima_cuota', 'display', true);
+                // Eliminar validaciones de monto_total
+                this.form1.get('monto_total')?.clearValidators();
+                this.form1.get('monto_total')?.updateValueAndValidity();
+
+                this.form1.get('monto_retroactivo')?.clearValidators();
+                this.form1.get('monto_retroactivo')?.updateValueAndValidity();
+                this.form1.get('monto_por_periodo')?.clearValidators();
+                this.form1.get('monto_por_periodo')?.updateValueAndValidity();
+                this.form1.get('num_rentas_pagar_primer_pago')?.clearValidators();
+                this.form1.get('num_rentas_pagar_primer_pago')?.updateValueAndValidity();
               }
 
             } else if (i?.periodicidad == "V") {
+
               this.setFieldValue(this.myFormFields1, 'num_rentas_pagar_primer_pago', 'display', true);
-              this.setFieldValue(this.myFormFields1, 'num_rentas_aplicadas', 'display', false);
+              this.setFieldValue(this.myFormFields1, 'num_rentas_aprobadas', 'display', false);
               this.setFieldValue(this.myFormFields1, 'ultimo_dia_ultima_renta', 'display', false);
               this.setFieldValue(this.myFormFields1, 'monto_total', 'display', false);
               this.setFieldValue(this.myFormFields1, 'monto_total', 'readOnly', false);
               this.setFieldValue(this.myFormFields1, 'monto_por_periodo', 'display', true);
               this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'display', true);
-              this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'readOnly', false);
+              this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'readOnly', true);
+              this.setFieldValue(this.myFormFields1, 'monto_retroactivo', 'display', true);
+              this.setFieldValue(this.myFormFields1, 'monto_retroactivo', 'readOnly', false);
               this.setFieldValue(this.myFormFields1, 'monto_ultima_cuota', 'display', false);
               this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'display', false);
               this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'readOnly', false);
+
+              this.form1.get('monto_total')?.clearValidators();
+              this.form1.get('monto_total')?.updateValueAndValidity();
+              console.log(this.form1);
+
+              this.form1.get('num_rentas_pagar_primer_pago')?.setValidators([Validators.required, Validators.min(1)]);
+              this.form1.get('monto_por_periodo')?.setValidators([Validators.required, Validators.min(0), montoTotalValidator()]);
+              this.form1.get('monto_retroactivo')?.setValidators([Validators.required, Validators.min(0), montoTotalValidator()]);
+
+              this.form1.get('num_rentas_pagar_primer_pago')?.updateValueAndValidity();
+              this.form1.get('monto_por_periodo')?.updateValueAndValidity();
+              this.form1.get('monto_retroactivo')?.updateValueAndValidity();
             }
+
 
           } else if (this.myFormFields2.length > 0) {
             this.FormBen.get("periodicidad_beneficio")?.setValue(i?.periodicidad);
@@ -913,42 +1061,57 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             this.FormBen.get("regimen")?.setValue(i.regimen.ley);
 
             if (i.periodicidad == "P") {
-              this.setFieldValue(this.myFormFields2, 'num_rentas_aplicadas', 'display', true);
+              this.setFieldValue(this.myFormFields2, 'num_rentas_aprobadas', 'display', true);
               this.setFieldValue(this.myFormFields2, 'monto_total', 'display', true);
               this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'display', true);
               this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'readOnly', true);
 
               if (i.numero_rentas_max == 1) {
-                this.FormBen.get("num_rentas_aplicadas")?.setValue(1);
+                this.FormBen.get("num_rentas_aprobadas")?.setValue(1);
                 this.setFieldValue(this.myFormFields2, 'num_rentas_pagar_primer_pago', 'display', false);
-                this.setFieldValue(this.myFormFields2, 'num_rentas_aplicadas', 'readOnly', true);
+                this.setFieldValue(this.myFormFields2, 'num_rentas_aprobadas', 'readOnly', true);
                 this.setFieldValue(this.myFormFields2, 'ultimo_dia_ultima_renta', 'display', false);
                 this.setFieldValue(this.myFormFields2, 'monto_total', 'readOnly', false);
+                this.FormBen.get('monto_total')?.setValidators([Validators.required, Validators.min(0), montoTotalValidator()]);
                 this.setFieldValue(this.myFormFields2, 'monto_por_periodo', 'display', false);
                 this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'display', false);
+                this.setFieldValue(this.myFormFields2, 'monto_retroactivo', 'display', false);
                 this.setFieldValue(this.myFormFields2, 'monto_ultima_cuota', 'display', false);
                 this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'display', false);
 
               } else if (i.numero_rentas_max > 1 || i.numero_rentas_max == 0) {
                 this.setFieldValue(this.myFormFields2, 'num_rentas_pagar_primer_pago', 'display', true);
-                this.setFieldValue(this.myFormFields2, 'num_rentas_aplicadas', 'readOnly', false);
+                this.FormBen.get('num_rentas_pagar_primer_pago')?.setValidators([Validators.required, Validators.min(1)]);
+
+                this.setFieldValue(this.myFormFields2, 'num_rentas_aprobadas', 'readOnly', false);
+                this.FormBen.get('num_rentas_aprobadas')?.setValidators([Validators.required, Validators.min(1)]);
+
                 this.setFieldValue(this.myFormFields2, 'ultimo_dia_ultima_renta', 'display', true);
                 this.setFieldValue(this.myFormFields2, 'monto_total', 'readOnly', true);
                 this.setFieldValue(this.myFormFields2, 'monto_por_periodo', 'display', true);
+                this.FormBen.get('monto_por_periodo')?.setValidators([Validators.required, Validators.min(0), montoTotalValidator()]);
+
                 this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'display', true);
-                this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'readOnly', false);
+                this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'readOnly', true);
+                this.setFieldValue(this.myFormFields2, 'monto_retroactivo', 'display', true);
+                this.setFieldValue(this.myFormFields2, 'monto_retroactivo', 'readOnly', false);
                 this.setFieldValue(this.myFormFields2, 'monto_ultima_cuota', 'display', true);
               }
 
             } else if (i?.periodicidad == "V") {
               this.setFieldValue(this.myFormFields2, 'num_rentas_pagar_primer_pago', 'display', true);
-              this.setFieldValue(this.myFormFields2, 'num_rentas_aplicadas', 'display', false);
+              this.FormBen.get('num_rentas_pagar_primer_pago')?.setValidators([Validators.required, Validators.min(1)]);
+              this.setFieldValue(this.myFormFields2, 'num_rentas_aprobadas', 'display', false);
+              this.FormBen.get('num_rentas_aprobadas')?.setValidators([Validators.required, Validators.min(1)]);
               this.setFieldValue(this.myFormFields2, 'ultimo_dia_ultima_renta', 'display', false);
               this.setFieldValue(this.myFormFields2, 'monto_total', 'display', false);
               this.setFieldValue(this.myFormFields2, 'monto_total', 'readOnly', false);
               this.setFieldValue(this.myFormFields2, 'monto_por_periodo', 'display', true);
+              this.FormBen.get('monto_por_periodo')?.setValidators([Validators.required, Validators.min(0), montoTotalValidator()]);
               this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'display', true);
-              this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'readOnly', false);
+              this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'readOnly', true);
+              this.setFieldValue(this.myFormFields2, 'monto_retroactivo', 'display', true);
+              this.setFieldValue(this.myFormFields2, 'monto_retroactivo', 'readOnly', false);
               this.setFieldValue(this.myFormFields2, 'monto_ultima_cuota', 'display', false);
               this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'display', false);
               this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'readOnly', false);
@@ -962,7 +1125,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   async guardarNTBenef() {
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficiarios si el afiliado ya falleció */
-    // console.log(this.datosFormateados);
     //AFILIADOS O BENEFICIARIOS
     if (this.Afiliado.fallecido != "SI") {
       this.datosFormateados["dni"] = this.form?.value.dni;

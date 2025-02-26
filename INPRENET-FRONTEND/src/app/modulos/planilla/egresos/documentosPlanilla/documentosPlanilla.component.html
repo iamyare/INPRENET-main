@@ -11,7 +11,9 @@
         <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'complementaria'}" (click)="seleccionarTipoPlanilla('complementaria')">COMPLEMENTARIA</button>
         <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'extraordinaria'}" (click)="seleccionarTipoPlanilla('extraordinaria')">EXTRAORDINARIA</button>
       </div>
+
       <div class="form-fields">
+
         <!-- Campo de rango de fechas -->
         <mat-form-field appearance="outline" class="field">
           <mat-label>Rango de Fechas</mat-label>
@@ -31,8 +33,13 @@
           </mat-error>
         </mat-form-field>
       </div>
-      <!-- <button class="button" mat-raised-button color="primary" (click)="generarReporteJubiladosYPensionadosActivos()">Generar Reporte de Planilla (Con y Sin Cuenta Bancaria)</button>
- -->
+
+      <!-- <button mat-raised-button color="primary" (click)="obtenerInformacionPlanillasbyFechas()">Obtener información de planillas cerradas</button> -->
+
+      <!--
+        <button class="button" mat-raised-button color="primary" (click)="generarReporteJubiladosYPensionadosActivos()">Generar Reporte de Planilla (Con y Sin Cuenta Bancaria)</button>
+      -->
+
       <div class="button-group-reportes" *ngIf="fechaInicioFormateada && fechaFinFormateada">
         <!-- Botones de generación de reportes -->
         <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarDocumento()">Generar Reporte de Planilla (Con y Sin Cuenta Bancaria)</button>
@@ -58,28 +65,32 @@
           Exportar Detalle a Excel
         </button>
 
+        <button class="button new-badge" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="exportarExcelDetalleCompletoPorPeriodo()">
+          Exportar Detalle a Excel Completo
+        </button>
+
         <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="descargarExcelInv()">Generar Excel Para Inversiones</button>
         <!-- Puedes añadir más botones aquí -->
 
         <!-- Botón Descargar Altas Excel -->
-          <button *ngIf="tipoPlanilla === 'ordinaria'" 
-          class="button" 
-          mat-raised-button color="primary" 
-          [disabled]="!planillaForm.valid" 
+          <button *ngIf="tipoPlanilla === 'ordinaria'"
+          class="button"
+          mat-raised-button color="primary"
+          [disabled]="!planillaForm.valid"
           (click)="descargarAltasExcel()">
           Descargar Altas Excel
           </button>
 
           <!-- Botón Descargar Bajas Excel -->
-          <button *ngIf="tipoPlanilla === 'ordinaria'" 
-          class="button" 
-          mat-raised-button color="warn" 
-          [disabled]="!planillaForm.valid" 
+          <button *ngIf="tipoPlanilla === 'ordinaria'"
+          class="button"
+          mat-raised-button color="warn"
+          [disabled]="!planillaForm.valid"
           (click)="descargarBajasExcel()">
           Descargar Bajas Excel
           </button>
 
-        
+
       </div>
     </form>
   </div>

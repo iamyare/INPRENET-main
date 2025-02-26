@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Observable, BehaviorSubject, catchError, throwError, map } from 'rxjs';
 import { environment } from '../../../src/environments/environment';
 import { Estatus60Rentas } from '../modulos/planilla/p-60-rentas/p_60_rentas.interface';
+import { format, subMonths } from 'date-fns';
 
 @Injectable({
   providedIn: 'root'
@@ -113,6 +114,41 @@ export class PlanillaService {
   descargarReporteDetallePagoPreliminar(idPlanilla: number): Observable<Blob> {
     const url = `${environment.API_URL}/api/planilla/generar-reporte-detalle-pago-preliminar`;
     let params = new HttpParams().set('idPlanilla', idPlanilla.toString());
+    return this.http.get<Blob>(url, { params, responseType: 'blob' as 'json' }).pipe(
+      catchError(error => {
+        console.error('Error al descargar el archivo Excel preliminar', error);
+        this.toastr.error('Error al descargar el archivo Excel preliminar');
+        return throwError(() => new Error('Error al descargar el archivo Excel preliminar'));
+      })
+    );
+  }
+
+  descargarReporteCompleto(idPlanilla: number, idTipoPlanilla: number): Observable<Blob> {
+    const url = `${environment.API_URL}/api/planilla/generar-reporte-completo-pago-preliminar`;
+    let params = new HttpParams()
+      .set('idPlanilla', idPlanilla.toString())
+      .set('idTipoPlanilla', idTipoPlanilla.toString())
+      .set('estadoBen', 'EN PRELIMINAR')
+      .set('estadoDed', 'EN PRELIMINAR');
+
+    return this.http.get<Blob>(url, { params, responseType: 'blob' as 'json' }).pipe(
+      catchError(error => {
+        console.error('Error al descargar el archivo Excel preliminar', error);
+        this.toastr.error('Error al descargar el archivo Excel preliminar');
+        return throwError(() => new Error('Error al descargar el archivo Excel preliminar'));
+      })
+    );
+  }
+
+  exportarExcelDetalleCompletoPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<Blob> {
+    const url = `${environment.API_URL}/api/planilla/generar-reporte-completo-pago-cerrada`;
+    let params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion)
+      .set('idTiposPlanilla', idTiposPlanilla.join(','))
+      .set('estadoBen', 'PAGADA')
+      .set('estadoDed', 'COBRADA');
+
     return this.http.get<Blob>(url, { params, responseType: 'blob' as 'json' }).pipe(
       catchError(error => {
         console.error('Error al descargar el archivo Excel preliminar', error);
@@ -420,25 +456,25 @@ export class PlanillaService {
     );
   }
 
-    obtenerAltaPorPeriodoExcel(mes_inicio: string, anio_inicio: string, mes_finalizacion: string, anio_finalizacion: string) {
-      const url = `${environment.API_URL}/api/planilla/obtenerAltaPorPeriodoExcel?mes_inicio=${mes_inicio}&anio_inicio=${anio_inicio}&mes_finalizacion=${mes_finalizacion}&anio_finalizacion=${anio_finalizacion}`;
-      
-      return this.http.get(url, { responseType: 'blob' }).pipe(
-        catchError((error) => {
-          console.error('Error al descargar el Excel de afiliados por periodo', error);
-          throw error;
-        })
-      );
+  obtenerAltaPorPeriodoExcel(mes_inicio: string, anio_inicio: string, mes_finalizacion: string, anio_finalizacion: string) {
+    const url = `${environment.API_URL}/api/planilla/obtenerAltaPorPeriodoExcel?mes_inicio=${mes_inicio}&anio_inicio=${anio_inicio}&mes_finalizacion=${mes_finalizacion}&anio_finalizacion=${anio_finalizacion}`;
+
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError((error) => {
+        console.error('Error al descargar el Excel de afiliados por periodo', error);
+        throw error;
+      })
+    );
   }
 
   obtenerBajasPorPeriodoExcel(mes_inicio: string, anio_inicio: string, mes_finalizacion: string, anio_finalizacion: string) {
-      const url = `${environment.API_URL}/api/planilla/obtenerBajasPorPeriodoExcel?mes_inicio=${mes_inicio}&anio_inicio=${anio_inicio}&mes_finalizacion=${mes_finalizacion}&anio_finalizacion=${anio_finalizacion}`;
-      return this.http.get(url, { responseType: 'blob' }).pipe(
-        catchError((error) => {
-          console.error('Error al descargar el Excel de bajas por periodo', error);
-          throw error;
-        })
-      );
+    const url = `${environment.API_URL}/api/planilla/obtenerBajasPorPeriodoExcel?mes_inicio=${mes_inicio}&anio_inicio=${anio_inicio}&mes_finalizacion=${mes_finalizacion}&anio_finalizacion=${anio_finalizacion}`;
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError((error) => {
+        console.error('Error al descargar el Excel de bajas por periodo', error);
+        throw error;
+      })
+    );
   }
 
   private handleError(error: any): Observable<never> {

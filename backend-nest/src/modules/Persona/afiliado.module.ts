@@ -32,11 +32,11 @@ import { Net_Referencias } from './entities/net_referencias.entity';
 import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
 import { Net_Colegios_Magisteriales } from '../transacciones/entities/net_colegios_magisteriales.entity';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
-import { BitacoraService } from '../bitacora/bitacora.afiliaciones.service';
+/* import { BitacoraService } from '../bitacora/bitacora.afiliaciones.service'; */
 
 @Module({
   controllers: [AfiliadoController, AfiliacionController, MantenimientoAfiliacionController],
-  providers: [AfiliadoService, AfiliacionService, MantenimientoAfiliacionService, BitacoraService],
+  providers: [AfiliadoService, AfiliacionService, MantenimientoAfiliacionService, /* BitacoraService */],
   imports: [RegionalModule, TransaccionesModule,
     TypeOrmModule.forFeature([Net_Empleado_Centro_Trabajo, net_otra_fuente_ingreso, net_persona, Net_Discapacidad, net_estado_afiliacion, net_detalle_persona, Net_perf_pers_cent_trab,
       Net_Ref_Per_Pers, Net_Persona_Discapacidad,

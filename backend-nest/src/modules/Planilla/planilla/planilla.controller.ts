@@ -75,7 +75,18 @@ export class PlanillaController {
       anio_finalizacion,
     });
   }
- 
+
+  @Get('deduccionesExcel')
+  async deduccionesExcel(
+    @Res() res,
+    @Query('mes_inicio') mes_inicio: string,
+    @Query('anio_inicio') anio_inicio: string,
+    @Query('mes_finalizacion') mes_finalizacion: string,
+    @Query('anio_finalizacion') anio_finalizacion: string
+  ) {
+    await this.planillaService.deduccMontosAplVsMontoTotalByInstitucion(res);
+  }
+
   @Get('pagos-persona/:dni')
   async obtenerPlanillasPorPersona(@Param('dni') dni: string) {
     try {
@@ -156,6 +167,33 @@ export class PlanillaController {
   ) {
     const data = await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPreliminar(idPlanilla);
     await this.planillaService.generarReporteDetallePago(data, res);
+  }
+
+  @Get('generar-reporte-completo-pago-cerrada')
+  async descargarReporteCompleto(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+    @Query('estadoBen') estadoBen: string,
+    @Query('estadoDed') estadoDed: string,
+    @Res() res,
+  ) {
+    // Convertir la cadena `idTiposPlanilla` a un array de números
+    const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+    const data = await this.planillaService.descargarReporteCompleto(periodoInicio, periodoFinalizacion, idTiposPlanillaArray, estadoBen, estadoDed);
+    await this.planillaService.generarReporteTotalDetallePago(data, res);
+  }
+
+  @Get('generar-reporte-completo-pago-preliminar')
+  async exportarExcelDetalleCompletoPorPeriodo(
+    @Query('idPlanilla') idPlanilla: number,
+    @Query('idTipoPlanilla') idTipoPlanilla: number,
+    @Query('estadoBen') estadoBen: string,
+    @Query('estadoDed') estadoDed: string,
+    @Res() res,
+  ) {
+    const data = await this.planillaService.exportarExcelDetalleCompletoPorPeriodo(idPlanilla, idTipoPlanilla, estadoBen, estadoDed);
+    await this.planillaService.generarReporteTotalDetallePago(data, res);
   }
 
   @Get('detalle-pago-beneficio')

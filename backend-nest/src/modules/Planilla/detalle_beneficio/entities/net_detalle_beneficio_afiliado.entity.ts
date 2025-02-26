@@ -33,8 +33,8 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, default: 'SI', name: 'LISTO_COMPLEMENTARIA' })
     listo_complementaria: string;
 
-    @Column({ type: 'date', nullable: true, name: 'FECHA_CALCULO' })
-    fecha_calculo: Date;
+    @Column({ type: 'date', nullable: true, name: 'FECHA_EFECTIVIDAD' })
+    fecha_efectividad: Date;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_TOTAL' })
     monto_total: number;
@@ -44,6 +44,9 @@ export class Net_Detalle_Beneficio_Afiliado {
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_POR_PERIODO' })
     monto_por_periodo: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_RETROACTIVO' })
+    monto_retroactivo: number;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_PRIMERA_CUOTA' })
     monto_primera_cuota: number;
@@ -66,14 +69,17 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, name: 'PRESTAMO' })
     prestamo: string;
 
-    @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })
-    num_rentas_aplicadas: number;
+    @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APROBADAS' })
+    num_rentas_aprobadas: number;
 
     @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_PAGAR_PRIMER_PAGO' })
     num_rentas_pagar_primer_pago: number;
 
     @Column({ nullable: true, name: 'ULTIMO_DIA_ULTIMA_RENTA' })
     ultimo_dia_ultima_renta: number;
+
+    @Column({ type: 'date', nullable: true, name: 'FECHA_INGRESO', default: () => 'CURRENT_DATE' })
+    fecha_ingreso: Date;
 
 
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)

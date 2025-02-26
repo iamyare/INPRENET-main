@@ -16,39 +16,43 @@
 
   <!-- Asignación de beneficios uno por uno -->
   <div  class="card" *ngIf="Afiliado" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
-    <h1 class="custom-header"  style="font-size: 2rem">Datos Generales Cliente</h1>
-    <div>
-      <table>
-        <tr style="background-color: #f2f2f2">
-          <th>Tipo Persona</th>
-          <td>{{ Afiliado.tipo_persona }}</td>
-          <th>Fallecido</th>
-          <td>{{ Afiliado.fallecido }}</td>
+    <div style="margin: 2% 2% 2% 2%">
+      <h1 class="custom-header"  style="font-size: 2rem">Datos Generales Cliente</h1>
+      <div>
+        <table>
+          <tr style="background-color: #f2f2f2">
+            <th>Tipo Persona</th>
+            <td>{{ Afiliado.tipo_persona }}</td>
+            <th>Fallecido</th>
+            <td>{{ Afiliado.fallecido }}</td>
 
-          <th *ngIf="Afiliado.tipo_persona == 'AFILIADO'">Estado</th>
-          <td *ngIf="Afiliado.tipo_persona  == 'AFILIADO'">{{ Afiliado.estado_persona }}</td>
+            <th *ngIf="Afiliado.tipo_persona == 'AFILIADO'">Estado</th>
+            <td *ngIf="Afiliado.tipo_persona  == 'AFILIADO'">{{ Afiliado.estado_persona }}</td>
 
-          <th>DNI de afiliado</th>
-          <td>{{ Afiliado.dni }}</td>
-          <th>Nombre de afiliado</th>
-          <td>{{ Afiliado.nombreCompleto }}</td>
-          <th>Género</th>
-          <td>{{ Afiliado.sexo }}</td>
-          <th>Voluntario</th>
-          <td>{{ Afiliado.voluntario }}</td>
-        </tr>
-        <tr>
-          <th>Fecha nacimiento</th>
-          <td>{{ Afiliado.fecha_nacimiento }}</td>
-          <th>Dirección de residencia</th>
-          <td>{{ Afiliado.direccion_residencia }}</td>
-          <th>Teléfono 1</th>
-          <td>{{ Afiliado.telefono_1 }}</td>
-          <th>Estado civil</th>
-          <td>{{ Afiliado.estado_civil }}</td>
-        </tr>
-      </table>
+            <th>DNI de afiliado</th>
+            <td>{{ Afiliado.dni }}</td>
+            <th>Nombre de afiliado</th>
+            <td>{{ Afiliado.nombreCompleto }}</td>
+            <th>Género</th>
+            <td>{{ Afiliado.sexo }}</td>
+            <th>Voluntario</th>
+            <td>{{ Afiliado.voluntario }}</td>
+          </tr>
+          <tr>
+            <th>Fecha nacimiento</th>
+            <td>{{ Afiliado.fecha_nacimiento }}</td>
+            <th>Dirección de residencia</th>
+            <td>{{ Afiliado.direccion_residencia }}</td>
+            <th>Teléfono 1</th>
+            <td>{{ Afiliado.telefono_1 }}</td>
+            <th>Estado civil</th>
+            <td>{{ Afiliado.estado_civil }}</td>
+          </tr>
+        </table>
+      </div>
     </div>
+
+
     <!--Afiliado.tipo_persona == 'REGISTRADO' ||-->
     <div *ngIf="Afiliado.fallecido == 'SI' && (
     Afiliado.tipo_persona == 'AFILIADO' ||
@@ -107,7 +111,7 @@
     <app-dynamic-form [fields]="myFormFields1" titulo="Datos sobre el beneficio"
       subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatos1($event)"(selectChange)="prueba($event)" ></app-dynamic-form>
       <!-- [disabled]="form1.invalid" -->
-    <button mat-raised-button color="primary"  style="color: white; margin: 1% 0 1% 0"
+    <button mat-raised-button color="primary" [disabled]="form1.invalid"  style="color: white; margin: 1% 0 1% 0"
       (click)="guardarNTBenef()">
       Asignar Beneficio
     </button>

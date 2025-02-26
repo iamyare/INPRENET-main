@@ -8,6 +8,8 @@ import { addMonths, endOfMonth, format, parseISO } from 'date-fns';
 interface Campo {
   nombre: string;
   tipo: string;
+  minDate: string;
+  maxDate: string;
   etiqueta?: string;
   editable?: boolean;
   opciones?: { value: any, label: string }[];
@@ -108,19 +110,23 @@ export class EditarDialogComponent implements OnInit {
       const values = this.formGroup.getRawValue();
 
       let {
-        num_rentas_pagar_primer_pago,
-        monto_por_periodo,
-        num_rentas_aplicadas,
+        monto_primera_cuota,
         ultimo_dia_ultima_renta,
-        fecha_calculo,
+        fecha_efectividad,
         monto_total,
         monto_ultima_cuota
       } = values;
 
+      let num_rentas_pagar_primer_pago: number = values.num_rentas_pagar_primer_pago ? Number(values.num_rentas_pagar_primer_pago) || 0.00 : 0.00;
+      let monto_por_periodo: number = values.monto_por_periodo ? Number(values.monto_por_periodo) || 0.00 : 0.00;
+      let monto_retroactivo: number = values.monto_retroactivo ? Number(values.monto_retroactivo) || 0.00 : 0.00;
+      let num_rentas_aprobadas: number = values.num_rentas_aprobadas ? Number(values.num_rentas_aprobadas) || 0.00 : 0.00;
+
+
       // Actualizar `monto_total` si se cumple la condición
       if (monto_total !== undefined && monto_por_periodo && monto_ultima_cuota) {
         const nuevomonto_por_periodo =
-          monto_por_periodo * (num_rentas_aplicadas || 0) + monto_ultima_cuota;
+          monto_por_periodo * (num_rentas_aprobadas || 0) + Number(monto_ultima_cuota);
 
         this.formGroup
           .get('monto_total')
@@ -128,15 +134,37 @@ export class EditarDialogComponent implements OnInit {
         values.monto_total = nuevomonto_por_periodo.toFixed(2)
       }
 
-      // Calcular `periodo_finalizacion` basado en `fecha_calculo`
+      if (num_rentas_pagar_primer_pago && monto_por_periodo) {
+        monto_primera_cuota = (num_rentas_pagar_primer_pago * monto_por_periodo) + monto_retroactivo
+        this.formGroup
+          .get('monto_primera_cuota')
+          ?.patchValue(Number(monto_primera_cuota).toFixed(2), { emitEvent: false });
+        values.monto_primera_cuota = Number(monto_primera_cuota).toFixed(2)
+      }
+
+      if (monto_primera_cuota) {
+        monto_ultima_cuota = Number(monto_primera_cuota).toFixed(2) || 0
+        this.formGroup
+          .get('monto_ultima_cuota')
+          ?.patchValue(monto_ultima_cuota, { emitEvent: false });
+        values.monto_ultima_cuota = monto_ultima_cuota
+      } else {
+        monto_ultima_cuota = 0.00
+        this.formGroup
+          .get('monto_ultima_cuota')
+          ?.patchValue(monto_ultima_cuota, { emitEvent: false });
+        values.monto_ultima_cuota = monto_ultima_cuota
+      }
+
+      // Calcular `periodo_finalizacion` basado en `fecha_efectividad`
       let startDate: Date = new Date();
-      if (num_rentas_aplicadas !== undefined) {
+      if (num_rentas_aprobadas !== undefined) {
         // Ajustar la fecha al próximo mes y día especificado
-        if (fecha_calculo) {
-          if (typeof fecha_calculo === 'string') {
-            startDate = parseISO(fecha_calculo);
-          } else if (fecha_calculo instanceof Date) {
-            startDate = fecha_calculo;
+        if (fecha_efectividad) {
+          if (typeof fecha_efectividad === 'string') {
+            startDate = parseISO(fecha_efectividad);
+          } else if (fecha_efectividad instanceof Date) {
+            startDate = fecha_efectividad;
           } else {
             console.error('El formato de fecha no es válido.');
             return;
@@ -144,7 +172,7 @@ export class EditarDialogComponent implements OnInit {
         }
 
         // Asegúrate de que el número de meses no sea negativo
-        let meses: number = Math.max(num_rentas_aplicadas - 1, 0);
+        let meses: number = Math.max(num_rentas_aprobadas - 1, 0);
 
         const endDateWithMonths = addMonths(startDate, meses);
 
@@ -173,7 +201,6 @@ export class EditarDialogComponent implements OnInit {
           let tem = new Date(endDateWithMonths);
           tem.setMonth(tem.getMonth() + 1);
           endDateAdjusted = new Date(tem.getFullYear(), tem.getMonth());
-          console.log(endDateAdjusted);
 
         }
 
@@ -183,7 +210,6 @@ export class EditarDialogComponent implements OnInit {
           tem.setMonth(tem.getMonth());
           endDateAdjusted = new Date(tem.getFullYear(), tem.getMonth(), lastDay + 1);
         }
-
 
         // Verificar que endDateAdjusted no sea null antes de formatear
         if (endDateAdjusted) {
@@ -197,8 +223,10 @@ export class EditarDialogComponent implements OnInit {
           values.periodo_finalizacion = endDateAdjusted;
         }
 
-        this.formUpdated.emit(values); // Emitir cambios del formulario
       }
+
+      const temp = this.formGroup.getRawValue()
+      this.formUpdated.emit(temp); // Emitir cambios del formulario
     });
   }
 

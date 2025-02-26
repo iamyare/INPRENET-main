@@ -73,10 +73,10 @@
               <mat-label>Fecha De Nacimiento</mat-label>
               <mat-datepicker-toggle matSuffix [for]="fechaNac"></mat-datepicker-toggle>
               <mat-datepicker #fechaNac></mat-datepicker>
-              <input 
-                matInput 
-                formControlName="fecha_nacimiento" 
-                [matDatepicker]="fechaNac" 
+              <input
+                matInput
+                formControlName="fecha_nacimiento"
+                [matDatepicker]="fechaNac"
                 [max]="minDate"
                 readonly
               >
@@ -197,30 +197,31 @@
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Porcentaje De Beneficio</mat-label>
               <mat-icon matPrefix>percent</mat-icon>
-              <input 
-                matInput 
-                formControlName="porcentaje" 
-                type="number" 
-                (input)="validarPorcentaje(i)"
+              <input
+                matInput
+                formControlName="porcentaje"
+                type="number"
+
               >
-            
+              <!-- (input)="validarPorcentaje(i)" -->
+
               <!-- Error: No puede superar el disponible -->
-              <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('excedeTotal')">
+             <!--  <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('excedeTotal')">
                 <mat-icon>error</mat-icon> No puede superar el {{ porcentajeDisponible }}% disponible.
-              </mat-error>
-            
+              </mat-error> -->
+
               <!-- Error: El porcentaje mínimo permitido -->
-              <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('minimoInvalido')">
+              <!-- <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('minimoInvalido')">
                 <mat-icon>error</mat-icon> El porcentaje mínimo permitido es {{ porcentajeDisponible }}%.
-              </mat-error>
-            
+              </mat-error> -->
+
               <!-- Error: La suma total debe ser exactamente 100% -->
-              <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('noCumpleTotal')">
+             <!--  <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('noCumpleTotal')">
                 <mat-icon>error</mat-icon> La suma total de los porcentajes debe ser exactamente 100%.
-              </mat-error>
-            
+              </mat-error> -->
+
             </mat-form-field>
-             
+
           </div>
 
           <!-- Botón para eliminar beneficiario -->

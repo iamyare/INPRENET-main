@@ -31,17 +31,25 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('api');
-
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
       exceptionFactory: (errors) => {
-        const errorMessages = errors.map(
-          (err) =>
-            `${err.property} - ${Object.values(err.constraints).join(', ')}`
-        );
+        const errorMessages = errors.flatMap((error) => {
+          if (error.children?.length > 0) {
+            return error.children.flatMap((nestedError, index) => {
+              return nestedError.children.map((childError) => {
+                return `${error.property}[${index}].${childError.property} - ${Object.values(
+                  childError.constraints
+                ).join(', ')}`;
+              });
+            });
+          }
+          return `${error.property} - ${Object.values(error.constraints).join(', ')}`;
+        });
+
         return new BadRequestException(errorMessages);
       }
     }),

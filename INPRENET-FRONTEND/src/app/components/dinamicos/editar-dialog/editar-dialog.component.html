@@ -1,12 +1,12 @@
 <div *ngIf="formGroup as formGroup" mat-dialog-content>
   <form [formGroup]="formGroup" class="edit-form">
-    <div class="form-grid" fxLayout="column">
-      <div *ngFor="let campo of data.campos" fxFlex class="form-cell" [class.non-editable-field]="!campo.editable">
+    <div class="form-grid" fxLayout="row wrap" fxLayoutGap="16px">
+      <div *ngFor="let campo of data.campos" fxFlex="30%" class="form-cell">
         <ng-container *ngIf="!campo.dependeDe || formGroup.get(campo.dependeDe)?.value === campo.valorDependiente">
-
+          
           <!-- Campo de rango de fecha -->
           <ng-container *ngIf="campo.tipo === 'daterange'">
-            <mat-form-field appearance="fill" fxFlex class="full-width-input" floatLabel="always">
+            <mat-form-field appearance="fill" class="full-width-input" floatLabel="always">
               <mat-label>{{ campo.etiqueta }}</mat-label>
               <mat-date-range-input [rangePicker]="pickerRange" [formGroup]="getRangeFormGroup(campo.nombre)">
                 <input matInput matStartDate placeholder="Inicio" formControlName="start" />
@@ -24,12 +24,18 @@
               <input matInput  [max]="campo.maxDate" [matDatepicker]="picker" [formControlName]="campo.nombre" />
               <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
+          
+              <!-- Agregar validación solo para fecha_egreso -->
+              <mat-error *ngIf="campo.nombre === 'fecha_egreso' && formGroup.get('fecha_egreso')?.hasError('fechaEgresoInvalida')">
+                No puede ser menor a la de fecha de ingreso.
+              </mat-error>
+          
             </mat-form-field>
           </ng-container>
 
           <!-- Otros tipos de campos -->
           <ng-container *ngIf="campo.tipo === 'text' || campo.tipo === 'number' || campo.tipo === 'list'">
-            <mat-form-field appearance="fill" fxFlex class="full-width-input" floatLabel="always">
+            <mat-form-field appearance="fill" class="full-width-input" floatLabel="always">
               <mat-label>{{ campo.etiqueta }}</mat-label>
               <input *ngIf="campo.tipo === 'text'" matInput [formControlName]="campo.nombre" />
               <input *ngIf="campo.tipo === 'number'" matInput type="number" [formControlName]="campo.nombre" />
@@ -45,6 +51,8 @@
           <mat-error *ngFor="let error of getErrors(campo.nombre)">
             {{ error }}
           </mat-error>
+
+          
 
         </ng-container>
       </div>

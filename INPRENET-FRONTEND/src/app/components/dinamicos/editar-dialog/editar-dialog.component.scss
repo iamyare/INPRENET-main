@@ -7,3 +7,20 @@
   color: rgba(0, 0, 0, 0.38); /* Cambia el color del texto para que parezca deshabilitado */
   background-color: #ececec; /* Fondo de color gris claro para indicar que está deshabilitado */
 }
+
+
+.form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.form-cell {
+  flex: 1 1 calc(33.333% - 16px);
+  min-width: 250px; /* Evita que los inputs sean demasiado pequeños */
+}
+
+.full-width-input {
+  width: 100%;
+}

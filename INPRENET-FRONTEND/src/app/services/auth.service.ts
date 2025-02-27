@@ -216,6 +216,22 @@ export class AuthService {
     );
   }
 
+  getUsuarioAutenticado(): { nombre: string, correo: string } | null {
+    const token = sessionStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+        const decodedToken: any = jwtDecode(token);
+        return {
+            nombre: decodedToken.nombreEmpleado,
+            correo: decodedToken.correo
+        };
+    } catch (error) {
+        console.error('Error al decodificar el token', error);
+        return null;
+    }
+  }
+
   getRolesModulos(): { rol: string, modulo: string }[] {
     const token = sessionStorage.getItem('token');
     if (token) {

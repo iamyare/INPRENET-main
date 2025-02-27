@@ -7,7 +7,6 @@ import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
-import { Net_Seguridad } from './entities/net_seguridad.entity';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
 import { net_rol_modulo } from './entities/net_rol_modulo.entity';

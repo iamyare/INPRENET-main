@@ -8,7 +8,7 @@ dotenv.config();
 export class ApiKeyGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
-    const apiKey = request.headers['API_KEY_BANCO'];
+    const apiKey = request.header('API_KEY_BANCO');
 
     if (!apiKey || apiKey !== process.env.API_KEY_BANCO) {
       throw new UnauthorizedException('Acceso no autorizado. API Key inválida.');

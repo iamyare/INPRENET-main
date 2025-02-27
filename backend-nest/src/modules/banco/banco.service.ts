@@ -51,15 +51,11 @@ export class BancoService {
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado con el correo proporcionado.');
     }
-
-    // 🔐 Generar código OTP de 6 dígitos
     const otp = crypto.randomInt(100000, 999999).toString();
-    const expiration = Date.now() + 5 * 60 * 1000; // Expira en 5 minutos
+    const expiration = Date.now() + 5 * 60 * 1000; 
 
-    // Guardar en almacenamiento temporal
     this.otpStore.set(correo, { otp, expiration });
 
-    // ✉️ Enviar OTP por correo
     const subject = 'Código de Verificación para Cambio de Contraseña';
     const htmlContent = `
       <p>Hola,</p>
@@ -74,7 +70,6 @@ export class BancoService {
     return { message: 'Código OTP enviado al correo.' };
   }
 
-  // ✅ 2. Verificar OTP y Cambiar Contraseña
   async actualizarContrasena(correo: string, otp: string, nuevaContrasena: string): Promise<{ message: string }> {
     const storedOtp = this.otpStore.get(correo);
 
@@ -95,14 +90,10 @@ export class BancoService {
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado.');
     }
-
-    // 🔐 Encriptar nueva contraseña
     const hashedPassword = await bcrypt.hash(nuevaContrasena, 10);
     usuario.contrasena = hashedPassword;
 
     await this.usuarioEmpresaRepository.save(usuario);
-
-    // 🚀 Eliminar OTP después del uso
     this.otpStore.delete(correo);
 
     return { message: 'Contraseña actualizada correctamente.' };
@@ -120,22 +111,28 @@ export class BancoService {
     `;
 
     const pagosQuery = `
-        SELECT
-            dp."ID_PLANILLA",
-            persona."N_IDENTIFICACION" AS "numero_identificacion",
-            persona."ID_PERSONA" AS "id_persona",
-            banco."CODIGO_ACH" AS "codigo_banco_ach",
-            personaPorBanco."NUM_CUENTA" AS "numero_cuenta",
-            SUM(dp."MONTO_A_PAGAR") AS "monto"
-        FROM "NET_DETALLE_PAGO_BENEFICIO" dp
-        JOIN "NET_PERSONA_POR_BANCO" personaPorBanco ON dp."ID_AF_BANCO" = personaPorBanco."ID_AF_BANCO"
-        JOIN "NET_BANCO" banco ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
-        JOIN "NET_PERSONA" persona ON personaPorBanco."ID_PERSONA" = persona."ID_PERSONA"
-        JOIN "NET_PLANILLA" planilla ON dp."ID_PLANILLA" = planilla."ID_PLANILLA"
-        WHERE planilla."ESTADO" = 'ENVIADO A BANCO'
-        AND dp."ESTADO" = 'ENVIADO A BANCO'
-        GROUP BY dp."ID_PLANILLA", persona."N_IDENTIFICACION", persona."ID_PERSONA", banco."CODIGO_ACH", personaPorBanco."NUM_CUENTA"
-    `;
+    SELECT
+        dp."ID_PLANILLA",
+        persona."N_IDENTIFICACION" AS "numero_identificacion",
+        persona."ID_PERSONA" AS "id_persona",
+        COALESCE(banco."CODIGO_ACH", ' ') AS "codigo_banco_ach",
+        COALESCE(personaPorBanco."NUM_CUENTA", ' ') AS "numero_cuenta",
+        dp."ID_AF_BANCO",
+        SUM(dp."MONTO_A_PAGAR") AS "monto"
+    FROM "NET_DETALLE_PAGO_BENEFICIO" dp
+    LEFT JOIN "NET_PERSONA" persona 
+        ON dp."ID_PERSONA" = persona."ID_PERSONA"
+    LEFT JOIN "NET_PERSONA_POR_BANCO" personaPorBanco 
+        ON dp."ID_AF_BANCO" = personaPorBanco."ID_AF_BANCO"
+    LEFT JOIN "NET_BANCO" banco 
+        ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
+    JOIN "NET_PLANILLA" planilla 
+        ON dp."ID_PLANILLA" = planilla."ID_PLANILLA"
+    WHERE planilla."ESTADO" = 'ENVIADO A BANCO'
+    AND dp."ESTADO" = 'ENVIADO A BANCO'
+    GROUP BY dp."ID_PLANILLA", persona."N_IDENTIFICACION", persona."ID_PERSONA", 
+             banco."CODIGO_ACH", personaPorBanco."NUM_CUENTA", dp."ID_AF_BANCO"
+`;
 
     const deduccionesQuery = `
         SELECT 
@@ -163,8 +160,6 @@ export class BancoService {
       if (!planillas.length) {
         return [{ message: 'NO SE ENCONTRARON PLANILLAS POR PAGAR.' }];
       }
-
-      // 📌 Crear mapas de pagos y deducciones para optimizar búsquedas
       const pagosPorPlanilla = new Map();
       pagos.forEach(pago => {
         if (!pagosPorPlanilla.has(pago.ID_PLANILLA)) {
@@ -188,8 +183,6 @@ export class BancoService {
         const totalPagos = pagosPlanilla.reduce((acc, curr) => acc + (curr.monto || 0), 0);
         const totalDeducciones = deduccionesPlanilla.reduce((acc, curr) => acc + (curr.total_deducciones || 0), 0);
         const montoTotalFinal = totalPagos - totalDeducciones;
-
-        // 📌 Convertir fecha para obtener descripción correcta
         const mes = parseInt(planilla.fecha_pago_planilla.substring(4, 6), 10);
         const anio = planilla.fecha_pago_planilla.substring(0, 4);
         const descripcion = `PENSIÓN MES DE ${mesesMap.get(mes) || "DESCONOCIDO"} ${anio}`;
@@ -258,7 +251,6 @@ export class BancoService {
     }
 
     try {
-      // ✅ Obtener todas las personas de la planilla
       const pagosQuery = `
             SELECT persona."ID_PERSONA", persona."N_IDENTIFICACION"
             FROM "NET_DETALLE_PAGO_BENEFICIO" dp
@@ -279,14 +271,8 @@ export class BancoService {
           message: `No hay personas asociadas a la planilla ${id_planilla} para procesar pagos.`,
         };
       }
-
-      // ✅ Obtener los ID_PERSONA de pagos fallidos
       const idsPagosFallidos = pagos_fallidos.map(p => p.numero_identificacion);
-
-      // ✅ Filtrar pagos exitosos (los que no están en la lista de fallidos)
       const idsPagosExitosos = identificacionesPersonasPlanilla.filter(id => !idsPagosFallidos.includes(id));
-
-      // ✅ Registrar el historial de pagos si no existe
       const historialExistente = await this.historialPagoPlanillaRepository.findOne({ where: { id_planilla } });
       if (!historialExistente) {
         await this.historialPagoPlanillaRepository.save({
@@ -392,7 +378,6 @@ export class BancoService {
         monto_total_pagado,
         descripcion_resolucion,
     } = datos;
-
     if (!pagos_acumulados.length) {
         throw new BadRequestException({
             statusCode: 400,
@@ -401,24 +386,17 @@ export class BancoService {
     }
 
     try {
-        // ✅ 1. Buscar ID_PERSONA
         const persona = await this.personaRepository.findOne({
             where: { n_identificacion: numero_identificacion },
         });
-
         if (!persona) {
             throw new BadRequestException({
                 statusCode: 404,
                 message: `No se encontró una persona con el número de identificación ${numero_identificacion}.`,
             });
         }
-
         const idPersona = persona.id_persona;
-
-        // ✅ 2. Obtener los ID_PLANILLA que ya han sido pagados para esta persona
         const idPlanillasArray = pagos_acumulados.map(pago => pago.id_planilla);
-
-        // 📌 Construir dinámicamente los placeholders para Oracle
         const placeholders = idPlanillasArray.map((_, i) => `:${i + 2}`).join(', ');
 
         const queryPagadas = `
@@ -427,11 +405,9 @@ export class BancoService {
             AND "ID_PLANILLA" IN (${placeholders})
             AND "ESTADO" = 'PAGADA'
         `;
-
         const pagosYaPagados = await this.entityManager.query(queryPagadas, [idPersona, ...idPlanillasArray]);
 
         if (pagosYaPagados.length > 0) {
-          // 📌 Convertir a un array de valores únicos con Set
           const planillasUnicas = [...new Set(pagosYaPagados.map(p => p.ID_PLANILLA))];
       
           throw new BadRequestException({
@@ -439,9 +415,6 @@ export class BancoService {
               message: `La persona con identificación ${numero_identificacion} ya tiene pagos registrados en estado 'PAGADA' para las planillas: ${planillasUnicas.join(', ')}.`,
           });
       }
-      
-
-        // ✅ 3. Verificar si el banco existe
         const banco = await this.bancoRepository.findOne({
             where: { id_banco: codigo_banco_ach },
         });
@@ -452,8 +425,6 @@ export class BancoService {
                 message: `No se encontró un banco con el código ${codigo_banco_ach}.`,
             });
         }
-
-        // ✅ 4. Buscar si la cuenta bancaria ya existe y activarla si es necesario
         let cuentaBancaria = await this.personaPorBancoRepository.findOne({
             where: {
                 persona: { id_persona: idPersona },
@@ -461,17 +432,14 @@ export class BancoService {
                 banco: { id_banco: banco.id_banco },
             },
         });
-
         let idAfBanco;
         if (cuentaBancaria) {
-            // ✅ Si la cuenta ya existe, actualizar su estado a ACTIVO y fecha de activación
             await this.personaPorBancoRepository.update(
                 { id_af_banco: cuentaBancaria.id_af_banco },
                 { estado: 'ACTIVO', fecha_activacion: new Date(), fecha_inactivacion: null }
             );
             idAfBanco = cuentaBancaria.id_af_banco;
         } else {
-            // ✅ Si la cuenta no existe, crearla y activarla
             cuentaBancaria = this.personaPorBancoRepository.create({
                 persona: persona,
                 num_cuenta: numero_cuenta,
@@ -483,26 +451,19 @@ export class BancoService {
             const nuevaCuenta = await this.personaPorBancoRepository.save(cuentaBancaria);
             idAfBanco = nuevaCuenta.id_af_banco;
         }
-
-        // ✅ 5. Desactivar todas las demás cuentas bancarias del usuario, excepto la actual
         await this.personaPorBancoRepository.update(
             { persona: { id_persona: idPersona }, id_af_banco: Not(idAfBanco) },
             { estado: 'INACTIVO', fecha_inactivacion: new Date() }
         );
-
-        // ✅ 6. Actualizar pagos (beneficios y deducciones) para cada ID_PLANILLA
         const idPlanillasString = idPlanillasArray.join(',');
 
         for (const idPlanilla of idPlanillasArray) {
-            // ✅ 6.1 Actualizar beneficios a "PAGADA" y cambiar el ID_AF_BANCO
             await this.entityManager.query(
                 `UPDATE "NET_DETALLE_PAGO_BENEFICIO"
                 SET "ESTADO" = 'PAGADA', "ID_AF_BANCO" = :1
                 WHERE "ID_PLANILLA" = :2 AND "ID_PERSONA" = :3`,
                 [idAfBanco, idPlanilla, idPersona]
             );
-
-            // ✅ 6.2 Actualizar deducciones a "COBRADA"
             await this.entityManager.query(
                 `UPDATE "NET_DETALLE_DEDUCCION"
                 SET "ESTADO_APLICACION" = 'COBRADA', "ID_AF_BANCO" = :1
@@ -510,8 +471,6 @@ export class BancoService {
                 [idAfBanco, idPlanilla, idPersona]
             );
         }
-
-        // ✅ 7. Registrar en historial de pagos pendientes
         await this.historialPagosPendientesRepository.save({
             id_persona: idPersona,
             id_af_banco: idAfBanco,
@@ -530,7 +489,6 @@ export class BancoService {
       if (!(error instanceof BadRequestException)) {
           console.error('Error al procesar pagos pendientes:', error);
       }
-  
       throw error instanceof BadRequestException
           ? error
           : new InternalServerErrorException({
@@ -538,7 +496,6 @@ export class BancoService {
               message: `Error interno al procesar los pagos pendientes: ${error.message}`,
           });
   }
-  
 }
 
 

@@ -227,8 +227,8 @@ export class BancoService {
             .map((pago) => {
               const deduccion = deduccionesPlanilla.find(d => d.ID_PERSONA === pago.id_persona) || { total_deducciones: 0 };
               return {
-                nombre_titular: pago.nombre_titular,
                 numero_identificacion: pago.numero_identificacion,
+                nombre_titular: pago.nombre_titular,
                 numero_cuenta: pago.numero_cuenta.trim(),
                 monto: parseFloat((pago.monto - deduccion.total_deducciones).toFixed(2)),
                 codigo_banco_ach: pago.codigo_banco_ach,

@@ -6,7 +6,7 @@ import { Net_Detalle_planilla_ingreso } from '../../Ingresos/detalle-plan-ingr/e
 import { Net_Detalle_Prestamo } from 'src/modules/prestamos/entities/net_detalle_prestamo.entity';
 
 @Entity({ name: 'NET_PLANILLA' })
-@Check(`estado IN ('ACTIVA', 'CERRADA', 'PAGADA')`)
+@Check(`estado IN ('ACTIVA', 'CERRADA', 'PAGADA', 'ENVIADO A BANCO')`)
 @Check(`beneficios_cargados IN ('SI', 'NO')`)
 @Check(`deducc_inprema_cargadas IN ('SI', 'NO')`)
 @Check(`deducc_terceros_cargadas IN ('SI', 'NO')`)

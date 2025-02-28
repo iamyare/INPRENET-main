@@ -6,7 +6,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
+    const exceptionResponse = exception.getResponse() as any;
     const status = exception instanceof HttpException
+    
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Ocurrió un error inesperado. Inténtelo de nuevo más tarde o contacte con soporte si el problema persiste.';
@@ -43,6 +45,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       message,
+      errors: exceptionResponse.errors || [],
     });
   }
 }

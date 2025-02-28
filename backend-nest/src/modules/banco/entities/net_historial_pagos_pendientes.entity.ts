@@ -23,6 +23,6 @@ export class Net_Historial_Pagos_Pendientes {
   @Column({ type: 'varchar2', length: 1000, name: 'ID_PLANILLAS' })
   id_planillas: string; 
 
-  @CreateDateColumn({ name: 'FECHA_ACTUALIZACION' })
-  fecha_actualizacion: Date;
+  @CreateDateColumn({ name: 'FECHA_REGISTRO' })
+  fecha_registro: Date;
 }

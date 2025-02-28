@@ -16,4 +16,7 @@ export class Net_Historial_Pagos_Fallidos {
 
   @Column({ name: 'MOTIVO_FALLO', type: 'varchar2', length: 255 })
   motivo_fallo: string;
+
+  @CreateDateColumn({ name: 'FECHA_REGISTRO' })
+  fecha_registro: Date;
 }

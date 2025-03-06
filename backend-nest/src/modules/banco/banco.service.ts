@@ -308,14 +308,6 @@ export class BancoService {
         );
       }
 
-      if (errores.length > 0) {
-        throw new BadRequestException({
-          statusCode: 400,
-          message: "No se procesó ningún pago debido a los siguientes errores.",
-          errors: errores,
-        });
-      }
-
       // 📌 Buscar personas asociadas a la planilla
       const pagosQuery = `
           SELECT persona."ID_PERSONA", persona."N_IDENTIFICACION"
@@ -337,6 +329,23 @@ export class BancoService {
 
       const idsPagosFallidos = pagos_fallidos.map(p => p.numero_identificacion);
       const idsPagosExitosos = identificacionesPersonasPlanilla.filter(id => !idsPagosFallidos.includes(id));
+
+      // 📌 Validar que los pagos fallidos pertenezcan a la planilla
+      const pagosFallidosInvalidos = idsPagosFallidos.filter(id => !identificacionesPersonasPlanilla.includes(id));
+
+      if (pagosFallidosInvalidos.length > 0) {
+        errores.push(
+          `Los siguientes pagos fallidos no pertenecen a la planilla ${id_planilla}: ${pagosFallidosInvalidos.join(', ')}.`
+        );
+      }
+
+      if (errores.length > 0) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: "No se procesó ningún pago debido a los siguientes errores.",
+          errors: errores,
+        });
+      }
 
       // 📌 Guardar en el historial de pagos de la planilla
       await this.historialPagoPlanillaRepository.save({
@@ -546,7 +555,7 @@ export class BancoService {
                     continue;
                 }
 
-                /* const banco = await this.bancoRepository.findOne({ where: { id_banco: codigo_banco_ach } });
+                const banco = await this.bancoRepository.findOne({ where: { id_banco: codigo_banco_ach } });
 
                 if (!banco) {
                     erroresGlobales.push(`Identidad ${numero_identificacion}: No se encontró un banco con el código ${codigo_banco_ach}.`);
@@ -593,16 +602,7 @@ export class BancoService {
                             WHERE "ID_PLANILLA" = :2 AND "ID_PERSONA" = :3`,
                         [idAfBanco, idPlanilla, idPersona]
                     );
-                } */
-
-                for (const idPlanilla of idPlanillasArray) {
-                      await this.entityManager  .query(
-                          `UPDATE "NET_DETALLE_PAGO_BENEFICIO"
-                              SET "ESTADO" = 'PAGADA'
-                              WHERE "ID_PLANILLA" = :1 AND "ID_PERSONA" = :2`,
-                          [idPlanilla, idPersona]
-                      );
-                  }  
+                }
 
                 await this.historialPagosPendientesRepository.save({
                     id_persona: idPersona,
@@ -648,7 +648,7 @@ export class BancoService {
                 message: `Error interno al procesar los pagos pendientes: ${error.message}`,
             });
     }
-}
+  }
 
 
 

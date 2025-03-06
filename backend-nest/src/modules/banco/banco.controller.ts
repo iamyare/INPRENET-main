@@ -59,9 +59,10 @@ export class BancoController {
   @ApiOperation({ summary: 'Procesar notificación de pagos acumulados y actualizar cuenta bancaria' })
   @ApiResponse({ status: 200, description: 'Pagos procesados correctamente' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
-  async procesarPagosPendientes(@Body() datos:NotificacionPagosPendientesDto) {
-    return this.bancoService.procesarPagosPendientes(datos);
+  async procesarPagosPendientes(@Body() datos: NotificacionPagosPendientesDto[]) {
+      return this.bancoService.procesarPagosPendientes(datos);
   }
+
 
   @Get()
   async findAll() {

@@ -2,10 +2,10 @@
 
 <div class="basic-container " >
   <div class="card">
-    <mat-tab-group>
+    <mat-tab-group (selectedTabChange)="onTabChange($event)">
 
       <mat-tab label="Cargar Beneficios">
-        <div>
+        <div  *ngIf="tieneAcceso">
           <!-- Botón con confirmación -->
           <button
           *ngIf="tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS'"
@@ -49,6 +49,27 @@
           </ng-template>
 
           <div>
+            <!-- Botón con confirmación -->
+            <button *ngIf="tipoPlanilla === '60 RENTAS'"
+            mat-raised-button
+            color="primary"
+            class="asignar-beneficios-btn"
+            (click)="confirmarAsignacion60Rentas()">
+            Asignar beneficios a planilla 60 Rentas
+            </button>
+
+            <!-- Modal de confirmación -->
+            <ng-template #confirmarAsignacion60RentasModal>
+              <h2 mat-dialog-title>Confirmar asignación</h2>
+              <mat-dialog-content>
+              <p>¿Estás seguro de asignar los beneficios a la planilla complementaria de Beneficiarios y Afiliados?</p>
+              </mat-dialog-content>
+              <mat-dialog-actions align="end">
+              <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+              <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+              </mat-dialog-actions>
+              </ng-template>
+
             <!-- Botón con confirmación -->
             <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA DE BENEFICIARIOS'"
             mat-raised-button
@@ -96,19 +117,25 @@
       </mat-tab>
 
       <mat-tab label="Cargar Deducciones de Terceros" *ngIf="(id_planilla && tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS') || ( id_planilla && tipoPlanilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA DE BENEFICIARIOS')">
-        <div>
-          <app-asignacion-deducciones [id_planilla]="id_planilla" [idTipoPlanilla]="idTipoPlanilla" [tipo_planilla]="tipoPlanilla"></app-asignacion-deducciones>
+        <div *ngIf="tieneAcceso">
+          <app-asignacion-deducciones [tipoDeduccion]="'TERCEROS'" [id_planilla]="id_planilla" [idTipoPlanilla]="idTipoPlanilla" [tipo_planilla]="tipoPlanilla"></app-asignacion-deducciones>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Cargar Deducciones de Inprema" *ngIf="(id_planilla && tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS') || ( id_planilla && tipoPlanilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA DE BENEFICIARIOS')">
+        <div *ngIf="tieneAcceso">
+          <app-asignacion-deducciones [tipoDeduccion]="'INPREMA'" [id_planilla]="id_planilla" [idTipoPlanilla]="idTipoPlanilla" [tipo_planilla]="tipoPlanilla"></app-asignacion-deducciones>
         </div>
       </mat-tab>
 
       <mat-tab label="Cálculo de Planilla" *ngIf="id_planilla">
-        <div>
+        <div *ngIf="tieneAcceso">
           <button
           mat-raised-button
           color="primary"
           class="asignar-beneficios-btn"
           (click)="confirmarCalculoPlanilla()">
-          Cálculo de planilla, Quitar inconsistencias de negativos.
+            Cálculo de planilla, Quitar inconsistencias de negativos.
           </button>
 
           <ng-template #confirmarCalculoPlanillaModal>

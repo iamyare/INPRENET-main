@@ -37,7 +37,14 @@ export class VerPlanillasActivasComponent {
     {
       header: 'Código Planilla',
       col: 'codigo_planilla',
-
+    },
+    {
+      header: 'Número Lote',
+      col: 'numero_lote',
+    },
+    {
+      header: 'Número de pagos',
+      col: 'numero_pagos',
     },
     { header: 'Secuencia', col: 'secuencia', },
     {
@@ -73,6 +80,8 @@ export class VerPlanillasActivasComponent {
         fecha_cierre: item.fecha_cierre,
         secuencia: item.secuencia,
         estado: item.estado,
+        numero_pagos: item.numero_pagos,
+        numero_lote: item.numero_lote,
         periodoInicio: convertirFecha(item.periodoInicio, false),
         periodoFinalizacion: convertirFecha(item.periodoFinalizacion, false),
         tipoPlanilla: item.tipoPlanilla.nombre_planilla,

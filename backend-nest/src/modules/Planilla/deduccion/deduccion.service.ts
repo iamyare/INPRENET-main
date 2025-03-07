@@ -74,6 +74,7 @@ export class DeduccionService {
       .andWhere('detalle_deduccion.estado_aplicacion = :estado', { estado: 'EN PRELIMINAR' })
       .andWhere('planilla.id_planilla = :id_planilla', { id_planilla: id_planilla })
       .andWhere('deduccion.codigo_deduccion = :codigoDeduccion', { codigoDeduccion })
+      .orderBy('deduccion.codigo_deduccion', 'ASC')
       .getRawMany();
   }
 
@@ -448,9 +449,6 @@ export class DeduccionService {
           planilla: { id_planilla: plan.id_planilla },
           personaPorBanco: activo,
         });
-        console.log(
-          detalleDeduccion
-        );
 
         await repositories.detalleDeduccionRepository.save(detalleDeduccion);
         return { processed: true };

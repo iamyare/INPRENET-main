@@ -48,16 +48,13 @@ SELECT
         WHEN b.id_beneficio = 6 THEN 2 
         ELSE 1 
     END AS PBCODI,
-    CASE 
-        WHEN COALESCE(
-            NULLIF(b.id_beneficio, 6), 
-            (SELECT id_beneficio FROM Beneficios b2 WHERE b2.CLDOC = b.CLDOC AND b2.id_beneficio <> 6 ORDER BY rn FETCH FIRST 1 ROWS ONLY)
-        ) = 201 THEN 20
-        ELSE COALESCE(
-            NULLIF(b.id_beneficio, 6), 
-            (SELECT id_beneficio FROM Beneficios b2 WHERE b2.CLDOC = b.CLDOC AND b2.id_beneficio <> 6 ORDER BY rn FETCH FIRST 1 ROWS ONLY)
-        )
-    END AS BNCODI,
+    COALESCE(
+    NULLIF(b.id_beneficio, 6), 
+    (SELECT id_beneficio FROM Beneficios b2 
+     WHERE b2.CLDOC = b.CLDOC AND b2.id_beneficio <> 6 
+     ORDER BY rn FETCH FIRST 1 ROWS ONLY)
+) AS BNCODI,
+
     2025 AS HPANPA,
     2 AS HPMEPA,
     SUM(b.monto_a_pagar) AS HPVADO,
@@ -69,6 +66,7 @@ GROUP BY
     b.CLDOC,
     b.id_beneficio,  
     b.id_planilla;
+    
 
 
 ---------------------*-------------------BENEFDAT/DPHIPC-----------------------*-----------------*---------
@@ -214,3 +212,752 @@ GROUP BY
     PB.ID_DEDUCCION,
     DB.ID_BENEFICIO;
 
+----------------------------------------------------------DEFINITIVAS------------------------------------------------------
+--------------------------*------------------DPHIPA-*-----------------------*-----------------*---------
+WITH Beneficios AS (
+    SELECT 
+        p.id_persona,
+        p.id_tipo_identificacion,
+        p.n_identificacion AS CLDOC,
+        dpb.id_beneficio,
+        dpb.id_planilla,
+        dpb.monto_a_pagar,
+        ROW_NUMBER() OVER (PARTITION BY p.n_identificacion ORDER BY dpb.id_beneficio) AS rn
+    FROM net_detalle_pago_beneficio dpb
+    JOIN net_persona p ON p.id_persona = dpb.id_persona
+    WHERE dpb.id_planilla = :idPlanilla
+      AND dpb.estado = 'PAGADA'
+)
+SELECT 
+    TO_CHAR(1) AS EMPCOD,
+    TO_CHAR(b.id_tipo_identificacion) AS CLTDOC,
+    b.CLDOC,
+    CASE 
+        WHEN b.id_beneficio = 6 THEN 2 
+        ELSE 1 
+    END AS PBCODI,
+    COALESCE(
+    NULLIF(b.id_beneficio, 6), 
+    (SELECT id_beneficio FROM Beneficios b2 
+     WHERE b2.CLDOC = b.CLDOC AND b2.id_beneficio <> 6 
+     ORDER BY rn FETCH FIRST 1 ROWS ONLY)
+) AS BNCODI,
+
+    2025 AS HPANPA,
+    2 AS HPMEPA,
+    SUM(b.monto_a_pagar) AS HPVADO,
+    TO_CHAR('P') AS HPESTA
+FROM Beneficios b
+GROUP BY 
+    b.id_persona,
+    b.id_tipo_identificacion,
+    b.CLDOC,
+    b.id_beneficio,  
+    b.id_planilla;
+    
+    
+---------------------*-------------------BENEFDAT/DPHIPC-----------------------*-----------------*---------
+WITH PAGO_TOTAL AS (
+    SELECT
+        PAGO.ID_PERSONA,
+        B.NUM_CUENTA,
+        BA.CODIGO_ACH,  -- Se agrega la columna CODIGO_ACH
+        MAX(
+        CASE 
+            --WHEN PAGO.ID_BENEFICIO = 201 THEN 20  -- Cambia ID_BENEFICIO 201 por 20
+            WHEN PAGO.ID_BENEFICIO != 6 THEN PAGO.ID_BENEFICIO 
+            ELSE NULL 
+        END
+    ) AS ID_BENEFICIO,
+        SUM(PAGO.MONTO_A_PAGAR) AS TOTAL_MONTO_A_PAGAR,
+        PAGO.ID_PLANILLA,  -- Aseguramos que el ID_PLANILLA esté en la subconsulta
+        PAGO.FECHA_CARGA  -- Se agrega la columna FECHA_CARGA
+    FROM
+        NET_DETALLE_PAGO_BENEFICIO PAGO
+    JOIN NET_PERSONA_POR_BANCO B
+        ON PAGO.ID_PERSONA = B.ID_PERSONA
+        AND B.ESTADO = 'ACTIVO'  -- Se filtra solo la cuenta activa
+    JOIN NET_BANCO BA
+        ON B.ID_BANCO = BA.ID_BANCO
+    JOIN NET_PLANILLA PL
+        ON PAGO.ID_PLANILLA = PL.ID_PLANILLA
+    WHERE
+        PL.ID_TIPO_PLANILLA = :idTipoPlanilla   -- Filtra solo tipo de planilla 1
+        AND PAGO.ESTADO = 'PAGADA'
+        AND PL.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')  -- Filtro de fecha inicio
+        AND PL.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')  -- Filtro de fecha finalización
+    GROUP BY
+        PAGO.ID_PERSONA,
+        B.NUM_CUENTA,
+        BA.CODIGO_ACH,  -- Se agrega al GROUP BY
+        B.ID_BANCO,  -- También es necesario incluir B.ID_BANCO en el GROUP BY
+        PAGO.ID_PLANILLA,  -- Aseguramos que el ID_PLANILLA esté en el GROUP BY
+        PAGO.FECHA_CARGA  -- Se agrega al GROUP BY
+),
+DEDUCCION_TOTAL AS (
+    SELECT
+        ID_PERSONA,
+        SUM(CASE WHEN ID_DEDUCCION IN (1,2,3,75,76) THEN MONTO_APLICADO ELSE 0 END) AS INPREMA,
+        SUM(CASE WHEN ID_DEDUCCION NOT IN (1,2,3,75,76) THEN MONTO_APLICADO ELSE 0 END) AS TERCEROS
+    FROM
+        NET_DETALLE_DEDUCCION
+    JOIN NET_PLANILLA PL
+        ON NET_DETALLE_DEDUCCION.ID_PLANILLA = PL.ID_PLANILLA
+    WHERE
+        PL.ID_TIPO_PLANILLA = :idTipoPlanilla  -- Filtra solo tipo de planilla 1
+        AND NET_DETALLE_DEDUCCION.ESTADO_APLICACION = 'COBRADA'
+        AND PL.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')  -- Filtro de fecha inicio
+        AND PL.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')  -- Filtro de fecha finalización
+    GROUP BY
+        ID_PERSONA
+)
+SELECT
+    TO_CHAR(1) AS EMPCOD,
+    TO_CHAR(NP.ID_TIPO_IDENTIFICACION) AS CLTDOC,
+    NP.N_IDENTIFICACION AS CLDOC,
+    PAGO_TOTAL.ID_BENEFICIO AS BNCODI,
+    EXTRACT(YEAR FROM PL.PERIODO_INICIO) AS HPANPA,  -- Año del PERIODO_INICIO de la planilla
+    EXTRACT(MONTH FROM PL.PERIODO_INICIO) AS HPMEPA,  -- Mes del PERIODO_INICIO de la planilla
+    1 AS TPACOD,
+    PAGO_TOTAL.TOTAL_MONTO_A_PAGAR AS HPVALO,
+    COALESCE(DEDUCCION_TOTAL.INPREMA, 0) AS HPVADI,
+    COALESCE(DEDUCCION_TOTAL.TERCEROS, 0) AS HPVADE,
+    PAGO_TOTAL.TOTAL_MONTO_A_PAGAR -
+    (COALESCE(DEDUCCION_TOTAL.INPREMA, 0) + COALESCE(DEDUCCION_TOTAL.TERCEROS, 0)) AS HPVAPA,
+    2 AS HPTIPA,
+    0 AS CHNSOL,
+    PAGO_TOTAL.NUM_CUENTA AS HPCTAB,
+    PAGO_TOTAL.CODIGO_ACH AS HPCOBA,
+    EXTRACT(YEAR FROM PAGO_TOTAL.FECHA_CARGA) AS HPAHOY,
+    EXTRACT(MONTH FROM PAGO_TOTAL.FECHA_CARGA) AS HPMHOY,
+    EXTRACT(DAY FROM PAGO_TOTAL.FECHA_CARGA) AS HPDHOY
+  -- Día de FECHA_CARGA de PAGO_TOTAL
+FROM
+    PAGO_TOTAL
+LEFT JOIN
+    DEDUCCION_TOTAL ON PAGO_TOTAL.ID_PERSONA = DEDUCCION_TOTAL.ID_PERSONA
+JOIN
+    NET_PERSONA NP ON PAGO_TOTAL.ID_PERSONA = NP.ID_PERSONA  -- Se agrega el JOIN con NET_PERSONA
+JOIN
+    NET_PLANILLA PL ON PAGO_TOTAL.ID_PLANILLA = PL.ID_PLANILLA;  -- Se agrega el JOIN con NET_PLANILLA
+    
+
+---------------------*---------DPHIDE No debe ir valores duplicados----------*-----------------------*-------
+SELECT
+    TO_CHAR(1) AS EMPCOD,
+    TO_CHAR(p.id_tipo_identificacion) AS CLTDOC,
+    P.N_IDENTIFICACION AS CLDOC,
+    PB.ID_DEDUCCION AS TIDECO,
+    DB.ID_BENEFICIO AS BNCODI,
+    EXTRACT(YEAR FROM PL.PERIODO_INICIO) AS HPANPA,
+    EXTRACT(MONTH FROM PL.PERIODO_INICIO) AS HPMEPA,
+    SUM(PB.MONTO_APLICADO) AS HDVADE,
+    0 AS HDVADO,
+    'P' AS HDESTA,
+    0 AS HDALIQ,
+    0 AS HDMLIQ,
+    0 AS HDDLIQ
+FROM NET_DETALLE_DEDUCCION PB
+JOIN NET_DETALLE_PAGO_BENEFICIO DB ON DB.ID_PERSONA = PB.ID_PERSONA
+JOIN NET_PERSONA P ON P.ID_PERSONA = PB.ID_PERSONA
+JOIN NET_PLANILLA PL ON DB.ID_PLANILLA = PL.ID_PLANILLA
+WHERE DB.ID_BENEFICIO != 6
+  AND PB.ID_PLANILLA = :idPlanilla
+  AND DB.ID_PLANILLA = :idPlanilla
+  AND PB.ESTADO_APLICACION = 'COBRADA'
+  AND DB.ESTADO = 'PAGADA'
+GROUP BY
+    P.ID_TIPO_IDENTIFICACION,
+    P.N_IDENTIFICACION,
+    PB.ID_DEDUCCION,
+    DB.ID_BENEFICIO,
+    PL.PERIODO_INICIO;
+
+****************************************-----------------QUERYS FINALES 03/03/2025----------*********************************
+    --------------------------*------------------DPHIPA-*-----------------------*-----------------*---------
+    WITH Beneficios AS (
+        SELECT
+            p.id_persona,
+            p.id_tipo_identificacion,
+            p.n_identificacion AS CLDOC,
+            dpb.id_beneficio,
+            dpb.id_planilla,
+            dpb.monto_a_pagar,
+            ROW_NUMBER() OVER (PARTITION BY p.n_identificacion ORDER BY dpb.id_beneficio) AS rn,
+            PL.PERIODO_INICIO FROM net_detalle_pago_beneficio dpb
+        JOIN net_persona p ON p.id_persona = dpb.id_persona
+        JOIN NET_PLANILLA PL
+            ON dpb.ID_PLANILLA = PL.ID_PLANILLA
+        WHERE dpb.id_planilla = :idPlanilla
+          AND dpb.estado = 'PAGADA'
+    )
+    SELECT
+        TO_CHAR(1) AS EMPCOD,
+        TO_CHAR(b.id_tipo_identificacion) AS CLTDOC,
+        b.CLDOC,
+        CASE
+            WHEN b.id_beneficio = 6 THEN 2
+            ELSE 1
+        END AS PBCODI,
+        COALESCE(
+        NULLIF(b.id_beneficio, 6),
+        (SELECT id_beneficio FROM Beneficios b2
+         WHERE b2.CLDOC = b.CLDOC AND b2.id_beneficio <> 6
+         ORDER BY rn FETCH FIRST 1 ROWS ONLY)
+    ) AS BNCODI,
+        TO_NUMBER(TO_CHAR(b.PERIODO_INICIO, 'YYYY'), '9999') AS HPANPA,  -- Tomamos la fecha de NET_PLANILLA
+        TO_NUMBER(TO_CHAR(b.PERIODO_INICIO, 'MM'), '99') AS HPMEPA,        -- Tomamos la fecha de NET_PLANILLA
+        SUM(b.monto_a_pagar) AS HPVADO,
+        TO_CHAR('P') AS HPESTA
+    FROM Beneficios b
+    GROUP BY
+        b.id_persona,
+        b.id_tipo_identificacion,
+        b.CLDOC,
+        b.id_beneficio,  
+        b.id_planilla,
+        b.periodo_inicio;
+       
+---------------------*-------------------BENEFDAT/DPHIPC-----------------------*-----------------*---------
+WITH PAGO_TOTAL AS (
+    SELECT
+        PAGO.ID_PERSONA,
+        B.NUM_CUENTA,
+        BA.CODIGO_ACH,  -- Se agrega la columna CODIGO_ACH
+        MAX(
+        CASE
+            --WHEN PAGO.ID_BENEFICIO = 201 THEN 20  -- Cambia ID_BENEFICIO 201 por 20
+            WHEN PAGO.ID_BENEFICIO != 6 THEN PAGO.ID_BENEFICIO
+            ELSE NULL
+        END
+    ) AS ID_BENEFICIO,
+        SUM(PAGO.MONTO_A_PAGAR) AS TOTAL_MONTO_A_PAGAR,
+        PAGO.ID_PLANILLA,  -- Aseguramos que el ID_PLANILLA esté en la subconsulta
+        PAGO.FECHA_CARGA  -- Se agrega la columna FECHA_CARGA
+    FROM
+        NET_DETALLE_PAGO_BENEFICIO PAGO
+    LEFT JOIN NET_PERSONA_POR_BANCO B
+        ON PAGO.ID_PERSONA = B.ID_PERSONA
+        AND B.ESTADO = 'ACTIVO'  -- Se filtra solo la cuenta activa
+    LEFT JOIN NET_BANCO BA
+        ON B.ID_BANCO = BA.ID_BANCO
+    JOIN NET_PLANILLA PL
+        ON PAGO.ID_PLANILLA = PL.ID_PLANILLA
+    WHERE
+        PL.ID_TIPO_PLANILLA = :idTipoPlanilla   -- Filtra solo tipo de planilla 1
+        AND PAGO.ESTADO = 'PAGADA'
+        AND PL.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')  -- Filtro de fecha inicio
+        AND PL.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')  -- Filtro de fecha finalización
+    GROUP BY
+        PAGO.ID_PERSONA,
+        B.NUM_CUENTA,
+        BA.CODIGO_ACH,  -- Se agrega al GROUP BY
+        B.ID_BANCO,  -- También es necesario incluir B.ID_BANCO en el GROUP BY
+        PAGO.ID_PLANILLA,  -- Aseguramos que el ID_PLANILLA esté en el GROUP BY
+        PAGO.FECHA_CARGA  -- Se agrega al GROUP BY
+),
+DEDUCCION_TOTAL AS (
+    SELECT
+        ID_PERSONA,
+        SUM(CASE WHEN ID_DEDUCCION IN (1,2,3,75,76,45) THEN MONTO_APLICADO ELSE 0 END) AS INPREMA,
+        SUM(CASE WHEN ID_DEDUCCION NOT IN (1,2,3,75,76,45) THEN MONTO_APLICADO ELSE 0 END) AS TERCEROS
+    FROM
+        NET_DETALLE_DEDUCCION
+    JOIN NET_PLANILLA PL
+        ON NET_DETALLE_DEDUCCION.ID_PLANILLA = PL.ID_PLANILLA
+    WHERE
+        PL.ID_TIPO_PLANILLA = :idTipoPlanilla  -- Filtra solo tipo de planilla 1
+        AND NET_DETALLE_DEDUCCION.ESTADO_APLICACION = 'COBRADA'
+        AND PL.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')  -- Filtro de fecha inicio
+        AND PL.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')  -- Filtro de fecha finalización
+    GROUP BY
+        ID_PERSONA
+)
+SELECT
+    TO_CHAR(1) AS EMPCOD,
+    TO_CHAR(NP.ID_TIPO_IDENTIFICACION) AS CLTDOC,
+    NP.N_IDENTIFICACION AS CLDOC,
+    PAGO_TOTAL.ID_BENEFICIO AS BNCODI,
+    EXTRACT(YEAR FROM PL.PERIODO_INICIO) AS HPANPA,  -- Año del PERIODO_INICIO de la planilla
+    EXTRACT(MONTH FROM PL.PERIODO_INICIO) AS HPMEPA,  -- Mes del PERIODO_INICIO de la planilla
+    CASE 
+        WHEN PL.SECUENCIA > 1 THEN 5 
+        WHEN PL.SECUENCIA = 1 AND (PL.ID_TIPO_PLANILLA = 3 OR PL.ID_TIPO_PLANILLA = 4) THEN 2
+        ELSE PL.ID_TIPO_PLANILLA
+    END AS TPACOD,
+    PAGO_TOTAL.TOTAL_MONTO_A_PAGAR AS HPVALO,
+    COALESCE(DEDUCCION_TOTAL.INPREMA, 0) AS HPVADI,
+    COALESCE(DEDUCCION_TOTAL.TERCEROS, 0) AS HPVADE,
+    PAGO_TOTAL.TOTAL_MONTO_A_PAGAR -
+    (COALESCE(DEDUCCION_TOTAL.INPREMA, 0) + COALESCE(DEDUCCION_TOTAL.TERCEROS, 0)) AS HPVAPA,
+    2 AS HPTIPA,
+    0 AS CHNSOL,
+    PAGO_TOTAL.NUM_CUENTA AS HPCTAB,
+    TO_NUMBER(PAGO_TOTAL.CODIGO_ACH) AS HPCOBA,
+    EXTRACT(YEAR FROM PL.FECHA_CIERRE) AS HPAHOY,
+    EXTRACT(MONTH FROM PL.FECHA_CIERRE) AS HPMHOY,
+    EXTRACT(DAY FROM PL.FECHA_CIERRE) AS HPDHOY
+  -- Día de FECHA_CARGA de PAGO_TOTAL
+FROM
+    PAGO_TOTAL
+LEFT JOIN
+    DEDUCCION_TOTAL ON PAGO_TOTAL.ID_PERSONA = DEDUCCION_TOTAL.ID_PERSONA
+JOIN
+    NET_PERSONA NP ON PAGO_TOTAL.ID_PERSONA = NP.ID_PERSONA  -- Se agrega el JOIN con NET_PERSONA
+JOIN
+    NET_PLANILLA PL ON PAGO_TOTAL.ID_PLANILLA = PL.ID_PLANILLA;  -- Se agrega el JOIN con NET_PLANILLA
+   
+
+---------------------*---------DPHIDE No debe ir valores duplicados----------*-----------------------*-------
+SELECT
+    TO_CHAR(1) AS EMPCOD,
+    TO_CHAR(p.id_tipo_identificacion) AS CLTDOC,
+    P.N_IDENTIFICACION AS CLDOC,
+    PB.ID_DEDUCCION AS TIDECO,
+    DB.ID_BENEFICIO AS BNCODI,
+    EXTRACT(YEAR FROM PL.PERIODO_INICIO) AS HPANPA,
+    EXTRACT(MONTH FROM PL.PERIODO_INICIO) AS HPMEPA,
+    SUM(PB.MONTO_APLICADO) AS HDVADE,
+    0 AS HDVADO,
+    'P' AS HDESTA,
+    0 AS HDALIQ,
+    0 AS HDMLIQ,
+    0 AS HDDLIQ
+FROM NET_DETALLE_DEDUCCION PB
+JOIN NET_DETALLE_PAGO_BENEFICIO DB ON DB.ID_PERSONA = PB.ID_PERSONA
+JOIN NET_PERSONA P ON P.ID_PERSONA = PB.ID_PERSONA
+JOIN NET_PLANILLA PL ON DB.ID_PLANILLA = PL.ID_PLANILLA
+WHERE DB.ID_BENEFICIO != 6
+  AND PB.ID_PLANILLA = :idPlanilla
+  AND DB.ID_PLANILLA = :idPlanilla
+  AND PB.ESTADO_APLICACION = 'COBRADA'
+  AND DB.ESTADO = 'PAGADA'
+GROUP BY
+    P.ID_TIPO_IDENTIFICACION,
+    P.N_IDENTIFICACION,
+    PB.ID_DEDUCCION,
+    DB.ID_BENEFICIO,
+    PL.PERIODO_INICIO;
+
+
+
+------------------------------------------04/03/2025--------------------------
+****************************************-----------------QUERYS FINALES 03/03/2025----------*********************************
+    --------------------------*------------------DPHIPA-*-----------------------*-----------------*---------
+    WITH Beneficios AS (
+        SELECT
+            p.id_persona,
+            p.id_tipo_identificacion,
+            p.n_identificacion AS CLDOC,
+            dpb.id_beneficio,
+            dpb.id_planilla,
+            dpb.monto_a_pagar,
+            ROW_NUMBER() OVER (PARTITION BY p.n_identificacion ORDER BY dpb.id_beneficio) AS rn,
+            PL.PERIODO_INICIO FROM net_detalle_pago_beneficio dpb
+        JOIN net_persona p ON p.id_persona = dpb.id_persona
+        JOIN NET_PLANILLA PL
+            ON dpb.ID_PLANILLA = PL.ID_PLANILLA
+        WHERE dpb.id_planilla = :idPlanilla
+          AND dpb.estado = 'PAGADA'
+    )
+    SELECT
+        TO_CHAR(1) AS EMPCOD,
+        TO_CHAR(b.id_tipo_identificacion) AS CLTDOC,
+        b.CLDOC,
+        CASE
+            WHEN b.id_beneficio = 6 THEN 2
+            ELSE 1
+        END AS PBCODI,
+        COALESCE(
+        NULLIF(b.id_beneficio, 6),
+        (SELECT id_beneficio FROM Beneficios b2
+         WHERE b2.CLDOC = b.CLDOC AND b2.id_beneficio <> 6
+         ORDER BY rn FETCH FIRST 1 ROWS ONLY)
+    ) AS BNCODI,
+        TO_NUMBER(TO_CHAR(b.PERIODO_INICIO, 'YYYY'), '9999') AS HPANPA,  -- Tomamos la fecha de NET_PLANILLA
+        TO_NUMBER(TO_CHAR(b.PERIODO_INICIO, 'MM'), '99') AS HPMEPA,        -- Tomamos la fecha de NET_PLANILLA
+        SUM(b.monto_a_pagar) AS HPVADO,
+        TO_CHAR('P') AS HPESTA
+    FROM Beneficios b
+    GROUP BY
+        b.id_persona,
+        b.id_tipo_identificacion,
+        b.CLDOC,
+        b.id_beneficio,  
+        b.id_planilla,
+        b.periodo_inicio;
+       
+---------------------*-------------------BENEFDAT/DPHIPC-----------------------*-----------------*---------
+WITH PAGO_TOTAL AS (
+    SELECT
+        PAGO.ID_PERSONA,
+        B.NUM_CUENTA,
+        BA.CODIGO_ACH,  -- Se agrega la columna CODIGO_ACH
+        MAX(
+        CASE
+            --WHEN PAGO.ID_BENEFICIO = 201 THEN 20  -- Cambia ID_BENEFICIO 201 por 20
+            WHEN PAGO.ID_BENEFICIO != 6 THEN PAGO.ID_BENEFICIO
+            ELSE NULL
+        END
+    ) AS ID_BENEFICIO,
+        SUM(PAGO.MONTO_A_PAGAR) AS TOTAL_MONTO_A_PAGAR,
+        PAGO.ID_PLANILLA,  -- Aseguramos que el ID_PLANILLA esté en la subconsulta
+        PAGO.FECHA_CARGA  -- Se agrega la columna FECHA_CARGA
+    FROM
+        NET_DETALLE_PAGO_BENEFICIO PAGO
+    LEFT JOIN NET_PERSONA_POR_BANCO B
+        ON PAGO.ID_PERSONA = B.ID_PERSONA
+        AND B.ESTADO = 'ACTIVO'  -- Se filtra solo la cuenta activa
+    LEFT JOIN NET_BANCO BA
+        ON B.ID_BANCO = BA.ID_BANCO
+    JOIN NET_PLANILLA PL
+        ON PAGO.ID_PLANILLA = PL.ID_PLANILLA
+    WHERE
+        PL.ID_TIPO_PLANILLA = :idTipoPlanilla   -- Filtra solo tipo de planilla 1
+        AND PAGO.ESTADO = 'PAGADA'
+        AND PL.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')  -- Filtro de fecha inicio
+        AND PL.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')  -- Filtro de fecha finalización
+    GROUP BY
+        PAGO.ID_PERSONA,
+        B.NUM_CUENTA,
+        BA.CODIGO_ACH,  -- Se agrega al GROUP BY
+        B.ID_BANCO,  -- También es necesario incluir B.ID_BANCO en el GROUP BY
+        PAGO.ID_PLANILLA,  -- Aseguramos que el ID_PLANILLA esté en el GROUP BY
+        PAGO.FECHA_CARGA  -- Se agrega al GROUP BY
+),
+DEDUCCION_TOTAL AS (
+    SELECT
+        ID_PERSONA,
+        SUM(CASE WHEN ID_DEDUCCION IN (1,2,3,75,76,45) THEN MONTO_APLICADO ELSE 0 END) AS INPREMA,
+        SUM(CASE WHEN ID_DEDUCCION NOT IN (1,2,3,75,76,45) THEN MONTO_APLICADO ELSE 0 END) AS TERCEROS
+    FROM
+        NET_DETALLE_DEDUCCION
+    JOIN NET_PLANILLA PL
+        ON NET_DETALLE_DEDUCCION.ID_PLANILLA = PL.ID_PLANILLA
+    WHERE
+        PL.ID_TIPO_PLANILLA = :idTipoPlanilla  -- Filtra solo tipo de planilla 1
+        AND NET_DETALLE_DEDUCCION.ESTADO_APLICACION = 'COBRADA'
+        AND PL.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')  -- Filtro de fecha inicio
+        AND PL.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')  -- Filtro de fecha finalización
+    GROUP BY
+        ID_PERSONA
+)
+SELECT
+    TO_CHAR(1) AS EMPCOD,
+    TO_CHAR(NP.ID_TIPO_IDENTIFICACION) AS CLTDOC,
+    NP.N_IDENTIFICACION AS CLDOC,
+    PAGO_TOTAL.ID_BENEFICIO AS BNCODI,
+    EXTRACT(YEAR FROM PL.PERIODO_INICIO) AS HPANPA,  -- Año del PERIODO_INICIO de la planilla
+    EXTRACT(MONTH FROM PL.PERIODO_INICIO) AS HPMEPA,  -- Mes del PERIODO_INICIO de la planilla
+    CASE 
+        WHEN PL.SECUENCIA > 1 THEN 5 
+        WHEN PL.SECUENCIA = 1 AND (PL.ID_TIPO_PLANILLA = 3 OR PL.ID_TIPO_PLANILLA = 4) THEN 2
+        ELSE PL.ID_TIPO_PLANILLA
+    END AS TPACOD,
+    PAGO_TOTAL.TOTAL_MONTO_A_PAGAR AS HPVALO,
+    COALESCE(DEDUCCION_TOTAL.INPREMA, 0) AS HPVADI,
+    COALESCE(DEDUCCION_TOTAL.TERCEROS, 0) AS HPVADE,
+    PAGO_TOTAL.TOTAL_MONTO_A_PAGAR -
+    (COALESCE(DEDUCCION_TOTAL.INPREMA, 0) + COALESCE(DEDUCCION_TOTAL.TERCEROS, 0)) AS HPVAPA,
+    2 AS HPTIPA,
+    0 AS CHNSOL,
+    PAGO_TOTAL.NUM_CUENTA AS HPCTAB,
+    TO_NUMBER(PAGO_TOTAL.CODIGO_ACH) AS HPCOBA,
+    EXTRACT(YEAR FROM PL.FECHA_CIERRE) AS HPAHOY,
+    EXTRACT(MONTH FROM PL.FECHA_CIERRE) AS HPMHOY,
+    EXTRACT(DAY FROM PL.FECHA_CIERRE) AS HPDHOY
+  -- Día de FECHA_CARGA de PAGO_TOTAL
+FROM
+    PAGO_TOTAL
+LEFT JOIN
+    DEDUCCION_TOTAL ON PAGO_TOTAL.ID_PERSONA = DEDUCCION_TOTAL.ID_PERSONA
+JOIN
+    NET_PERSONA NP ON PAGO_TOTAL.ID_PERSONA = NP.ID_PERSONA  -- Se agrega el JOIN con NET_PERSONA
+JOIN
+    NET_PLANILLA PL ON PAGO_TOTAL.ID_PLANILLA = PL.ID_PLANILLA;  -- Se agrega el JOIN con NET_PLANILLA
+   
+
+---------------------*---------DPHIDE No debe ir valores duplicados----------*-----------------------*-------
+SELECT
+    TO_CHAR(1) AS EMPCOD,
+    TO_CHAR(p.id_tipo_identificacion) AS CLTDOC,
+    P.N_IDENTIFICACION AS CLDOC,
+    PB.ID_DEDUCCION AS TIDECO,
+    DB.ID_BENEFICIO AS BNCODI,
+    EXTRACT(YEAR FROM PL.PERIODO_INICIO) AS HPANPA,
+    EXTRACT(MONTH FROM PL.PERIODO_INICIO) AS HPMEPA,
+    SUM(PB.MONTO_APLICADO) AS HDVADE,
+    0 AS HDVADO,
+    'P' AS HDESTA,
+    0 AS HDALIQ,
+    0 AS HDMLIQ,
+    0 AS HDDLIQ
+FROM NET_DETALLE_DEDUCCION PB
+JOIN NET_DETALLE_PAGO_BENEFICIO DB ON DB.ID_PERSONA = PB.ID_PERSONA
+JOIN NET_PERSONA P ON P.ID_PERSONA = PB.ID_PERSONA
+JOIN NET_PLANILLA PL ON DB.ID_PLANILLA = PL.ID_PLANILLA
+WHERE DB.ID_BENEFICIO != 6
+  AND PB.ID_PLANILLA = :idPlanilla
+  AND DB.ID_PLANILLA = :idPlanilla
+  AND PB.ESTADO_APLICACION = 'COBRADA'
+  AND DB.ESTADO = 'PAGADA'
+GROUP BY
+    P.ID_TIPO_IDENTIFICACION,
+    P.N_IDENTIFICACION,
+    PB.ID_DEDUCCION,
+    DB.ID_BENEFICIO,
+    PL.PERIODO_INICIO;
+
+
+
+
+------------------------------*****************************---------------------------------
+------------------------------ARCHIVO DPREPA = Resumen de pagos de planillas 
+WITH PAGO_TOTAL AS (
+    SELECT
+        PAGO.ID_PERSONA,
+        B.NUM_CUENTA,
+        BA.CODIGO_ACH,  
+        CASE
+            WHEN PAGO.ID_BENEFICIO = 101 THEN 10  -- Convertimos 101 a 10
+            ELSE PAGO.ID_BENEFICIO
+        END AS ID_BENEFICIO,
+        SUM(CASE WHEN PAGO.ID_BENEFICIO = 101 THEN 0 ELSE PAGO.MONTO_A_PAGAR END) +
+        SUM(CASE WHEN PAGO.ID_BENEFICIO = 101 THEN PAGO.MONTO_A_PAGAR ELSE 0 END) AS TOTAL_MONTO_A_PAGAR,
+        PAGO.ID_PLANILLA,  
+        PAGO.FECHA_CARGA  
+    FROM
+        NET_DETALLE_PAGO_BENEFICIO PAGO
+    LEFT JOIN NET_PERSONA_POR_BANCO B
+        ON PAGO.ID_PERSONA = B.ID_PERSONA
+        AND (B.ID_AF_BANCO = PAGO.ID_AF_BANCO OR B.ID_AF_BANCO IS NULL)
+    LEFT JOIN NET_BANCO BA
+        ON B.ID_BANCO = BA.ID_BANCO
+    JOIN NET_PLANILLA PL
+        ON PAGO.ID_PLANILLA = PL.ID_PLANILLA
+    WHERE
+        PL.ID_TIPO_PLANILLA = :Tipo_planilla  
+        AND PAGO.ESTADO = 'PAGADA'
+        AND PL.SECUENCIA = 3
+        AND PL.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')  
+        AND PL.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')  
+    GROUP BY
+        PAGO.ID_PERSONA,
+        B.NUM_CUENTA,
+        BA.CODIGO_ACH,  
+        PAGO.ID_PLANILLA,  
+        PAGO.FECHA_CARGA,
+        CASE
+            WHEN PAGO.ID_BENEFICIO = 101 THEN 10  
+            ELSE PAGO.ID_BENEFICIO
+        END
+),
+DEDUCCION_TOTAL AS (
+    SELECT
+        DEDUCCION.ID_PERSONA,
+        SUM(CASE WHEN DEDUCCION.ID_DEDUCCION IN (1,2,3,75,76,45,36) THEN DEDUCCION.MONTO_APLICADO ELSE 0 END) AS INPREMA,
+        SUM(CASE WHEN DEDUCCION.ID_DEDUCCION NOT IN (1,2,3,75,76,45,36) THEN DEDUCCION.MONTO_APLICADO ELSE 0 END) AS TERCEROS
+    FROM
+        NET_DETALLE_DEDUCCION DEDUCCION
+    JOIN NET_PLANILLA PL
+        ON DEDUCCION.ID_PLANILLA = PL.ID_PLANILLA
+    WHERE
+        PL.ID_TIPO_PLANILLA = :Tipo_planilla  
+        AND DEDUCCION.ESTADO_APLICACION = 'COBRADA'
+        AND PL.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')  
+        AND PL.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')  
+    GROUP BY
+        DEDUCCION.ID_PERSONA
+)
+SELECT
+    TO_CHAR(1) AS EMPCOD,
+    EXTRACT(YEAR FROM PL.PERIODO_INICIO) AS RPANPA,  
+    EXTRACT(MONTH FROM PL.PERIODO_INICIO) AS RPMEPA,  
+    PL.ID_TIPO_PLANILLA AS TPACOD,
+    PAGO_TOTAL.ID_BENEFICIO AS BNCODI,
+    COUNT(PAGO_TOTAL.ID_BENEFICIO) AS RPNUPA,
+    SUM(PAGO_TOTAL.TOTAL_MONTO_A_PAGAR) AS HPVALO,  
+    COALESCE(SUM(DEDUCCION_TOTAL.INPREMA), 0) AS HPVADI,  
+    COALESCE(SUM(DEDUCCION_TOTAL.TERCEROS), 0) AS HPVADE,  
+    SUM(PAGO_TOTAL.TOTAL_MONTO_A_PAGAR) -
+    (COALESCE(SUM(DEDUCCION_TOTAL.INPREMA), 0) + COALESCE(SUM(DEDUCCION_TOTAL.TERCEROS), 0)) AS HPVAPA  
+FROM
+    PAGO_TOTAL
+LEFT JOIN
+    DEDUCCION_TOTAL ON PAGO_TOTAL.ID_PERSONA = DEDUCCION_TOTAL.ID_PERSONA
+JOIN
+    NET_PERSONA NP ON PAGO_TOTAL.ID_PERSONA = NP.ID_PERSONA  
+JOIN
+    NET_PLANILLA PL ON PAGO_TOTAL.ID_PLANILLA = PL.ID_PLANILLA  
+GROUP BY
+    PAGO_TOTAL.ID_BENEFICIO,
+    PL.ID_TIPO_PLANILLA,
+    PL.PERIODO_INICIO
+ORDER BY
+    RPANPA, RPMEPA, TPACOD, BNCODI;
+   
+------------------------------JUBILADOS-----------------------------------------------------------------    
+   
+   
+   
+WITH PAGO_TOTAL AS (
+SELECT
+    PAGO.ID_PERSONA,
+    B.NUM_CUENTA,
+    BA.CODIGO_ACH,  
+    MAX(CASE WHEN PAGO.ID_BENEFICIO NOT IN (6,27) THEN PAGO.ID_BENEFICIO ELSE NULL END) AS ID_BENEFICIO,
+    SUM(CASE WHEN PAGO.ID_BENEFICIO = 6 THEN 0 ELSE PAGO.MONTO_A_PAGAR END) +
+    SUM(CASE WHEN PAGO.ID_BENEFICIO = 6 THEN PAGO.MONTO_A_PAGAR ELSE 0 END) AS TOTAL_MONTO_A_PAGAR,
+    PAGO.ID_PLANILLA,  
+    PAGO.FECHA_CARGA  
+    FROM
+        NET_DETALLE_PAGO_BENEFICIO PAGO
+    LEFT JOIN NET_PERSONA_POR_BANCO B
+        ON PAGO.ID_PERSONA = B.ID_PERSONA
+        AND (B.ID_AF_BANCO = PAGO.ID_AF_BANCO OR B.ID_AF_BANCO IS NULL) -- Permitir que se incluyan los registros donde ID_AF_BANCO es NULL
+    LEFT JOIN NET_BANCO BA
+        ON B.ID_BANCO = BA.ID_BANCO
+    JOIN NET_PLANILLA PL
+        ON PAGO.ID_PLANILLA = PL.ID_PLANILLA
+WHERE
+    PL.ID_TIPO_PLANILLA = :Tipo_planilla  
+    AND PAGO.ESTADO = 'PAGADA'
+    AND PL.SECUENCIA = 3
+    AND PL.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')  
+    AND PL.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')  
+GROUP BY
+    PAGO.ID_PERSONA,
+    B.NUM_CUENTA,
+    BA.CODIGO_ACH,  
+    PAGO.ID_PLANILLA,  
+    PAGO.FECHA_CARGA
+ORDER BY
+    PAGO.ID_PERSONA
+
+),
+DEDUCCION_TOTAL AS (
+    SELECT
+        DEDUCCION.ID_PERSONA,
+        SUM(CASE WHEN DEDUCCION.ID_DEDUCCION IN (1,2,3,75,76,45,36) THEN DEDUCCION.MONTO_APLICADO ELSE 0 END) AS INPREMA,
+        SUM(CASE WHEN DEDUCCION.ID_DEDUCCION NOT IN (1,2,3,75,76,45,36) THEN DEDUCCION.MONTO_APLICADO ELSE 0 END) AS TERCEROS
+    FROM
+        NET_DETALLE_DEDUCCION DEDUCCION
+    JOIN NET_PLANILLA PL
+        ON DEDUCCION.ID_PLANILLA = PL.ID_PLANILLA
+    WHERE
+        PL.ID_TIPO_PLANILLA = :Tipo_planilla  
+        AND DEDUCCION.ESTADO_APLICACION = 'COBRADA'
+        AND PL.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')  
+        AND PL.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')  
+    GROUP BY
+        DEDUCCION.ID_PERSONA
+)
+SELECT
+    TO_CHAR(1) AS EMPCOD,
+    EXTRACT(YEAR FROM PL.PERIODO_INICIO) AS RPANPA,  
+    EXTRACT(MONTH FROM PL.PERIODO_INICIO) AS RPMEPA,  
+    PL.ID_TIPO_PLANILLA AS TPACOD,
+    PAGO_TOTAL.ID_BENEFICIO AS BNCODI,
+    COUNT(PAGO_TOTAL.ID_BENEFICIO) AS RPNUPA, -- Conteo por ID_BENEFICIO
+    SUM(PAGO_TOTAL.TOTAL_MONTO_A_PAGAR) AS HPVALO,  
+    COALESCE(SUM(DEDUCCION_TOTAL.INPREMA), 0) AS HPVADI,  
+    COALESCE(SUM(DEDUCCION_TOTAL.TERCEROS), 0) AS HPVADE,  
+    SUM(PAGO_TOTAL.TOTAL_MONTO_A_PAGAR) -
+    (COALESCE(SUM(DEDUCCION_TOTAL.INPREMA), 0) + COALESCE(SUM(DEDUCCION_TOTAL.TERCEROS), 0)) AS HPVAPA  
+FROM
+    PAGO_TOTAL
+LEFT JOIN
+    DEDUCCION_TOTAL ON PAGO_TOTAL.ID_PERSONA = DEDUCCION_TOTAL.ID_PERSONA
+JOIN
+    NET_PERSONA NP ON PAGO_TOTAL.ID_PERSONA = NP.ID_PERSONA  
+JOIN
+    NET_PLANILLA PL ON PAGO_TOTAL.ID_PLANILLA = PL.ID_PLANILLA  
+GROUP BY
+    PAGO_TOTAL.ID_BENEFICIO,
+    PL.ID_TIPO_PLANILLA,
+    PL.PERIODO_INICIO;
+
+
+-----------------------------------DPMOBE----------------------------------------------
+SELECT
+    TO_CHAR(1) AS EMPCOD,
+    TO_CHAR(P.ID_TIPO_IDENTIFICACION) AS CLTDOC,
+    CAST(P.N_IDENTIFICACION AS CHAR(18)) AS CLDOC,
+    TO_NUMBER(dpb.ID_BENEFICIO, '999.999') AS BNCODI,
+    TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'YYYY'), '9999') AS MBANOC,  
+    TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'MM'), '99') AS MBMESC,      
+    TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'DD'), '99') AS MBDIAC,
+    CASE
+        WHEN dpb.MONTO_POR_PERIODO IS NULL AND dpb.ID_BENEFICIO IN (1,21,22) THEN CAST(dpb.MONTO_PRIMERA_CUOTA AS NUMBER(13,2))
+        ELSE CAST(dpb.MONTO_POR_PERIODO AS NUMBER(13,2))
+    END AS BDVALO,
+    CASE
+        WHEN ESTADO_SOLICITUD = 'APROBADO' THEN 'A'
+        ELSE 'V'
+    END AS MBSTAT,
+    CAST(0 AS NUMBER(13,2)) AS MBVADE,
+    CAST(0 AS NUMBER(13,2)) AS MBVACU,
+    CAST(0 AS NUMBER(13,2)) AS MBBULSU,
+    TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'YYYY'), '9999') AS MBAEFE,  
+    TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'MM'), '99') AS MBMEFE,      
+    TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'DD'), '99') AS MBDEFE,
+    CASE
+        WHEN dpb.PERIODO_FINALIZACION IS NULL AND ID_BENEFICIO IN (1,21,22) THEN TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'YYYY'), '9999')
+        ELSE TO_NUMBER(TO_CHAR(dpb.PERIODO_FINALIZACION, 'YYYY'), '9999')
+    END AS MBAFIN,
+    CASE
+        WHEN dpb.PERIODO_FINALIZACION IS NULL AND ID_BENEFICIO IN (1,21,22) THEN TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'MM'), '99')
+        ELSE TO_NUMBER(TO_CHAR(dpb.PERIODO_FINALIZACION, 'MM'), '99')
+    END AS MBMFIN,
+    CASE
+        WHEN dpb.PERIODO_FINALIZACION IS NULL AND ID_BENEFICIO IN (1,21,22) THEN TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'DD'), '99')
+        ELSE TO_NUMBER(TO_CHAR(dpb.PERIODO_FINALIZACION, 'DD'), '99')
+    END AS MBDFIN
+FROM NET_DETALLE_BENEFICIO_AFILIADO dpb
+JOIN NET_DETALLE_PERSONA dp ON dp.ID_PERSONA = dpb.ID_PERSONA
+                                        AND dp.ID_CAUSANTE = dpb.ID_CAUSANTE
+                                        AND dp.ID_DETALLE_PERSONA = dpb.ID_DETALLE_PERSONA
+JOIN NET_PERSONA P ON P.ID_PERSONA = dpb.ID_PERSONA
+JOIN NET_PERSONA_POR_BANCO PRB ON dpb.ID_PERSONA = PRB.ID_PERSONA
+                                --AND dpb.ID_AF_BANCO = PRB.ID_AF_BANCO
+JOIN NET_BANCO B ON B.ID_BANCO = PRB.ID_BANCO
+WHERE   dpb.FECHA_EFECTIVIDAD BETWEEN :FECHA_EFECTIVIDAD AND SYSDATE
+         AND dpb.ID_BENEFICIO IN (1,18,11,21,3,12,23,8,14,20,22,25,81,201)
+         AND PRB.ESTADO = 'ACTIVO';
+
+ -----------------------------------DPBEDO----------------------------------------------
+SELECT
+    TO_CHAR(1) AS EMPCOD,
+    TO_CHAR(P.ID_TIPO_IDENTIFICACION) AS CLTDOC,
+    CAST(P.N_IDENTIFICACION AS CHAR(18)) AS CLDOC,
+    TO_NUMBER(dpb.ID_BENEFICIO, '999.999') AS BNCODI,
+    CASE
+        WHEN COUNT(*) OVER (PARTITION BY dpb.ID_PERSONA) = 1 THEN 1  -- Si no está repetido
+        WHEN ROW_NUMBER() OVER (PARTITION BY dpb.ID_PERSONA ORDER BY dpb.FECHA_EFECTIVIDAD ASC) = 1 THEN 1  -- Fecha menor
+        WHEN ROW_NUMBER() OVER (PARTITION BY dpb.ID_PERSONA ORDER BY dpb.FECHA_EFECTIVIDAD DESC) = 1 THEN 2  -- Fecha mayor
+        ELSE NULL
+    END AS BTCORR,
+    dp.PORCENTAJE AS BTPORC,
+    TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'YYYY'), '9999') AS BDANOC,  -- Decimal(4)
+    TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'MM'), '99') AS BDMESC,      -- Decimal(4,2) (pero mes no necesita decimales)
+    TO_NUMBER(TO_CHAR(dpb.FECHA_EFECTIVIDAD, 'DD'), '99') AS BDDIAC ,     -- Decimal(2)
+    CAST(dpb.MONTO_POR_PERIODO AS NUMBER(13,2)) AS MBVALO,
+    CASE
+        WHEN ESTADO_SOLICITUD = 'APROBADO' THEN 'A'
+        ELSE 'V'
+    END AS BDSTAT,
+    TO_CHAR(1) AS DBFOPA,
+    CAST(B.CODIGO_ACH  AS CHAR(3)) AS BDCOBA,
+    CAST(PRB.NUM_CUENTA AS CHAR(15)) AS BDCTAB
+FROM NET_DETALLE_BENEFICIO_AFILIADO dpb
+JOIN NET_DETALLE_PERSONA dp ON dp.ID_PERSONA = dpb.ID_PERSONA
+                                        AND dp.ID_CAUSANTE = dpb.ID_CAUSANTE
+                                        AND dp.ID_DETALLE_PERSONA = dpb.ID_DETALLE_PERSONA
+JOIN NET_PERSONA P ON P.ID_PERSONA = dpb.ID_PERSONA
+JOIN NET_PERSONA_POR_BANCO PRB ON dpb.ID_PERSONA = PRB.ID_PERSONA
+                                --AND dpb.ID_AF_BANCO = PRB.ID_AF_BANCO
+JOIN NET_BANCO B ON B.ID_BANCO = PRB.ID_BANCO
+WHERE   dpb.FECHA_EFECTIVIDAD BETWEEN :FECHA_EFECTIVIDAD AND SYSDATE
+ AND dpb.ID_BENEFICIO IN (10,17,15,19,24,30,101)
+ AND PRB.ESTADO = 'ACTIVO';
+   

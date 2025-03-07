@@ -280,7 +280,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             col: 12
           },
           {
-            type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false,
+            type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(0)], display: false,
             col: 12
           },
           {
@@ -288,7 +288,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             col: 12
           },
           {
-            type: 'number', label: 'monto retroactivo', name: 'monto_retroactivo', validations: [Validators.min(0), montoTotalValidator()], display: false,
+            type: 'number', label: 'monto retroactivo / extraordinario', name: 'monto_retroactivo', validations: [Validators.min(0), montoTotalValidator()], display: false,
             col: 12
           },
           {
@@ -406,8 +406,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             col: 6
           },
           { type: 'number', label: 'Monto mensual', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
-          { type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false },
-          { type: 'number', label: 'monto retroactivo', name: 'monto_retroactivo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+          { type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(0)], display: false },
+          { type: 'number', label: 'monto retroactivo / extraordinario', name: 'monto_retroactivo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
           { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false, },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
           {
@@ -544,12 +544,12 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         },
 
         {
-          type: 'number', label: 'Número de rentas a pagar en la primera cuota', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false,
+          type: 'number', label: 'Número de rentas a pagar en la primera cuota', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(0)], display: false,
           col: 4
         },
 
         {
-          type: 'number', label: 'monto_retroactivo', name: 'monto_retroactivo', validations: [Validators.min(0), montoTotalValidator()], display: false,
+          type: 'number', label: 'Monto retroactivo / extraordinario', name: 'monto_retroactivo', validations: [Validators.min(0), montoTotalValidator()], display: false,
           col: 4
         },
         {
@@ -1045,7 +1045,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               this.form1.get('monto_total')?.updateValueAndValidity();
               console.log(this.form1);
 
-              this.form1.get('num_rentas_pagar_primer_pago')?.setValidators([Validators.required, Validators.min(1)]);
+              this.form1.get('num_rentas_pagar_primer_pago')?.setValidators([Validators.required, Validators.min(0)]);
               this.form1.get('monto_por_periodo')?.setValidators([Validators.required, Validators.min(0), montoTotalValidator()]);
               this.form1.get('monto_retroactivo')?.setValidators([Validators.required, Validators.min(0), montoTotalValidator()]);
 
@@ -1081,7 +1081,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
               } else if (i.numero_rentas_max > 1 || i.numero_rentas_max == 0) {
                 this.setFieldValue(this.myFormFields2, 'num_rentas_pagar_primer_pago', 'display', true);
-                this.FormBen.get('num_rentas_pagar_primer_pago')?.setValidators([Validators.required, Validators.min(1)]);
+                this.FormBen.get('num_rentas_pagar_primer_pago')?.setValidators([Validators.required, Validators.min(0)]);
 
                 this.setFieldValue(this.myFormFields2, 'num_rentas_aprobadas', 'readOnly', false);
                 this.FormBen.get('num_rentas_aprobadas')?.setValidators([Validators.required, Validators.min(1)]);
@@ -1100,7 +1100,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
             } else if (i?.periodicidad == "V") {
               this.setFieldValue(this.myFormFields2, 'num_rentas_pagar_primer_pago', 'display', true);
-              this.FormBen.get('num_rentas_pagar_primer_pago')?.setValidators([Validators.required, Validators.min(1)]);
+              this.FormBen.get('num_rentas_pagar_primer_pago')?.setValidators([Validators.required, Validators.min(0)]);
               this.setFieldValue(this.myFormFields2, 'num_rentas_aprobadas', 'display', false);
               this.FormBen.get('num_rentas_aprobadas')?.setValidators([Validators.required, Validators.min(1)]);
               this.setFieldValue(this.myFormFields2, 'ultimo_dia_ultima_renta', 'display', false);

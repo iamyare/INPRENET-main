@@ -11,6 +11,7 @@ export class DetalleDeduccionController {
 
   @Get('detallePorCodDeduccion')
   async obtenerDetalleYDescargarExcel(
+    @Query('idsPlanilla') idsPlanilla: number[],
     @Query('periodoInicio') periodoInicio: string,
     @Query('periodoFinalizacion') periodoFinalizacion: string,
     @Query('idTiposPlanilla') idTiposPlanilla: string,
@@ -18,8 +19,9 @@ export class DetalleDeduccionController {
     @Res() res
   ) {
     const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
-    
+
     const buffer = await this.detalleDeduccionService.obtenerDetallePorDeduccionPorCodigoYGenerarExcel(
+      idsPlanilla,
       periodoInicio,
       periodoFinalizacion,
       tiposPlanillaArray,
@@ -160,8 +162,8 @@ export class DetalleDeduccionController {
 
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
-     return this.detalleDeduccionService.deleteDetalleDeduccion(id);
-    }
+    return this.detalleDeduccionService.deleteDetalleDeduccion(id);
+  }
 
 
 }

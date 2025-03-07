@@ -69,19 +69,19 @@ export class CentroTrabajoService {
 
   async buscarCentroTrabajo(termino: string, idMunicipio?: number): Promise<Net_Centro_Trabajo[]> {
     const whereCondition: any = [
-        { codigo: ILike(`%${termino}%`), tipo: 'EDUCACION' },
-        { nombre_centro_trabajo: ILike(`%${termino}%`), tipo: 'EDUCACION' },
+      { codigo: ILike(`%${termino}%`), tipo: 'EDUCACION' },
+      { nombre_centro_trabajo: ILike(`%${termino}%`), tipo: 'EDUCACION' },
     ];
     if (idMunicipio) {
-        whereCondition.forEach((condition: any) => {
-            condition.municipio = { id_municipio: idMunicipio };
-        });
+      whereCondition.forEach((condition: any) => {
+        condition.municipio = { id_municipio: idMunicipio };
+      });
     }
     return await this.centroTrabajoRepository.find({
-        where: whereCondition,
-        relations: ['municipio', 'municipio.departamento'],
+      where: whereCondition,
+      relations: ['municipio', 'municipio.departamento'],
     });
-}
+  }
 
 
   async updateArchivoIdentificacion(id_empleado: number, archivoBuffer: Buffer): Promise<Net_Empleado> {
@@ -173,6 +173,8 @@ export class CentroTrabajoService {
     return await this.centroTrabajoRepository.createQueryBuilder('centroTrabajo')
       .leftJoinAndSelect('centroTrabajo.deduccion', 'deduccion') // Hacer el join con la tabla de deducciones
       .where('centroTrabajo.tipo = :tipo', { tipo: 'INSTITUCION' }) // Filtrar por el tipo de centro de trabajo
+      .orderBy('centroTrabajo.nombre_centro_trabajo', 'ASC')
+      .addOrderBy('deduccion.codigo_deduccion', 'ASC')
       .getMany();
   }
 

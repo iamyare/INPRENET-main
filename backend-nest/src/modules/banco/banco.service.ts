@@ -100,7 +100,7 @@ export class BancoService {
   }
 
   async obtenerDetallePagoPlanilla(): Promise<any[]> {
-        const planillaQuery = `
+    const planillaQuery = `
             SELECT
                 p."ID_PLANILLA" AS "id_planilla",
                 tp."NOMBRE_PLANILLA" AS "tipo_planilla",
@@ -110,7 +110,7 @@ export class BancoService {
             WHERE p."ESTADO" = 'ENVIADO A BANCO'
         `;
 
-        const pagosQuery = `
+    const pagosQuery = `
         SELECT
         dp."ID_PLANILLA",
         persona."N_IDENTIFICACION" AS "numero_identificacion",
@@ -440,10 +440,10 @@ export class BancoService {
 
   async procesarPagosPendientes(datos: NotificacionPagosPendientesDto[]): Promise<any> {
     if (!Array.isArray(datos) || datos.length === 0) {
-        throw new BadRequestException({
-            statusCode: 400,
-            message: 'Debe proporcionar al menos un pago pendiente en el arreglo.',
-        });
+      throw new BadRequestException({
+        statusCode: 400,
+        message: 'Debe proporcionar al menos un pago pendiente en el arreglo.',
+      });
     }
 
     const erroresGlobales: string[] = [];
@@ -452,205 +452,213 @@ export class BancoService {
     // 📌 Validar que no haya pagos duplicados (misma persona en la misma planilla)
     const pagosSet = new Set();
     for (const pago of datos) {
-        const { numero_identificacion, pagos_acumulados } = pago;
+      const { numero_identificacion, pagos_acumulados } = pago;
 
-        // Validar que todas las propiedades estén definidas
-        const propiedadesObligatorias = [
-            'numero_identificacion', 'numero_cuenta', 'fecha_actualizacion',
-            'codigo_banco_ach', 'monto_pagado', 'monto_total_pagado', 'descripcion_resolucion', 'pagos_acumulados'
-        ];
+      // Validar que todas las propiedades estén definidas
+      const propiedadesObligatorias = [
+        'numero_identificacion', 'numero_cuenta', 'fecha_actualizacion',
+        'codigo_banco_ach', 'monto_pagado', 'monto_total_pagado', 'descripcion_resolucion', 'pagos_acumulados'
+      ];
 
-        const faltantes = propiedadesObligatorias.filter(prop => pago[prop] === undefined || pago[prop] === null);
+      const faltantes = propiedadesObligatorias.filter(prop => pago[prop] === undefined || pago[prop] === null);
 
-        if (faltantes.length > 0) {
-            throw new BadRequestException({
-                statusCode: 400,
-                message: `Faltan las siguientes propiedades obligatorias en el objeto de identidad ${pago.numero_identificacion}: ${faltantes.join(', ')}.`,
-            });
+      if (faltantes.length > 0) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: `Faltan las siguientes propiedades obligatorias en el objeto de identidad ${pago.numero_identificacion}: ${faltantes.join(', ')}.`,
+        });
+      }
+
+      // Validar que cada objeto dentro de pagos_acumulados tenga id_planilla
+      if (!Array.isArray(pagos_acumulados) || pagos_acumulados.length === 0) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: `El usuario ${pago.numero_identificacion} no tiene pagos acumulados.`,
+        });
+      }
+
+      for (const p of pagos_acumulados) {
+        if (!p.id_planilla) {
+          throw new BadRequestException({
+            statusCode: 400,
+            message: `Falta el campo id_planilla en el objeto pagos_acumulados del usuario ${numero_identificacion}.`,
+          });
         }
 
-        // Validar que cada objeto dentro de pagos_acumulados tenga id_planilla
-        if (!Array.isArray(pagos_acumulados) || pagos_acumulados.length === 0) {
-            throw new BadRequestException({
-                statusCode: 400,
-                message: `El usuario ${pago.numero_identificacion} no tiene pagos acumulados.`,
-            });
+        // Generar clave única para verificar duplicados (persona + planilla)
+        const claveUnica = `${numero_identificacion}-${p.id_planilla}`;
+        if (pagosSet.has(claveUnica)) {
+          throw new BadRequestException({
+            statusCode: 400,
+            message: `Se encontró un pago duplicado para la identidad ${numero_identificacion} en la planilla ${p.id_planilla}.`,
+          });
         }
-
-        for (const p of pagos_acumulados) {
-            if (!p.id_planilla) {
-                throw new BadRequestException({
-                    statusCode: 400,
-                    message: `Falta el campo id_planilla en el objeto pagos_acumulados del usuario ${numero_identificacion}.`,
-                });
-            }
-
-            // Generar clave única para verificar duplicados (persona + planilla)
-            const claveUnica = `${numero_identificacion}-${p.id_planilla}`;
-            if (pagosSet.has(claveUnica)) {
-                throw new BadRequestException({
-                    statusCode: 400,
-                    message: `Se encontró un pago duplicado para la identidad ${numero_identificacion} en la planilla ${p.id_planilla}.`,
-                });
-            }
-            pagosSet.add(claveUnica);
-        }
+        pagosSet.add(claveUnica);
+      }
     }
 
     try {
-        for (const pago of datos) {
-            const {
-                numero_identificacion,
-                numero_cuenta,
-                fecha_actualizacion,
-                codigo_banco_ach,
-                pagos_acumulados,
-                monto_pagado,
-                monto_total_pagado,
-                descripcion_resolucion,
-            } = pago;
+      for (const pago of datos) {
+        const {
+          numero_identificacion,
+          numero_cuenta,
+          fecha_actualizacion,
+          codigo_banco_ach,
+          pagos_acumulados,
+          monto_pagado,
+          monto_total_pagado,
+          descripcion_resolucion,
+        } = pago;
 
-            try {
-                const persona = await this.personaRepository.findOne({ where: { n_identificacion: numero_identificacion } });
-                if (!persona) {
-                    erroresGlobales.push(`No se encontró una persona con el número de identificación ${numero_identificacion}.`);
-                    continue;
-                }
-                const idPersona = persona.id_persona;
+        try {
+          const persona = await this.personaRepository.findOne({ where: { n_identificacion: numero_identificacion } });
+          if (!persona) {
+            erroresGlobales.push(`No se encontró una persona con el número de identificación ${numero_identificacion}.`);
+            continue;
+          }
+          const idPersona = persona.id_persona;
 
-                const idPlanillasArray = pagos_acumulados.map(p => p.id_planilla);
-                const placeholders = idPlanillasArray.map((_, i) => `:${i + 2}`).join(', ');
+          const idPlanillasArray = pagos_acumulados.map(p => p.id_planilla);
+          const placeholders = idPlanillasArray.map((_, i) => `:${i + 2}`).join(', ');
 
-                const errores: string[] = [];
-                const queryBeneficio = `
+          const errores: string[] = [];
+          const queryBeneficio = `
                     SELECT "ID_PLANILLA" FROM "NET_DETALLE_PAGO_BENEFICIO"
                     WHERE "ID_PERSONA" = :1
                     AND "ID_PLANILLA" IN (${placeholders})
                 `;
-                const beneficiosEncontrados = await this.entityManager.query(queryBeneficio, [idPersona, ...idPlanillasArray]);
+          const beneficiosEncontrados = await this.entityManager.query(queryBeneficio, [idPersona, ...idPlanillasArray]);
 
-                const planillasNoRelacionadas = idPlanillasArray.filter(
-                    id => !beneficiosEncontrados.some(p => p.ID_PLANILLA === id)
-                );
+          const planillasNoRelacionadas = idPlanillasArray.filter(
+            id => !beneficiosEncontrados.some(p => p.ID_PLANILLA === id)
+          );
 
-                if (planillasNoRelacionadas.length > 0) {
-                    errores.push(`Identidad ${numero_identificacion}: No tiene pagos registrados en las siguientes planillas: ${planillasNoRelacionadas.join(', ')}.`);
-                }
+          if (planillasNoRelacionadas.length > 0) {
+            errores.push(`Identidad ${numero_identificacion}: No tiene pagos registrados en las siguientes planillas: ${planillasNoRelacionadas.join(', ')}.`);
+          }
 
-                const queryPagadas = `
+          const queryPagadas = `
                     SELECT "ID_PLANILLA" FROM "NET_DETALLE_PAGO_BENEFICIO"
                     WHERE "ID_PERSONA" = :1
                     AND "ID_PLANILLA" IN (${placeholders})
                     AND "ESTADO" = 'PAGADA'
                 `;
-                const pagosYaPagados = await this.entityManager.query(queryPagadas, [idPersona, ...idPlanillasArray]);
+          const pagosYaPagados = await this.entityManager.query(queryPagadas, [idPersona, ...idPlanillasArray]);
 
-                if (pagosYaPagados.length > 0) {
-                    const planillasPagadas = pagosYaPagados.map(p => p.ID_PLANILLA);
-                    errores.push(`Identidad ${numero_identificacion}: Las siguientes planillas ya han sido procesadas previamente: ${planillasPagadas.join(', ')}.`);
-                }
+          if (pagosYaPagados.length > 0) {
+            const planillasPagadas = pagosYaPagados.map(p => p.ID_PLANILLA);
+            errores.push(`Identidad ${numero_identificacion}: Las siguientes planillas ya han sido procesadas previamente: ${planillasPagadas.join(', ')}.`);
+          }
 
-                if (errores.length > 0) {
-                    erroresGlobales.push(...errores);
-                    continue;
-                }
+          if (errores.length > 0) {
+            erroresGlobales.push(...errores);
+            continue;
+          }
 
-                const banco = await this.bancoRepository.findOne({ where: { id_banco: codigo_banco_ach } });
+          /* const banco = await this.bancoRepository.findOne({ where: { id_banco: codigo_banco_ach } });
 
-                if (!banco) {
-                    erroresGlobales.push(`Identidad ${numero_identificacion}: No se encontró un banco con el código ${codigo_banco_ach}.`);
-                    continue;
-                }
+          if (!banco) {
+              erroresGlobales.push(`Identidad ${numero_identificacion}: No se encontró un banco con el código ${codigo_banco_ach}.`);
+              continue;
+          }
 
-                let cuentaBancaria = await this.personaPorBancoRepository.findOne({
-                    where: {
-                        persona: { id_persona: idPersona },
-                        num_cuenta: numero_cuenta,
-                        banco: { id_banco: banco.id_banco },
-                    },
-                });
+          let cuentaBancaria = await this.personaPorBancoRepository.findOne({
+              where: {
+                  persona: { id_persona: idPersona },
+                  num_cuenta: numero_cuenta,
+                  banco: { id_banco: banco.id_banco },
+              },
+          });
 
-                let idAfBanco;
-                if (cuentaBancaria) {
-                    await this.personaPorBancoRepository.update(
-                        { id_af_banco: cuentaBancaria.id_af_banco },
-                        { estado: 'ACTIVO', fecha_activacion: new Date(), fecha_inactivacion: null }
-                    );
-                    idAfBanco = cuentaBancaria.id_af_banco;
-                } else {
-                    cuentaBancaria = this.personaPorBancoRepository.create({
-                        persona: persona,
-                        num_cuenta: numero_cuenta,
-                        banco: banco,
-                        estado: 'ACTIVO',
-                        fecha_activacion: new Date(),
-                    });
+          let idAfBanco;
+          if (cuentaBancaria) {
+              await this.personaPorBancoRepository.update(
+                  { id_af_banco: cuentaBancaria.id_af_banco },
+                  { estado: 'ACTIVO', fecha_activacion: new Date(), fecha_inactivacion: null }
+              );
+              idAfBanco = cuentaBancaria.id_af_banco;
+          } else {
+              cuentaBancaria = this.personaPorBancoRepository.create({
+                  persona: persona,
+                  num_cuenta: numero_cuenta,
+                  banco: banco,
+                  estado: 'ACTIVO',
+                  fecha_activacion: new Date(),
+              });
 
-                    const nuevaCuenta = await this.personaPorBancoRepository.save(cuentaBancaria);
-                    idAfBanco = nuevaCuenta.id_af_banco;
-                }
+              const nuevaCuenta = await this.personaPorBancoRepository.save(cuentaBancaria);
+              idAfBanco = nuevaCuenta.id_af_banco;
+          }
 
-                await this.personaPorBancoRepository.update(
-                    { persona: { id_persona: idPersona }, id_af_banco: Not(idAfBanco) },
-                    { estado: 'INACTIVO', fecha_inactivacion: new Date() }
-                );
+          await this.personaPorBancoRepository.update(
+              { persona: { id_persona: idPersona }, id_af_banco: Not(idAfBanco) },
+              { estado: 'INACTIVO', fecha_inactivacion: new Date() }
+          );
 
-                for (const idPlanilla of idPlanillasArray) {
-                    await this.entityManager.query(
-                        `UPDATE "NET_DETALLE_PAGO_BENEFICIO"
-                            SET "ESTADO" = 'PAGADA', "ID_AF_BANCO" = :1
-                            WHERE "ID_PLANILLA" = :2 AND "ID_PERSONA" = :3`,
-                        [idAfBanco, idPlanilla, idPersona]
-                    );
-                }
+          for (const idPlanilla of idPlanillasArray) {
+              await this.entityManager.query(
+                  `UPDATE "NET_DETALLE_PAGO_BENEFICIO"
+                      SET "ESTADO" = 'PAGADA', "ID_AF_BANCO" = :1
+                      WHERE "ID_PLANILLA" = :2 AND "ID_PERSONA" = :3`,
+                  [idAfBanco, idPlanilla, idPersona]
+              );
+          } */
 
-                await this.historialPagosPendientesRepository.save({
-                    id_persona: idPersona,
-                    id_af_banco: 1,
-                    monto_pagado,
-                    monto_total_pagado,
-                    descripcion_resolucion,
-                    id_planillas: idPlanillasArray.join(','), 
-                    fecha_actualizacion: fecha_actualizacion,
-                });
+          for (const idPlanilla of idPlanillasArray) {
+            await this.entityManager.query(
+              `UPDATE "NET_DETALLE_PAGO_BENEFICIO"
+                              SET "ESTADO" = 'PAGADA'
+                              WHERE "ID_PLANILLA" = :1 AND "ID_PERSONA" = :2`,
+              [idPlanilla, idPersona]
+            );
+          }
 
-                pagosProcesados.push({
-                    numero_identificacion,
-                    id_planillas: idPlanillasArray,
-                    monto_pagado,
-                });
-            } catch (error) {
-                erroresGlobales.push(`Error procesando pago para ${numero_identificacion}: ${error.message}`);
-            }
+          await this.historialPagosPendientesRepository.save({
+            id_persona: idPersona,
+            id_af_banco: 1,
+            monto_pagado,
+            monto_total_pagado,
+            descripcion_resolucion,
+            id_planillas: idPlanillasArray.join(','),
+            fecha_actualizacion: fecha_actualizacion,
+          });
+
+          pagosProcesados.push({
+            numero_identificacion,
+            id_planillas: idPlanillasArray,
+            monto_pagado,
+          });
+        } catch (error) {
+          erroresGlobales.push(`Error procesando pago para ${numero_identificacion}: ${error.message}`);
         }
+      }
 
-        if (erroresGlobales.length > 0) {
-            throw new BadRequestException({
-                statusCode: 400,
-                message: "Algunos pagos no se procesaron correctamente. Sin embargo, otros pagos fueron registrados con éxito.",
-                detalles: {
-                    pagos_exitosos: pagosProcesados.length,
-                    pagos_fallidos: erroresGlobales.length,
-                },
-                errors: erroresGlobales,
-            });
-        }
+      if (erroresGlobales.length > 0) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: "Algunos pagos no se procesaron correctamente. Sin embargo, otros pagos fueron registrados con éxito.",
+          detalles: {
+            pagos_exitosos: pagosProcesados.length,
+            pagos_fallidos: erroresGlobales.length,
+          },
+          errors: erroresGlobales,
+        });
+      }
 
-        return {
-            statusCode: 200,
-            message: 'Todos los pagos pendientes fueron procesados correctamente.'
-        };
+      return {
+        statusCode: 200,
+        message: 'Todos los pagos pendientes fueron procesados correctamente.'
+      };
     } catch (error) {
-        throw error instanceof BadRequestException
-            ? error
-            : new InternalServerErrorException({
-                statusCode: 500,
-                message: `Error interno al procesar los pagos pendientes: ${error.message}`,
-            });
+      throw error instanceof BadRequestException
+        ? error
+        : new InternalServerErrorException({
+          statusCode: 500,
+          message: `Error interno al procesar los pagos pendientes: ${error.message}`,
+        });
     }
   }
 
 
 
 }
- 

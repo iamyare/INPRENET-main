@@ -1,20 +1,25 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild, OnInit } from '@angular/core';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { ToastrService } from 'ngx-toastr';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { MontoDialogComponent } from '../../monto-dialog/monto-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
+import { AuthService } from 'src/app/services/auth.service';
+
 
 @Component({
   selector: 'app-cargarbef-ded',
   templateUrl: './cargarbef-ded.component.html',
   styleUrls: ['./cargarbef-ded.component.scss']
 })
-export class CargarbefDedComponent {
+export class CargarbefDedComponent implements OnInit {
+  @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
   @ViewChild('confirmarAsignacionModal') confirmarAsignacionModal!: TemplateRef<any>;
   @ViewChild('confirmarAsignacionBeneficiariosModal') confirmarAsignacionBeneficiariosModal!: TemplateRef<any>;
   @ViewChild('confirmarCalculoPlanillaModal') confirmarCalculoPlanillaModal!: TemplateRef<any>;
   @ViewChild('confirmarAsignacionComplementariaModal') confirmarAsignacionComplementariaModal!: TemplateRef<any>;
+  @ViewChild('confirmarAsignacion60RentasModal') confirmarAsignacion60RentasModal!: TemplateRef<any>;
   @ViewChild('confirmarAsignacionJubiladosModal') confirmarAsignacionJubiladosModal!: TemplateRef<any>;
 
   tipoPlanilla: any;
@@ -25,8 +30,28 @@ export class CargarbefDedComponent {
   idTipoPlanilla: any
 
   displayedColumns: string[] = ['causante', 'beneficio', 'select'];
+  userRole: { rol: string; modulo: string }[] = []; // Ahora userRole es un array de objetos
 
-  constructor(private planillaService: PlanillaService, private toastr: ToastrService, private SVCBeneficios: BeneficiosService, private dialog: MatDialog) { }
+  steps = [
+    { label: 'Cargar Beneficios', isActive: true },
+    { label: 'Cargar Deducciones de Terceros', isActive: false },
+    { label: 'Cargar Deducciones de Inprema', isActive: false },
+    { label: 'Cálculo de Planilla', isActive: false }
+  ];
+
+  rolesPermitidos = {
+    'Cargar Beneficios': ['TODO', 'CARGAR BENEFICIOS'],
+    'Cargar Deducciones de Terceros': ['TODO', 'CARGAR DEDUCCIONES TERCEROS'],
+    'Cargar Deducciones de Inprema': ['TODO', 'CARGAR DEDUCCIONES INPREMA'],
+    'Cálculo de Planilla': ['TODO', 'CALCULO DE PLANILLA']
+  };
+  tieneAcceso: boolean = false;
+
+  constructor(private authService: AuthService, private planillaService: PlanillaService, private toastr: ToastrService, private SVCBeneficios: BeneficiosService, private dialog: MatDialog) { }
+
+  ngOnInit() {
+    this.userRole = this.authService.getRolesModulos(); // Obtener el rol del usuario autenticado
+  }
 
   asignarBeneficiosOrdinariaBeneficiariosAfiliados() {
     this.planillaService.generarPlanillaOrdinaria('BENEFICIARIO SIN CAUSANTE,BENEFICIARIO').subscribe({
@@ -37,6 +62,35 @@ export class CargarbefDedComponent {
         this.toastr.error('Error al generar la planilla ordinaria para Beneficiarios y Afiliados', 'Error');
       }
     });
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      const event: MatTabChangeEvent = {
+        index: this.tabGroup.selectedIndex ?? 0,
+        tab: this.tabGroup._tabs.get(this.tabGroup.selectedIndex ?? 0)!
+      };
+      this.onTabChange(event);
+    });
+  }
+
+
+
+  onTabChange(event: MatTabChangeEvent) {
+    const index = this.steps.findIndex(step => step.label === event.tab.textLabel);
+    if (index !== -1) {
+      const step = this.steps[index];
+
+      const tieneAcceso = this.userRole.some(userRole => {
+        return this.rolesPermitidos[step.label as keyof typeof this.rolesPermitidos].includes(userRole.rol);
+      });
+
+      this.tieneAcceso = tieneAcceso;
+      if (!tieneAcceso) {
+        this.toastr.warning("No tiene acceso a esta sección.")
+      }
+
+    }
   }
 
   asignarBeneficiosOrdinariaJubiladosPensionados() {
@@ -52,6 +106,17 @@ export class CargarbefDedComponent {
 
   asignarBeneficiosComplementariaBeneficiariosAfiliados() {
     this.planillaService.generarPlanillaComplementaria('BENEFICIARIO').subscribe({
+      next: () => {
+        this.toastr.success('Planilla complementaria generada para Beneficiarios y Afiliados', 'Éxito');
+      },
+      error: err => {
+        this.toastr.error('Error al generar la planilla complementaria para Beneficiarios y Afiliados', 'Error');
+      }
+    });
+  }
+
+  asignarBeneficios60Rentas() {
+    this.planillaService.generarPlanilla60Rentas('JUBILADO,PENSIONADO', this.id_planilla).subscribe({
       next: () => {
         this.toastr.success('Planilla complementaria generada para Beneficiarios y Afiliados', 'Éxito');
       },
@@ -108,6 +173,19 @@ export class CargarbefDedComponent {
       },
       error: err => {
         this.toastr.error('Error en calcular Prioridad', 'Error');
+      }
+    });
+  }
+
+  confirmarAsignacion60Rentas(): void {
+    const dialogRef = this.dialog.open(this.confirmarAsignacion60RentasModal);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirmar') {
+        console.log('Asignación de beneficios complementaria confirmada');
+        this.asignarBeneficios60Rentas(); // Llama a tu método real
+      } else {
+        console.log('Asignación de beneficios complementaria cancelada');
       }
     });
   }

@@ -12,7 +12,6 @@ export class AfiliacionService {
 
   descargarConstanciaBeneficiarios(idPersona: string, empleadoDto: any): Observable<Blob> {
     const url = `${environment.API_URL}/api/documents/constancia-beneficiarios/${idPersona}`;
-    
     return this.http.post(url, empleadoDto, { responseType: 'blob' }).pipe(
         catchError((error) => {
             console.error('Error al descargar la constancia:', error);

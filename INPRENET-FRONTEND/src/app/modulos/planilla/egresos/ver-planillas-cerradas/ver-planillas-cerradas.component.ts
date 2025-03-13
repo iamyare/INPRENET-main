@@ -42,6 +42,14 @@ export class VerPlanillasCerradasComponent {
     },
     { header: 'Secuencia', col: 'secuencia', },
     {
+      header: 'Número Lote',
+      col: 'numero_lote',
+    },
+    {
+      header: 'Número de pagos',
+      col: 'numero_pagos',
+    },
+    {
       header: 'Estado',
       col: 'estado',
     },
@@ -80,6 +88,8 @@ export class VerPlanillasCerradasComponent {
         fecha_apertura: item.fecha_apertura,
         fecha_cierre: item.fecha_cierre,
         secuencia: item.secuencia,
+        numero_pagos: item.numero_pagos,
+        numero_lote: item.numero_lote,
         estado: item.estado,
         periodoInicio: convertirFecha(item.periodoInicio, false),
         periodoFinalizacion: convertirFecha(item.periodoFinalizacion, false),

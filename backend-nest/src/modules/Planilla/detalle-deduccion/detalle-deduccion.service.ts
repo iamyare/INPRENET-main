@@ -30,11 +30,13 @@ export class DetalleDeduccionService {
   ) { }
 
   async obtenerDetallePorDeduccionPorCodigoYGenerarExcel(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
     codDeduccion: number
   ): Promise<Buffer> {
+    const idsPlanillaArrayNumeros = (Array.isArray(idsPlanillaArray) ? idsPlanillaArray : [idsPlanillaArray]).map((id: any) => parseInt(id, 10));
     const detallesQuery = `
       SELECT 
           dd."ANIO" AS "anio",
@@ -55,6 +57,7 @@ export class DetalleDeduccionService {
           planilla."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
           AND planilla."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
           AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+          AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
           AND dd."ESTADO_APLICACION" = 'COBRADA'
           AND ded."COD_DEDUCCION" = :codDeduccion
       GROUP BY 
@@ -75,9 +78,8 @@ export class DetalleDeduccionService {
           persona."SEGUNDO_NOMBRE"
     `;
     try {
-      
       const detalles = await this.dataSource.query(detallesQuery, [periodoInicio, periodoFinalizacion, codDeduccion]);
-      
+
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Deducciones');
       worksheet.columns = [

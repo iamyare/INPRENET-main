@@ -2841,7 +2841,6 @@ async generateConstanciaBeneficiosFormatoNuevo(data: any, includeQR: boolean, dt
   return this.generateConstancia(data, includeQR, templateFunction);
 }
 
-
 async generateConstanciaBeneficiariosSinPago(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
   const templateFunction = async (data: any, includeQR: boolean) => {
     const today = new Date();

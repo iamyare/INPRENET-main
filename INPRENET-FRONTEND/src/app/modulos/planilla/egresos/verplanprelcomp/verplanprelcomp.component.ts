@@ -14,6 +14,13 @@ import { firstValueFrom } from 'rxjs';
 import { DialogSuboptionsComponent } from 'src/app/modulos/afiliacion/constancias/dialog-suboptions/dialog-suboptions.component';
 import { format, subMonths } from 'date-fns';
 
+interface BenEnPreliminar {
+  ID_PERSONA: number;
+  ID_DETALLE_PERSONA?: number;
+  ID_CAUSANTE?: number;
+  ID_BENEFICIO?: number;
+}
+
 @Component({
   selector: 'app-verplanprelcomp',
   templateUrl: './verplanprelcomp.component.html',
@@ -110,11 +117,12 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
 
     try {
       const response = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
+
       let totalBeneficios = 0;
       let deduccionesI = 0;
       let deduccionesT = 0;
 
-      this.datosTabl = response.map((item: any) => {
+      this.datosTabl = response.orderedResult.map((item: any) => {
         totalBeneficios += item.TOTAL_BENEFICIOS || 0;
         deduccionesI += item.TOTAL_DEDUCCIONES_INPREMA || 0;
         deduccionesT += item.TOTAL_DEDUCCIONES_TERCEROS || 0;
@@ -152,10 +160,11 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       return;
     }
     try {
-      this.dataPlan = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
+      const result = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
+      this.dataPlan = result;
 
-      if (this.dataPlan && this.dataPlan.length > 0) {
-        this.datosTabl = this.dataPlan.map((item: any) => ({
+      if (this.dataPlan.orderedResult && this.dataPlan.orderedResult.length > 0) {
+        this.datosTabl = this.dataPlan.orderedResult.map((item: any) => ({
           id_afiliado: item.ID_PERSONA,
           n_identificacion: item.N_IDENTIFICACION,
           TIPO_PERSONA: item.TIPO_PERSONA,
@@ -265,8 +274,12 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirmar') {
         console.log('Cierre de planilla confirmado');
+
+        const ben = this.dataPlan.resultBenEnPrel
+        console.log(ben);
+
         // Aquí puedes implementar la lógica para cerrar la planilla.
-        this.updatePlanillaACerrada(this.codigoPlanilla);
+        this.updatePlanillaACerrada(this.codigoPlanilla, ben);
       } else {
         console.log('Cierre de planilla cancelado');
       }
@@ -274,8 +287,8 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   }
 
 
-  updatePlanillaACerrada(codigo_planilla: string): void {
-    this.planillaService.updatePlanillaACerrada(codigo_planilla).subscribe({
+  updatePlanillaACerrada(codigo_planilla: string, benefPrelim: BenEnPreliminar[]): void {
+    this.planillaService.updatePlanillaACerrada(codigo_planilla, benefPrelim).subscribe({
       next: () => {
         this.toastr.success('Estado de la planilla actualizado con éxito');
         this.detallePlanilla.estado = 'CERRADA';
@@ -296,7 +309,6 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   }
 
   getElemSeleccionados(event: any) {
-    console.log(event);
     this.planillaSelected = event
     this.codigoPlanilla = this.planillaSelected?.codigo_planilla;
 

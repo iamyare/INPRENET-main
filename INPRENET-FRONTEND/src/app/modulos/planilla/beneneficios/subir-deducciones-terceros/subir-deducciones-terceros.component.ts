@@ -25,6 +25,7 @@ export class SubirDeduccionesTercerosComponent {
   deduccionSeleccionada: number | null = null;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
+  @Input() tipoDeduccion: any;
   @Input() id_planilla: any;
   @Input() idTipoPlanilla: any;
   @Input() tipo_planilla: any;
@@ -38,6 +39,7 @@ export class SubirDeduccionesTercerosComponent {
 
   ngOnInit(): void {
     this.obtenerCentrosTrabajo();
+
   }
 
   onFileSelected(event: any) {
@@ -178,7 +180,11 @@ export class SubirDeduccionesTercerosComponent {
   obtenerCentrosTrabajo() {
     this.centrosTrabajoService.obtenerCentrosTrabajoTipoE().subscribe({
       next: (response) => {
-        this.centrosTrabajo = response;
+        if (this.tipoDeduccion == 'INPREMA') {
+          this.centrosTrabajo = response.filter(item => item.id_centro_trabajo === 1);
+        } else if (this.tipoDeduccion == 'TERCEROS') {
+          this.centrosTrabajo = response.filter(item => item.id_centro_trabajo !== 1);
+        }
       },
       error: (error) => {
         this.toastr.error('Error al obtener los centros de trabajo', 'Error');
@@ -260,8 +266,13 @@ export class SubirDeduccionesTercerosComponent {
   }
 
   downloadExample() {
+    let encabezados: string[] = []
     // Define los encabezados del archivo CSV
-    const encabezados = ["anio", "mes", "dni", "codigoDeduccion", "montoTotal"];
+    if (this.tipoDeduccion == 'INPREMA') {
+      encabezados = ["anio", "mes", "dni", "codigoDeduccion", "montoTotal", "N_PRESTAMO_INPREMA", "TIPO_PRESTAMO_INPREMA"];
+    } else if (this.tipoDeduccion == 'TERCEROS') {
+      encabezados = ["anio", "mes", "dni", "codigoDeduccion", "montoTotal"];
+    }
 
     // Convierte los encabezados y los datos en formato CSV con punto y coma como separador
     const filas = [

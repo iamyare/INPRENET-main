@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus, InternalServerErrorException, HttpCode, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpException, HttpStatus, HttpCode, Put, UseGuards } from '@nestjs/common';
 import { BancoService } from './banco.service';
-import { CreateBancoDto } from './dto/create-banco.dto';
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ResultadosPagosDto } from './dto/ResultadosPagos.dto';
 import { NotificacionPagosPendientesDto } from './dto/pago_pendiente.dto';
 import { ApiKeyGuard } from './guards/api-key.guard';
+import { CuadrePlanillasDto } from './dto/cuadre-planillas.dto';
 
 @ApiTags('banco')
 @Controller('banco')
@@ -31,6 +31,18 @@ export class BancoController {
     @Body() datos: { correo: string; otp: string; nuevaContrasena: string }
   ): Promise<{ message: string }> {
     return this.bancoService.actualizarContrasena(datos.correo, datos.otp, datos.nuevaContrasena);
+  }
+
+  @Post('/pagos/cuadre-rechazos')
+  @UseGuards(ApiKeyGuard)
+  @ApiHeader({ name: 'API_KEY_BANCO', required: true, description: 'Clave de autenticación del banco' })
+  @ApiOperation({ summary: 'Registrar cuadre de planillas con el banco' })
+  @ApiResponse({ status: 200, description: 'Cuadre de planillas procesado correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 500, description: 'Error interno al procesar el cuadre' })
+  async procesarCuadrePlanillas(@Body() datos: CuadrePlanillasDto) {
+    return this.bancoService.procesarCuadrePlanillas(datos);
   }
 
   @Get('/planilla/disponibles')

@@ -130,7 +130,7 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: false
       },
       {
-        header: 'monto retroactivo',
+        header: 'Monto retroactivo / Extraordinario',
         col: 'monto_retroactivo',
         moneda: true,
         isEditable: true
@@ -142,7 +142,7 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: true
       },
       {
-        header: 'Dias de la ultima renta',
+        header: 'Dias de la última renta',
         col: 'ultimo_dia_ultima_renta',
         isEditable: true
       },
@@ -381,9 +381,9 @@ export class VerEditarBeneficioAfilComponent {
 
           { nombre: 'periodo_finalizacion', tipo: 'date', requerido: false, etiqueta: 'Última Fecha de pago', editable: false, validadores: [] },
 
-          { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: true, etiqueta: 'Número de rentas a pagar en la primera cuota', editable: true, validadores: [Validators.min(1), noDecimalValidator(), Validators.required] },
+          { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: true, etiqueta: 'Número de rentas a pagar en la primera cuota', editable: true, validadores: [Validators.min(0), noDecimalValidator(), Validators.required] },
 
-          { nombre: 'monto_retroactivo', tipo: 'number', requerido: false, etiqueta: 'monto retroactivo', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
+          { nombre: 'monto_retroactivo', tipo: 'number', requerido: false, etiqueta: 'monto retroactivo / extraordinario', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
           { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
 
           { nombre: 'monto_total', tipo: 'number', requerido: false, etiqueta: 'Monto total', editable: false, validadores: [Validators.min(0), montoTotalValidator()] },
@@ -402,9 +402,9 @@ export class VerEditarBeneficioAfilComponent {
 
         { nombre: 'monto_por_periodo', tipo: 'number', requerido: false, etiqueta: 'Monto por periodo', editable: true, validadores: [Validators.min(0), montoTotalValidator(), Validators.required] },
 
-        { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: false, etiqueta: 'Número de rentas a pagar en la primera cuota', editable: true, validadores: [Validators.min(1), noDecimalValidator(), Validators.required] },
+        { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: false, etiqueta: 'Número de rentas a pagar en la primera cuota', editable: true, validadores: [Validators.min(0), noDecimalValidator(), Validators.required] },
 
-        { nombre: 'monto_retroactivo', tipo: 'number', requerido: false, etiqueta: 'monto_retroactivo', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
+        { nombre: 'monto_retroactivo', tipo: 'number', requerido: false, etiqueta: 'monto retroactivo / extraordinario', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
         { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
 
         { nombre: 'estado_solicitud', validadores: [Validators.required], tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }, { label: "SUSPENDIDO", value: "SUSPENDIDO" }], etiqueta: 'Estado Solicitud', editable: true },

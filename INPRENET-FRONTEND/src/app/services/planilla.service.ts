@@ -19,11 +19,16 @@ export class PlanillaService {
     }) as Observable<Blob>;
   }
 
-  getDetalleBeneficiosYDeduccionesPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
-    const params = new HttpParams()
+  getDetalleBeneficiosYDeduccionesPorPeriodo(idsPlanilla: number[], periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
+    let params = new HttpParams()
       .set('periodoInicio', periodoInicio)
       .set('periodoFinalizacion', periodoFinalizacion)
       .set('idTiposPlanilla', idTiposPlanilla.join(','));
+    // Si el backend espera múltiples valores de idTiposPlanilla, usa append en lugar de set
+    idsPlanilla.forEach(idsPlanilla => {
+      params = params.append('idsPlanilla', idsPlanilla);
+    });
+
 
     return this.http.get<any>(`${environment.API_URL}/api/planilla/detalle-beneficios-deducciones-periodo`, { params }).pipe(
       catchError(error => {
@@ -140,25 +145,40 @@ export class PlanillaService {
     );
   }
 
-  exportarExcelDetalleCompletoPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<Blob> {
+  exportarExcelDetalleCompletoPorPeriodo(
+    idsPlanilla: number[],
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[]
+  ): Observable<Blob> {
+
     const url = `${environment.API_URL}/api/planilla/generar-reporte-completo-pago-cerrada`;
     let params = new HttpParams()
       .set('periodoInicio', periodoInicio)
       .set('periodoFinalizacion', periodoFinalizacion)
-      .set('idTiposPlanilla', idTiposPlanilla.join(','))
       .set('estadoBen', 'PAGADA')
       .set('estadoDed', 'COBRADA');
 
+    // Si el backend espera múltiples valores de idTiposPlanilla, usa append en lugar de set
+    idTiposPlanilla.forEach(id => {
+      params = params.append('idTiposPlanilla', id.toString());
+    });
+    // Si el backend espera múltiples valores de idTiposPlanilla, usa append en lugar de set
+    idsPlanilla.forEach(idsPlanilla => {
+      params = params.append('idsPlanilla', idsPlanilla);
+    });
+
     return this.http.get<Blob>(url, { params, responseType: 'blob' as 'json' }).pipe(
       catchError(error => {
-        console.error('Error al descargar el archivo Excel preliminar', error);
-        this.toastr.error('Error al descargar el archivo Excel preliminar');
-        return throwError(() => new Error('Error al descargar el archivo Excel preliminar'));
+        console.error('Error al descargar el archivo Excel:', error);
+        this.toastr.error('No se pudo descargar el archivo. Inténtalo nuevamente.');
+        return throwError(() => new Error(error.message || 'Error al descargar el archivo Excel'));
       })
     );
   }
 
   descargarReporteDetallePago(
+    idsPlanilla: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[]
@@ -170,6 +190,11 @@ export class PlanillaService {
       .set('periodoFinalizacion', periodoFinalizacion)
       .set('idTiposPlanilla', idTiposPlanilla.join(','));
 
+    // Si el backend espera múltiples valores de idTiposPlanilla, usa append en lugar de set
+    idsPlanilla.forEach(idsPlanilla => {
+      params = params.append('idsPlanilla', idsPlanilla);
+    });
+
     return this.http.get(url, { params, responseType: 'blob' }).pipe(
       catchError(error => {
         console.error('Error al descargar el archivo Excel', error);
@@ -180,6 +205,7 @@ export class PlanillaService {
   }
 
   descargarReporteDetallePagoSCB(
+    idsPlanilla: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[]
@@ -191,6 +217,11 @@ export class PlanillaService {
       .set('periodoFinalizacion', periodoFinalizacion)
       .set('idTiposPlanilla', idTiposPlanilla.join(','));
 
+    // Si el backend espera múltiples valores de idTiposPlanilla, usa append en lugar de set
+    idsPlanilla.forEach(idsPlanilla => {
+      params = params.append('idsPlanilla', idsPlanilla);
+    });
+
     return this.http.get(url, { params, responseType: 'blob' }).pipe(
       catchError(error => {
         console.error('Error al descargar el archivo Excel', error);
@@ -200,9 +231,12 @@ export class PlanillaService {
     );
   }
 
-  updatePlanillaACerrada(codigo_planilla: string): Observable<void> {
+  updatePlanillaACerrada(codigo_planilla: string, benefPrelim: any[]): Observable<void> {
     const url = `${environment.API_URL}/api/planilla/actualizar-planilla-a-cerrada`;
-    return this.http.patch<void>(url, null, { params: { codigo_planilla } }).pipe(
+
+    return this.http.patch<void>(url, { benefPrelim }, {
+      params: { codigo_planilla } // Si necesitas enviar parámetros en la URL
+    }).pipe(
       catchError(error => {
         console.error('Error al actualizar el estado de la planilla', error);
         this.toastr.error('Error al actualizar el estado de la planilla');
@@ -300,6 +334,21 @@ export class PlanillaService {
     );
   }
 
+  generarPlanilla60Rentas(tiposPersona: string, id_planilla: number): Observable<void> {
+    const accessToken = sessionStorage.getItem('token');
+    const url = `${environment.API_URL}/api/planilla/generar-60Rentas/${accessToken}`;
+
+
+    return this.http.post<void>(url, { tipos_persona: tiposPersona, id_planilla: id_planilla }).pipe(
+      catchError(error => {
+        const errorMessage = error.error.message || 'Error al generar planilla 60Rentas';
+        this.toastr.error(errorMessage);
+        console.error('Error al generar planilla 60Rentas', error);
+        return throwError(error);
+      })
+    );
+  }
+
   generarPlanillaOrdinaria(tiposPersona: string): Observable<void> {
     const accessToken = sessionStorage.getItem('token');
 
@@ -325,11 +374,16 @@ export class PlanillaService {
     );
   }
 
-  getTotalBeneficiosYDeduccionesPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
-    const params = new HttpParams()
+  getTotalBeneficiosYDeduccionesPorPeriodo(idsPlanilla: number[], periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
+    let params = new HttpParams()
       .set('periodoInicio', periodoInicio)
       .set('periodoFinalizacion', periodoFinalizacion)
       .set('idTiposPlanilla', idTiposPlanilla.join(','));
+
+    // Si el backend espera múltiples valores de idTiposPlanilla, usa append en lugar de set
+    idsPlanilla.forEach(idsPlanilla => {
+      params = params.append('idsPlanilla', idsPlanilla);
+    });
 
     return this.http.get<any>(`${environment.API_URL}/api/planilla/beneficios-deducciones-periodo`, { params }).pipe(
       catchError(error => {
@@ -339,12 +393,16 @@ export class PlanillaService {
     );
   }
 
-  getTotalMontosPorBancoYPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
-    const params = new HttpParams()
+  getTotalMontosPorBancoYPeriodo(idsPlanilla: number[], periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
+    let params = new HttpParams()
       .set('periodoInicio', periodoInicio)
       .set('periodoFinalizacion', periodoFinalizacion)
       .set('idTiposPlanilla', idTiposPlanilla.join(','));
 
+    // Si el backend espera múltiples valores de idTiposPlanilla, usa append en lugar de set
+    idsPlanilla.forEach(idsPlanilla => {
+      params = params.append('idsPlanilla', idsPlanilla);
+    });
     return this.http.get<any>(`${environment.API_URL}/api/planilla/montos-banco-periodo`, { params }).pipe(
       catchError(error => {
         console.error('Error al obtener montos por banco en el periodo', error);
@@ -619,6 +677,22 @@ export class PlanillaService {
       catchError((error) => {
         console.error(`Error al obtener los préstamos para el DNI ${dni}:`, error);
         return throwError(() => new Error('No se pudieron obtener los préstamos. Inténtelo más tarde.'));
+      })
+    );
+  }
+
+  obtenerInformacionPlanillasbyFechas(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
+    let params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion)
+      .set('idTiposPlanilla', idTiposPlanilla.join(','))
+
+    const url = `${environment.API_URL}/api/planilla/obtenerInformacionPlanillasbyFechas`;
+
+    return this.http.get(url, { params }).pipe(
+      catchError((error) => {
+        console.error(`Error al obtener planillas en los rangos de fecha ${periodoInicio} - ${periodoFinalizacion}`, error);
+        return throwError(() => new Error('No se pudieron obtener las planillas. Inténtelo más tarde.'));
       })
     );
   }

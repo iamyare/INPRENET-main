@@ -140,20 +140,27 @@ export class EditarDialogComponent implements OnInit {
           .get('monto_primera_cuota')
           ?.patchValue(Number(monto_primera_cuota).toFixed(2), { emitEvent: false });
         values.monto_primera_cuota = Number(monto_primera_cuota).toFixed(2)
+      } else if (num_rentas_pagar_primer_pago == 0) {
+        /* monto_primera_cuota = (num_rentas_pagar_primer_pago * monto_por_periodo) + monto_retroactivo
+        this.formGroup
+          .get('monto_primera_cuota')
+          ?.patchValue(Number(monto_primera_cuota).toFixed(2), { emitEvent: false });
+        values.monto_primera_cuota = Number(monto_primera_cuota).toFixed(2) */
+
       }
 
-      if (monto_primera_cuota) {
+      if (monto_primera_cuota && num_rentas_aprobadas == 1) {
         monto_ultima_cuota = Number(monto_primera_cuota).toFixed(2) || 0
         this.formGroup
           .get('monto_ultima_cuota')
           ?.patchValue(monto_ultima_cuota, { emitEvent: false });
         values.monto_ultima_cuota = monto_ultima_cuota
       } else {
-        monto_ultima_cuota = 0.00
+        /* monto_ultima_cuota = 0.00
         this.formGroup
           .get('monto_ultima_cuota')
           ?.patchValue(monto_ultima_cuota, { emitEvent: false });
-        values.monto_ultima_cuota = monto_ultima_cuota
+        values.monto_ultima_cuota = monto_ultima_cuota */
       }
 
       // Calcular `periodo_finalizacion` basado en `fecha_efectividad`
@@ -261,10 +268,13 @@ export class EditarDialogComponent implements OnInit {
       errors.push('Este campo es requerido.');
     }
     if (control.errors['minlength']) {
-      errors.push(`Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`);
+      errors.push(`Debe tener al menos ${control.errors['minlength'].minlength} caracteres.`);
+    }
+    if (control.errors['min']) {
+      errors.push(`El valor minimo a ingresar es: ${control.errors['min'].min} caracteres.`);
     }
     if (control.errors['maxlength']) {
-      errors.push(`No puede tener más de ${control.errors['maxlength'].requiredLength} caracteres.`);
+      errors.push(`No puede tener más de ${control.errors['maxlength'].maxlength} caracteres.`);
     }
     if (control.errors['pattern']) {
       errors.push('El formato no es válido.');

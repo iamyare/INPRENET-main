@@ -67,16 +67,22 @@ export class DeduccionesService {
   }
 
   descargarExcelDeduccionPorCodigo(
+    idsPlanilla: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
     codDeduccion: number
   ): Observable<Blob> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('periodoInicio', periodoInicio)
       .set('periodoFinalizacion', periodoFinalizacion)
       .set('idTiposPlanilla', idTiposPlanilla.join(','))
       .set('codDeduccion', codDeduccion.toString());
+
+    // Agregar múltiples valores de `idsPlanilla` al FormData
+    idsPlanilla.forEach(id => {
+      params = params.append('idsPlanilla', id);
+    });
 
     return this.http.get(`${environment.API_URL}/api/detalle-deduccion/detallePorCodDeduccion`, {
       params,

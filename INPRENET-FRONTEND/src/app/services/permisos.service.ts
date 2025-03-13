@@ -144,7 +144,15 @@ export class PermisosService {
             title: 'Proceso de Planilla',
             permisos: [
               { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+              { role: 'CREAR PLANILLA', module: 'PLANILLA' },
+              /* { role: 'CARGAR BENEFICIOS DEDUCCIONES', module: 'PLANILLA' }, */
+              { role: 'VER PLANILLA PRELIMINAR', module: 'PLANILLA' },
+              { role: 'VER PLANILLA CERRADA', module: 'PLANILLA' },
+              { role: 'CARGAR BENEFICIOS', module: 'PLANILLA' },
+              { role: 'CARGAR DEDUCCIONES INPREMA', module: 'PLANILLA' },
+              { role: 'CARGAR DEDUCCIONES TERCEROS', module: 'PLANILLA' },
+              { role: 'CALCULO DE PLANILLA', module: 'PLANILLA' },
+              /* { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
             ]
           },
           'planilla/Egresos/ver-planillas': {

@@ -3,7 +3,7 @@ import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { EntityManager, In, QueryFailedError, Raw, Repository } from 'typeorm';
+import { Between, EntityManager, In, QueryFailedError, Raw, Repository, SelectQueryBuilder } from 'typeorm';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Persona_Por_Banco } from '../../banco/entities/net_persona-banco.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -36,6 +36,13 @@ interface Deduccion {
   ID_PERSONA: number;
   TOTAL_DEDUCCIONES_INPREMA?: number;
   TOTAL_DEDUCCIONES_TERCEROS?: number;
+}
+
+interface BenEnPreliminar {
+  ID_PERSONA: number;
+  ID_DETALLE_PERSONA?: number;
+  ID_CAUSANTE?: number;
+  ID_BENEFICIO?: number;
 }
 
 @Injectable()
@@ -825,11 +832,11 @@ export class PlanillaService {
   }
 
   async getBeneficiosPorPeriodo(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
-
     let query = "";
 
     if (JSON.stringify(idTiposPlanilla) == '[1,2]') {
@@ -871,6 +878,7 @@ FROM
             NET_PERSONA_POR_BANCO ppb ON PB.ID_AF_BANCO = ppb.ID_AF_BANCO 
         WHERE 
             PB.ESTADO = 'PAGADA' 
+            AND PER.ID_PLANILLA IN (${idsPlanillaArray})
             AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
             AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
             AND PER.ID_TIPO_PLANILLA = 1 
@@ -940,6 +948,7 @@ FROM
             NET_PERSONA_POR_BANCO ppb ON PB.ID_AF_BANCO = ppb.ID_AF_BANCO 
         WHERE 
             PB.ESTADO = 'PAGADA'
+            AND PER.ID_PLANILLA IN (${idsPlanillaArray})
             AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
             AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
             AND PER.ID_TIPO_PLANILLA = 2 
@@ -981,7 +990,8 @@ GROUP BY
           "NET_PERSONA_POR_BANCO" ppb 
           ON detBs."ID_AF_BANCO" = ppb."ID_AF_BANCO"
         WHERE 
-        plan.ESTADO = 'CERRADA' AND
+          plan.ESTADO = 'CERRADA' AND
+          plan.ID_PLANILLA IN (${idsPlanillaArray}) AND
           plan."PERIODO_INICIO" >= :periodoInicio AND
           plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
           plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')}) AND
@@ -1006,6 +1016,7 @@ GROUP BY
   }
 
   async getDeduccionesInpremaPorPeriodoCCB(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
@@ -1028,6 +1039,7 @@ GROUP BY
         ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
       WHERE 
         plan."PERIODO_INICIO" >= :periodoInicio AND
+        plan.ID_PLANILLA IN (${idsPlanillaArray}) AND
         plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ded."ID_CENTRO_TRABAJO" = 1
@@ -1050,6 +1062,7 @@ GROUP BY
   }
 
   async getDeduccionesTercerosPorPeriodoCCB(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
@@ -1073,6 +1086,7 @@ GROUP BY
       WHERE 
         plan."PERIODO_INICIO" >= :periodoInicio AND
         plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
+        plan.ID_PLANILLA IN (${idsPlanillaArray}) AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
         AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
@@ -1093,11 +1107,11 @@ GROUP BY
   }
 
   async getBeneficiosPorPeriodoSC(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
-
     let query = "";
 
     if (JSON.stringify(idTiposPlanilla) == '[1,2]') {
@@ -1136,9 +1150,11 @@ GROUP BY
             WHERE
                 PB."ID_AF_BANCO" IS NULL AND
                 PB."ESTADO" = 'PAGADA' AND
-                PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
-                AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-                AND PER.ID_TIPO_PLANILLA = 1
+                PB."ESTADO" = 'PAGADA' AND
+                PER.ID_PLANILLA IN (${idsPlanillaArray}) AND
+                PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
+                PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
+                PER.ID_TIPO_PLANILLA = 1
             GROUP BY
                 PB.ID_PERSONA,
                 PB.ID_DETALLE_PERSONA,
@@ -1190,6 +1206,7 @@ GROUP BY
                  WHERE SUB.ID_PERSONA = PB.ID_PERSONA
                    AND SUB.ID_DETALLE_PERSONA = PB.ID_DETALLE_PERSONA
                    AND SUB.ID_CAUSANTE = PB.ID_CAUSANTE
+                   AND PER.ID_PLANILLA IN (${idsPlanillaArray}) 
                    AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
                    AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
                    AND PER.ID_TIPO_PLANILLA = 2) AS TOTAL_MONTO_A_PAGAR
@@ -1265,10 +1282,12 @@ GROUP BY
   }
 
   async getDeduccionesInpremaPorPeriodoSC(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
+
     const query = `
       SELECT 
         ded."ID_DEDUCCION" AS "ID_DEDUCCION",
@@ -1285,9 +1304,10 @@ GROUP BY
         "NET_PLANILLA" plan 
         ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
       WHERE 
-        plan."PERIODO_INICIO" >= :periodoInicio AND
-          plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
-        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        plan."PERIODO_INICIO" >= :periodoInicio
+        AND plan."PERIODO_FINALIZACION" <= :periodoFinalizacion
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND plan.ID_PLANILLA IN (${idsPlanillaArray})
         AND ded."ID_CENTRO_TRABAJO" = 1
         AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
         AND dedd."ID_AF_BANCO" IS NULL
@@ -1308,6 +1328,7 @@ GROUP BY
   }
 
   async getDeduccionesTercerosPorPeriodoSC(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
@@ -1328,9 +1349,10 @@ GROUP BY
         "NET_PLANILLA" plan 
         ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
       WHERE 
-        plan."PERIODO_INICIO" >= :periodoInicio AND
-        plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
-        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        plan."PERIODO_INICIO" >= :periodoInicio
+        AND plan."PERIODO_FINALIZACION" <= :periodoFinalizacion
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND plan.ID_PLANILLA IN (${idsPlanillaArray})
         AND dedd."ID_AF_BANCO" IS NULL
         AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
         AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
@@ -1351,18 +1373,23 @@ GROUP BY
   }
 
   async getDeduccionesTotalesPorPeriodo(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any> {
     try {
+      const idsPlanillaArrayNumeros = (Array.isArray(idsPlanillaArray) ? idsPlanillaArray : [idsPlanillaArray]).map((id: any) => parseInt(id, 10));
+
       const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodoCCB(
+        idsPlanillaArrayNumeros,
         periodoInicio,
         periodoFinalizacion,
         idTiposPlanilla
       );
 
       const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodoCCB(
+        idsPlanillaArrayNumeros,
         periodoInicio,
         periodoFinalizacion,
         idTiposPlanilla
@@ -1376,18 +1403,21 @@ GROUP BY
   }
 
   async getTotalPorBeneficiosYDeduccionesPorPeriodo(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any> {
     try {
-      const beneficios = await this.getBeneficiosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-      const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodoCCB(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-      const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodoCCB(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const idsPlanillaArrayNumeros = (Array.isArray(idsPlanillaArray) ? idsPlanillaArray : [idsPlanillaArray]).map((id: any) => parseInt(id, 10));
 
-      const beneficiosSC = await this.getBeneficiosPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-      const deduccionesInpremaSC = await this.getDeduccionesInpremaPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-      const deduccionesTercerosSC = await this.getDeduccionesTercerosPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const beneficios = await this.getBeneficiosPorPeriodo(idsPlanillaArrayNumeros, periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodoCCB(idsPlanillaArrayNumeros, periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodoCCB(idsPlanillaArrayNumeros, periodoInicio, periodoFinalizacion, idTiposPlanilla);
+
+      const beneficiosSC = await this.getBeneficiosPorPeriodoSC(idsPlanillaArrayNumeros, periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const deduccionesInpremaSC = await this.getDeduccionesInpremaPorPeriodoSC(idsPlanillaArrayNumeros, periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const deduccionesTercerosSC = await this.getDeduccionesTercerosPorPeriodoSC(idsPlanillaArrayNumeros, periodoInicio, periodoFinalizacion, idTiposPlanilla);
 
       return { beneficios, deduccionesInprema, deduccionesTerceros, beneficiosSC, deduccionesInpremaSC, deduccionesTercerosSC };
     } catch (error) {
@@ -1397,6 +1427,7 @@ GROUP BY
   }
 
   async getBeneficiosPorPeriodoDetallado(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
@@ -1421,9 +1452,10 @@ GROUP BY
         "NET_PERSONA" per 
         ON detBs."ID_PERSONA" = per."ID_PERSONA"
       WHERE 
-        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
-        plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
-        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaStr})
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+        AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaStr})
+        AND plan."ID_PLANILLA" IN (${idsPlanillaArray})
         AND detBs."ESTADO" = 'PAGADA'
       ORDER BY 
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
@@ -1439,6 +1471,7 @@ GROUP BY
   }
 
   async getDeduccionesInpremaPorPeriodoDetallado(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
@@ -1464,10 +1497,11 @@ GROUP BY
         "NET_PERSONA" per 
         ON dedd."ID_PERSONA" = per."ID_PERSONA"
       WHERE 
-        dedd.ESTADO_APLICACION = 'COBRADA' AND
-        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
-        plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
-        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaStr})
+        dedd.ESTADO_APLICACION = 'COBRADA'
+        AND plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+        AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaStr})
+        AND plan."ID_PLANILLA" IN (${idsPlanillaArray})
         AND ded."ID_CENTRO_TRABAJO" = 1
       ORDER BY 
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
@@ -1484,6 +1518,7 @@ GROUP BY
   }
 
   async getDeduccionesTercerosPorPeriodoDetallado(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
@@ -1509,10 +1544,11 @@ GROUP BY
         "NET_PERSONA" per 
         ON dedd."ID_PERSONA" = per."ID_PERSONA"
       WHERE 
-        dedd.ESTADO_APLICACION = 'COBRADA' AND
-        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
-        plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
-        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaList})
+        dedd.ESTADO_APLICACION = 'COBRADA' 
+        AND plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+        AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaList})
+        AND plan."ID_PLANILLA" IN (${idsPlanillaArray})
         AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
       ORDER BY 
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
@@ -1529,13 +1565,17 @@ GROUP BY
   }
 
   async getDetallePorBeneficiosYDeduccionesPorPeriodo(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any> {
     try {
+      const idsPlanillaArrayNumeros = (Array.isArray(idsPlanillaArray) ? idsPlanillaArray : [idsPlanillaArray]).map((id: any) => parseInt(id, 10));
+
       // Obtener detalles de beneficios
       const beneficiosDetallados = await this.getBeneficiosPorPeriodoDetallado(
+        idsPlanillaArrayNumeros,
         periodoInicio,
         periodoFinalizacion,
         idTiposPlanilla,
@@ -1543,6 +1583,7 @@ GROUP BY
 
       // Obtener detalles de deducciones INPREMA
       const deduccionesInpremaDetalladas = await this.getDeduccionesInpremaPorPeriodoDetallado(
+        idsPlanillaArrayNumeros,
         periodoInicio,
         periodoFinalizacion,
         idTiposPlanilla,
@@ -1550,6 +1591,7 @@ GROUP BY
 
       // Obtener detalles de deducciones de terceros
       const deduccionesTercerosDetalladas = await this.getDeduccionesTercerosPorPeriodoDetallado(
+        idsPlanillaArrayNumeros,
         periodoInicio,
         periodoFinalizacion,
         idTiposPlanilla,
@@ -1567,10 +1609,12 @@ GROUP BY
   }
 
   async getTotalPorBancoYPeriodo(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
+    const idsPlanillaArrayNumeros = (Array.isArray(idsPlanillaArray) ? idsPlanillaArray : [idsPlanillaArray]).map((id: any) => parseInt(id, 10));
     const beneficiosQuery = `
         SELECT
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
@@ -1582,6 +1626,7 @@ GROUP BY
       WHERE
         p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND p."ID_PLANILLA" IN (${idsPlanillaArray})
         AND dpb."ESTADO" = 'PAGADA'
         AND dpb."ESTADO" != 'RECHAZADO'
       GROUP BY 
@@ -1601,6 +1646,7 @@ GROUP BY
       WHERE
         p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND p."ID_PLANILLA" IN (${idsPlanillaArray})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
         AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
         AND d."ID_CENTRO_TRABAJO" = 1
@@ -1621,6 +1667,7 @@ GROUP BY
       WHERE
         p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND p."ID_PLANILLA" IN (${idsPlanillaArray})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
         AND d."ID_DEDUCCION" NOT IN (1,2,3,44,51)
         AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
@@ -2869,6 +2916,29 @@ GROUP BY
     }
   }
 
+  async generar_60Rentas(token: string, tipos_persona: string, v_id_planilla: number): Promise<void> {
+    const decoded = this.jwtService.verify(token);
+    const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
+    const id_usuario_empresa_in = estadoPP.id_usuario_empresa;
+
+    try {
+      await this.entityManager.query(
+        `BEGIN
+            InsertarPlanilla60Rentas(:tipos_persona, :id_usuario_empresa_in, :v_id_planilla);
+        END;`,
+        [tipos_persona, id_usuario_empresa_in, v_id_planilla]
+      );
+    } catch (error) {
+      if (error.message.includes('No se encontró una planilla activa de 60 rentas para Jubilados o pencionados')) {
+        throw new InternalServerErrorException('No se encontró una planilla activa para Beneficiarios');
+      } else if (error.message.includes('No se encontró una planilla activa para Jubilados')) {
+        throw new InternalServerErrorException('No se encontró una planilla activa para Jubilados');
+      } else {
+        throw new InternalServerErrorException('Error ejecutando el procedimiento de planilla complementaria');
+      }
+    }
+  }
+
   async generarPlanillaOrdinaria(token: string, tipos_persona: string): Promise<void> {
     const decoded = this.jwtService.verify(token);
 
@@ -3311,7 +3381,7 @@ GROUP BY
   }
 
 
-  async getPlanillasPreliminares(codigo_planilla: string): Promise<Persona[]> {
+  async getPlanillasPreliminares(codigo_planilla: string): Promise<any> {
     const query = `
       SELECT DISTINCT
         per."N_IDENTIFICACION" AS "N_IDENTIFICACION",
@@ -3415,10 +3485,21 @@ GROUP BY
       GROUP BY 
         per."ID_PERSONA"
     `;
+
+    const queryBenEnPreliminar = `
+      select 
+        dpb.id_persona, dpb.id_detalle_persona, dpb.id_causante, dpb.id_beneficio from net_detalle_pago_beneficio dpb
+      join net_planilla p on p.id_planilla = dpb.id_planilla
+      where 
+        p.codigo_planilla = :codigo_planilla 
+        and dpb.estado = 'EN PRELIMINAR'
+    `;
+
     try {
       const result: Persona[] = await this.entityManager.query(query, [codigo_planilla]);
       const resultI: Deduccion[] = await this.entityManager.query(queryI, [codigo_planilla]);
       const resultT: Deduccion[] = await this.entityManager.query(queryT, [codigo_planilla]);
+      const resultBenEnPrel: BenEnPreliminar[] = await this.entityManager.query(queryBenEnPreliminar, [codigo_planilla]);
 
       const deduccionesInpremaMap = new Map(resultI.map(d => [d.ID_PERSONA, d]));
       const deduccionesTercerosMap = new Map(resultT.map(d => [d.ID_PERSONA, d]));
@@ -3440,7 +3521,8 @@ GROUP BY
 
       const orderedResult = newResult.sort((a, b) => a.TOTAL_NETO - b.TOTAL_NETO);
 
-      return orderedResult;
+      return { orderedResult: orderedResult, resultBenEnPrel: resultBenEnPrel };
+
     } catch (error) {
       this.logger.error('Error ejecutando la consulta', error.stack);
       throw new InternalServerErrorException('Error ejecutando la consulta');
@@ -3570,45 +3652,126 @@ GROUP BY
   }
 
 
-  async updatePlanillaACerrada(codigo_planilla: string): Promise<void> {
+  async updatePlanillaACerrada(codigo_planilla: string, benefPrelim: any): Promise<void> {
+    const temp = benefPrelim.benefPrelim;
+
     const queryUpdateBeneficios = `
-    UPDATE NET_DETALLE_PAGO_BENEFICIO dpb
-    SET dpb.ESTADO = 'PAGADA'
-    WHERE dpb.ID_PLANILLA IN (
-      SELECT pl.ID_PLANILLA
-      FROM NET_PLANILLA pl
-      WHERE pl.CODIGO_PLANILLA = :codigo_planilla AND
-      dpb.ESTADO = 'EN PRELIMINAR'
-    )
-  `;
+      UPDATE NET_DETALLE_PAGO_BENEFICIO dpb
+      SET dpb.ESTADO = 'PAGADA'
+      WHERE dpb.ID_PLANILLA IN (
+        SELECT pl.ID_PLANILLA FROM NET_PLANILLA pl WHERE pl.CODIGO_PLANILLA = :codigo_planilla
+      )
+      AND dpb.ESTADO = 'EN PRELIMINAR'
+    `;
 
     const queryUpdateDeducciones = `
-    UPDATE NET_DETALLE_DEDUCCION dd
-    SET dd.ESTADO_APLICACION = 'COBRADA'
-    WHERE dd.ID_PLANILLA IN (
-      SELECT pl.ID_PLANILLA
-      FROM NET_PLANILLA pl
-      WHERE pl.CODIGO_PLANILLA = :codigo_planilla AND
-      dd.ESTADO_APLICACION = 'EN PRELIMINAR'
-    )
-  `;
+      UPDATE NET_DETALLE_DEDUCCION dd
+      SET dd.ESTADO_APLICACION = 'COBRADA'
+      WHERE dd.ID_PLANILLA IN (
+        SELECT pl.ID_PLANILLA FROM NET_PLANILLA pl WHERE pl.CODIGO_PLANILLA = :codigo_planilla
+      )
+      AND dd.ESTADO_APLICACION = 'EN PRELIMINAR'
+    `;
 
     const queryUpdatePlanilla = `
-    UPDATE NET_PLANILLA pl
-    SET pl.ESTADO = 'CERRADA',
-    pl.FECHA_CIERRE = SYSDATE
-    WHERE pl.CODIGO_PLANILLA = :codigo_planilla
-  `;
+      UPDATE NET_PLANILLA pl
+      SET pl.ESTADO = 'CERRADA',
+          pl.FECHA_CIERRE = SYSDATE
+      WHERE pl.CODIGO_PLANILLA = :codigo_planilla
+    `;
+
+    // 1️⃣ Verificar si la tabla temporal existe
+    const queryCheckTempTable = `
+      SELECT COUNT(*) AS count FROM USER_TABLES WHERE TABLE_NAME = 'TEMP_BENEFICIOS_AFILIADO_COMPLEM'
+    `;
+
+    // 2️⃣ Crear la tabla temporal solo si no existe
+    const queryCreateTempTable = `
+      CREATE TABLE TEMP_BENEFICIOS_AFILIADO_COMPLEM (
+          ID_PERSONA NUMBER NOT NULL,
+          ID_DETALLE_PERSONA NUMBER NOT NULL,
+          ID_CAUSANTE NUMBER NOT NULL,
+          ID_BENEFICIO NUMBER NOT NULL,
+          CODIGO_PLANILLA VARCHAR2(30) NOT NULL,
+          FECHA_INSERCION DATE DEFAULT SYSDATE NOT NULL
+      )
+    `;
+
+    const queryTruncateTempTable = `
+    DELETE FROM TEMP_BENEFICIOS_AFILIADO_COMPLEM
+    WHERE codigo_planilla = '${codigo_planilla}'`;
+
+    // 3️⃣ Query optimizado para inserción por lotes
+    const buildInsertQuery = (data: any[]) => {
+      // Mapea los datos a las filas de inserción
+      const values = data.map((_, i) =>
+        `INTO TEMP_BENEFICIOS_AFILIADO_COMPLEM (ID_PERSONA, ID_DETALLE_PERSONA, ID_CAUSANTE, ID_BENEFICIO, CODIGO_PLANILLA) 
+        VALUES (:${i * 5 + 1}, :${i * 5 + 2}, :${i * 5 + 3}, :${i * 5 + 4}, :${i * 5 + 5})`
+      ).join(" ");
+
+      // Retorna la consulta con la lista de valores y el SELECT DUAL para Oracle
+      return `INSERT ALL ${values} SELECT 1 FROM DUAL`;
+    };
+
+    const queryUpdateBeneficioAfiliado = `
+      UPDATE NET_DETALLE_BENEFICIO_AFILIADO nba
+      SET nba.LISTO_COMPLEMENTARIA = 'NO'
+      WHERE EXISTS (
+        SELECT 1 FROM TEMP_BENEFICIOS_AFILIADO_COMPLEM temp
+        WHERE nba.ID_PERSONA = temp.ID_PERSONA
+          AND nba.ID_DETALLE_PERSONA = temp.ID_DETALLE_PERSONA
+          AND nba.ID_CAUSANTE = temp.ID_CAUSANTE
+          AND nba.ID_BENEFICIO = temp.ID_BENEFICIO
+          AND  temp.CODIGO_PLANILLA = '${codigo_planilla}'
+      )`;
 
     const queryParams: any = { codigo_planilla };
-    try {
-      await this.entityManager.query(queryUpdateBeneficios, queryParams);
-      await this.entityManager.query(queryUpdateDeducciones, queryParams);
-      await this.entityManager.query(queryUpdatePlanilla, queryParams);
-    } catch (error) {
-      this.logger.error('Error ejecutando la actualización', error.stack);
-      throw new InternalServerErrorException('Error ejecutando la actualización');
+
+    if (temp.length > 0) {
+      const result = await this.entityManager.query(queryCheckTempTable);
+      const tableExists = result[0]?.COUNT > 0;
+
+      if (!tableExists) {
+        await this.entityManager.query(queryCreateTempTable);
+      }
+
+      // 4️⃣ Vaciar la tabla temporal antes de insertar nuevos datos
+      await this.entityManager.query(queryTruncateTempTable);
+
+      // Insertar datos en la tabla temporal en lotes
+      const batchSize = 1000;
+      for (let i = 0; i < temp.length; i += batchSize) {
+        const batch = temp.slice(i, i + batchSize);
+        const queryInsertTempData = buildInsertQuery(batch);
+
+        // Aquí, aplanamos los datos para formar el array de parámetros, manteniendo el orden de los valores.
+        const batchParams = batch.flatMap(item => [
+          item.ID_PERSONA,
+          item.ID_DETALLE_PERSONA,
+          item.ID_CAUSANTE,
+          item.ID_BENEFICIO,
+          codigo_planilla,
+        ]);
+
+        await this.entityManager.transaction(async (transactionalEntityManager) => {
+          try {
+
+            await transactionalEntityManager.query(queryUpdateBeneficios, queryParams);
+            await transactionalEntityManager.query(queryUpdateDeducciones, queryParams);
+            await transactionalEntityManager.query(queryUpdatePlanilla, queryParams);
+
+            await transactionalEntityManager.query(queryInsertTempData, batchParams);
+            await transactionalEntityManager.query(queryUpdateBeneficioAfiliado);
+
+          } catch (error) {
+            console.error('Error en la transacción:', error);
+            this.logger.error('Error ejecutando la transacción', error.stack);
+            throw new InternalServerErrorException('Error ejecutando la transacción');
+          }
+        });
+      }
     }
+    this.logger.log(`Planilla ${codigo_planilla} actualizada exitosamente.`);
   }
 
   private handleException(error: any): void {
@@ -3728,7 +3891,7 @@ GROUP BY
     }
   }
 
-  async descargarReporteCompleto(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[], estadoBen: string, estadoDed: string): Promise<any> {
+  async descargarReporteCompleto(idsPlanillaArray: number[], idTiposPlanilla: number[], periodoInicio: string, periodoFinalizacion: string, estadoBen: string, estadoDed: string): Promise<any> {
     let JubPenQuery = '';
     let BenQuery = '';
     let resultbeneficiosben: any;
@@ -3736,12 +3899,12 @@ GROUP BY
 
 
     try {
-      console.log(idTiposPlanilla);
-
-      if (idTiposPlanilla.includes(1) || idTiposPlanilla.includes(3)) {
-        const idTipoPlanilla = idTiposPlanilla.find(num => num === 1 || num === 3);
+      const idsPlanillaArrayNumeros = (Array.isArray(idsPlanillaArray) ? idsPlanillaArray : [idsPlanillaArray]).map((id: any) => parseInt(id, 10));
+      const idTiposPlanillaNumeros = (Array.isArray(idTiposPlanilla) ? idTiposPlanilla : [idTiposPlanilla]).map((id: any) => parseInt(id, 10));
 
 
+      if (idTiposPlanillaNumeros.includes(1) || idTiposPlanillaNumeros.includes(3)) {
+        const idTipoPlanilla = idTiposPlanillaNumeros.find(num => num === 1 || num === 3);
         JubPenQuery = `SELECT
               NP.N_IDENTIFICACION,
              TRIM(
@@ -3794,6 +3957,7 @@ GROUP BY
                   ON PAGO.ID_PLANILLA = PL.ID_PLANILLA
               WHERE
                   PL.ID_TIPO_PLANILLA IN (${idTipoPlanilla})
+                  AND PL.ID_PLANILLA IN (${idsPlanillaArrayNumeros})
                   AND PAGO.ESTADO =  '${estadoBen}'
                   AND PL.PERIODO_INICIO >= TO_DATE('${periodoInicio}', 'DD/MM/YYYY')
                   AND PL.PERIODO_FINALIZACION <= TO_DATE('${periodoFinalizacion}', 'DD/MM/YYYY')
@@ -3811,6 +3975,7 @@ GROUP BY
                   ON DED.ID_PLANILLA = PL.ID_PLANILLA
               WHERE
                   PL.ID_TIPO_PLANILLA IN (${idTipoPlanilla})
+                  AND PL.ID_PLANILLA IN (${idsPlanillaArrayNumeros})
                   AND DED.ESTADO_APLICACION = '${estadoDed}'
                   AND PL.PERIODO_INICIO >= TO_DATE('${periodoInicio}', 'DD/MM/YYYY')
                   AND PL.PERIODO_FINALIZACION <= TO_DATE('${periodoFinalizacion}', 'DD/MM/YYYY')
@@ -3842,11 +4007,9 @@ GROUP BY
           };
         }).sort((a, b) => a.neto - b.neto);
 
+      } if (idTiposPlanillaNumeros.includes(2) || idTiposPlanillaNumeros.includes(4)) {
 
-
-      } if (idTiposPlanilla.includes(2) || idTiposPlanilla.includes(4)) {
-
-        const idTipoPlanilla = idTiposPlanilla.find(num => num === 2 || num === 4);
+        const idTipoPlanilla = idTiposPlanillaNumeros.find(num => num === 2 || num === 4);
 
         BenQuery = `WITH PAGO_TOTAL AS (
             SELECT
@@ -3874,7 +4037,8 @@ GROUP BY
             JOIN NET_PLANILLA PL
                 ON PAGO.ID_PLANILLA = PL.ID_PLANILLA
             WHERE
-                PL.ID_TIPO_PLANILLA IN (${idTipoPlanilla})
+                 PL.ID_TIPO_PLANILLA IN (${idTipoPlanilla})
+                  AND PL.ID_PLANILLA IN (${idsPlanillaArrayNumeros})
                 AND PAGO.ESTADO = '${estadoBen}'
                 AND PL.PERIODO_INICIO >= TO_DATE('${periodoInicio}', 'DD/MM/YYYY')
                 AND PL.PERIODO_FINALIZACION <= TO_DATE('${periodoFinalizacion}', 'DD/MM/YYYY')
@@ -3896,7 +4060,8 @@ GROUP BY
                 JOIN NET_PLANILLA PL
                     ON NET_DETALLE_DEDUCCION.ID_PLANILLA = PL.ID_PLANILLA
                 WHERE
-                    PL.ID_TIPO_PLANILLA IN (${idTipoPlanilla})
+                     PL.ID_TIPO_PLANILLA IN (${idTipoPlanilla})
+                  AND PL.ID_PLANILLA IN (${idsPlanillaArrayNumeros})
                     AND NET_DETALLE_DEDUCCION.ESTADO_APLICACION =  '${estadoDed}'
                     AND PL.PERIODO_INICIO >= TO_DATE('${periodoInicio}', 'DD/MM/YYYY')
                     AND PL.PERIODO_FINALIZACION <= TO_DATE('${periodoFinalizacion}', 'DD/MM/YYYY')
@@ -3981,10 +4146,137 @@ GROUP BY
           };
         }).sort((a, b) => a.neto - b.neto);
 
+      } if (idTiposPlanillaNumeros.includes(10)) {
+        const idTipoPlanilla = idTiposPlanillaNumeros.find(num => num === 10);
+        JubPenQuery = `SELECT
+              NP.N_IDENTIFICACION,
+             TRIM(
+                NP.primer_apellido ||
+                CASE
+                    WHEN NP.segundo_apellido IS NOT NULL THEN ' ' || TRIM(NP.segundo_apellido)
+                    ELSE ''
+                END ||
+                CASE
+                    WHEN NP.primer_nombre IS NOT NULL THEN ' ' || TRIM(NP.primer_nombre)
+                    ELSE ''
+                END ||
+                CASE
+                    WHEN NP.segundo_nombre IS NOT NULL THEN ' ' || TRIM(NP.segundo_nombre)
+                    ELSE ''
+                END ||
+                CASE
+                    WHEN NP.tercer_nombre IS NOT NULL THEN ' ' || TRIM(NP.tercer_nombre)
+                    ELSE ''
+                END
+              ) AS "NOMBRE_COMPLETO",
+              EXTRACT(YEAR FROM PL.PERIODO_INICIO) AS ANIO,
+              EXTRACT(MONTH FROM PL.PERIODO_INICIO) AS MES,
+              PAGO_TOTAL.ID_BENEFICIO,
+              PAGO_TOTAL.TOTAL_MONTO_A_PAGAR AS TOTAL,
+              COALESCE(DEDUCCION_TOTAL.INPREMA, 0) AS DEDUCCIONES_INPREMA,
+              COALESCE(DEDUCCION_TOTAL.TERCEROS, 0) AS DEDUCCIONES_TERCEROS,
+              PAGO_TOTAL.TOTAL_MONTO_A_PAGAR - 
+              (COALESCE(DEDUCCION_TOTAL.INPREMA, 0) + COALESCE(DEDUCCION_TOTAL.TERCEROS, 0)) AS NETO,
+              PAGO_TOTAL.NUM_CUENTA,
+              PAGO_TOTAL.CODIGO_ACH,
+              PAGO_TOTAL.NOMBRE_BANCO
+          FROM (
+              SELECT
+                  PAGO.ID_PERSONA,
+                  B.NUM_CUENTA,
+                  BA.CODIGO_ACH,
+                  MAX(CASE WHEN PAGO.ID_BENEFICIO NOT IN (6, 27) THEN PAGO.ID_BENEFICIO ELSE NULL END) AS ID_BENEFICIO,
+                  SUM(PAGO.MONTO_A_PAGAR) AS TOTAL_MONTO_A_PAGAR,
+                  PAGO.ID_PLANILLA,
+                  BA.NOMBRE_BANCO
+              FROM
+                  NET_DETALLE_PAGO_BENEFICIO PAGO
+              LEFT JOIN NET_PERSONA_POR_BANCO B 
+                  ON PAGO.ID_PERSONA = B.ID_PERSONA 
+                  AND B.ID_AF_BANCO = PAGO.ID_AF_BANCO
+              LEFT JOIN NET_BANCO BA 
+                  ON B.ID_BANCO = BA.ID_BANCO
+              JOIN NET_PLANILLA PL 
+                  ON PAGO.ID_PLANILLA = PL.ID_PLANILLA
+              WHERE
+                  PL.ID_TIPO_PLANILLA IN (${idTipoPlanilla})
+                  AND PL.ID_PLANILLA IN (${idsPlanillaArrayNumeros})
+                  AND PAGO.ESTADO =  '${estadoBen}'
+                  AND PL.PERIODO_INICIO >= TO_DATE('${periodoInicio}', 'DD/MM/YYYY')
+                  AND PL.PERIODO_FINALIZACION <= TO_DATE('${periodoFinalizacion}', 'DD/MM/YYYY')
+              GROUP BY
+                  PAGO.ID_PERSONA, B.NUM_CUENTA, BA.CODIGO_ACH, PAGO.ID_PLANILLA, BA.NOMBRE_BANCO
+          ) PAGO_TOTAL
+          LEFT JOIN (
+              SELECT
+                  ID_PERSONA,
+                  SUM(CASE WHEN ID_DEDUCCION IN (1, 2, 3, 75, 76, 45, 51) THEN MONTO_APLICADO ELSE 0 END) AS INPREMA,
+                  SUM(CASE WHEN ID_DEDUCCION NOT IN (1, 2, 3, 75, 76, 45, 51) THEN MONTO_APLICADO ELSE 0 END) AS TERCEROS
+              FROM
+                  NET_DETALLE_DEDUCCION DED
+              JOIN NET_PLANILLA PL 
+                  ON DED.ID_PLANILLA = PL.ID_PLANILLA
+              WHERE
+                  PL.ID_TIPO_PLANILLA IN (${idTipoPlanilla})
+                  AND PL.ID_PLANILLA IN (${idsPlanillaArrayNumeros})
+                  AND DED.ESTADO_APLICACION = '${estadoDed}'
+                  AND PL.PERIODO_INICIO >= TO_DATE('${periodoInicio}', 'DD/MM/YYYY')
+                  AND PL.PERIODO_FINALIZACION <= TO_DATE('${periodoFinalizacion}', 'DD/MM/YYYY')
+              GROUP BY
+                  ID_PERSONA
+          ) DEDUCCION_TOTAL 
+          ON PAGO_TOTAL.ID_PERSONA = DEDUCCION_TOTAL.ID_PERSONA
+          JOIN NET_PERSONA NP 
+              ON PAGO_TOTAL.ID_PERSONA = NP.ID_PERSONA
+          JOIN NET_PLANILLA PL 
+              ON PAGO_TOTAL.ID_PLANILLA = PL.ID_PLANILLA
+        `;
+
+        const beneficiosjub = await this.entityManager.query(JubPenQuery);
+        resultbeneficiosjub = beneficiosjub.map(beneficio => {
+          return {
+            dni: beneficio?.N_IDENTIFICACION?.trim(),
+            num_cuenta: beneficio?.NUM_CUENTA?.trim(),
+            codigo_ach: beneficio?.CODIGO_ACH,
+            nombre_banco: beneficio?.NOMBRE_BANCO?.trim(),
+            nombre_completo: beneficio?.NOMBRE_COMPLETO?.trim(),
+            anio: beneficio?.ANIO,
+            mes: beneficio?.MES,
+            id_beneficio: beneficio?.ID_BENEFICIO,
+            total: beneficio?.TOTAL,
+            deducciones_inprema: beneficio?.DEDUCCIONES_INPREMA,
+            deducciones_terceros: beneficio?.DEDUCCIONES_TERCEROS,
+            neto: beneficio?.NETO,
+          };
+        }).sort((a, b) => a.neto - b.neto);
       }
+
       return { resultbeneficiosjub: resultbeneficiosjub, resultbeneficiosben: resultbeneficiosben };
 
+    } catch (error) {
+      console.error('Error al obtener los detalles preliminares de pago por planilla:', error);
+      throw new InternalServerErrorException('Error al obtener los detalles preliminares de pago por planilla.');
+    }
+  }
 
+  async obtenerInformacionPlanillasbyFechas(
+    periodoInicio: Date,
+    periodoFinalizacion: Date,
+    idTiposPlanilla: number[]
+  ): Promise<any> {
+    const inicioFormateado = format(periodoInicio, 'dd/MM/yyyy');
+    const finFormateado = format(periodoFinalizacion, 'dd/MM/yyyy');
+
+    try {
+      const planillas = await this.planillaRepository
+        .createQueryBuilder('planilla')
+        .where(` "planilla"."PERIODO_INICIO" >= TO_DATE('${inicioFormateado}', 'DD/MM/YYYY')
+    AND "planilla"."PERIODO_FINALIZACION" <= TO_DATE('${finFormateado}', 'DD/MM/YYYY')`)
+        .andWhere('planilla.tipoPlanilla IN (:...tipoPlanilla)', { tipoPlanilla: idTiposPlanilla })
+        .andWhere('planilla.ESTADO = \'CERRADA\'')
+        .getMany();
+
+      return planillas;
     } catch (error) {
       console.error('Error al obtener los detalles preliminares de pago por planilla:', error);
       throw new InternalServerErrorException('Error al obtener los detalles preliminares de pago por planilla.');
@@ -4230,6 +4522,105 @@ GROUP BY
       }).sort((a, b) => a.neto - b.neto);
 
       return { resultbeneficiosben: resultbeneficiosben };
+    } if (idTipoPlanilla == 10) {
+      JubPenQuery = `SELECT
+            NP.N_IDENTIFICACION,
+           TRIM(
+              NP.primer_apellido ||
+              CASE
+                  WHEN NP.segundo_apellido IS NOT NULL THEN ' ' || TRIM(NP.segundo_apellido)
+                  ELSE ''
+              END ||
+              CASE
+                  WHEN NP.primer_nombre IS NOT NULL THEN ' ' || TRIM(NP.primer_nombre)
+                  ELSE ''
+              END ||
+              CASE
+                  WHEN NP.segundo_nombre IS NOT NULL THEN ' ' || TRIM(NP.segundo_nombre)
+                  ELSE ''
+              END ||
+              CASE
+                  WHEN NP.tercer_nombre IS NOT NULL THEN ' ' || TRIM(NP.tercer_nombre)
+                  ELSE ''
+              END
+            ) AS "NOMBRE_COMPLETO",
+            EXTRACT(YEAR FROM PL.PERIODO_INICIO) AS ANIO,
+            EXTRACT(MONTH FROM PL.PERIODO_INICIO) AS MES,
+            PAGO_TOTAL.ID_BENEFICIO,
+            PAGO_TOTAL.TOTAL_MONTO_A_PAGAR AS TOTAL,
+            COALESCE(DEDUCCION_TOTAL.INPREMA, 0) AS DEDUCCIONES_INPREMA,
+            COALESCE(DEDUCCION_TOTAL.TERCEROS, 0) AS DEDUCCIONES_TERCEROS,
+            PAGO_TOTAL.TOTAL_MONTO_A_PAGAR - 
+            (COALESCE(DEDUCCION_TOTAL.INPREMA, 0) + COALESCE(DEDUCCION_TOTAL.TERCEROS, 0)) AS NETO,
+            PAGO_TOTAL.NUM_CUENTA,
+            PAGO_TOTAL.CODIGO_ACH,
+            PAGO_TOTAL.NOMBRE_BANCO
+        FROM (
+            SELECT
+                PAGO.ID_PERSONA,
+                B.NUM_CUENTA,
+                BA.CODIGO_ACH,
+                MAX(CASE WHEN PAGO.ID_BENEFICIO NOT IN (6, 27) THEN PAGO.ID_BENEFICIO ELSE NULL END) AS ID_BENEFICIO,
+                SUM(PAGO.MONTO_A_PAGAR) AS TOTAL_MONTO_A_PAGAR,
+                PAGO.ID_PLANILLA,
+                BA.NOMBRE_BANCO
+            FROM
+                NET_DETALLE_PAGO_BENEFICIO PAGO
+            LEFT JOIN NET_PERSONA_POR_BANCO B 
+                ON PAGO.ID_PERSONA = B.ID_PERSONA 
+                AND B.ID_AF_BANCO = PAGO.ID_AF_BANCO
+            LEFT JOIN NET_BANCO BA 
+                ON B.ID_BANCO = BA.ID_BANCO
+            JOIN NET_PLANILLA PL 
+                ON PAGO.ID_PLANILLA = PL.ID_PLANILLA
+            WHERE
+                PL.ID_TIPO_PLANILLA = ${idTipoPlanilla}
+                AND PAGO.ESTADO =  '${estadoBen}'
+                AND PL.ID_PLANILLA =  ${idPlanilla}
+            GROUP BY
+                PAGO.ID_PERSONA, B.NUM_CUENTA, BA.CODIGO_ACH, PAGO.ID_PLANILLA, BA.NOMBRE_BANCO
+        ) PAGO_TOTAL
+        LEFT JOIN (
+            SELECT
+                ID_PERSONA,
+                SUM(CASE WHEN ID_DEDUCCION IN (1, 2, 3, 75, 76, 45, 51) THEN MONTO_APLICADO ELSE 0 END) AS INPREMA,
+                SUM(CASE WHEN ID_DEDUCCION NOT IN (1, 2, 3, 75, 76, 45, 51) THEN MONTO_APLICADO ELSE 0 END) AS TERCEROS
+            FROM
+                NET_DETALLE_DEDUCCION DED
+            JOIN NET_PLANILLA PL 
+                ON DED.ID_PLANILLA = PL.ID_PLANILLA
+            WHERE
+                PL.ID_TIPO_PLANILLA = ${idTipoPlanilla}
+                AND DED.ESTADO_APLICACION = '${estadoDed}'
+                AND PL.ID_PLANILLA = ${idPlanilla}
+            GROUP BY
+                ID_PERSONA
+        ) DEDUCCION_TOTAL 
+        ON PAGO_TOTAL.ID_PERSONA = DEDUCCION_TOTAL.ID_PERSONA
+        JOIN NET_PERSONA NP 
+            ON PAGO_TOTAL.ID_PERSONA = NP.ID_PERSONA
+        JOIN NET_PLANILLA PL 
+            ON PAGO_TOTAL.ID_PLANILLA = PL.ID_PLANILLA
+      `;
+      const beneficiosjub = await this.entityManager.query(JubPenQuery);
+      const resultbeneficiosjub = beneficiosjub.map(beneficio => {
+        return {
+          dni: beneficio?.N_IDENTIFICACION?.trim(),
+          num_cuenta: beneficio?.NUM_CUENTA?.trim(),
+          codigo_ach: beneficio?.CODIGO_ACH,
+          nombre_banco: beneficio?.NOMBRE_BANCO?.trim(),
+          nombre_completo: beneficio?.NOMBRE_COMPLETO?.trim(),
+          anio: beneficio?.ANIO,
+          mes: beneficio?.MES,
+          id_beneficio: beneficio?.ID_BENEFICIO,
+          total: beneficio?.TOTAL,
+          deducciones_inprema: beneficio?.DEDUCCIONES_INPREMA,
+          deducciones_terceros: beneficio?.DEDUCCIONES_TERCEROS,
+          neto: beneficio?.NETO,
+        };
+      }).sort((a, b) => a.neto - b.neto);
+
+      return { resultbeneficiosjub: resultbeneficiosjub };
     }
 
     try {
@@ -4241,10 +4632,14 @@ GROUP BY
   }
 
   async obtenerDetallePagoBeneficioPorPlanillaPrueba(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
+
+    const idsPlanillaArrayNumeros = (Array.isArray(idsPlanillaArray) ? idsPlanillaArray : [idsPlanillaArray]).map((id: any) => parseInt(id, 10));
+
     const beneficiosQuery = `
         SELECT
             banco.codigo_ach AS "codigo_banco", 
@@ -4282,6 +4677,7 @@ GROUP BY
             planilla."PERIODO_INICIO" >= :1
             AND planilla."PERIODO_FINALIZACION" <= :2
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+            AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
             AND detallePago."ESTADO" = 'PAGADA'
         GROUP BY
             banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, persona.tercer_nombre, persona.n_identificacion, persona.ID_PERSONA
@@ -4303,6 +4699,7 @@ GROUP BY
             planilla."PERIODO_INICIO" >= :periodoInicio
             AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+            AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
             AND dd."ESTADO_APLICACION" = 'COBRADA'
             --AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
             AND dd.ID_AF_BANCO IS NOT NULL
@@ -4327,6 +4724,7 @@ GROUP BY
             planilla."PERIODO_INICIO" >= :periodoInicio
             AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+            AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
             AND dd."ESTADO_APLICACION" = 'COBRADA'
             --AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
             AND dd.ID_AF_BANCO IS NOT NULL
@@ -4366,10 +4764,14 @@ GROUP BY
   }
 
   async generarReporteSinCuenta(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
+
+    const idsPlanillaArrayNumeros = (Array.isArray(idsPlanillaArray) ? idsPlanillaArray : [idsPlanillaArray]).map((id: any) => parseInt(id, 10));
+
     const beneficiosQuery = `
          SELECT
             banco.codigo_ach AS "codigo_banco", 
@@ -4407,6 +4809,7 @@ GROUP BY
             planilla."PERIODO_INICIO" >= :1
             AND planilla."PERIODO_FINALIZACION" <= :2
             AND planilla."ID_TIPO_PLANILLA" IN (1,2)
+            AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
             AND detallePago."ESTADO" = 'PAGADA'
             AND personaPorBanco."ID_PERSONA" IS NULL 
             AND personaPorBanco."NUM_CUENTA" IS NULL
@@ -4433,6 +4836,7 @@ GROUP BY
             planilla."PERIODO_INICIO" >= :periodoInicio
             AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
             AND planilla."ID_TIPO_PLANILLA" IN (1,2)
+            AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
             AND dd."ESTADO_APLICACION" = 'COBRADA'
             --AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
             AND ded."ID_CENTRO_TRABAJO" = 1
@@ -4457,6 +4861,7 @@ GROUP BY
             planilla."PERIODO_INICIO" >= :periodoInicio
             AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+            AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
             AND dd."ESTADO_APLICACION" = 'COBRADA'
             AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
             AND ded."ID_CENTRO_TRABAJO" != 1
@@ -4588,7 +4993,6 @@ GROUP BY
   ): Promise<void> {
     try {
       const workbook = new ExcelJS.Workbook();
-
       const procesarHoja = (nombreHoja: string, datos: any[]) => {
         if (!datos) return;
         const sheet = workbook.addWorksheet(nombreHoja);

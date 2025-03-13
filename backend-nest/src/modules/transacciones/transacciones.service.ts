@@ -4,8 +4,6 @@ import { NET_MOVIMIENTO_CUENTA } from './entities/net_movimiento_cuenta.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { net_persona } from '../Persona/entities/net_persona.entity';
-import { NET_TIPO_CUENTA } from './entities/net_tipo_cuenta.entity';
-import { NET_CUENTA_PERSONA } from './entities/net_cuenta_persona.entity';
 import { NET_TIPO_MOVIMIENTO } from './entities/net_tipo_movimiento.entity';
 import { CrearMovimientoDTO } from './dto/voucher.dto';
 import { NET_PROFESIONES } from './entities/net_profesiones.entity';
@@ -13,6 +11,8 @@ import { Net_Colegios_Magisteriales } from './entities/net_colegios_magisteriale
 import { crearCuentaDTO } from './dto/cuenta-transaccioens.dto';
 import path from 'path';
 import * as fs from 'fs';
+import { Net_Tipo_Cuenta } from './entities/net_tipo_cuenta.entity';
+import { Net_Cuenta_Persona } from './entities/net_cuenta_persona.entity';
 
 @Injectable()
 export class TransaccionesService {
@@ -22,10 +22,10 @@ export class TransaccionesService {
     private personaRepository: Repository<net_persona>,
     @InjectRepository(NET_MOVIMIENTO_CUENTA)
     private movimientoCuentaRepository: Repository<NET_MOVIMIENTO_CUENTA>,
-    @InjectRepository(NET_TIPO_CUENTA)
-    private tipoCuentaRepository: Repository<NET_TIPO_CUENTA>,
-    @InjectRepository(NET_CUENTA_PERSONA)
-    private cuentaPersonaRepository: Repository<NET_CUENTA_PERSONA>,
+    @InjectRepository(Net_Tipo_Cuenta)
+    private tipoCuentaRepository: Repository<Net_Tipo_Cuenta>,
+    @InjectRepository(Net_Cuenta_Persona)
+    private cuentaPersonaRepository: Repository<Net_Cuenta_Persona>,
     @InjectRepository(NET_TIPO_MOVIMIENTO)
     private tipoMovimientoRepository: Repository<NET_TIPO_MOVIMIENTO>,
     @InjectRepository(NET_PROFESIONES)
@@ -115,7 +115,7 @@ export class TransaccionesService {
         throw new NotFoundException(`No se encontró la persona con ID: ${idPersona}`);
     }
 
-    const tipoCuenta = await this.tipoCuentaRepository.findOne({
+    /* const tipoCuenta = await this.tipoCuentaRepository.findOne({
         where: { DESCRIPCION: dto.tipo_cuenta },
     });
 
@@ -124,7 +124,7 @@ export class TransaccionesService {
             `No se encontró un tipo de cuenta con la descripción: ${dto.tipo_cuenta}`
         );
     }
-
+ */
     const numeroCuenta = this.generarNumeroCuenta(persona.id_persona);
 
     const nuevaCuenta = this.cuentaPersonaRepository.create({
@@ -140,7 +140,7 @@ export class TransaccionesService {
     return {
         //numero_cuenta: cuentaGuardada.NUMERO_CUENTA,
         tipo_cuenta: {
-            descripcion: cuentaGuardada.tipoCuenta.DESCRIPCION,
+            //descripcion: cuentaGuardada.tipoCuenta.DESCRIPCION,
         },
     };
   }
@@ -271,7 +271,7 @@ export class TransaccionesService {
     }
   
     const nuevoMovimiento = this.movimientoCuentaRepository.create({
-      cuentaPersona: cuentaExistente,
+      //cuentaPersona: cuentaExistente,
       tipoMovimiento: tipoMovimiento,
       MONTO: dto.monto,
       DESCRIPCION: dto.descripcion,
@@ -303,7 +303,7 @@ export class TransaccionesService {
 
     const cuentasConDescripcion = cuentasPersona.map(cuenta => ({
       //NUMERO_CUENTA: cuenta.NUMERO_CUENTA,
-      DESCRIPCION: cuenta.tipoCuenta.DESCRIPCION
+      //DESCRIPCION: cuenta.tipoCuenta.DESCRIPCION
     }));
 
     return cuentasConDescripcion;

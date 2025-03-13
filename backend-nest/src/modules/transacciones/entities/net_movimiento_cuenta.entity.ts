@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { NET_TIPO_MOVIMIENTO } from "./net_tipo_movimiento.entity";
-import { NET_CUENTA_PERSONA } from "./net_cuenta_persona.entity";
 import { Net_Planilla_Ingresos } from "src/modules/Planilla/planilla/entities/net_planilla_ingresos.entity";
 
 @Entity({ name: 'NET_MOVIMIENTO_CUENTA' })
@@ -20,9 +19,9 @@ export class NET_MOVIMIENTO_CUENTA {
     @Column({ length: 12 })
     CREADA_POR: string;
 
-    @ManyToOne(() => NET_CUENTA_PERSONA, cuentaPersona => cuentaPersona.movimientos)
+    /* @ManyToOne(() => NET_CUENTA_PERSONA, cuentaPersona => cuentaPersona.movimientos)
     @JoinColumn({ name: 'ID_CUENTA_PERSONA', referencedColumnName: 'ID_CUENTA_PERSONA', foreignKeyConstraintName: 'FK_ID_CUENTA_PERSONA_MOVIMIENTO' })
-    cuentaPersona: NET_CUENTA_PERSONA;
+    cuentaPersona: NET_CUENTA_PERSONA; */
     
     @ManyToOne(() => NET_TIPO_MOVIMIENTO, tipoMovimiento => tipoMovimiento.movimientos)
     @JoinColumn({ name: 'ID_TIPO_MOVIMIENTO', referencedColumnName: 'ID_TIPO_MOVIMIENTO', foreignKeyConstraintName: 'FK_ID_TIPO_MOV_NET_MOV_CUEN' })

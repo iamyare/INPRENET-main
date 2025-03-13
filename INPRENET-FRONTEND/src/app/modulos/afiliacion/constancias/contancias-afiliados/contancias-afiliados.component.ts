@@ -5,7 +5,6 @@ import { AuthService } from '../../../../services/auth.service';
 import { DialogSuboptionsComponent } from '../dialog-suboptions/dialog-suboptions.component';
 import { MatDialog } from '@angular/material/dialog';
 import { BeneficiosService } from '../../../../services/beneficios.service';
-import { DireccionService } from '../../../../services/direccion.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -24,10 +23,15 @@ export class ContanciasAfiliadosComponent implements OnInit {
     nombrePuesto: string;
     nombreEmpleado: string;
   } | null = null;
+  beneficiosConPeriodicidadV: string[] = [];
+  beneficiosSinPeriodicidadV: string[] = [];
 
   constanciaButtons = [
-    { label: 'Generar Constancia de Afiliación', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
-    { label: 'Generar Constancia de Beneficio', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
+    { label: 'Constancia de Afiliación', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
+    { label: 'Constancia de Beneficio Vitalicio', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
+    { label: 'Constancia de Beneficio Periodico', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO', 'BENEFICIARIO'] },
+    { label: 'Constancia de Jubilado Fallecido', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
+    { label: 'Constancia de Beneficiarios Sin Pago', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
   ];
 
   filteredConstanciaButtons: any = [];
@@ -38,7 +42,6 @@ export class ContanciasAfiliadosComponent implements OnInit {
     private authService: AuthService,
     private dialog: MatDialog,
     private beneficiosService: BeneficiosService,
-    private direccionService: DireccionService,
     private toastr: ToastrService 
   ) {}
 
@@ -77,6 +80,7 @@ export class ContanciasAfiliadosComponent implements OnInit {
 
   onPersonaEncontrada(persona: any): void {
     this.persona = persona;
+    
     this.filtrarConstanciasPorTipoPersona();
     this.obtenerBeneficiosPorPersona(persona.N_IDENTIFICACION);
   }
@@ -88,41 +92,165 @@ export class ContanciasAfiliadosComponent implements OnInit {
   }
 
   private obtenerBeneficiosPorPersona(dni: string): void {
-    const nombresExcluidos = [
-        '60 RENTAS',
-        'DECIMO TERCERO',
-        'DECIMO CUARTO',
-        'COSTO DE VIDA'
-    ];
-    this.beneficiosService.GetAllBeneficios(dni).subscribe(
-        (response) => {
-            this.beneficios = response?.detBen
-                ?.filter((item: any) => !nombresExcluidos.includes(item.beneficio?.nombre_beneficio))
-                .map((item: any) => item.beneficio?.nombre_beneficio) || [];
-        },
-        (error) => {
-            console.error('Error al obtener los beneficios:', error);
+    this.beneficiosService.obtenerBeneficiosPorPersona(dni).subscribe(
+      (response) => {
+        if (!response || response.length === 0) {
+          this.toastr.warning('No se encontraron beneficios para esta persona.', 'Aviso');
+          return;
         }
+  
+        // Limpiar los arreglos antes de asignar nuevos valores
+        this.beneficiosConPeriodicidadV = [];
+        this.beneficiosSinPeriodicidadV = [];
+        this.beneficios = response; // Guardamos la lista completa de beneficios
+  
+        response.forEach((beneficio: any) => {
+          if (beneficio.PERIODICIDAD?.trim() === 'V') {
+            this.beneficiosConPeriodicidadV.push(beneficio.NOMBRE_BENEFICIO);
+          } else {
+            this.beneficiosSinPeriodicidadV.push(beneficio.NOMBRE_BENEFICIO);
+          }
+        });
+      },
+      (error) => {
+        console.error('Error al obtener los beneficios:', error);
+      }
     );
   }
-
+  
   onConstanciaClick(event: { label: string; params?: any }): void {
     const selectedConstanciaLabel = event.label;
-    const params = event.params;
   
-    if (selectedConstanciaLabel === 'Generar Constancia de Beneficio') {
-      if (this.beneficios.length > 0) {
-        this.openSubOptionsDialog(this.beneficios);
-      } else {
-        this.toastr.warning(
-          'No hay beneficios disponibles para esta persona.',
-          'Advertencia'
-        );
+    // 🔹 "Constancia de Jubilado Fallecido" - EXCLUIR COSTO DE VIDA
+    if (selectedConstanciaLabel === 'Constancia de Jubilado Fallecido') {
+      if (this.persona.fallecido !== 'SI') {
+        this.toastr.warning('No se puede generar esta constancia porque la persona no está fallecida.', 'Advertencia');
+        return;
       }
-    } else if (selectedConstanciaLabel === 'Generar Constancia de Afiliación') {
-      this.generarConstanciaAfiliacion();
+  
+      this.beneficiosService.obtenerBeneficiosPorPersona(this.persona.N_IDENTIFICACION, false).subscribe(
+        (response) => {
+          if (!response || response.length === 0) {
+            this.toastr.warning('No hay beneficios disponibles para esta persona.', 'Advertencia');
+            return;
+          }
+  
+          this.beneficios = response;
+          const beneficiosNombres = response.map((b: any) => b.NOMBRE_BENEFICIO);
+          this.openSubOptionsDialog(beneficiosNombres, this.generateConstanciaJubiladoFallecido.bind(this));
+        },
+        (error) => {
+          console.error('Error al obtener los beneficios sin costo de vida:', error);
+        }
+      );
+    } 
+    else {
+      // 🔹 Para TODAS las demás constancias - INCLUIR COSTO DE VIDA
+      this.beneficiosService.obtenerBeneficiosPorPersona(this.persona.N_IDENTIFICACION, true).subscribe(
+        (response) => {
+          if (!response || response.length === 0) {
+            this.toastr.warning('No hay beneficios disponibles para esta persona.', 'Advertencia');
+            return;
+          }
+  
+          this.beneficios = response;
+          this.beneficiosConPeriodicidadV = [];
+          this.beneficiosSinPeriodicidadV = [];
+  
+          response.forEach((beneficio: any) => {
+            if (beneficio.PERIODICIDAD?.trim() === 'V') {
+              this.beneficiosConPeriodicidadV.push(beneficio.NOMBRE_BENEFICIO);
+            } else {
+              this.beneficiosSinPeriodicidadV.push(beneficio.NOMBRE_BENEFICIO);
+            }
+          });
+  
+          if (selectedConstanciaLabel === 'Constancia de Beneficio Vitalicio') {
+            if (this.beneficiosConPeriodicidadV.length > 0) {
+              this.openSubOptionsDialog(this.beneficiosConPeriodicidadV, this.generateConstanciaBeneficio.bind(this));
+            } else {
+              this.toastr.warning('No hay beneficios disponibles con periodicidad "VITALICIO".', 'Advertencia');
+            }
+          } 
+          else if (selectedConstanciaLabel === 'Constancia de Afiliación') {
+            this.generarConstanciaAfiliacion();
+          } 
+          else if (selectedConstanciaLabel === 'Constancia de Beneficiarios Sin Pago') {
+            this.generateConstanciaBeneficiariosSinPago();
+          } 
+          else if (selectedConstanciaLabel === 'Constancia de Beneficio Periodico') {
+            if (this.beneficiosSinPeriodicidadV.length > 0) {
+              this.openSubOptionsDialog(this.beneficiosSinPeriodicidadV, this.generateNuevaConstanciaBeneficio.bind(this));
+            } else {
+              this.toastr.warning('No hay beneficios disponibles.', 'Advertencia');
+            }
+          }
+        },
+        (error) => {
+          console.error('Error al obtener los beneficios con costo de vida:', error);
+        }
+      );
     }
   }
+  
+  
+  generateNuevaConstanciaBeneficio(beneficio: any): void {
+    console.log('Beneficio seleccionado:', beneficio);
+    
+    if (typeof beneficio === 'object' && beneficio.selectedOption) {
+      beneficio = beneficio.selectedOption;
+    }
+    if (typeof beneficio !== 'string') {
+      console.error('El valor de beneficio no es una cadena:', beneficio);
+      return;
+    }
+    const beneficioData = this.beneficios.find(b => b.NOMBRE_BENEFICIO.toUpperCase() === beneficio.toUpperCase());
+
+    if (!beneficioData) {
+      console.error('No se encontró el beneficio en la lista:', beneficio);
+      return;
+    }
+
+    const nombre_completo = [
+      this.persona.PRIMER_NOMBRE,
+      this.persona.SEGUNDO_NOMBRE,
+      this.persona.TERCER_NOMBRE,
+      this.persona.PRIMER_APELLIDO,
+      this.persona.SEGUNDO_APELLIDO
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toUpperCase();
+
+    const data = {
+      nombre_completo: nombre_completo,
+      n_identificacion: beneficioData.N_IDENTIFICACION,
+      beneficio: beneficio.toUpperCase(),
+      departamento: beneficioData.NOMBRE_MUNICIPIO?.toUpperCase() || 'NO DEFINIDO',
+      monto: beneficioData.MONTO_POR_PERIODO || 0,
+      monto_letras: this.convertirNumeroALetrasConCentavos(beneficioData.MONTO_POR_PERIODO || 0),
+      fecha_inicio: this.convertirFechaAPalabras(beneficioData.FECHA_EFECTIVIDAD),
+      fecha_fin: this.convertirFechaAPalabras(beneficioData.PERIODO_FINALIZACION),
+      num_rentas_aprobadas: beneficioData.NUM_RENTAS_APROBADAS || 'INDEFINIDO'
+    };
+
+    const dto = this.usuarioToken;
+
+    if (!dto || !dto.numero_empleado || !dto.departamento || !dto.municipio || !dto.nombrePuesto) {
+      console.error('Faltan datos del usuario en el token:', dto);
+      return;
+    }
+
+    this.afiliadoService.generarConstanciaQR(data, dto, 'constancia-beneficios').subscribe(
+      (blob: Blob) => {
+        const nombreArchivo = this.generarNombreArchivo(this.persona, 'constancia-beneficios');
+        this.manejarDescarga(blob, nombreArchivo);
+      },
+      (error) => {
+        console.error('Error al generar la nueva constancia de beneficio:', error);
+      }
+    );
+}
   
   private generarNombreArchivo(persona: any, tipo: string): string {
     const nombreCompleto = `${persona.PRIMER_NOMBRE}_${persona.PRIMER_APELLIDO}_${persona.N_IDENTIFICACION}`;
@@ -170,15 +298,14 @@ export class ContanciasAfiliadosComponent implements OnInit {
     };
   }
 
-  openSubOptionsDialog(options: string[]): void {
+  openSubOptionsDialog(options: string[], callback: (beneficio: any) => void): void {
     const dialogRef = this.dialog.open(DialogSuboptionsComponent, {
       width: '400px',
       data: { options },
     });
-  
     dialogRef.afterClosed().subscribe((selectedOption) => {
       if (selectedOption) {
-        this.generateConstanciaBeneficio(selectedOption);
+        callback(selectedOption);
       } else {
         console.log('El usuario cerró el diálogo sin seleccionar.');
       }
@@ -186,83 +313,72 @@ export class ContanciasAfiliadosComponent implements OnInit {
   }
 
   generateConstanciaBeneficio(beneficio: any): void {
-    if (typeof beneficio === 'object' && beneficio?.selectedOption) {
-      beneficio = beneficio.selectedOption;
+    if (!this.beneficios || this.beneficios.length === 0) {
+      console.error('No hay beneficios disponibles.');
+      return;
     }
-  
+    if (typeof beneficio === 'object' && beneficio?.selectedOption) {
+      beneficio = beneficio.selectedOption.NOMBRE_BENEFICIO || beneficio.selectedOption;
+    }
     if (typeof beneficio !== 'string') {
-      console.error('El valor de beneficio no es una cadena:', beneficio);
+      console.error('El valor de beneficio no es una cadena válida:', beneficio);
+      return;
+    }
+    const beneficioData = this.beneficios.find(b => b.NOMBRE_BENEFICIO.toUpperCase() === beneficio.toUpperCase());
+  
+    if (!beneficioData) {
+      console.error('No se encontró el beneficio en la lista:', beneficio);
+      return;
+    }
+    if (!beneficioData.N_IDENTIFICACION) {
+      console.error('El beneficio seleccionado no tiene datos completos:', beneficioData);
       return;
     }
   
-    const beneficioClean = beneficio.trim().toUpperCase();
-    const departamentoId = this.persona?.id_departamento_residencia;
+    const beneficioClean = beneficioData.NOMBRE_BENEFICIO.trim().toUpperCase();
+    const nombre_completo = [
+      this.persona?.PRIMER_NOMBRE,
+      this.persona?.SEGUNDO_NOMBRE,
+      this.persona?.TERCER_NOMBRE,
+      this.persona?.PRIMER_APELLIDO,
+      this.persona?.SEGUNDO_APELLIDO
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toUpperCase();
   
-    this.direccionService.getAllDepartments().subscribe(
-      (departamentos: { id_departamento: number; nombre_departamento: string }[]) => {
-        const departamento = departamentoId
-          ? departamentos.find(dep => dep.id_departamento === departamentoId)
-          : { nombre_departamento: 'NO DEFINIDO' };
+    const data = {
+      nombre_completo: nombre_completo,
+      n_identificacion: beneficioData.N_IDENTIFICACION,
+      beneficio: beneficioClean,
+      departamento: beneficioData.NOMBRE_MUNICIPIO?.toUpperCase() || 'NO DEFINIDO',
+      monto: beneficioData.MONTO_POR_PERIODO || 0,
+      monto_letras: this.convertirNumeroALetrasConCentavos(beneficioData.MONTO_POR_PERIODO || 0),
+      fecha_inicio: this.convertirFechaAPalabras(beneficioData.FECHA_EFECTIVIDAD),
+      fecha_fin: this.convertirFechaAPalabras(beneficioData.PERIODO_FINALIZACION),
+      num_rentas_aprobadas: beneficioData.NUM_RENTAS_APROBADAS || 'INDEFINIDO'
+    };
   
-        this.beneficiosService.GetAllBeneficios(this.persona.N_IDENTIFICACION).subscribe(
-          (response) => {
-            if (!response || !response.detBen) {
-              console.error('Error: La respuesta del servicio de beneficios es inválida', response);
-              return;
-            }
+    console.log('Datos preparados para la constancia:', data);
   
-            const beneficioEncontrado = response.detBen.find(
-              (item: any) => item.beneficio?.nombre_beneficio.trim().toUpperCase() === beneficioClean
-            );
+    const dto = this.usuarioToken;
   
-            if (!beneficioEncontrado) {
-              console.error(`No se encontró el beneficio seleccionado (${beneficioClean}) en el response.`, response.detBen);
-              return;
-            }
+    if (!dto || !dto.numero_empleado || !dto.departamento || !dto.municipio || !dto.nombrePuesto) {
+      console.error('Faltan datos del usuario en el token:', dto);
+      return;
+    }
   
-            const monto = beneficioEncontrado.monto_por_periodo || 0;
-            const fechaInicio = beneficioEncontrado.periodo_inicio || 'Fecha no definida';
-  
-            const data = {
-              nombre_completo: `${this.persona.PRIMER_NOMBRE} ${this.persona.SEGUNDO_NOMBRE || ''} ${this.persona.PRIMER_APELLIDO} ${this.persona.SEGUNDO_APELLIDO || ''}`.trim(),
-              n_identificacion: this.persona.N_IDENTIFICACION,
-              beneficio: beneficioEncontrado.beneficio?.nombre_beneficio,
-              departamento: departamento?.nombre_departamento || 'NO DEFINIDO',
-              monto: monto,
-              monto_letras: this.convertirNumeroALetrasConCentavos(monto),
-              fecha_inicio: this.convertirFechaAPalabras(fechaInicio),
-            };
-  
-            const dto = this.usuarioToken;
-  
-            if (!dto || !dto.numero_empleado || !dto.departamento || !dto.municipio || !dto.nombrePuesto) {
-              console.error('Faltan datos del usuario en el token:', dto);
-              return;
-            }
-  
-            // Llama al servicio para generar la constancia
-            this.afiliadoService.generarConstanciaQR(data, dto, 'beneficios').subscribe(
-              (blob: Blob) => {
-                const nombreArchivo = this.generarNombreArchivo(this.persona, 'beneficio');
-                this.manejarDescarga(blob, nombreArchivo);
-              },
-              (error) => {
-                console.error('Error al generar la constancia de beneficio:', error);
-              }
-            );
-          },
-          (error) => {
-            console.error('Error al obtener los beneficios:', error);
-          }
-        );
+    this.afiliadoService.generarConstanciaQR(data, dto, 'beneficios').subscribe(
+      (blob: Blob) => {
+        const nombreArchivo = this.generarNombreArchivo(this.persona, 'beneficios');
+        this.manejarDescarga(blob, nombreArchivo);
       },
       (error) => {
-        console.error('Error al cargar los departamentos:', error);
+        console.error('Error al generar la nueva constancia de beneficio:', error);
       }
     );
   }
   
-
   private convertirNumeroALetrasConCentavos(monto: number): string {
     if (isNaN(monto) || monto === null || monto === undefined) {
       console.error('El monto proporcionado no es válido:', monto);
@@ -284,28 +400,31 @@ export class ContanciasAfiliadosComponent implements OnInit {
 
     function convertirSeccion(numero: number): string {
       let texto = '';
-
       if (numero >= 100) {
-        const centena = Math.floor(numero / 100);
-        texto += centenas[centena] + ' ';
-        numero %= 100;
+          const centena = Math.floor(numero / 100);
+          if (centena === 1 && numero > 100) {
+              texto += 'CIENTO ';
+          } else {
+              texto += centenas[centena] + ' ';
+          }
+          numero %= 100;
       }
-
+  
       if (numero >= 20) {
-        const decena = Math.floor(numero / 10);
-        texto += decenas[decena] + ' ';
-        numero %= 10;
+          const decena = Math.floor(numero / 10);
+          texto += decenas[decena] + ' ';
+          numero %= 10;
       } else if (numero >= 10) {
-        texto += especiales[numero - 10] + ' ';
-        numero = 0;
+          texto += especiales[numero - 10] + ' ';
+          numero = 0;
       }
-
+  
       if (numero > 0) {
-        texto += unidades[numero];
+          texto += unidades[numero];
       }
-
+  
       return texto.trim();
-    }
+  }
 
     function convertirMiles(numero: number): string {
       if (numero === 0) return '';
@@ -338,11 +457,8 @@ export class ContanciasAfiliadosComponent implements OnInit {
       resultado += convertirSeccion(resto);
     }
 
-    if (centavos > 0) {
-      resultado += ` CON ${centavos}/100 CENTAVOS`;
-    }
+    return resultado.trim() + ' LEMPIRAS' + (centavos > 0 ? ` CON ${centavos}/100 CENTAVOS` : '');
 
-    return resultado.trim() + ' LEMPIRAS';
   }
 
   private convertirFechaAPalabras(fecha: string): string {
@@ -350,22 +466,214 @@ export class ContanciasAfiliadosComponent implements OnInit {
       console.error('Fecha no proporcionada');
       return 'Fecha no válida';
     }
-
+  
     const meses = [
       'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
     ];
-
-    const partesFecha = fecha.split('-');
-    if (partesFecha.length !== 3) {
-      console.error('Formato de fecha inválido:', fecha);
-      return 'Fecha no válida';
+  
+    let partesFecha;
+    
+    if (fecha.includes('/')) {
+      partesFecha = fecha.split('/');
+      if (partesFecha.length !== 3) {
+        console.error('Formato de fecha inválido:', fecha);
+        return 'Fecha no válida';
+      }
+  
+      const dia = parseInt(partesFecha[0], 10);
+      const mes = meses[parseInt(partesFecha[1], 10) - 1];
+      const anio = partesFecha[2];
+  
+      return `${dia} de ${mes} del ${anio}`;
+    } 
+  
+    if (fecha.includes('-')) {
+      partesFecha = fecha.split('-');
+      if (partesFecha.length !== 3) {
+        console.error('Formato de fecha inválido:', fecha);
+        return 'Fecha no válida';
+      }
+  
+      const anio = partesFecha[0];
+      const mes = meses[parseInt(partesFecha[1], 10) - 1];
+      const dia = parseInt(partesFecha[2], 10);
+  
+      return `${dia} de ${mes} del ${anio}`;
     }
-
-    const anio = partesFecha[0];
-    const mes = meses[parseInt(partesFecha[1], 10) - 1];
-    const dia = parseInt(partesFecha[2], 10);
-
-    return `${dia} de ${mes} del ${anio}`;
+  
+    console.error('Formato de fecha no reconocido:', fecha);
+    return 'Fecha no válida';
   }
+
+  generateConstanciaJubiladoFallecido(beneficio: any): void {
+    if (!this.beneficios || this.beneficios.length === 0) {
+      console.error('No hay beneficios disponibles.');
+      return;
+    }
+  
+    // ✅ Si `beneficio` es un objeto, intentamos obtener la propiedad correcta
+    if (typeof beneficio === 'object' && beneficio?.selectedOption) {
+      beneficio = beneficio.selectedOption.NOMBRE_BENEFICIO || beneficio.selectedOption;
+    }
+  
+    // ✅ Nos aseguramos de que `beneficio` sea un string
+    if (typeof beneficio !== 'string') {
+      console.error('El valor de beneficio no es una cadena válida:', beneficio);
+      return;
+    }
+  
+    // 🔹 Buscamos el beneficio correcto en la lista
+    const beneficioData = this.beneficios.find(b => b.NOMBRE_BENEFICIO.toUpperCase() === beneficio.toUpperCase());
+  
+    if (!beneficioData) {
+      console.error('No se encontró el beneficio en la lista:', beneficio);
+      return;
+    }
+  
+    const beneficioClean = beneficioData.NOMBRE_BENEFICIO.trim().toUpperCase();
+    const nombre_completo = [
+      this.persona.PRIMER_NOMBRE,
+      this.persona.SEGUNDO_NOMBRE,
+      this.persona.TERCER_NOMBRE,
+      this.persona.PRIMER_APELLIDO,
+      this.persona.SEGUNDO_APELLIDO
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toUpperCase();
+  
+    const data = {
+      nombre_completo: nombre_completo,
+      n_identificacion: beneficioData.N_IDENTIFICACION,
+      beneficio: beneficioClean,
+      departamento: beneficioData.NOMBRE_MUNICIPIO?.toUpperCase() || 'NO DEFINIDO',
+      monto: beneficioData.MONTO_POR_PERIODO || 0,
+      monto_letras: this.convertirNumeroALetrasConCentavos(beneficioData.MONTO_POR_PERIODO || 0),
+      fecha_inicio: this.convertirFechaAPalabras(beneficioData.FECHA_EFECTIVIDAD),
+      fecha_fin: this.convertirFechaAPalabras(beneficioData.PERIODO_FINALIZACION),
+      num_rentas_aprobadas: beneficioData.NUM_RENTAS_APROBADAS || 'INDEFINIDO'
+    };
+  
+    console.log('Datos preparados para la constancia:', data);
+  
+    const dto = this.usuarioToken;
+  
+    if (!dto || !dto.numero_empleado || !dto.departamento || !dto.municipio || !dto.nombrePuesto) {
+      console.error('Faltan datos del usuario en el token:', dto);
+      return;
+    }
+  
+    this.afiliadoService.generarConstanciaQR(data, dto, 'constancia-beneficio-fallecido').subscribe(
+      (blob: Blob) => {
+        const nombreArchivo = this.generarNombreArchivo(this.persona, 'constancia-beneficio-fallecido');
+        this.manejarDescarga(blob, nombreArchivo);
+      },
+      (error) => {
+        console.error('Error al generar la constancia de jubilado fallecido:', error);
+      }
+    );
+  }
+  
+  generateConstanciaBeneficiariosSinPago(): void {
+    if (!this.persona) {
+      this.toastr.error('Debe seleccionar una persona antes de generar la constancia.', 'Error');
+      return;
+    }
+  
+    // ✅ Verificar si la persona está fallecida
+    if (this.persona.fallecido !== 'SI') {
+      this.toastr.warning('Solo se pueden generar constancias para personas fallecidas.', 'Advertencia');
+      return;
+    }
+  
+    const nombre_completo = [
+      this.persona.PRIMER_NOMBRE,
+      this.persona.SEGUNDO_NOMBRE,
+      this.persona.TERCER_NOMBRE,
+      this.persona.PRIMER_APELLIDO,
+      this.persona.SEGUNDO_APELLIDO
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toUpperCase();
+  
+    const dni = this.persona.N_IDENTIFICACION;
+  
+    // ✅ Verificar si los beneficiarios han recibido pagos antes de generar la constancia
+    this.beneficiosService.verificarPagosBeneficiarios(dni).subscribe(
+      (recibioPagos: boolean) => {
+        console.log(`Estado de pagos para los beneficiarios de ${dni}:`, recibioPagos);
+  
+        if (!!recibioPagos) {
+          this.toastr.warning(
+            'Los beneficiarios de esta persona han recibido pagos. No se puede generar la constancia.',
+            'Advertencia'
+          );
+          return;
+        }
+  
+        // ✅ Si no ha recibido pagos, seleccionar un beneficio antes de generar la constancia
+        if (this.beneficios.length === 0) {
+          this.toastr.warning('No hay beneficios disponibles para esta persona.', 'Advertencia');
+          return;
+        }
+  
+        const beneficiosNombres = this.beneficios.map(b => b.NOMBRE_BENEFICIO);
+        this.openSubOptionsDialog(beneficiosNombres, (beneficioSeleccionado: any) => {
+          if (!beneficioSeleccionado) {
+            this.toastr.warning('Debe seleccionar un beneficio para continuar.', 'Advertencia');
+            return;
+          }
+  
+          console.log('Beneficio seleccionado antes de formatear:', beneficioSeleccionado);
+  
+          // 🔹 Asegurar que `beneficioSeleccionado` sea una cadena antes de llamar `toUpperCase()`
+          let beneficioNombre = '';
+          if (typeof beneficioSeleccionado === 'string') {
+            beneficioNombre = beneficioSeleccionado.toUpperCase();
+          } else if (beneficioSeleccionado?.selectedOption) {
+            beneficioNombre = beneficioSeleccionado.selectedOption.toUpperCase();
+          }
+  
+          if (!beneficioNombre) {
+            this.toastr.warning('Debe seleccionar un beneficio válido.', 'Advertencia');
+            return;
+          }
+  
+          const data = {
+            nombre_completo,
+            n_identificacion: dni,
+            beneficio: beneficioNombre
+          };
+  
+          const dto = this.usuarioToken;
+  
+          if (!dto || !dto.numero_empleado || !dto.departamento || !dto.municipio || !dto.nombrePuesto) {
+            console.error('Faltan datos del usuario en el token:', dto);
+            return;
+          }
+  
+          this.afiliadoService.generarConstanciaQR(data, dto, 'beneficiarios-sin-pago').subscribe(
+            (blob: Blob) => {
+              const nombreArchivo = this.generarNombreArchivo(this.persona, 'beneficiarios-sin-pago');
+              this.manejarDescarga(blob, nombreArchivo);
+            },
+            (error) => {
+              console.error('Error al generar la constancia de beneficiarios sin pago:', error);
+              this.toastr.error('Hubo un error al generar la constancia.', 'Error');
+            }
+          );
+        });
+      },
+      (error) => {
+        console.error('Error al verificar pagos de beneficiarios:', error);
+        this.toastr.error('Hubo un error al verificar si los beneficiarios han recibido pagos.', 'Error');
+      }
+    );
+  }
+  
+  
+  
+  
 }

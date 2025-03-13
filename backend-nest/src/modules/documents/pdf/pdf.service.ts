@@ -2232,6 +2232,15 @@ export class PdfService {
       case 'beneficios':
         pdfBufferWithoutQR = await this.generateConstanciaBeneficios(data, false, dto);
         break;
+      case 'constancia-beneficios':
+        pdfBufferWithoutQR = await this.generateConstanciaBeneficiosFormatoNuevo(data, false, dto);
+        break;
+      case 'constancia-beneficio-fallecido':
+        pdfBufferWithoutQR = await this.generateConstanciaJubiladoFallecido(data, false, dto);
+        break;
+      case 'beneficiarios-sin-pago':
+          pdfBufferWithoutQR = await this.generateConstanciaBeneficiariosSinPago(data, false, dto);
+        break;
       default:
         throw new Error('Invalid constancia type');
     }
@@ -2286,6 +2295,12 @@ export class PdfService {
         return await this.generateConstanciaAfiliacion2(data, true, dto);
       case 'beneficios':
         return await this.generateConstanciaBeneficios(data, true, dto);
+      case 'constancia-beneficios':
+        return await this.generateConstanciaBeneficiosFormatoNuevo(data, false, dto);
+      case 'constancia-beneficio-fallecido':
+        return await this.generateConstanciaJubiladoFallecido(data, false, dto);
+      case 'beneficiarios-sin-pago':
+        return await this.generateConstanciaBeneficiariosSinPago(data, false, dto);
       default:
         throw new Error('Invalid constancia type');
     }
@@ -2637,138 +2652,369 @@ export class PdfService {
     return this.generateConstancia(data, includeQR, templateFunction);
   }
 
-  async generateConstanciaBeneficios(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
-    const templateFunction = async (data: any, includeQR: boolean) => {
+  private convertirFechaFormal(fecha: Date): string {
+    const meses = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+
+    const dia = fecha.getDate();
+    const mes = meses[fecha.getMonth()];
+    const anio = fecha.getFullYear();
+
+    return `a los ${dia} días del mes de ${mes} del año ${anio}`;
+}
+
+async generateConstanciaBeneficios(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
+  const templateFunction = async (data: any, includeQR: boolean) => {
+      const today = new Date();
+      const formattedDate = `${today.getDate()} de ${today.toLocaleString('es-HN', { month: 'long' })} del ${today.getFullYear()}`;
+      const user = dto.correo.split('@')[0]; // Usuario antes de la arroba
+
       const content: Array<any> = [
-        { text: 'A QUIEN INTERESE', style: 'header' },
-        {
-          text: `El Instituto Nacional de Previsión del Magisterio (INPREMA) informa que:`,
-          style: 'subheader',
-        },
-        {
-          text: `*************${data.nombre_completo.toUpperCase()}*************`,
-          style: 'highlightedName',
-        },
-        {
-          text: `Con tarjeta de identidad número ${data.n_identificacion}`,
-          style: 'body',
-        },
-        {
-          text: `Goza del Beneficio **${data.beneficio.toUpperCase()}**`,
-          style: 'benefit',
-        },
-        {
-          text: `Con residencia en el Departamento de: ********${data.departamento.toUpperCase()}********`,
-          style: 'body',
-        },
-        {
-          text: `Cuyo monto asciende a la cantidad de Lps. ***${data.monto.toFixed(2)} ${data.monto_letras.toUpperCase()}***`,
-          style: 'body',
-        },
-        {
-          text: `Beneficio otorgado a partir del ${data.fecha_inicio} y para los fines que el interesado estime conveniente, se le extiende el presente documento en la ciudad de ${dto.municipio}, el ${new Date().getDate()} de ${new Date().toLocaleString('es-HN', { month: 'long' })} del ${new Date().getFullYear()}.`,
-          style: 'body',
-        },
-        { text: '\n\n\n' },
-        // Espaciado adicional para empujar la firma hacia abajo
-        { text: '\n\n\n\n\n\n\n\n\n' },
-        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
-        { text: dto.nombreEmpleado, style: 'signature' }, // Nombre del empleado
-        { text: dto.nombrePuesto, style: 'signatureTitle' }, // Puesto del empleado
+          // 📌 Título principal
+          { text: 'CONSTANCIA DE BENEFICIO VITALICIO', style: 'mainTitle' },
+
+          // 📌 Párrafo con información clave del beneficio
+          {
+              text: [
+                  'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
+                  { text: data.nombre_completo.toUpperCase(), bold: true },
+                  ', con número de identificación ',
+                  { text: data.n_identificacion, bold: true },
+                  ', goza del beneficio vitalicio de ',
+                  { text: `${data.beneficio.toUpperCase()},`, bold: true }, // ✅ Se mantiene la coma
+                  ' otorgado a partir del ',
+                  { text: `${data.fecha_inicio},`, bold: true }, // ✅ Se mantiene la coma y se elimina espacio extra
+                  ' cuyo monto asciende a la cantidad de ',
+                  { text: data.monto_letras.toUpperCase(), bold: true },
+                  ' (L. ',
+                  { text: data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), bold: true },
+                  ').'
+              ],
+              style: 'body'
+          },
+
+          {
+              text: [
+                  'Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de ',
+                  { text: dto.municipio.charAt(0).toUpperCase() + dto.municipio.slice(1).toLowerCase(), bold: true },
+                  ', ',
+                  { text: dto.departamento.charAt(0).toUpperCase() + dto.departamento.slice(1).toLowerCase(), bold: true },
+                  ', el ',
+                  { text: formattedDate, bold: true },
+                  '.'
+              ],
+              style: 'body'
+          },
+
+          { text: '\n\n\n\n\n\n\n\n\n' }, // Espaciado antes de la firma
+          
+          // 📌 Firma
+          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
+          { text: dto.nombreEmpleado, style: 'signature' },
+          { text: dto.nombrePuesto, style: 'signatureTitle' }
       ];
 
-      // QR opcional
-      /* if (includeQR) {
-          const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
-          content.push({ image: qrCode, width: 100, alignment: 'center', margin: [0, 20, 0, 0] });
-      } */
+      return {
+          pageSize: 'A4',
+          pageMargins: [40, 120, 40, 85],
+          background: {
+              image: data.base64data,
+              width: 595.28,
+              height: 841.89
+          },
+          content: content,
+          footer: (currentPage, pageCount) => ({
+              table: {
+                  widths: ['*', '*', '*'],
+                  body: [
+                      [
+                          { text: 'Fecha y Hora: ' + today.toLocaleString(), alignment: 'left', border: [false, false, false, false], style: 'footerText' },
+                          { text: 'Generado por: ' + user, alignment: 'center', border: [false, false, false, false], style: 'footerText' },
+                          { text: 'Página: ' + currentPage + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: 'footerText' }
+                      ]
+                  ]
+              },
+              margin: [20, 0, 20, 20]
+          }),
+          styles: {
+              mainTitle: { fontSize: 20, bold: true, alignment: 'center', margin: [0, 30, 0, 20] },
+              body: { fontSize: 12, alignment: 'justify', margin: [40, 10, 40, 5], lineHeight: 1.5 },
+              signature: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 10, 0, 0] },
+              signatureTitle: { fontSize: 12, alignment: 'center' },
+              footerText: { fontSize: 8 }
+          }
+      };
+  };
+
+  return this.generateConstancia(data, includeQR, templateFunction);
+}
+
+async generateConstanciaBeneficiosFormatoNuevo(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
+  const templateFunction = async (data: any, includeQR: boolean) => {
+      const today = new Date();
+      const formattedDate = `${today.getDate()} de ${today.toLocaleString('es-HN', { month: 'long' })} del ${today.getFullYear()}`;
+      const user = dto.correo.split('@')[0];
+
+      const content: Array<any> = [
+          // 📌 Título principal
+          { text: 'CONSTANCIA DE BENEFICIO', style: 'mainTitle' },
+
+          // 📌 Párrafo con información clave del beneficio
+          {
+              text: [
+                  'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
+                  { text: data.nombre_completo.toUpperCase(), bold: true },
+                  ', con número de identificación ',
+                  { text: data.n_identificacion, bold: true },
+                  ', goza del beneficio de ',
+                  { text: `${data.beneficio.toUpperCase()},`, bold: true }, // ✅ Se mantiene la coma correctamente
+                  ' otorgado a partir del ',
+                  { text: `${data.fecha_inicio},`, bold: true }, // ✅ Se mantiene la coma correctamente
+                  data.fecha_fin ? ' con fecha de finalización ' : '',
+                  data.fecha_fin ? { text: `${data.fecha_fin},`, bold: true } : '',
+                  ' cuyo monto asciende a la cantidad de ',
+                  { text: data.monto_letras.toUpperCase(), bold: true },
+                  ' (L. ',
+                  { text: data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), bold: true },
+                  '), y por el término de ',
+                  { text: `${data.num_rentas_aprobadas || 'INDEFINIDO'}`, bold: true },
+                  ' rentas.'
+              ],
+              style: 'body'
+          },
+
+          {
+              text: [
+                  'Y para los fines que el interesado estime convenientes, se extiende el presente documento en la ciudad de ',
+                  { text: dto.municipio.charAt(0).toUpperCase() + dto.municipio.slice(1).toLowerCase(), bold: true },
+                  ', ',
+                  { text: dto.departamento.charAt(0).toUpperCase() + dto.departamento.slice(1).toLowerCase(), bold: true },
+                  ', el ',
+                  { text: formattedDate, bold: true },
+                  '.'
+              ],
+              style: 'body'
+          },
+
+          { text: '\n\n\n\n\n\n\n\n\n' }, // Espaciado antes de la firma
+          
+          // 📌 Firma
+          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
+          { text: dto.nombreEmpleado, style: 'signature' },
+          { text: dto.nombrePuesto, style: 'signatureTitle' }
+      ];
 
       return {
-        pageSize: 'A4',
-        pageMargins: [40, 120, 40, 85],
-        background: {
-          image: data.base64data, // Base64 del fondo
-          width: 595.28, // Ancho en puntos para A4
-          height: 841.89, // Alto en puntos para A4
-        },
-        content: content,
-        footer: function (currentPage, pageCount) {
-          const user = dto.correo.split('@')[0]; // Usuario antes de la arroba
-          return {
-            table: {
-              widths: ['*', '*', '*'],
-              body: [
-                [
-                  {
-                    text: `Fecha y Hora: ${new Date().toLocaleString()}`,
-                    alignment: 'left',
-                    border: [false, false, false, false],
-                    style: { fontSize: 8 },
-                  },
-                  {
-                    text: `Generó: ${user}`,
-                    alignment: 'center',
-                    border: [false, false, false, false],
-                    style: { fontSize: 8 },
-                  },
-                  {
-                    text: `Página: ${currentPage} de ${pageCount}`,
-                    alignment: 'right',
-                    border: [false, false, false, false],
-                    style: { fontSize: 8 },
-                  },
-                ],
-              ],
-            },
-            margin: [20, 0, 20, 20],
-          };
-        },
-        styles: {
-          header: {
-            fontSize: 18,
-            bold: true,
-            alignment: 'center',
-            margin: [0, 20, 0, 20],
+          pageSize: 'A4',
+          pageMargins: [40, 120, 40, 85],
+          background: {
+              image: data.base64data,
+              width: 595.28,
+              height: 841.89
           },
-          subheader: {
-            fontSize: 11,
-            alignment: 'left',
-            margin: [40, 10, 40, 5],
-          },
-          highlightedName: {
-            fontSize: 14,
-            bold: true,
-            alignment: 'center',
-            margin: [40, 10, 40, 5],
-          },
-          benefit: {
-            fontSize: 12,
-            bold: true,
-            alignment: 'center',
-            margin: [0, 10, 0, 10],
-          },
-          body: {
-            fontSize: 11,
-            alignment: 'left',
-            margin: [40, 10, 40, 5],
-          },
-          signature: {
-            fontSize: 12,
-            bold: true,
-            alignment: 'center',
-            margin: [0, 10, 0, 0],
-          },
-          signatureTitle: {
-            fontSize: 12,
-            alignment: 'center',
-          },
-        },
+          content: content,
+          footer: (currentPage, pageCount) => ({
+              table: {
+                  widths: ['*', '*', '*'],
+                  body: [
+                      [
+                          { text: 'Fecha y Hora: ' + today.toLocaleString(), alignment: 'left', border: [false, false, false, false], style: 'footerText' },
+                          { text: 'Generado por: ' + user, alignment: 'center', border: [false, false, false, false], style: 'footerText' },
+                          { text: 'Página: ' + currentPage + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: 'footerText' }
+                      ]
+                  ]
+              },
+              margin: [20, 0, 20, 20]
+          }),
+          styles: {
+              mainTitle: { fontSize: 20, bold: true, alignment: 'center', margin: [0, 30, 0, 20] },
+              body: { fontSize: 12, alignment: 'justify', margin: [40, 10, 40, 5], lineHeight: 1.5 },
+              signature: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 10, 0, 0] },
+              signatureTitle: { fontSize: 12, alignment: 'center' },
+              footerText: { fontSize: 8 }
+          }
       };
-    };
+  };
 
-    // Utiliza generateConstancia para manejar el fondo y la firma
-    return this.generateConstancia(data, includeQR, templateFunction);
-  }
+  return this.generateConstancia(data, includeQR, templateFunction);
+}
+
+
+async generateConstanciaBeneficiariosSinPago(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
+  const templateFunction = async (data: any, includeQR: boolean) => {
+    const today = new Date();
+    const formattedDate = `${today.getDate()} de ${today.toLocaleString('es-HN', { month: 'long' })} del ${today.getFullYear()}.`;
+    const user = dto.correo.split('@')[0];
+
+    const nombre_completo = (data?.nombre_completo || 'NO DEFINIDO').toUpperCase();
+    const n_identificacion = (data?.n_identificacion || 'SIN IDENTIFICACIÓN').toUpperCase();
+
+    const content: Array<any> = [
+      { text: 'A QUIEN INTERESE', style: 'mainTitle' },
+
+      {
+        text: [
+          'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
+          { text: nombre_completo, bold: true },
+          ', con número de identificación ',
+          { text: n_identificacion, bold: true },
+          ', gozaba del beneficio de ',
+          { text: `${data.beneficio.toUpperCase()},`, bold: true }, // ✅ Se mantiene la coma correctamente
+          ' y sus beneficiarios ',
+          { text: 'no han recibido', bold: true },
+          ' beneficio causado por el(la) docente fallecido(a).'
+        ],
+        style: 'body'
+      },
+
+      {
+        text: [
+          'Y para los fines que el interesado estime convenientes, se extiende el presente documento en la ciudad de ',
+          { text: dto.municipio.charAt(0).toUpperCase() + dto.municipio.slice(1).toLowerCase(), bold: true },
+          ', ',
+          { text: dto.departamento.charAt(0).toUpperCase() + dto.departamento.slice(1).toLowerCase(), bold: true },
+          ', el ',
+          { text: formattedDate, bold: true } // ✅ Eliminación de espacio innecesario después de la fecha
+        ],
+        style: 'body'
+      },
+
+      { text: '\n\n\n\n\n\n\n\n\n' }, // Espaciado antes de la firma
+
+      {
+        canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }],
+        margin: [127, 0, 0, 0]
+      },
+
+      { text: dto.nombreEmpleado, style: 'signature', alignment: 'center' },
+      { text: dto.nombrePuesto, style: 'signatureTitle', alignment: 'center' }
+    ];
+
+    return {
+      pageSize: 'A4',
+      pageMargins: [40, 120, 40, 85],
+      background: {
+        image: data.base64data,
+        width: 595.28,
+        height: 841.89
+      },
+      content: content,
+      footer: (currentPage, pageCount) => ({
+        table: {
+          widths: ['*', '*', '*'],
+          body: [
+            [
+              { text: 'Fecha y Hora: ' + today.toLocaleString(), alignment: 'left', border: [false, false, false, false], style: 'footerText' },
+              { text: 'Generado por: ' + user, alignment: 'center', border: [false, false, false, false], style: 'footerText' },
+              { text: 'Página: ' + currentPage + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: 'footerText' }
+            ]
+          ]
+        },
+        margin: [20, 0, 20, 20]
+      }),
+      styles: {
+        mainTitle: { fontSize: 20, bold: true, alignment: 'center', margin: [0, 30, 0, 20] },
+        body: { fontSize: 12, alignment: 'justify', margin: [40, 10, 40, 5], lineHeight: 1.5 },
+        signature: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 10, 0, 0] },
+        signatureTitle: { fontSize: 12, alignment: 'center' },
+        footerText: { fontSize: 8 }
+      }
+    };
+  };
+
+  return this.generateConstancia(data, includeQR, templateFunction);
+}
+
+async generateConstanciaJubiladoFallecido(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
+  const templateFunction = async (data: any, includeQR: boolean) => {
+      const today = new Date();
+      const formattedDate = `${today.getDate()} de ${today.toLocaleString('es-HN', { month: 'long' })} del ${today.getFullYear()}.`;
+      const user = dto.correo.split('@')[0];
+
+      const content: Array<any> = [
+          { text: 'A QUIEN INTERESE', style: 'mainTitle' },
+          {
+              text: [
+                  'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
+                  { text: data.nombre_completo.toUpperCase(), bold: true },
+                  ', con número de identificación ',
+                  { text: data.n_identificacion, bold: true },
+                  ', gozaba del beneficio de ',
+                  { text: data.beneficio.toUpperCase(), bold: true },
+                  ', otorgado a partir del ',
+                  { text: data.fecha_inicio, bold: true },
+                  data.fecha_fin ? ', y con fecha de finalización el ' : '.',
+                  data.fecha_fin ? { text: data.fecha_fin, bold: true } : '.'
+              ],
+              style: 'body'
+          },
+          {
+              text: [
+                  'Este beneficio fue aprobado con un monto de ',
+                  { text: data.monto_letras.toUpperCase(), bold: true },
+                  ' (L. ',
+                  { text: data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), bold: true },
+                  ').'
+              ],
+              style: 'body'
+          },
+
+          {
+              text: [
+                  'Y para los fines que el interesado estime convenientes, se extiende la presente confirmación en la ciudad de ',
+                  { text: dto.municipio.charAt(0).toUpperCase() + dto.municipio.slice(1).toLowerCase(), bold: true },
+                  ', ',
+                  { text: dto.departamento.charAt(0).toUpperCase() + dto.departamento.slice(1).toLowerCase(), bold: true },
+                  ', el ',
+                  { text: formattedDate, bold: true }
+              ],
+              style: 'body'
+          },
+
+          { text: '\n\n\n\n\n\n\n\n\n' }, // Espaciado antes de la firma
+          
+          // 📌 Firma
+          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
+          { text: dto.nombreEmpleado, style: 'signature' },
+          { text: dto.nombrePuesto, style: 'signatureTitle' }
+      ];
+
+      return {
+          pageSize: 'A4',
+          pageMargins: [40, 120, 40, 85],
+          background: {
+              image: data.base64data,
+              width: 595.28,
+              height: 841.89
+          },
+          content: content,
+          footer: (currentPage, pageCount) => ({
+              table: {
+                  widths: ['*', '*', '*'],
+                  body: [
+                      [
+                          { text: 'Fecha y Hora: ' + today.toLocaleString(), alignment: 'left', border: [false, false, false, false], style: 'footerText' },
+                          { text: 'Generado por: ' + user, alignment: 'center', border: [false, false, false, false], style: 'footerText' },
+                          { text: 'Página: ' + currentPage + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: 'footerText' }
+                      ]
+                  ]
+              },
+              margin: [20, 0, 20, 20]
+          }),
+          styles: {
+              mainTitle: { fontSize: 20, bold: true, alignment: 'center', margin: [0, 30, 0, 20] },
+              body: { fontSize: 12, alignment: 'justify', margin: [40, 10, 40, 5], lineHeight: 1.5 },
+              signature: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 10, 0, 0] },
+              signatureTitle: { fontSize: 12, alignment: 'center' },
+              footerText: { fontSize: 8 }
+          }
+      };
+  };
+
+  return this.generateConstancia(data, includeQR, templateFunction);
+}
 
   async generateMovimientosPdf(data: any): Promise<Buffer> {
     try {

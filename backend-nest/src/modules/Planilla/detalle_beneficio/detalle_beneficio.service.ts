@@ -1,9 +1,9 @@
 import * as oracledb from 'oracledb';
 import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
-import { addDays, format, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, In, Not, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
@@ -27,11 +27,9 @@ export class DetalleBeneficioService {
   constructor(
     @InjectRepository(Net_Detalle_Deduccion)
     private readonly detDedRepository: Repository<Net_Detalle_Deduccion>,
-
     @InjectRepository(Net_Usuario_Empresa)
     private readonly usuarioEmpRepository: Repository<Net_Usuario_Empresa>,
     private jwtService: JwtService,
-
     @InjectRepository(Net_Detalle_Pago_Beneficio)
     private readonly detPagBenRepository: Repository<Net_Detalle_Pago_Beneficio>,
     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
@@ -42,20 +40,114 @@ export class DetalleBeneficioService {
     private detPersonaRepository: Repository<net_detalle_persona>,
     @InjectRepository(Net_Beneficio_Tipo_Persona)
     private benTipoPerRepository: Repository<Net_Beneficio_Tipo_Persona>,
-
     @InjectRepository(Net_Tipo_Persona)
     private tipoPersonaRepos: Repository<Net_Tipo_Persona>,
-
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
-
     @InjectRepository(Net_Persona_Por_Banco)
     private readonly personaPorBancoRepository: Repository<Net_Persona_Por_Banco>,
-
     @InjectRepository(net_estado_afiliacion)
     private readonly estadoAfilRepository: Repository<net_estado_afiliacion>,
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) { }
+
+  async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
+    const causante = await this.personaRepository.findOne({
+      where: { n_identificacion },
+    });
+
+    if (!causante) {
+      return false;
+    }
+
+    const beneficiarios = await this.detPersonaRepository.find({
+      where: { ID_CAUSANTE_PADRE: causante.id_persona },
+    });
+
+    if (beneficiarios.length === 0) {
+      return false;
+    }
+    const idsBeneficiarios = beneficiarios.map(b => b.ID_PERSONA);
+
+    if (idsBeneficiarios.length === 0) {
+      return false;
+    }
+
+    const pagos = await this.detPagBenRepository
+      .createQueryBuilder('pago')
+      .innerJoinAndSelect('pago.detalleBeneficioAfiliado', 'detalle')
+      .where('detalle.ID_PERSONA IN (:...ids)', { ids: idsBeneficiarios })
+      .andWhere('pago.estado != :estado', { estado: 'RECHAZADO' })
+      .getCount();
+    return pagos > 0;
+  }
+
+  async obtenerBeneficiosPorPersona(dni: string, incluirCostoVida: boolean): Promise<any> {
+    let query = '';
+    if (incluirCostoVida) {
+      query = `
+        SELECT
+            P.N_IDENTIFICACION,
+            M.NOMBRE_MUNICIPIO,
+            MAX(B.NOMBRE_BENEFICIO) AS NOMBRE_BENEFICIO,
+            B.PERIODICIDAD,
+            SUM(PAGO.MONTO_POR_PERIODO) AS MONTO_POR_PERIODO,
+            MAX(
+                CASE
+                    WHEN PAGO.ID_BENEFICIO NOT IN (6, 26, 27) 
+                    THEN TO_CHAR(PAGO.FECHA_EFECTIVIDAD, 'DD/MM/YYYY')
+                    ELSE NULL
+                END
+            ) AS FECHA_EFECTIVIDAD,
+            MAX(PAGO.NUM_RENTAS_APROBADAS) AS NUM_RENTAS_APROBADAS,
+            MAX(PAGO.PERIODO_FINALIZACION) AS PERIODO_FINALIZACION
+        FROM
+            NET_DETALLE_BENEFICIO_AFILIADO PAGO
+        JOIN NET_PERSONA P ON P.ID_PERSONA = PAGO.ID_PERSONA
+        LEFT JOIN NET_MUNICIPIO M ON P.ID_MUNICIPIO_RESIDENCIA = M.ID_MUNICIPIO
+        JOIN NET_BENEFICIO B ON B.ID_BENEFICIO = PAGO.ID_BENEFICIO
+        WHERE
+            P.N_IDENTIFICACION = :dni
+            AND PAGO.ID_BENEFICIO NOT IN (26, 27)
+        GROUP BY
+            P.N_IDENTIFICACION,
+            M.NOMBRE_MUNICIPIO,
+            B.PERIODICIDAD
+      `;
+    } else {
+      query = `
+        SELECT 
+          P.N_IDENTIFICACION,
+          M.NOMBRE_MUNICIPIO,
+          B.NOMBRE_BENEFICIO,
+          B.PERIODICIDAD,
+          PAGO.MONTO_POR_PERIODO,
+          TO_CHAR(PAGO.FECHA_EFECTIVIDAD, 'DD/MM/YYYY') AS FECHA_EFECTIVIDAD,
+          PAGO.NUM_RENTAS_APROBADAS,
+          PAGO.PERIODO_FINALIZACION
+        FROM 
+          NET_DETALLE_BENEFICIO_AFILIADO PAGO
+        JOIN 
+          NET_PERSONA P ON P.ID_PERSONA = PAGO.ID_PERSONA
+        LEFT JOIN 
+          NET_MUNICIPIO M ON P.ID_MUNICIPIO_RESIDENCIA = M.ID_MUNICIPIO
+        JOIN 
+          NET_BENEFICIO B ON B.ID_BENEFICIO = PAGO.ID_BENEFICIO
+        WHERE 
+          P.N_IDENTIFICACION = :dni 
+        ORDER BY 
+          PAGO.FECHA_EFECTIVIDAD DESC
+      `;
+    }
+
+    const beneficios = await this.personaRepository.query(query, [dni]);
+
+    if (!beneficios || beneficios.length === 0) {
+      throw new NotFoundException(`No se encontraron beneficios para la persona con DNI ${dni}`);
+    }
+
+    return beneficios;
+  }
 
   async verificarSiEsAfiliado(n_identificacion: string): Promise<any> {
     const persona = await this.personaRepository

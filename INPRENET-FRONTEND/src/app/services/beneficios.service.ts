@@ -13,6 +13,35 @@ export class BeneficiosService {
   constructor(private toastr: ToastrService, private http: HttpClient) {
   }
 
+  verificarPagosBeneficiarios(n_identificacion: string): Observable<boolean> {
+    return this.http.get<boolean>(`${environment.API_URL}/api/beneficio-planilla/verificar-pagos`, {
+      params: new HttpParams().set('n_identificacion', n_identificacion),
+    })
+    .pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al verificar pagos de beneficiarios', error);
+        this.toastr.error('Error al verificar pagos de beneficiarios', 'Error');
+        return throwError(() => new Error('Error al verificar pagos de beneficiarios'));
+      })
+    );
+  }
+
+  obtenerBeneficiosPorPersona(dni: string, incluirCostoVida: boolean = false): Observable<any> {
+    return this.http.get<any>(`${environment.API_URL}/api/beneficio-planilla/beneficios`, {
+      params: new HttpParams()
+        .set('dni', dni)
+        .set('incluirCostoVida', incluirCostoVida.toString()),
+    })
+    .pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al obtener beneficios:', error);
+        this.toastr.error('No se pudieron obtener los beneficios', 'Error');
+        return throwError(() => new Error('Error al obtener beneficios'));
+      })
+    );
+  }
+  
+  
   verificarSiEsAfiliado(dni: string): Observable<boolean> {
     return this.http.get<boolean>(`${environment.API_URL}/api/beneficio-planilla/verificar-afiliado/${dni}`)
       .pipe(

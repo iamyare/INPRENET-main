@@ -91,17 +91,17 @@ export class AfiliadoService {
   async getMovimientosOrdenados(id_persona: number, id_tipo_cuenta: number): Promise<any> {
     try {
       const movimientos = await this.movimientoCuentaRepository.find({
-        where: {
+        /* where: {
           cuentaPersona: {
-           /*  persona: { id_persona },
-            tipoCuenta: { ID_TIPO_CUENTA: id_tipo_cuenta } */
+            persona: { id_persona },
+            tipoCuenta: { ID_TIPO_CUENTA: id_tipo_cuenta }
           }
-        },
+        }, */
         order: { ANO: 'ASC', MES: 'ASC' },
         relations: ['cuentaPersona', 'cuentaPersona.tipoCuenta', 'tipoMovimiento'],
       });
 
-      const tipoCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.tipoCuenta.DESCRIPCION : null;
+      const tipoCuenta = ''//movimientos.length > 0 ? movimientos[0].cuentaPersona.tipoCuenta.DESCRIPCION : null;
       //const numeroCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.NUMERO_CUENTA : null;
 
       const movimientosOrdenados = movimientos.reduce((acc, movimiento) => {

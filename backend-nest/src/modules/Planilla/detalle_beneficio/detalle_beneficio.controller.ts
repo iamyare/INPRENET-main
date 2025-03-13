@@ -9,6 +9,23 @@ import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) { }
 
+  @Get('verificar-pagos')
+  async verificarBeneficiariosSinPago(@Query('n_identificacion') n_identificacion: string) {
+    return this.detallebeneficioService.verificarPagosBeneficiarios(n_identificacion);
+  }
+
+  @Get('beneficios')
+  async obtenerBeneficios(
+    @Query('dni') dni: string,
+    @Query('incluirCostoVida') incluirCostoVida?: string
+  ) {
+    if (!dni || isNaN(Number(dni))) {
+      throw new BadRequestException('El DNI proporcionado no es válido.');
+    }
+    const incluirCosto = incluirCostoVida === 'true' || incluirCostoVida === '1';
+
+    return await this.detallebeneficioService.obtenerBeneficiosPorPersona(dni, incluirCosto);
+  }
   @Get('verificar-afiliado/:dni')
   async verificarAfiliado(@Param('dni') dni: string): Promise<{ esAfiliado: boolean }> {
     const esAfiliado = await this.detallebeneficioService.verificarSiEsAfiliado(dni);

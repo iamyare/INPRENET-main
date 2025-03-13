@@ -29,7 +29,7 @@ export class ContanciasAfiliadosComponent implements OnInit {
   constanciaButtons = [
     { label: 'Constancia de Afiliación', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
     { label: 'Constancia de Beneficio Vitalicio', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
-    { label: 'Constancia de Beneficio Periodico', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO', 'BENEFICIARIO'] },
+    { label: 'Constancia de Beneficio Periodico', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO', 'BENEFICIARIO', 'DESIGNADO', 'BENEFICIARIO SIN CAUSANTE'] },
     { label: 'Constancia de Jubilado Fallecido', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
     { label: 'Constancia de Beneficiarios Sin Pago', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
   ];

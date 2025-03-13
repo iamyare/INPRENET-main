@@ -2780,7 +2780,7 @@ async generateConstanciaBeneficiosFormatoNuevo(data: any, includeQR: boolean, dt
                   { text: data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), bold: true },
                   '), y por el término de ',
                   { text: `${data.num_rentas_aprobadas || 'INDEFINIDO'}`, bold: true },
-                  ' rentas.'
+                  ' rentas mensuales.'
               ],
               style: 'body'
           },

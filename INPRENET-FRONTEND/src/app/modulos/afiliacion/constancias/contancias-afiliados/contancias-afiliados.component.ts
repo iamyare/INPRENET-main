@@ -307,7 +307,6 @@ export class ContanciasAfiliadosComponent implements OnInit {
       if (selectedOption) {
         callback(selectedOption);
       } else {
-        console.log('El usuario cerró el diálogo sin seleccionar.');
       }
     });
   }

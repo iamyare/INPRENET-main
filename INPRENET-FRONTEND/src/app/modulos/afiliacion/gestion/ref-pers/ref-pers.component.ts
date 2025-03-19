@@ -22,6 +22,7 @@ export class RefPersComponent implements OnInit {
   public parentesco: any[] = [];
   public tipo_referencia: any[] = [];
   public maxDate!: Date;
+  public mostrarConyuge: boolean = false;
 
   esAfiliadoText: string = '';
 
@@ -48,6 +49,16 @@ export class RefPersComponent implements OnInit {
     }
 
     this.cargarDatosEstaticos();
+
+    this.formGroup.root?.get('datosGenerales')?.get('estado_civil')?.valueChanges.subscribe((estadoCivil: string) => {
+      this.mostrarConyuge = estadoCivil === 'CASADO/A' || estadoCivil === 'UNION LIBRE';
+      
+      if (!this.mostrarConyuge) {
+        this.formGroup.removeControl('conyuge');
+      } else if (!this.formGroup.get('conyuge')) {
+        this.formGroup.addControl('conyuge', this.initFormConyuge());
+      }
+    });
   }
 
   private validarMinimoUnaReferencia(): ValidatorFn {
@@ -328,6 +339,7 @@ private clearConyugeFieldsValidation(form: FormGroup): void {
   cambiarListadoParentesco(tipoReferencia: string, referenciaForm: FormGroup) {
     if (tipoReferencia === 'REFERENCIA FAMILIAR') {
       this.parentesco = this.datosEstaticosService.parentesco;
+      console.log(this.parentesco);
       
     } else if (tipoReferencia === 'REFERENCIA PERSONAL') {
       this.parentesco = this.datosEstaticosService.parentescoReferenciasPersonales;

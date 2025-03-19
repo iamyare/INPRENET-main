@@ -1,8 +1,8 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { Net_Tipo_Persona } from '../entities/net_tipo_persona.entity';
 import { net_persona } from '../entities/net_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { CrearPersonaDto } from './dtos/crear-persona.dto';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Tipo_Identificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
@@ -36,9 +36,13 @@ import { Net_Cargo_Publico } from 'src/modules/Empresarial/entities/net_cargo_pu
 import { Net_Referencias } from '../entities/net_referencias.entity';
 import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
 import { validate, ValidationError } from 'class-validator';
+import { Net_Aldea } from 'src/modules/Regional/provincia/entities/net_aldea.entity';
+import { Net_Colonia } from 'src/modules/Regional/provincia/entities/net_colonia.entity';
+import * as moment from 'moment';
 
 @Injectable()
 export class AfiliacionService {
+  private readonly logger = new Logger(AfiliacionService.name);
   constructor(
     @InjectRepository(net_persona)
     private readonly personaRepository: Repository<net_persona>,
@@ -76,46 +80,170 @@ export class AfiliacionService {
     private readonly otraFuenteIngresoRepository: Repository<net_otra_fuente_ingreso>,
     @InjectRepository(Net_perf_pers_cent_trab)
     private readonly perfilCentroTrabajoRepository: Repository<Net_perf_pers_cent_trab>,
+    @InjectRepository(Net_Aldea)
+    private readonly aldeaRepository: Repository<Net_Aldea>,
+    @InjectRepository(Net_Colonia)
+    private readonly coloniaRepository: Repository<Net_Colonia>,
     private readonly entityManager: EntityManager,
   ) { }
 
+
   async tieneBancoActivo(idPersona: number): Promise<{
     tieneBancoActivo: boolean;
-    tieneBeneficiarios: boolean;
+    beneficiariosValidos: boolean;
     tieneReferencias: boolean;
     tieneCentroTrabajo: boolean;
+    datosCompletos: boolean;
+    ultimaActualizacionValida: boolean;
+    estaEnPeps: boolean;
   }> {
-    const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
-
+    const logger = new Logger('TieneBancoActivoService');
+  
+    const persona = await this.personaRepository.findOne({
+      where: { id_persona: idPersona },
+      relations: [
+        'tipoIdentificacion',
+        'pais',
+        'municipio',
+        'municipio_nacimiento',
+        'profesion',
+        'peps',
+      ],
+    });
+  
     if (!persona) {
       throw new NotFoundException(`La persona con ID ${idPersona} no existe.`);
     }
-
+  
+    // 📌 **Determinar si la persona está en PEPS**
+    const estaEnPeps = persona.peps && persona.peps.length > 0;
+  
+    // 📌 **Validar última fecha de actualización**
+    let ultimaActualizacionValida = true;
+    if (persona.ultima_fecha_actualizacion) {
+      const fechaActualizacion = moment(persona.ultima_fecha_actualizacion, 'DD/MM/YY HH:mm:ss.SSS');
+      const ahora = moment();
+      const diferenciaAnios = ahora.diff(fechaActualizacion, 'years');
+      const diferenciaMeses = ahora.diff(fechaActualizacion, 'months');
+  
+      if (estaEnPeps && diferenciaMeses > 6) {
+        ultimaActualizacionValida = false;
+        logger.warn(`La persona con ID ${idPersona} está en PEPS y su última actualización es mayor a 6 meses.`);
+      } else if (!estaEnPeps && diferenciaAnios > 2) {
+        ultimaActualizacionValida = false;
+        logger.warn(`La persona con ID ${idPersona} tiene más de 2 años sin actualizar su información.`);
+      }
+    }
+  
+    // 📌 **Obtener beneficiarios correctamente**
+    const beneficiarios = await this.detallePersonaRepository.find({
+      where: { ID_CAUSANTE_PADRE: idPersona, eliminado: 'NO' },
+      relations: ['persona', 'persona.pais', 'persona.municipio', 'persona.municipio_nacimiento'],
+    });
+  
+    let sumaPorcentajes = 0;
+    let beneficiariosValidos = beneficiarios.length > 0;
+  
+    for (const beneficiario of beneficiarios) {
+      const datosBeneficiario = beneficiario.persona;
+  
+      const camposRequeridosBeneficiario = {
+        ID_PAIS_NACIONALIDAD: datosBeneficiario.pais,
+        PRIMER_NOMBRE: datosBeneficiario.primer_nombre,
+        PRIMER_APELLIDO: datosBeneficiario.primer_apellido,
+        GENERO: datosBeneficiario.genero,
+        TELEFONO_1: datosBeneficiario.telefono_1,
+        FECHA_NACIMIENTO: datosBeneficiario.fecha_nacimiento,
+        PARENTESCO: beneficiario.parentesco,
+      };
+  
+      if (datosBeneficiario.pais && datosBeneficiario.pais.id_pais === 1) {
+        camposRequeridosBeneficiario['ID_MUNICIPIO_RESIDENCIA'] = datosBeneficiario.municipio;
+        camposRequeridosBeneficiario['ID_MUNICIPIO_NACIMIENTO'] = datosBeneficiario.municipio_nacimiento;
+      }
+  
+      const camposFaltantesBeneficiario = Object.entries(camposRequeridosBeneficiario)
+        .filter(([_, valor]) => valor === null || valor === undefined || valor === "")
+        .map(([campo]) => campo);
+  
+      if (camposFaltantesBeneficiario.length > 0) {
+        beneficiariosValidos = false;
+        logger.warn(`El beneficiario con ID ${beneficiario.ID_PERSONA} tiene los siguientes campos faltantes: ${JSON.stringify(camposFaltantesBeneficiario)}`);
+      }
+  
+      sumaPorcentajes += beneficiario.porcentaje ?? 0;
+    }
+  
+    if (sumaPorcentajes !== 100) {
+      beneficiariosValidos = false;
+      logger.warn(`La suma de los porcentajes de los beneficiarios de la persona con ID ${idPersona} no es 100, sino ${sumaPorcentajes}.`);
+    }
+  
+    const camposRequeridos = {
+      ID_TIPO_IDENTIFICACION: persona.tipoIdentificacion,
+      ID_PAIS_NACIONALIDAD: persona.pais,
+      N_IDENTIFICACION: persona.n_identificacion,
+      RTN: persona.rtn,
+      ESTADO_CIVIL: persona.estado_civil,
+      PRIMER_NOMBRE: persona.primer_nombre,
+      PRIMER_APELLIDO: persona.primer_apellido,
+      GENERO: persona.genero,
+      CANTIDAD_HIJOS: persona.cantidad_hijos,
+      CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
+      GRADO_ACADEMICO: persona.grado_academico,
+      TELEFONO_1: persona.telefono_1,
+      CORREO_1: persona.correo_1,
+      FECHA_NACIMIENTO: persona.fecha_nacimiento,
+      DIRECCION_RESIDENCIA: persona.direccion_residencia,
+      FOTO_PERFIL: persona.foto_perfil,
+      ID_MUNICIPIO_RESIDENCIA: persona.municipio,
+      ID_PROFESION: persona.profesion,
+      FECHA_AFILIACION: persona.fecha_afiliacion,
+    };
+    
+    if (persona.pais && persona.pais.id_pais === 1) {
+      camposRequeridos['ID_MUNICIPIO_NACIMIENTO'] = persona.municipio_nacimiento;
+    }
+  
+    const camposFaltantes = Object.entries(camposRequeridos)
+      .filter(([_, valor]) => valor === null || valor === undefined || valor === "")
+      .map(([campo]) => campo);
+  
+    if (camposFaltantes.length > 0) {
+      logger.warn(`La persona con ID ${idPersona} tiene los siguientes campos faltantes: ${JSON.stringify(camposFaltantes)}`);
+    }
+  
     const tieneBancoActivo = await this.personaBancoRepository.count({
       where: { persona: { id_persona: idPersona }, estado: 'ACTIVO' },
-    });
-
-    const tieneBeneficiarios = await this.detallePersonaRepository.count({
-      where: { ID_CAUSANTE_PADRE: idPersona, eliminado: 'NO' }, // Solo cuenta beneficiarios no eliminados
-    });
-
+    }) > 0;
+  
     const tieneReferencias = await this.referenciaRepository.count({
-      where: { persona: { id_persona: idPersona }, estado: 'ACTIVO' }, // Solo referencias activas
+      where: { persona: { id_persona: idPersona }, estado: 'ACTIVO' },
+    }) > 0;
+  
+    const tieneCentroTrabajo =
+      await this.perfilCentroTrabajoRepository.count({ where: { persona: { id_persona: idPersona }, estado: 'ACTIVO' } }) > 0;
+  
+    // 📌 **Excepción para ciertos tipos de persona**
+    const tipoPersona = await this.detallePersonaRepository.findOne({
+      where: { ID_PERSONA: idPersona },
+      relations: ['tipoPersona'],
     });
-
-    const tieneCentroTrabajo = await this.perfilCentroTrabajoRepository.count({
-      where: { persona: { id_persona: idPersona }, estado: 'ACTIVO' }, // Solo perfiles activos
-    });
-
+  
+    const esExcepcionCentroTrabajo = tipoPersona?.ID_TIPO_PERSONA === 2 || tipoPersona?.ID_TIPO_PERSONA === 3;
+    const centroTrabajoValido = esExcepcionCentroTrabajo || tieneCentroTrabajo;
+  
     return {
-      tieneBancoActivo: tieneBancoActivo > 0,
-      tieneBeneficiarios: tieneBeneficiarios > 0,
-      tieneReferencias: tieneReferencias > 0,
-      tieneCentroTrabajo: tieneCentroTrabajo > 0, // True si tiene un perfil de centro de trabajo activo
+      tieneBancoActivo,
+      beneficiariosValidos,
+      tieneReferencias,
+      tieneCentroTrabajo: centroTrabajoValido,
+      datosCompletos: camposFaltantes.length === 0,
+      ultimaActualizacionValida,
+      estaEnPeps,
     };
   }
-
-
+  
 
   async convertirEnAfiliado(idPersona: number, idTipoPersona: number): Promise<{ message: string }> {
     const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
@@ -267,30 +395,31 @@ export class AfiliacionService {
       .leftJoinAndSelect("peps.cargo_publico", "cargo_publico")
       .leftJoinAndSelect("persona.referencias", "referencias")
       .leftJoinAndSelect("persona.detalleDeduccion", "detalleDeduccion")
-      /* .leftJoinAndSelect("persona.cuentas", "cuentas") */
       .leftJoinAndSelect("persona.detallePlanIngreso", "detallePlanIngreso")
       .leftJoinAndSelect("persona.colegiosMagisteriales", "colegiosMagisteriales")
       .leftJoinAndSelect("persona.otra_fuente_ingreso", "otra_fuente_ingreso")
       .leftJoinAndSelect("persona.familiares", "familiares")
       .leftJoinAndSelect("familiares.referenciada", "referenciada")
-      .leftJoinAndSelect("persona.personasPorBanco", "personasPorBanco", "personasPorBanco.estado = :estadoBanco", { estadoBanco: "ACTIVO" }) // Solo bancos activos
+      .leftJoinAndSelect("persona.personasPorBanco", "personasPorBanco", "personasPorBanco.estado = :estadoBanco", { estadoBanco: "ACTIVO" })
       .leftJoinAndSelect("personasPorBanco.banco", "banco")
-      .leftJoinAndSelect("persona.perfPersCentTrabs", "perfPersCentTrabs", "perfPersCentTrabs.estado = :estadoTrabajo", { estadoTrabajo: "ACTIVO" }) // Solo centros de trabajo activos
+      .leftJoinAndSelect("persona.perfPersCentTrabs", "perfPersCentTrabs", "perfPersCentTrabs.estado = :estadoTrabajo", { estadoTrabajo: "ACTIVO" })
       .leftJoinAndSelect("perfPersCentTrabs.centroTrabajo", "centroTrabajo")
       .leftJoinAndSelect("centroTrabajo.municipio", "centroTrabajo_municipio")
       .leftJoinAndSelect("centroTrabajo_municipio.departamento", "centroTrabajo_municipio_departamento")
+      //.leftJoinAndSelect("persona.aldea", "aldea")
+      //.leftJoinAndSelect("persona.colonia", "colonia")
       .where("persona.n_identificacion = :n_identificacion", { n_identificacion })
       .getOne();
-
+  
     if (!persona) {
       throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
     }
+  
     const conyuge = persona.familiares.find(familiar => familiar.parentesco === 'CÓNYUGE');
     const esAfiliado = conyuge && conyuge.referenciada
       ? await this.verificarSiEsAfiliado(conyuge.referenciada.n_identificacion)
       : "NO";
-
-    // Mapear los familiares en el formato adecuado
+  
     const familiares = persona.familiares.map(familiar => ({
       id_familia: familiar.id_familia,
       parentesco: familiar.parentesco,
@@ -306,7 +435,7 @@ export class AfiliacionService {
         }
         : null
     }));
-
+  
     return {
       ...persona,
       conyuge: conyuge
@@ -319,9 +448,6 @@ export class AfiliacionService {
       familiares,
     };
   }
-
-
-
 
   async verificarSiEsAfiliado(n_identificacion: string): Promise<string> {
     const persona = await this.personaRepository
@@ -404,7 +530,7 @@ export class AfiliacionService {
       // No se crea una nueva persona, pero se continúa con la función
     } else {
 
-      const [tipoIdentificacion, pais, municipioResidencia, municipioNacimiento, municipioDefuncion, profesion, causaFallecimiento] = await Promise.all([
+      const [tipoIdentificacion, pais, municipioResidencia, municipioNacimiento, municipioDefuncion, profesion, causaFallecimiento, aldeaResidencia, coloniaResidencia] = await Promise.all([
         this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: crearPersonaDto.id_tipo_identificacion } }),
         this.paisRepository.findOne({ where: { id_pais: crearPersonaDto.id_pais_nacionalidad } }),
         this.municipioRepository.findOne({ where: { id_municipio: crearPersonaDto.id_municipio_residencia } }),
@@ -412,6 +538,8 @@ export class AfiliacionService {
         crearPersonaDto.id_municipio_defuncion ? this.municipioRepository.findOne({ where: { id_municipio: crearPersonaDto.id_municipio_defuncion } }) : null,
         crearPersonaDto.id_profesion ? this.profesionRepository.findOne({ where: { id_profesion: crearPersonaDto.id_profesion } }) : null,
         crearPersonaDto.id_causa_fallecimiento ? this.causasFallecimientosRepository.findOne({ where: { id_causa_fallecimiento: crearPersonaDto.id_causa_fallecimiento } }) : null,
+        crearPersonaDto.id_aldea ? this.aldeaRepository.findOne({ where: { id_aldea: crearPersonaDto.id_aldea } }) : null,
+        crearPersonaDto.id_colonia ? this.coloniaRepository.findOne({ where: { id_colonia: crearPersonaDto.id_colonia } }) : null
       ]);
 
       if (!tipoIdentificacion) throw new NotFoundException(`El tipo de identificación con ID ${crearPersonaDto.id_tipo_identificacion} no existe`);
@@ -432,6 +560,8 @@ export class AfiliacionService {
         municipio_defuncion: municipioDefuncion,
         profesion,
         causa_fallecimiento: causaFallecimiento,
+        aldea: aldeaResidencia || null,
+        colonia: coloniaResidencia || null
       });
       await entityManager.save(net_persona, persona);
     }

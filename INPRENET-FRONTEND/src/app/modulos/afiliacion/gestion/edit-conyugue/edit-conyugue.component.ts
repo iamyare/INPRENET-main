@@ -69,13 +69,13 @@ export class EditConyugueComponent implements OnChanges {
       });
   }
 
+
   verificarAfiliado(n_identificacion: string): void {
     this.beneficiosService.verificarSiEsAfiliado(n_identificacion).subscribe({
       next: (response: any) => {
         if (response?.esAfiliado?.datosPersona) {
           const datosPersona = response.esAfiliado.datosPersona;
-
-          // Si hay datos de la persona, llenar los campos automáticamente
+          
           this.formGroup.patchValue({
             conyuge: {
               primer_nombre: datosPersona.primer_nombre || '',
@@ -89,11 +89,10 @@ export class EditConyugueComponent implements OnChanges {
               telefono_celular: datosPersona.telefono_celular || '',
               telefono_trabajo: datosPersona.telefono_trabajo || '',
               trabaja: datosPersona.trabaja === 'SI' ? 'SI' : 'NO',
-              es_afiliado: response.esAfiliado ? 'SÍ' : 'NO'
+              es_afiliado: response.esAfiliado?.esAfiliado === true ? 'SÍ' : 'NO'
             }
           });
         } else {
-          // Si no se encuentra, dejar los campos vacíos y marcar como no afiliado
           this.formGroup.patchValue({
             conyuge: {
               es_afiliado: 'NO',
@@ -130,6 +129,7 @@ export class EditConyugueComponent implements OnChanges {
   cargarConyuge(n_identificacion: string): void {
     this.afiliacionService.obtenerConyugePorIdentificacion(n_identificacion).subscribe({
       next: (conyuge) => {
+        
         if (!conyuge || !conyuge.id_familia) {
           this.conyugeExisteFlag = false;
           this.mostrandoFormularioAgregar = true;
@@ -141,6 +141,7 @@ export class EditConyugueComponent implements OnChanges {
         this.idFamilia = conyuge.id_familia;
   
         let fecha_nacimiento = conyuge.fecha_nacimiento ? this.convertToLocalDate(conyuge.fecha_nacimiento) : null;
+  console.log(conyuge.trabaja);
   
         this.formGroup.patchValue({
           conyuge: {
@@ -154,7 +155,7 @@ export class EditConyugueComponent implements OnChanges {
             telefono_domicilio: conyuge.telefono_3,
             telefono_celular: conyuge.telefono_1,
             telefono_trabajo: conyuge.telefono_2,
-            trabaja: conyuge.trabaja === 'SI' ? 'SI' : 'NO',
+            trabaja: conyuge.trabaja && conyuge.trabaja.trim() === 'SI' ? 'SI' : 'NO',
             es_afiliado: conyuge.esAfiliado === 'SÍ' ? 'SÍ' : 'NO'
           }
         });
@@ -184,6 +185,7 @@ export class EditConyugueComponent implements OnChanges {
     const formattedData = [
       {
         parentesco: 'CÓNYUGE',
+        trabaja: datosConyuge.trabaja ?? 'NO',
         persona_referencia: {
           primer_nombre: datosConyuge.primer_nombre,
           segundo_nombre: datosConyuge.segundo_nombre,
@@ -258,6 +260,7 @@ export class EditConyugueComponent implements OnChanges {
               es_afiliado: 'NO'
             }
           });
+          console.log("Valor en el formulario después de actualizar:", this.formGroup.get('conyuge.trabaja')?.value);
         },
         error: () => {
           this.toastr.error('Error al eliminar el cónyuge');

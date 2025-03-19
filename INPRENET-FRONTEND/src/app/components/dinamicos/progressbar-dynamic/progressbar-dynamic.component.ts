@@ -8,7 +8,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 })
 export class ProgressbarDynamicComponent {
   @Input() title: string = '';
-  @Input() steps: { label: string, isActive: boolean }[] = [];
+  @Input() steps: { label: string, isActive: boolean, isError?: boolean }[] = [];
   @Output() stepChange = new EventEmitter<number>();
 
   activateStep(index: number) {

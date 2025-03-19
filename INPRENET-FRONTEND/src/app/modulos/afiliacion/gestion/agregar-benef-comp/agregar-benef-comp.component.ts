@@ -100,7 +100,8 @@ export class AgregarBenefCompComponent implements OnInit {
         genero: beneficiario.genero,
         direccion_residencia: beneficiario.direccion_residencia,
         id_municipio_residencia: beneficiario.id_municipio_residencia,
-        id_municipio_nacimiento: beneficiario.id_municipio_nacimiento
+        id_municipio_nacimiento: beneficiario.id_municipio_nacimiento,
+        id_pais_nacionalidad: beneficiario.id_pais_nacionalidad
       },
       discapacidades: this.formatDiscapacidades(this.mapDiscapacidades(beneficiario.discapacidades)),
       porcentaje: beneficiario.porcentaje || null,

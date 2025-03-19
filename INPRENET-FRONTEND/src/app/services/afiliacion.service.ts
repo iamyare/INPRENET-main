@@ -10,6 +10,28 @@ export class AfiliacionService {
 
   constructor(private http: HttpClient) { }
 
+  tieneBancoActivo(idPersona: string): Observable<{ 
+    tieneBancoActivo: boolean; 
+    beneficiariosValidos: boolean; 
+    tieneReferencias: boolean; 
+    tieneCentroTrabajo: boolean; 
+    datosCompletos: boolean;
+    ultimaActualizacionValida: boolean;
+    estaEnPeps: boolean; // 🔹 Nueva propiedad para validar si está en PEPs
+}> {
+    const url = `${environment.API_URL}/api/afiliacion/tiene-banco-activo/${idPersona}`;
+    return this.http.get<{ 
+      tieneBancoActivo: boolean; 
+      beneficiariosValidos: boolean; 
+      tieneReferencias: boolean; 
+      tieneCentroTrabajo: boolean; 
+      datosCompletos: boolean;
+      ultimaActualizacionValida: boolean;
+      estaEnPeps: boolean; // 🔹 Se agrega aquí también en la respuesta
+    }>(url);
+}
+
+
   descargarConstanciaBeneficiarios(idPersona: string, empleadoDto: any): Observable<Blob> {
     const url = `${environment.API_URL}/api/documents/constancia-beneficiarios/${idPersona}`;
     return this.http.post(url, empleadoDto, { responseType: 'blob' }).pipe(
@@ -180,26 +202,20 @@ export class AfiliacionService {
     );
   }
 
-  crearAfiliacion(datos: any, fotoPerfil: File, fileIden?: File): Observable<any> {
+  crearAfiliacion(datos: any, fotoPerfil: File, carnetDiscapacidad?: File): Observable<any> {
     const url = `${environment.API_URL}/api/afiliacion/crear`;
     const formData: FormData = new FormData();
 
     formData.append('datos', JSON.stringify(datos));
     formData.append('foto_perfil', fotoPerfil);
 
-    if (fileIden) {
-      formData.append('file_ident', fileIden);
+    if (carnetDiscapacidad) {
+      formData.append('carnet_discapacidad', carnetDiscapacidad);
     }
 
-    if (datos.beneficiarios) {
-      datos.beneficiarios.forEach((persona: any, index: Number) => {
-        formData.append(`file_identB[${persona.persona.n_identificacion}]`, persona.persona.archivo_identificacion);
-      });
-    }
-
-    //return this.http.get<any[]>(url);
     return this.http.post<any>(url, formData);
-  }
+}
+
 
   getAllDiscapacidades(): Observable<any[]> {
     const url = `${environment.API_URL}/api/afiliacion/discapacidades`;

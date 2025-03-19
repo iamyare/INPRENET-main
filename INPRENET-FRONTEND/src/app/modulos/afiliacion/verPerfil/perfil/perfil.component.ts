@@ -1,7 +1,8 @@
-import { Component, OnInit, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
 import { PersonaService } from 'src/app/services/persona.service';
 import { DatePipe } from '@angular/common';
 import { convertirFechaInputs, convertirFecha } from 'src/app/shared/functions/formatoFecha';
+import { AfiliacionService } from '../../../../services/afiliacion.service';
 
 @Component({
   selector: 'app-perfil',
@@ -14,28 +15,30 @@ export class PerfilComponent implements OnInit {
   @Output() resetBusqueda = new EventEmitter<void>();
   detallePersonaUnico: any[] = [];
   defaultFotoUrl = '../../../../../assets/images/AvatarDefecto.png';
+  datosCompletos: boolean = true;
+  tieneBancoActivo: boolean = true;
+  ultimaActualizacionValida: boolean = true;
+  beneficiariosValidos: boolean = true;
+  tieneCentroTrabajo: boolean = true;
+  tieneReferencias: boolean = true;
 
   // Variable para el mensaje cuando supera 2 años sin actualizar
   mensajeSinActualizacion: string = '';
 
-  constructor(private personaService: PersonaService, private datePipe: DatePipe) { }
+  constructor(private personaService: PersonaService,
+      private datePipe: DatePipe,
+      private afiliacionService: AfiliacionService,
+      private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.personaService.currentPersona.subscribe(persona => {
+      if (!persona) return;
+
       this.persona = persona;
+      this.detallePersonaUnico = this.filtrarDetallePersona(persona.detallePersona || []);
 
-      // Si trae "detallePersona", filtramos los tipos
-      if (persona && persona.detallePersona) {
-        this.detallePersonaUnico = this.filtrarDetallePersona(persona.detallePersona);
-      }
-
-      // Verificamos si existe ultima_fecha_actualizacion
-      if (this.persona?.ultima_fecha_actualizacion) {
-        this.verificarTiempoSinActualizacion(this.persona.ultima_fecha_actualizacion);
-      } else {
-        // Si no hay fecha, no mostramos mensaje
-        this.mensajeSinActualizacion = '';
-      }
+      this.verificarTiempoSinActualizacion(this.persona.ultima_fecha_actualizacion || null);
+      this.verificarValidaciones();
     });
   }
 
@@ -53,6 +56,11 @@ export class PerfilComponent implements OnInit {
   trackByPerfil(index: number, perfil: any): any {
     return perfil.tipoPersona.tipo_persona;
   }
+
+  onDatoAgregado(): void {
+    this.verificarValidaciones();
+    this.cdr.detectChanges();
+  }  
 
   getFotoUrl(foto: any): string {
     if (foto && foto.data) {
@@ -86,22 +94,41 @@ export class PerfilComponent implements OnInit {
     return this.persona?.persona?.detallePersona?.some((detalle: any) => detalle.voluntario === 'SI');
   }
 
-  /**
-   * Revisa cuántos años han pasado desde 'fechaUltima' hasta hoy.
-   * Si es mayor a 2, genera el mensaje correspondiente.
-   */
-  private verificarTiempoSinActualizacion(fechaUltima: string): void {
+  private verificarTiempoSinActualizacion(fechaUltima: string | null): void {
+    if (!fechaUltima) {
+      this.ultimaActualizacionValida = false;
+      return;
+    }
+
     const hoy = new Date();
     const ultima = new Date(fechaUltima);
-    const diffMs = hoy.getTime() - ultima.getTime(); // Diferencia en ms
-    const diffYears = diffMs / (1000 * 60 * 60 * 24 * 365.25); // Aproximado en años
+    const diffYears = (hoy.getTime() - ultima.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
 
-    if (diffYears > 2) {
-      const aniosEnteros = Math.floor(diffYears);
-      const mesesAprox = Math.floor((diffYears - aniosEnteros) * 12);
-      this.mensajeSinActualizacion = `Tiene ${aniosEnteros} año(s) y ${mesesAprox} mes(es) sin actualizar.`;
-    } else {
-      this.mensajeSinActualizacion = '';
-    }
+    this.ultimaActualizacionValida = diffYears <= 2;
+    this.mensajeSinActualizacion = diffYears > 2
+      ? `Tiene ${Math.floor(diffYears)} año(s) y ${Math.floor((diffYears - Math.floor(diffYears)) * 12)} mes(es) sin actualizar.`
+      : '';
   }
+
+  private verificarValidaciones(): void {
+    if (!this.persona?.id_persona) return;
+
+    this.afiliacionService.tieneBancoActivo(this.persona.id_persona).subscribe(
+      (response) => {
+        this.datosCompletos = response.datosCompletos;
+        this.tieneBancoActivo = response.tieneBancoActivo;
+        this.beneficiariosValidos = response.beneficiariosValidos;
+        this.tieneCentroTrabajo = response.tieneCentroTrabajo;
+        this.tieneReferencias = response.tieneReferencias;
+        this.ultimaActualizacionValida = response.ultimaActualizacionValida;
+
+        this.cdr.detectChanges();
+      },
+      (error) => {
+        console.error('Error obteniendo validaciones:', error);
+      }
+    );
+  }
+
+  
 }

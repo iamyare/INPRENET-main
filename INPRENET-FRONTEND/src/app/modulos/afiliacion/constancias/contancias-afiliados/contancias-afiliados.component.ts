@@ -99,10 +99,9 @@ export class ContanciasAfiliadosComponent implements OnInit {
           return;
         }
   
-        // Limpiar los arreglos antes de asignar nuevos valores
         this.beneficiosConPeriodicidadV = [];
         this.beneficiosSinPeriodicidadV = [];
-        this.beneficios = response; // Guardamos la lista completa de beneficios
+        this.beneficios = response;
   
         response.forEach((beneficio: any) => {
           if (beneficio.PERIODICIDAD?.trim() === 'V') {
@@ -358,7 +357,6 @@ export class ContanciasAfiliadosComponent implements OnInit {
       num_rentas_aprobadas: beneficioData.NUM_RENTAS_APROBADAS || 'INDEFINIDO'
     };
   
-    console.log('Datos preparados para la constancia:', data);
   
     const dto = this.usuarioToken;
   
@@ -554,7 +552,6 @@ export class ContanciasAfiliadosComponent implements OnInit {
       num_rentas_aprobadas: beneficioData.NUM_RENTAS_APROBADAS || 'INDEFINIDO'
     };
   
-    console.log('Datos preparados para la constancia:', data);
   
     const dto = this.usuarioToken;
   
@@ -624,8 +621,6 @@ export class ContanciasAfiliadosComponent implements OnInit {
             this.toastr.warning('Debe seleccionar un beneficio para continuar.', 'Advertencia');
             return;
           }
-  
-          console.log('Beneficio seleccionado antes de formatear:', beneficioSeleccionado);
   
           // 🔹 Asegurar que `beneficioSeleccionado` sea una cadena antes de llamar `toUpperCase()`
           let beneficioNombre = '';

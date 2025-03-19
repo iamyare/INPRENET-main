@@ -21,10 +21,11 @@ import { net_causas_fallecimientos } from './entities/net_causas_fallecimientos.
 import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
 import { format, parse } from 'date-fns';
-import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import axios from 'axios';
+import { Net_Aldea } from '../Regional/provincia/entities/net_aldea.entity';
+import { Net_Colonia } from '../Regional/provincia/entities/net_colonia.entity';
 
 
 @Injectable()
@@ -63,7 +64,11 @@ export class AfiliadoService {
     @InjectRepository(Net_Tipo_Identificacion)
     private readonly TipoIdentificacionRepository: Repository<Net_Tipo_Identificacion>,
     @InjectRepository(Net_Pais)
-    private readonly paisRepository: Repository<Net_Pais>
+    private readonly paisRepository: Repository<Net_Pais>,
+    @InjectRepository(Net_Pais)
+    private readonly aldeaRepository: Repository<Net_Aldea>,
+    @InjectRepository(Net_Pais)
+    private readonly coloniaRepository: Repository<Net_Colonia>,
 
   ) { }
 
@@ -1071,220 +1076,174 @@ export class AfiliadoService {
     }
     await this.netPersonaColegiosRepository.remove(referencia);
   }
-
+ 
   async updateDatosGenerales(
     idPersona: number,
     datosGenerales: any,
     fileIdent: any,
     arch_cert_def: any,
-    fotoPerfil: any
+    fotoPerfil: any,
+    carnetDiscapacidad: any
   ): Promise<any> {
     try {
-      // Manejo de discapacidades
-      if (datosGenerales.dato?.discapacidades) {
+      console.log(datosGenerales);
+  
+      /** 🔹 Obtener datos existentes de la persona */
+      const personaExistente = await this.personaRepository.findOne({
+        where: { id_persona: idPersona },
+        select: ['carnet_discapacidad']
+      });
+  
+      /** 🔹 Extraer tipos de persona */
+      const tiposPersona = datosGenerales.detalles.map(d => d.tipoPersona);
+      const esAfiliado = tiposPersona.some(tipo => ['AFILIADO', 'JUBILADO', 'PENSIONADO'].includes(tipo));
+      const esBeneficiarioODesignado = tiposPersona.every(tipo => ['BENEFICIARIO', 'DESIGNADO'].includes(tipo));
+  
+      /** 🔹 Definir Campos Obligatorios */
+      let camposObligatorios = esAfiliado
+        ? [
+            'n_identificacion', 'rtn', 'fecha_nacimiento', 'fecha_afiliacion', 'genero',
+            'primer_nombre', 'primer_apellido', 'telefono_1', 'correo_1', 'estado_civil',
+            'cantidad_hijos', 'cantidad_dependientes', 'grado_academico', 'representacion',
+            'id_pais', 'id_municipio_nacimiento', 'id_municipio_residencia', 'id_tipo_identificacion',
+            'id_profesion', 'FotoPerfil'
+          ]
+        : esBeneficiarioODesignado
+        ? ['n_identificacion', 'fecha_nacimiento', 'genero', 'primer_nombre', 'primer_apellido', 'telefono_1', 'id_municipio_nacimiento', 'id_municipio_residencia']
+        : [];
+  
+      /** 🔹 Validaciones adicionales */
+      if (datosGenerales.dato?.id_pais !== 1) {
+        camposObligatorios = camposObligatorios.filter(campo => campo !== 'id_municipio_nacimiento');
+      }
+  
+      if (esBeneficiarioODesignado && datosGenerales.dato?.id_pais !== 1) {
+        camposObligatorios = camposObligatorios.filter(campo => !['id_municipio_nacimiento', 'id_municipio_residencia'].includes(campo));
+      }
+  
+      /** 🔹 Validaciones para Fallecidos */
+      if (datosGenerales.fallecido === 'SI') {
+        camposObligatorios.push(
+          'fecha_defuncion', 'numero_certificado_defuncion', 'fecha_reporte_fallecido',
+          'causa_fallecimiento', 'id_municipio_defuncion'
+        );
+      }
+  
+      /** 🔹 Validar si el carnet de discapacidad debe ser obligatorio */
+      if (datosGenerales.dato?.discapacidad) {
+        camposObligatorios.push('discapacidades');
+        if (!carnetDiscapacidad?.buffer && !personaExistente?.carnet_discapacidad) {
+          camposObligatorios.push('carnet_discapacidad');
+        }
+      }
+  
+      const errores: string[] = [];
+  
+      /** 🔹 Verificación de Campos Requeridos */
+      for (const campo of camposObligatorios) {
+        const valorCampo = datosGenerales.dato?.[campo] ?? datosGenerales[campo];
+        if (valorCampo === undefined || valorCampo === null || valorCampo === '') {
+          errores.push(`El campo '${campo}' es obligatorio.`);
+        }
+      }
+  
+      /** 🔹 Validar que al menos una discapacidad tenga valor `true` */
+      if (datosGenerales.dato?.discapacidad) {
+        const tieneDiscapacidad = Object.values(datosGenerales.dato.discapacidades).some(value => value === true);
+        if (!tieneDiscapacidad) {
+          errores.push("Debe seleccionar al menos una discapacidad.");
+        }
+      }
+  
+      /** 🔹 Manejo de errores antes de continuar */
+      if (errores.length > 0) {
+        throw new BadRequestException({ message: "Se encontraron errores en los datos", errors: errores });
+      }
+  
+      /** 🔹 Manejo del Carnet de Discapacidad y Discapacidades */
+      if (datosGenerales.dato?.discapacidad) {
+        if (carnetDiscapacidad?.buffer) {
+          datosGenerales.dato.carnet_discapacidad = Buffer.from(carnetDiscapacidad.buffer);
+        } else if (personaExistente?.carnet_discapacidad) {
+          datosGenerales.dato.carnet_discapacidad = personaExistente.carnet_discapacidad;
+        }
+  
         const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
           .filter(([_, value]) => value === true)
           .map(([key]) => key);
-
+  
         await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
+  
         if (keysWithTrueValues.length > 0) {
           const discapacidades = await this.discapacidadRepository.find({
             where: { tipo_discapacidad: In(keysWithTrueValues) },
           });
+  
           const nuevosRegistros = discapacidades.map((discapacidad) => ({
             persona: { id_persona: idPersona },
             discapacidad: discapacidad,
           }));
+  
           await this.perDiscapacidadRepository.save(nuevosRegistros);
         }
+      } else {
+        /** 🔹 Si discapacidad es `false`, eliminar todo */
+        await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
+        datosGenerales.dato.carnet_discapacidad = null;
       }
+  
+      /** 🔹 Manejo de Municipios */
+      const municipioResidencia = await this.municipioRepository.findOne({ where: { id_municipio: datosGenerales.dato?.id_municipio_residencia } });
+      const municipioNacimiento = await this.municipioRepository.findOne({ where: { id_municipio: datosGenerales.dato?.id_municipio_nacimiento } });
+      const municipioDefuncion = await this.municipioRepository.findOne({ where: { id_municipio: datosGenerales.id_municipio_defuncion } });
+  
+      const pais = await this.paisRepository.findOne({ where: { id_pais: datosGenerales.dato?.id_pais } });
+      const profesion = await this.profesionRepository.findOne({ where: { id_profesion: datosGenerales.dato?.id_profesion } });
+      const tipoIdentificacion = await this.TipoIdentificacionRepository.findOne({ where: { id_identificacion: datosGenerales.dato?.id_tipo_identificacion } });
+      const causaFallecimiento = await this.causasFallecimientoRepository.findOne({ where: { id_causa_fallecimiento: datosGenerales.causa_fallecimiento } });
+  
+       /** 🔹 Manejo de Aldea y Colonia */
+    //const aldea = await this.aldeaRepository.findOne({ where: { id_aldea: datosGenerales.dato?.id_aldea } });
+    //const colonia = await this.coloniaRepository.findOne({ where: { id_colonia: datosGenerales.dato?.id_colonia } });
 
 
-      /* // Obtención del estado de afiliación
-      const estadoP = await this.estadoAfiliacionRepository.findOne({
-        where: { codigo: datosGenerales.estado },
-      });
-      if (!estadoP) {
-        throw new NotFoundException(`No se ha encontrado el estado de afiliación con el código ${datosGenerales.estado}`);
-      } */
-
-      // Obtención de la causa de fallecimiento (solo si no es null)
-
-      // Validar que el archivo de certificado de defunción sea obligatorio si FALLECIDO es SI
-      if (datosGenerales.fallecido === 'SI' && !arch_cert_def?.buffer) {
-        throw new BadRequestException('El certificado de defunción es obligatorio cuando el afiliado está marcado como fallecido.');
-      }
-      const causaFallecimiento = datosGenerales.causa_fallecimiento
-        ? await this.causasFallecimientoRepository.findOne({
-          where: { id_causa_fallecimiento: datosGenerales.causa_fallecimiento },
-        })
-        : null;
-
-      if (datosGenerales.causa_fallecimiento && !causaFallecimiento) {
-        throw new NotFoundException(
-          `No se encontró la causa de fallecimiento con el ID ${datosGenerales.causa_fallecimiento}`
-        );
-      }
-
-      // Obtención de la profesión
-      const profesion = datosGenerales.dato?.id_profesion
-        ? await this.profesionRepository.findOne({
-          where: { id_profesion: datosGenerales.dato.id_profesion },
-        })
-        : null; // Si no se envía, no buscará la profesión.
-
-      if (!profesion && datosGenerales.dato?.id_profesion) {
-        throw new NotFoundException(`No se encontró la profesión con el ID ${datosGenerales.dato.id_profesion}`);
-      }
-
-      // Obtención de municipios de residencia y nacimiento
-      const municipioResidencia = datosGenerales.dato?.id_municipio_residencia
-        ? await this.municipioRepository.findOne({
-          where: { id_municipio: datosGenerales.dato?.id_municipio_residencia },
-        })
-        : null;
-
-      const municipioNacimiento = datosGenerales.dato?.id_municipio_nacimiento
-        ? await this.municipioRepository.findOne({
-          where: { id_municipio: datosGenerales.dato?.id_municipio_nacimiento },
-        })
-        : null;
-
-      const temp = datosGenerales.dato || {};
-
-      const direccionParts = {
-        "BARRIO_COLONIA": temp.barrio_colonia,
-        "AVENIDA": temp.avenida,
-        "CALLE": temp.calle,
-        "SECTOR": temp.sector,
-        "BLOQUE": temp.bloque,
-        "N° DE CASA": temp.numero_casa,
-        "COLOR CASA": temp.color_casa,
-        "ALDEA": temp.aldea,
-        "CASERIO": temp.caserio,
-      };
-
-      temp.direccion_residencia_estructurada = Object.entries(direccionParts)
-        .filter(([_, value]) => value)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join(',');
-
-      const pais = datosGenerales.dato?.id_pais
-
-        ? await this.paisRepository.findOne({ where: { id_pais: datosGenerales.dato?.id_pais } })
-        : null;
-
-      const tipoIdentificacion = datosGenerales.dato?.id_tipo_identificacion
-        ? await this.TipoIdentificacionRepository.findOne({
-          where: { id_identificacion: datosGenerales.dato?.id_tipo_identificacion },
-        })
-        : null;
-
-      if (datosGenerales.dato?.id_pais && !pais) {
-        throw new NotFoundException(`No se encontró el país con el ID ${datosGenerales.dato?.id_pais}`);
-      }
-
-      if (datosGenerales.dato?.id_tipo_identificacion && !tipoIdentificacion) {
-        throw new NotFoundException(
-          `No se encontró el tipo de identificación con el ID ${datosGenerales.dato?.id_tipo_identificacion}`
-        );
-      }
-
-      // Definir formato de entrada y salida
-      const formatoEntrada = 'yyyy-MM-dd';
-      const formatoSalida = 'yyyy-MM-dd';
-
-      const fechaAfiliacion = temp.fecha_afiliacion
-        ? format(parse(temp.fecha_afiliacion, formatoEntrada, new Date()), formatoSalida)
-        : temp.fecha_defuncion
-          ? format(parse(temp.fecha_defuncion, formatoEntrada, new Date()), formatoSalida)
-          : null;
-
-      const fechaAfiliacionDate = fechaAfiliacion ? new Date(fechaAfiliacion + 'T00:00:00') : null;
-
-      // Convierte la fecha de defunción y la fecha de reporte de fallecido
-      const fechaDefuncion = datosGenerales.fecha_defuncion
-        ? format(parse(datosGenerales.fecha_defuncion, formatoEntrada, new Date()), formatoSalida)
-        : temp.fecha_defuncion
-          ? format(parse(temp.fecha_defuncion, formatoEntrada, new Date()), formatoSalida)
-          : null;
-
-      const fechaReporteFallecido = datosGenerales.fecha_reporte_fallecido
-        ? format(parse(datosGenerales.fecha_reporte_fallecido, formatoEntrada, new Date()), formatoSalida)
-        : temp.fecha_reporte_fallecido
-          ? format(parse(temp.fecha_reporte_fallecido, formatoEntrada, new Date()), formatoSalida)
-          : null;
-
-      // Convierte las fechas a objetos Date sin zona horaria
-      const fechaDefuncionDate = fechaDefuncion ? new Date(fechaDefuncion + 'T00:00:00') : null;
-      const fechaReporteFallecidoDate = fechaReporteFallecido ? new Date(fechaReporteFallecido + 'T00:00:00') : null;
-
-      // Construcción del objeto 'data' con las fechas correctas
+      /** 🔹 Manejo de Archivos */
+      if (fileIdent?.buffer) datosGenerales.dato.archivo_identificacion = Buffer.from(fileIdent.buffer);
+      if (arch_cert_def?.buffer) datosGenerales.dato.certificado_defuncion = Buffer.from(arch_cert_def.buffer);
+      if (fotoPerfil?.buffer) datosGenerales.dato.foto_perfil = Buffer.from(fotoPerfil.buffer);
+      if (carnetDiscapacidad?.buffer) datosGenerales.dato.carnet_discapacidad = Buffer.from(carnetDiscapacidad.buffer);
+  
+      /** 🔹 Construcción del Objeto Final */
       const data: net_persona = {
-        ...temp,
+        ...datosGenerales.dato,
         id_persona: idPersona,
-        fallecido: datosGenerales.fallecido ? datosGenerales.fallecido : 'NO',
+        fallecido: datosGenerales.fallecido ?? 'NO',
         municipio: municipioResidencia,
         municipio_nacimiento: municipioNacimiento,
-        municipio_defuncion: datosGenerales.id_municipio_defuncion || null,
+        municipio_defuncion: municipioDefuncion,
         causa_fallecimiento: causaFallecimiento,
-        profesion: profesion,
-        fecha_defuncion: fechaDefuncionDate,
-        fechaReporteFallecido: fechaReporteFallecidoDate,
         pais: pais,
-        tipoIdentificacion: tipoIdentificacion,
-        fecha_afiliacion: fechaAfiliacionDate,
-        numero_certificado_defuncion: datosGenerales.numero_certificado_defuncion || null,
+        id_profesion: profesion,
+        id_tipo_identificacion: tipoIdentificacion,
+        //colonia: colonia,
+        //aldea: aldea,
       };
-
-      if (datosGenerales.fallecido === 'NO') {
-        data.certificado_defuncion = null;
-      }
-      if (fileIdent?.buffer) {
-        data.archivo_identificacion = Buffer.from(fileIdent.buffer);
-      }
-      if (arch_cert_def?.buffer) {
-        data.certificado_defuncion = Buffer.from(arch_cert_def.buffer);
-      }
-      if (fotoPerfil?.buffer) {
-        data.foto_perfil = Buffer.from(fotoPerfil.buffer);
-      }
-
-
+  
+      /** 🔹 Guardado en Base de Datos */
       const afiliado = await this.personaRepository.preload(data);
       if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
       await this.personaRepository.save(afiliado);
-
-      // Actualización o inserción en NET_DETALLE_PERSONA
-      const existingDetalle = await this.detallePersonaRepository.findOne({
-        where: { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
-      });
-
-      const voluntario = datosGenerales?.voluntario ?? 'NO';
-
-      if (existingDetalle) {
-        await this.detallePersonaRepository.update(
-          { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
-          {
-            //ID_ESTADO_AFILIACION: estadoP.codigo,
-            ID_TIPO_PERSONA: datosGenerales.tipo_persona || null,
-            voluntario: voluntario,
-          }
-        );
-      } else {
-        await this.detallePersonaRepository.save({
-          ID_PERSONA: idPersona,
-          ID_CAUSANTE: idPersona,
-          //ID_ESTADO_AFILIACION: datosGenerales.fallecido ? 7 : null,,
-          ID_TIPO_PERSONA: datosGenerales.tipo_persona || null,
-          VOLUNTARIO: voluntario,
-        });
-      }
+  
       return afiliado;
     } catch (error) {
-      this.handleException(error);
+      console.error("Error detallado:", error);
+      throw new BadRequestException(error.response || "Error al procesar los datos");
     }
   }
+  
+  
+  
+  
 
   formatFechaYYYYMMDD(fecha: string): string | null {
     if (!fecha) return null;

@@ -57,17 +57,23 @@ export class DatPuestoTrabComponent implements OnInit {
   buscarCentroTrabajoAPI(index: number): void {
     const trabajoControl = this.trabajosArray.at(index) as FormGroup;
     const searchValue = trabajoControl.get('buscarCentro')?.value;
+    const idMunicipio = trabajoControl.get('id_municipio')?.value;
   
     if (!searchValue) {
       trabajoControl.patchValue({ centrosFiltrados: [], noResults: false }, { emitEvent: false });
       return;
     }
   
-    this.centrosTrabSVC.buscarCentroTrabajo(searchValue).subscribe({
+    if (!idMunicipio) { // 🔹 Verificar si el municipio ha sido seleccionado
+      trabajoControl.patchValue({ centrosFiltrados: [], noResults: true }, { emitEvent: false });
+      return;
+    }
+  
+    this.centrosTrabSVC.buscarCentroTrabajo(searchValue, idMunicipio).subscribe({
       next: (centros) => {
         trabajoControl.patchValue({ 
           centrosFiltrados: centros, 
-          noResults: centros.length === 0 // ✅ Si no hay centros, actualizar noResults
+          noResults: centros.length === 0 
         }, { emitEvent: false });
   
         this.changeDetectorRef.detectChanges();
@@ -81,14 +87,11 @@ export class DatPuestoTrabComponent implements OnInit {
   }
   
   async seleccionarCentro(index: number, centro: any): Promise<void> {
-    
     const trabajoControl = this.trabajosArray.at(index) as FormGroup;
     const municipio = centro.municipio || {};
     const departamento = municipio.departamento || {};
-  
-    const esPublicoOProheco = centro.sector_economico === 'PUBLICO' || centro.sector_economico === 'PROHECO';
-  
-    // 🔹 Asignar valores correctamente
+    const esPublicoOProheco = centro.sector_economico === 'PUBLICO' || centro.sector_economico === 'PROHECO' || centro.sector_economico === 'PEDAGOGICA';
+
     trabajoControl.patchValue({
       codigo: centro.codigo,
       id_centro_trabajo: centro.id_centro_trabajo,
@@ -97,12 +100,11 @@ export class DatPuestoTrabComponent implements OnInit {
       sectorEconomico: centro.sector_economico,
       direccionCentro: centro.direccion_1 || centro.direccion_2,
       id_departamento: departamento.id_departamento || '',
-      id_municipio: null,
+      id_municipio: municipio.id_municipio || '',
       showNumeroAcuerdo: esPublicoOProheco,
       centroSeleccionado: true,
     });
   
-    // 🔹 Forzar la actualización del input `numero_acuerdo`
     this.configurarValidacionesNumeroAcuerdo(trabajoControl, centro.sector_economico);
   
     if (departamento.id_departamento) {
@@ -149,7 +151,7 @@ export class DatPuestoTrabComponent implements OnInit {
       numero_acuerdo: ['', Validators.maxLength(40)],
       salario_base: ['', [Validators.required, Validators.min(0), Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)]],
       fecha_ingreso: ['', Validators.required],
-      fecha_egreso: [''],
+      //fecha_egreso: [''],
       fecha_pago: ['', [Validators.required, Validators.min(1), Validators.max(31), Validators.pattern('^[0-9]+$')]],
       sectorEconomico: [{ value: '', disabled: true }],
       estado: ['', Validators.maxLength(40)],
@@ -157,8 +159,8 @@ export class DatPuestoTrabComponent implements OnInit {
       direccionCentro: ['', Validators.required],
       showNumeroAcuerdo: [true],
       jornada: ['', Validators.required],
-      id_departamento: ['', Validators.required],
-      id_municipio: ['', Validators.required],
+      id_departamento: [''], // 🔹 No deshabilitado, pero solo lectura en el HTML
+      id_municipio: [''],
       tipo_jornada: ['', Validators.required]
     }, { validators: this.fechasValidator });
   
@@ -178,7 +180,7 @@ export class DatPuestoTrabComponent implements OnInit {
           telefono_1: selectedCentro.telefono_1,
           id_departamento: selectedCentro.municipio?.id_departamento || null, // 🔹 Llenar departamento
           id_municipio: selectedCentro.municipio?.id_municipio || null,
-          showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO'
+          showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO' || selectedCentro.sector === 'PEDAGOGICA' 
         }, { emitEvent: false });
       
         /* if (selectedCentro.municipio?.id_departamento) {
@@ -239,7 +241,6 @@ export class DatPuestoTrabComponent implements OnInit {
         }, { emitEvent: false });
       }
     });
-  
     this.trabajosArray.push(trabajoFormGroup);
     this.markAllAsTouched(trabajoFormGroup);
   }

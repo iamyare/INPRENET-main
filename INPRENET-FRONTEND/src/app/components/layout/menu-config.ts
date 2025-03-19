@@ -52,7 +52,8 @@ export const MENU_CONFIG: Section[] = [
             icon: 'person_search',
             isCustomReset: true
           },
-          { title: 'Constancias', route: 'afiliacion/constancias-afiliados', icon: 'description' }
+          { title: 'Constancias', route: 'afiliacion/constancias-afiliados', icon: 'description' },
+          { title: 'huella', route: 'afiliacion/huella', icon: 'description' }
         ],
       },
       {

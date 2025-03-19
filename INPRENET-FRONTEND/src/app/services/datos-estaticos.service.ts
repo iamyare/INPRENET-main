@@ -19,7 +19,6 @@ export class DatosEstaticosService {
   DatosBancBen: any = [];
   Bancos: any = [];
   tipoIdent: any = [];
-  tipoCuenta: any = [];
   profesiones: any = [];
   colegiosMagisteriales: any = [];
   centrosTrabajo: any = [];
@@ -48,7 +47,6 @@ export class DatosEstaticosService {
     this.getCausasFallecimiento();
     this.getNacionalidad();
     this.gettipoIdent();
-    this.getTipoCuenta();
     this.getTipoMovimientos();
     this.getBancos();
     this.getColegiosMagisteriales();
@@ -182,17 +180,6 @@ export class DatosEstaticosService {
 
     this.tipoIdent = mappedResponse;
     return this.tipoIdent;
-  }
-
-  async getTipoCuenta() {
-    const response = await this.afiliadoService.obtenerTiposCuentas().toPromise();
-    const mappedResponse = response.data.map((item: { NUMERO_CUENTA: any; DESCRIPCION: any; }) => ({
-      label: item.DESCRIPCION,
-      value: item.NUMERO_CUENTA
-    }));
-
-    this.tipoCuenta = mappedResponse;
-    return this.tipoCuenta;
   }
 
   async getTipoMovimientos() {

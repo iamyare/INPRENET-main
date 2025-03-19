@@ -254,8 +254,15 @@ export class AfiliadoController {
     const fileIdent = files?.find(file => file.fieldname === 'archivo_identificacion');
     const arch_cert_def = files?.find(file => file.fieldname === 'arch_cert_def');
     const fotoPerfil = files?.find(file => file.fieldname === 'FotoPerfil');
-
-    return this.afiliadoService.updateDatosGenerales(idPersona, crearDatosDto, fileIdent, arch_cert_def, fotoPerfil);
+    const carnetDiscapacidad = files?.find(file => file.fieldname === 'carnet_discapacidad');
+    return this.afiliadoService.updateDatosGenerales(
+      idPersona, 
+      crearDatosDto, 
+      fileIdent, 
+      arch_cert_def, 
+      fotoPerfil, 
+      carnetDiscapacidad
+    );
   }
 
   @Put('activarCuentaBancaria/:id/:id_persona')

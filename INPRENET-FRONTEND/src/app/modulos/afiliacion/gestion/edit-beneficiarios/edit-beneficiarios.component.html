@@ -28,7 +28,7 @@
     [mostrarBotonEditar]="mostrarBotonEditar"
     (editar)="editarFila($event)"
     [mostrarBotonEliminar]="mostrarBotonEliminar"
-    (eliminar)="eliminarFila($event)"
+    (eliminar)="eliminarFila($event);"
     [nombreEncabezadoUno]="'Gestion'"
     [mostrarBotonUno]="mostrarBotonAgregarDiscapacidad"
     etiquetaBotonUno="Gestionar Discapacidades"
@@ -40,16 +40,16 @@
   <button 
     mat-raised-button 
     color="primary" 
-    (click)="generarPDF()" 
-    *ngIf="mostrarBotonGenerarPDF">
+    (click)="intentarGenerarPDF()" 
+    *ngIf="filas.length >= 1">
     Generar PDF
   </button>
 
   <button 
     mat-raised-button 
     color="primary" 
-    (click)="descargarConstanciaBeneficiarios()" 
-    *ngIf="mostrarBotonGenerarPDF">
+    (click)="intentarDescargarConstancia()" 
+    *ngIf="filas.length >= 1">
     Generar Documento De Beneficiario
   </button>
 </div>

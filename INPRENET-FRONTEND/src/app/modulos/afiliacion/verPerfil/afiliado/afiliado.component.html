@@ -4,7 +4,10 @@
   <div *ngIf="currentStepIndex === 0">
     <mat-tab-group>
       <mat-tab label="Centros Trabajo">
-        <app-edit-perfil-puest-trab [Afiliado]="persona"></app-edit-perfil-puest-trab>
+        <app-edit-perfil-puest-trab 
+        [Afiliado]="persona" 
+        (onDatoAgregado)="notificarDatoAgregado()">
+      </app-edit-perfil-puest-trab>
       </mat-tab>
       <mat-tab label="Otras Fuentes De Ingreso">
         <ver-otras-fuentes-ingreso [Afiliado]="persona"></ver-otras-fuentes-ingreso>
@@ -13,7 +16,10 @@
   </div>
 
   <div *ngIf="currentStepIndex === 1">
-    <app-edit-beneficiarios [persona]="persona"></app-edit-beneficiarios>
+    <app-edit-beneficiarios 
+      [persona]="persona"
+      (onDatoAgregado)="notificarDatoAgregado()">
+    </app-edit-beneficiarios>
   </div>
 
   <div *ngIf="currentStepIndex === 2">
@@ -21,7 +27,10 @@
   </div>
 
   <div *ngIf="currentStepIndex === 3">
-    <app-edit-refer-personales [Afiliado]="persona"></app-edit-refer-personales>
+    <app-edit-refer-personales 
+      [Afiliado]="persona"
+      (onDatoAgregado)="notificarDatoAgregado()">
+    </app-edit-refer-personales>
   </div>
 
   <div *ngIf="currentStepIndex === 4 && mostrarDetallesPagos">

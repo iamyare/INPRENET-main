@@ -83,11 +83,6 @@ export class MantenimientoAfiliacionService {
     return this.http.get<any[]>(url);
   }
 
-  getBancoById(id: number): Observable<any> {
-    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/bancos/detalle/${id}`;
-    return this.http.get<any>(url);
-  }
-
   createBanco(datos: any): Observable<any> {
     const url = `${environment.API_URL}/api/mantenimiento-afiliacion/bancos/crear`;
     return this.http.post<any>(url, datos);

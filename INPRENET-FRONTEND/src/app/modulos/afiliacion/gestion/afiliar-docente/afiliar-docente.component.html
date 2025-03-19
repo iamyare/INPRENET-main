@@ -57,10 +57,10 @@
         <ng-container *ngIf="isStepInvalid(steps[1].formGroup); else validLabel2">
           <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
           <div class="error-text">
-            <strong>Referencias Personales</strong>
+            <strong>Referencias</strong>
           </div>
         </ng-container>
-        <ng-template #validLabel2>Referencias Personales</ng-template>
+        <ng-template #validLabel2>Referencias</ng-template>
       </div>
     </ng-template>
     <ng-container *ngTemplateOutlet="referenciasPersonalesTemplate"></ng-container>

@@ -1,48 +1,104 @@
 <div class="container">
-  <h1 class="title">Aportaciones y Cotizaciones para {{ currentYear }}</h1>
+  <h1 class="title">Parametrización de Cotizaciones y Aportaciones</h1>
 
-  <!-- Selector de año -->
-  <div class="year-selector">
-    <label for="year">Seleccionar Año:</label>
-    <input
-      id="year"
-      type="number"
-      [(ngModel)]="currentYear"
-      (change)="setYear(currentYear)"
-      min="2000"
-      max="2100"
-    />
-  </div>
+  <!-- Formulario para ingresar parámetros -->
+  <section class="form-container">
+    <h2>Agregar Parámetro</h2>
+    <form (submit)="addParametro(+year.value, tipo.value, porcentaje.value, sector.value);
+                    year.value=''; tipo.value=''; porcentaje.value=''; sector.value=''; $event.preventDefault()">
+      
+      <input #year type="number" placeholder="Año" required />
 
-  <!-- Sección de Aportaciones -->
-  <section>
-    <h2>Aportaciones</h2>
-    <div class="card" *ngFor="let aportacion of getYearData(currentYear)?.aportaciones; let i = index">
-      <h3>{{ aportacion.tipo }}</h3>
-      <p><strong>Porcentaje:</strong> {{ aportacion.porcentaje }}%</p>
-      <p>{{ aportacion.descripcion }}</p>
-    </div>
-    <form (submit)="addAportacion(currentYear, aportacionTipo.value, aportacionPorcentaje.value, aportacionDescripcion.value); aportacionTipo.value=''; aportacionPorcentaje.value=''; aportacionDescripcion.value=''; $event.preventDefault()">
-      <input #aportacionTipo type="text" placeholder="Tipo de Aportación" required />
-      <input #aportacionPorcentaje type="text" placeholder="Porcentaje" required />
-      <input #aportacionDescripcion type="text" placeholder="Descripción" required />
-      <button type="submit">Agregar Aportación</button>
+      <select #tipo required>
+        <option value="" disabled selected>Seleccionar Tipo</option>
+        <option value="COTIZACIÓN">COTIZACIÓN</option>
+        <option value="APORTACIÓN">APORTACIÓN</option>
+      </select>
+
+      <select #sector required>
+        <option value="" disabled selected>Seleccionar Sector</option>
+        <option value="Público">Público</option>
+        <option value="Privado">Privado</option>
+      </select>
+
+      <input #porcentaje type="text" placeholder="IPC" required />
+      <!-- <input #descripcion type="text" placeholder="Descripción" required />
+       -->
+      <button type="submit" class="btn primary">Agregar Parámetro</button>
     </form>
   </section>
 
-  <!-- Sección de Cotizaciones -->
-  <section>
-    <h2>Cotizaciones</h2>
-    <div class="card" *ngFor="let cotizacion of getYearData(currentYear)?.cotizaciones; let i = index">
-      <h3>{{ cotizacion.tipo }}</h3>
-      <p><strong>Porcentaje:</strong> {{ cotizacion.porcentaje }}%</p>
-      <p>{{ cotizacion.descripcion }}</p>
+  <!-- 📌 Tabla con Angular Material -->
+  <!-- 📌 Tabla con Angular Material -->
+  <section class="table-container">
+    <h2>Historial de Parámetros por Año</h2>
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+
+        <!-- Año -->
+        <ng-container matColumnDef="year">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Año</th>
+          <td mat-cell *matCellDef="let row">{{ row.year }}</td>
+        </ng-container>
+
+        <!-- Sector -->
+        <ng-container matColumnDef="sector">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Sector</th>
+          <td mat-cell *matCellDef="let row">{{ row.sector }}</td>
+        </ng-container>
+
+        <!-- Sueldo -->
+        <ng-container matColumnDef="sueldoMin">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Sueldo Mínimo</th>
+          <td mat-cell *matCellDef="let row">{{ row.sueldoMin }} L</td>
+        </ng-container>
+
+        <ng-container matColumnDef="sueldoMax">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Sueldo Máximo</th>
+          <td mat-cell *matCellDef="let row">{{ row.sueldoMax }} L</td>
+        </ng-container>
+
+        <!-- Cotización -->
+        <ng-container matColumnDef="cotizacionMin">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Cotización Mínima</th>
+          <td mat-cell *matCellDef="let row">{{ row.cotizacionMin }} L</td>
+        </ng-container>
+
+        <ng-container matColumnDef="cotizacionMax">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Cotización Máxima</th>
+          <td mat-cell *matCellDef="let row">{{ row.cotizacionMax }} L</td>
+        </ng-container>
+
+        <!-- Aportación -->
+        <ng-container matColumnDef="aportacionMin">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Aportación Mínima</th>
+          <td mat-cell *matCellDef="let row">{{ row.aportacionMin }} L</td>
+        </ng-container>
+
+        <ng-container matColumnDef="aportacionMax">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Aportación Máxima</th>
+          <td mat-cell *matCellDef="let row">{{ row.aportacionMax }} L</td>
+        </ng-container>
+
+        <!-- Porcentaje -->
+        <ng-container matColumnDef="porcentajeCotizacion">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Porcentaje Cotización</th>
+          <td mat-cell *matCellDef="let row">{{ row.porcentajeCotizacion }}</td>
+        </ng-container>
+
+        <!-- Nueva columna: Porcentaje de Aportación -->
+        <ng-container matColumnDef="porcentajeAportacion">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Porcentaje Aportación</th>
+          <td mat-cell *matCellDef="let row">{{ row.porcentajeAportacion }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
     </div>
-    <form (submit)="addCotizacion(currentYear, cotizacionTipo.value, cotizacionPorcentaje.value, cotizacionDescripcion.value); cotizacionTipo.value=''; cotizacionPorcentaje.value=''; cotizacionDescripcion.value=''; $event.preventDefault()">
-      <input #cotizacionTipo type="text" placeholder="Tipo de Cotización" required />
-      <input #cotizacionPorcentaje type="text" placeholder="Porcentaje" required />
-      <input #cotizacionDescripcion type="text" placeholder="Descripción" required />
-      <button type="submit">Agregar Cotización</button>
-    </form>
   </section>
+
 </div>

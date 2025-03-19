@@ -1,37 +1,48 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { MunicipioService } from './municipio.service';
-import { CreateMunicipioDto } from './dto/create-municipio.dto';
-import { UpdateMunicipioDto } from './dto/update-municipio.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateAldeaDto } from '../provincia/dto/create-aldea.dto';
+import { CreateColoniaDto } from '../provincia/dto/CreateColoniaDto';
+import { UpdateAldeaColoniaDto } from '../provincia/dto/update-aldea-colonia.dto';
 
 @ApiTags('municipio')
 @Controller('municipio')
 export class MunicipioController {
   constructor(private readonly municipioService: MunicipioService) { }
 
-  @Post()
-  create(@Body() createMunicipioDto: CreateMunicipioDto) {
-    return this.municipioService.create(createMunicipioDto);
-  }
-
   @Get()
   findAll() {
     return this.municipioService.findAll();
   }
-  
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.municipioService.findOne(+id);
+
+  @Get('aldeas')
+  async getAllAldeas() {
+    return await this.municipioService.findAllAldeas();
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMunicipioDto: UpdateMunicipioDto) {
-    return this.municipioService.update(+id, updateMunicipioDto);
+  @Get('colonias')
+  async getAllColonias() {
+    return await this.municipioService.findAllColonias();
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.municipioService.remove(+id);
+  @Patch('aldea/:id')
+  async actualizarAldea(@Param('id') id: number, @Body() updateDto: UpdateAldeaColoniaDto) {
+    return await this.municipioService.actualizarAldea(id, updateDto);
+  }
+
+  @Patch('colonia/:id')
+  async actualizarColonia(@Param('id') id: number, @Body() updateDto: UpdateAldeaColoniaDto) {
+    return await this.municipioService.actualizarColonia(id, updateDto);
+  }
+
+  @Post('aldea')
+  async createAldea(@Body() createAldeaDto: CreateAldeaDto) {
+    return await this.municipioService.createAldea(createAldeaDto);
+  }
+
+  @Post('colonia')
+  async createColonia(@Body() createColoniaDto: CreateColoniaDto) {
+    return await this.municipioService.createColonia(createColoniaDto);
   }
 
   @Get('departamento/:id')
@@ -43,4 +54,15 @@ export class MunicipioController {
   async getDepartamentoByMunicipio(@Param('id') municipioId: number) {
     return this.municipioService.getDepartamentoByMunicipio(municipioId);
   }
+
+  @Get(':id/aldeas')
+  getAldeasByMunicipio(@Param('id') municipioId: number) {
+    return this.municipioService.getAldeasByMunicipio(municipioId);
+  }
+
+  @Get(':id/colonias')
+  async getColoniasByMunicipio(@Param('id') municipioId: number) {
+    return this.municipioService.getColoniasByMunicipio(municipioId);
+  }
+  
 }

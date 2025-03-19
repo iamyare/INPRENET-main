@@ -32,6 +32,8 @@ import { Net_Referencias } from './entities/net_referencias.entity';
 import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
 import { Net_Colegios_Magisteriales } from '../transacciones/entities/net_colegios_magisteriales.entity';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
+import { Net_Aldea } from '../Regional/provincia/entities/net_aldea.entity';
+import { Net_Colonia } from '../Regional/provincia/entities/net_colonia.entity';
 /* import { BitacoraService } from '../bitacora/bitacora.afiliaciones.service'; */
 
 @Module({
@@ -44,7 +46,7 @@ import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_emplead
       Net_Pais, Net_Tipo_Identificacion, net_causas_fallecimientos,
       Net_Centro_Trabajo, Net_Banco, Net_Tipo_Persona, Net_Municipio,
       Net_Jornada, Net_Nivel_Educativo, Net_Referencias, NET_PROFESIONES,
-      Net_Colegios_Magisteriales])
+      Net_Colegios_Magisteriales, Net_Aldea, Net_Colonia])
   ],
   exports: [TypeOrmModule, AfiliadoService],
 })

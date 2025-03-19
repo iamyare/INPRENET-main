@@ -18,6 +18,8 @@ import { Net_Deducciones_Asignadas } from "src/modules/Planilla/detalle-deduccio
 import { Net_Referencias } from "./net_referencias.entity";
 import { Net_Usuario_Empresa } from "src/modules/usuario/entities/net_usuario_empresa.entity";
 import { Net_Detalle_Prestamo } from "src/modules/prestamos/entities/net_detalle_prestamo.entity";
+import { Net_Aldea } from "src/modules/Regional/provincia/entities/net_aldea.entity";
+import { Net_Colonia } from "src/modules/Regional/provincia/entities/net_colonia.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -226,4 +228,11 @@ export class net_persona {
     @OneToMany(() => Net_Detalle_Prestamo, prestamo => prestamo.persona)
     detallePrestamos: Net_Detalle_Prestamo[];
 
+    @ManyToOne(() => Net_Aldea, aldea => aldea.personas, { cascade: true })
+    @JoinColumn({ name: 'ID_ALDEA', foreignKeyConstraintName: "FK_ID_ALDEA_NET_PERSONA" })
+    aldea: Net_Aldea;
+
+    @ManyToOne(() => Net_Colonia, colonia => colonia.personas, { cascade: true })
+    @JoinColumn({ name: 'ID_COLONIA', foreignKeyConstraintName: "FK_ID_COLONIA_NET_PERSONA" })
+    colonia: Net_Colonia;
 }

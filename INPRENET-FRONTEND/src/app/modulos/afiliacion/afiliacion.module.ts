@@ -17,10 +17,7 @@ import { BuscarPersonaComponent } from './verPerfil/buscar-persona/buscar-person
 import { CausanteDetalleComponent } from './verPerfil/causante-detalle/causante-detalle.component';
 import { ConstanciasAfiliadoComponent } from './verPerfil/constancias-afiliado/constancias-afiliado.component';
 import { InformacionGeneralComponent } from './verPerfil/informacion-general/informacion-general.component';
-import { JubiladoComponent } from './verPerfil/jubilado/jubilado.component';
-import { PensionadoComponent } from './verPerfil/pensionado/pensionado.component';
 import { PerfilComponent } from './verPerfil/perfil/perfil.component';
-import { VoluntarioComponent } from './verPerfil/voluntario/voluntario.component';
 import { ComponentsModule } from '../../../../src/app/components/components.module';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { AfiliacionRoutingModule } from './afiliacion-routing.module';
@@ -71,10 +68,12 @@ import { AgregarPepsComponent } from './gestion/agregar-peps/agregar-peps.compon
 import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-familiar.component';
 import { DatosGeneralesTemporalComponent } from './gestion/datos-generales-temporal/datos-generales-temporal.component';
 import { BeneficiarioSinCausanteComponent } from './verPerfil/beneficiario-sin-causante/beneficiario-sin-causante.component';
-import { DesignadoComponent } from './verPerfil/designado/designado.component';
 import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
 import { DialogSuboptionsComponent } from './constancias/dialog-suboptions/dialog-suboptions.component';
 import { EditBeneficiarioModalComponent } from './gestion/edit-beneficiario-modal/edit-beneficiario-modal.component';
+import { CapturarHuellaComponent } from './gestion/capturar-huella/capturar-huella.component';
+import { ColoniaComponent } from './mantenimiento/colonia/colonia.component';
+import { AldeaComponent } from './mantenimiento/aldea/aldea.component';
 
 @NgModule({
   declarations: [
@@ -94,10 +93,7 @@ import { EditBeneficiarioModalComponent } from './gestion/edit-beneficiario-moda
     CausanteDetalleComponent,
     ConstanciasAfiliadoComponent,
     InformacionGeneralComponent,
-    JubiladoComponent,
-    PensionadoComponent,
     PerfilComponent,
-    VoluntarioComponent,
     DatBancComponent,
     AgregarMovimientoComponent,
     EditBeneficiariosComponent,
@@ -144,10 +140,12 @@ import { EditBeneficiarioModalComponent } from './gestion/edit-beneficiario-moda
     AgregarFamiliarComponent,
     DatosGeneralesTemporalComponent,
     BeneficiarioSinCausanteComponent,
-    DesignadoComponent,
     ContanciasAfiliadosComponent,
     DialogSuboptionsComponent,
-    EditBeneficiarioModalComponent
+    EditBeneficiarioModalComponent,
+    CapturarHuellaComponent,
+    ColoniaComponent,
+    AldeaComponent
   ],
   imports: [
     CommonModule,
@@ -158,11 +156,8 @@ import { EditBeneficiarioModalComponent } from './gestion/edit-beneficiario-moda
   ],
   exports: [
     AdminCentroEducativoComponent,
-    JubiladoComponent,
-    PensionadoComponent,
     BeneficiarioComponent,
     AfiliadoComponent,
-    VoluntarioComponent,
     DatBancComponent,
     EditDatosBancariosComponent,
   ],

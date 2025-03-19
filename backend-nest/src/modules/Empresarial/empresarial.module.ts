@@ -24,7 +24,6 @@ import { Net_Empleado_Centro_Trabajo } from './entities/net_empleado_centro_trab
 import { Net_Empleado } from './entities/net_empleado.entity';
 import { Net_Nivel_Educativo } from './entities/net_nivel_educativo.entity';
 import { Net_Cargo_Publico } from './entities/net_cargo_publico.entity';
-import { Net_Familia_Pep } from './entities/net_familia_pep.entity';
 
 @Module({
   controllers: [CentroTrabajoController, EmpresasController],
@@ -32,7 +31,6 @@ import { Net_Familia_Pep } from './entities/net_familia_pep.entity';
   imports: [
     TypeOrmModule.forFeature([
       Net_Cargo_Publico,
-      Net_Familia_Pep,
       Net_Jornada,
       Net_Centro_Trabajo_Jornada,
       Net_Nivel_Educativo,

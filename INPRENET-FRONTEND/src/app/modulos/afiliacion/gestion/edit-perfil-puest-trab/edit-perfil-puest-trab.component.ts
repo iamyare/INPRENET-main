@@ -1,13 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
-import { Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { AbstractControl, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { EditarDialogComponent } from '../../../../../../src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
@@ -23,6 +22,7 @@ import { PermisosService } from 'src/app/services/permisos.service';
 })
 export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChanges {
   @Input() Afiliado!: any;
+  @Output() onDatoAgregado = new EventEmitter<void>();
 
   private subscriptions: Subscription = new Subscription();
 
@@ -57,7 +57,6 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     private toastr: ToastrService,
     private dialog: MatDialog,
     private datePipe: DatePipe,
-    private centrosTrabSVC: CentroTrabajoService,
     private permisosService: PermisosService,
     private cdr: ChangeDetectorRef
   ) { }
@@ -97,10 +96,6 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
       return;
     }
 
-    this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true }
-    ];
-
     this.myColumns = [
       {
         header: 'Estado',
@@ -118,6 +113,11 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
         col: 'nombre_centro_trabajo',
         isEditable: true,
         validationRules: [Validators.required]
+      },
+      {
+        header: 'Departamento',
+        col: 'departamento',
+        isEditable: false
       },
       {
         header: 'Número de Acuerdo',
@@ -138,7 +138,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
       {
         header: 'Fecha de Egreso',
         col: 'fecha_egreso',
-        isEditable: true
+        isEditable: true,
+        validationRules: []
       },
       {
         header: 'Cargo',
@@ -156,24 +157,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
         isEditable: true
       }
     ];
-    this.getCentrosTrabajo();
     this.getFilas().then(() => this.cargar());
-
-  }
-
-  async getCentrosTrabajo() {
-    const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
-    if (response) {
-
-      const mappedResponse = response.map((item) => ({
-        label: item.nombre_centro_trabajo,
-        value: String(item.id_centro_trabajo),
-        sector: item.sector_economico,
-      }));
-      this.centrosTrabajo = mappedResponse;
-    }
-
-    //this.centrosTrabajo = await this.datosEstaticosService.getAllCentrosTrabajo();
   }
 
   resetDatos() {
@@ -196,10 +180,14 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
           numero_acuerdo: item.numero_acuerdo,
           salarioBase: item.salario_base,
           fecha_ingreso: this.datePipe.transform(item.fecha_ingreso, 'dd/MM/yyyy'),
-          fecha_egreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy'),
+          fecha_egreso: item.fecha_egreso ? this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy') : null,
           cargo: item.cargo,
           jornada: item.jornada,
           tipo_jornada: item.tipo_jornada,
+          municipio: item.centroTrabajo.municipio.nombre,
+          departamento: item.centroTrabajo.departamento.nombre,
+          sector_economico: item.centroTrabajo.sector_economico,
+          telefono_1: item.centroTrabajo.telefono_1,
         }));
         this.cdr.detectChanges();
       } catch (error) {
@@ -222,49 +210,64 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   }
 
   async manejarAccionUno(row: any) {
-    const campos = [
-      { nombre: 'codigo', tipo: 'text', requerido: true, etiqueta: 'Codigo de Centro Trabajo', editable: false, icono: 'business' },
-      { nombre: 'nombre_centro_trabajo', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: false, icono: 'business' },
-      { nombre: 'direccion_1', tipo: 'text', requerido: true, etiqueta: 'Direccion 1', editable: false, icono: 'place' },
-      { nombre: 'direccion_2', tipo: 'text', requerido: true, etiqueta: 'Direccion 2', editable: false, icono: 'place' },
-      { nombre: 'numero_acuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true, icono: 'description', validaciones: [Validators.required, Validators.maxLength(40)] },
-      { nombre: 'salarioBase', tipo: 'number', requerido: true, etiqueta: 'Salario Base', editable: true, icono: 'money', validaciones: [Validators.required, Validators.min(0)] },
-      { nombre: 'fechaRango', tipo: 'daterange', requerido: false, etiqueta: 'Periodo laboral', editable: true, icono: 'event', validaciones: [Validators.required] },
-      { nombre: 'cargo', tipo: 'text', requerido: false, etiqueta: 'Cargo', editable: true, icono: 'work_outline', validaciones: [Validators.required, Validators.maxLength(40)] },
-      { nombre: 'jornada', tipo: 'list', requerido: true, etiqueta: 'Jornada', editable: true, opciones: this.jornadas, icono: 'schedule' },
-      { nombre: 'tipo_jornada', tipo: 'list', requerido: true, etiqueta: 'Tipo de Jornada', editable: true, opciones: this.tiposJornada, icono: 'assignment_turned_in' }
+    const sectorEconomico = row.sector_economico || '';
+  
+    const campos: any[] = [
+      { nombre: 'codigo', tipo: 'text', etiqueta: 'Código de Centro Trabajo', editable: false, icono: 'business' },
+      { nombre: 'nombre_centro_trabajo', tipo: 'text', etiqueta: 'Nombre Centro Trabajo', editable: false, icono: 'business' },
+      { nombre: 'municipio', tipo: 'text', etiqueta: 'Municipio', editable: false, icono: 'location_city' },
+      { nombre: 'departamento', tipo: 'text', etiqueta: 'Departamento', editable: false, icono: 'map' },
+      { nombre: 'sector_economico', tipo: 'text', etiqueta: 'Sector Económico', editable: false, icono: 'business_center' },
+      { nombre: 'direccion_1', tipo: 'text', etiqueta: 'Dirección 1', editable: true, icono: 'place' },
+      { nombre: 'direccion_2', tipo: 'text', etiqueta: 'Dirección 2', editable: true, icono: 'place' },
+      { nombre: 'telefono_1', tipo: 'text', etiqueta: 'Teléfono', editable: true, icono: 'phone', validadores: [Validators.pattern('^[0-9]{8,15}$')] },
+      { nombre: 'salarioBase', tipo: 'number', etiqueta: 'Salario Base', editable: true, icono: 'money', validadores: [Validators.required, Validators.min(0)] },
+      { nombre: 'fecha_ingreso', tipo: 'date', etiqueta: 'Fecha de Ingreso', editable: true, icono: 'event', validadores: [Validators.required] },
+      { nombre: 'fecha_egreso', tipo: 'date', etiqueta: 'Fecha de Egreso', editable: true, icono: 'event' },
+      { nombre: 'cargo', tipo: 'text', etiqueta: 'Cargo', editable: true, icono: 'work_outline', validadores: [Validators.required, Validators.maxLength(40)] },
+      { nombre: 'jornada', tipo: 'list', etiqueta: 'Jornada', editable: true, opciones: this.jornadas, icono: 'schedule' },
+      { nombre: 'tipo_jornada', tipo: 'list', etiqueta: 'Tipo de Jornada', editable: true, opciones: this.tiposJornada, icono: 'assignment_turned_in' },
     ];
-
-    const fechaRango = {
-      start: this.convertirCadenaAFecha(row.fecha_ingreso),
-      end: this.convertirCadenaAFecha(row.fecha_egreso)
-    };
-
+  
+    if (sectorEconomico === 'PUBLICO') {
+      campos.push({
+        nombre: 'numero_acuerdo',
+        tipo: 'text',
+        etiqueta: 'Número Acuerdo',
+        editable: true,
+        icono: 'description',
+        validadores: [Validators.required, Validators.maxLength(40)]
+      });
+    }
+  
     const valoresIniciales = {
       ...row,
-      fechaRango: fechaRango
+      fecha_ingreso: this.convertirCadenaAFecha(row.fecha_ingreso),
+      fecha_egreso: this.convertirCadenaAFecha(row.fecha_egreso)
     };
 
+    const validacionesDinamicas = {
+      fecha_egreso: [this.validarFechaEgresoDinamica()]
+    };
+    
     const dialogRef = this.dialog.open(EditarDialogComponent, {
-      width: '500px',
-      data: { campos: campos, valoresIniciales: valoresIniciales }
+      width: '1200px',
+      data: { campos: campos, valoresIniciales: valoresIniciales, validacionesDinamicas: validacionesDinamicas }
     });
-
+  
     dialogRef.afterClosed().subscribe(async (result: any) => {
       if (result) {
-        result.fecha_ingreso = this.datePipe.transform(result.fechaRango.start, 'dd/MM/yyyy');
-        result.fecha_egreso = this.datePipe.transform(result.fechaRango.end, 'dd/MM/yyyy');
-        delete result.fechaRango;
-
-        // ✅ Si hay una fecha de egreso, enviar estado "INACTIVO"
+        result.fecha_ingreso = this.datePipe.transform(result.fecha_ingreso, 'dd/MM/yyyy');
+        result.fecha_egreso = this.datePipe.transform(result.fecha_egreso, 'dd/MM/yyyy');
+  
         const estadoFinal = result.fecha_egreso ? 'INACTIVO' : row.estado;
-
+  
         const dataToSend = {
           ...result,
           idCentroTrabajo: row.id_centro_trabajo,
-          estado: estadoFinal // Se agrega la lógica de cambio de estado
+          estado: estadoFinal
         };
-
+  
         this.svcAfiliado.updatePerfCentroTrabajo(row.id_perf_pers_centro_trab, dataToSend).subscribe({
           next: () => {
             const index = this.filas.findIndex(item => item.id === row.id);
@@ -273,7 +276,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
                 ...this.filas[index],
                 ...result,
                 nombre_centro_trabajo: row.nombre_centro_trabajo,
-                estado: estadoFinal // También actualiza el estado en la UI
+                estado: estadoFinal
               };
             }
             this.toastr.success("Se actualizó el perfil de trabajo correctamente");
@@ -286,8 +289,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
         });
       }
     });
-}
-
+  }
+  
   manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
@@ -304,6 +307,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
           next: (response) => {
             this.toastr.success(response.mensaje, 'Centro De Trabajo Desactivado');
             this.getFilas().then(() => this.cargar());
+            this.onDatoAgregado.emit();
           },
           error: (error) => {
             console.error('Error al desactivar el perfil:', error);
@@ -317,7 +321,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
 
   AgregarPuestoTrabajo() {
     const dialogRef = this.dialog.open(AgregarPuestTrabComponent, {
-      width: '55%',
+      width: '80%',
       height: '75%',
       data: {
         idPersona: this.Afiliado.id_persona
@@ -326,16 +330,36 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
 
     dialogRef.afterClosed().subscribe((result: any) => {
       this.getFilas().then(() => this.cargar());
+      this.onDatoAgregado.emit();
     });
   }
 
   convertirCadenaAFecha(fecha: string | null | undefined): Date | null {
     if (!fecha || !fecha.includes('/')) {
-      return null; // Retorna null si la fecha es null, undefined o no contiene el formato esperado
+      return null
     }
   
     const [day, month, year] = fecha.split('/').map(Number);
-    return new Date(year, month - 1, day); // Retorna la fecha si el formato es correcto
+    return new Date(year, month - 1, day);
+  }
+  
+  validarFechaEgresoDinamica(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      if (!control.parent) return null;
+  
+      const fechaIngreso = control.parent.get('fecha_ingreso')?.value;
+      const fechaEgreso = control.value;
+  
+      if (fechaIngreso && fechaEgreso) {
+        const fechaIngresoDate = new Date(fechaIngreso);
+        const fechaEgresoDate = new Date(fechaEgreso);
+  
+        if (fechaEgresoDate < fechaIngresoDate) {
+          return { fechaEgresoInvalida: true };
+        }
+      }
+      return null;
+    };
   }
   
   

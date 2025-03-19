@@ -1,4 +1,3 @@
-
 import { ChangeDetectorRef, Component, Inject, OnInit, QueryList, ViewChild, ViewChildren, Output, EventEmitter } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDatepicker } from '@angular/material/datepicker';
@@ -52,31 +51,26 @@ export class EditarDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    
     this.crearFormulario();
-    this.escucharCambiosFormulario(); // Escuchar cambios en el formulario.
+    this.escucharCambiosFormulario();
     this.cdr.detectChanges();
   }
 
   crearFormulario() {
     const group: { [key: string]: FormControl | FormGroup } = {};
-
+  
     this.data.campos.forEach(campo => {
       let valorInicial = this.data.valoresIniciales[campo.nombre] || '';
       let validadores = campo.validadores || [];
 
-      // 🔹 Si existen validaciones dinámicas para este campo, las agregamos
       if (this.data.validacionesDinamicas && this.data.validacionesDinamicas[campo.nombre]) {
         validadores = [...validadores, ...this.data.validacionesDinamicas[campo.nombre]];
       }
-
-      if (campo.tipo === 'daterange') {
-        group[campo.nombre] = this.fb.group({
-          start: [this.convertToDate(valorInicial?.start) || null, validadores],
-          end: [this.convertToDate(valorInicial?.end) || null, validadores]
-        });
-      } else if (campo.tipo === 'date') {
+  
+      if (campo.tipo === 'date') {
         group[campo.nombre] = new FormControl(
-          { value: this.convertToDate(valorInicial), disabled: !campo.editable },
+          { value: this.convertToDate(valorInicial) || null, disabled: !campo.editable },
           validadores
         );
       } else {
@@ -85,25 +79,49 @@ export class EditarDialogComponent implements OnInit {
     });
 
     this.formGroup = this.fb.group(group);
+  
+    // 🔹 Escuchar cambios en los campos que afectan la visibilidad y validación de otros campos
+    this.data.campos.forEach(campo => {
+      if (campo.dependeDe) {
+        this.formGroup.get(campo.dependeDe)?.valueChanges.subscribe(value => {
+          const campoControl = this.formGroup.get(campo.nombre);
+  
+          if (value === campo.valorDependiente) {
+            campoControl?.enable();
+            if (campo.nombre === 'numero_acuerdo') {
+              campoControl?.setValidators([Validators.required, Validators.maxLength(40)]);
+            }
+          } else {
+            campoControl?.disable();
+            campoControl?.setValue(null);
+            campoControl?.clearValidators();
+          }
+  
+          campoControl?.updateValueAndValidity();
+        });
+      }
+    });
+  
     this.cdr.detectChanges();
   }
-
-  convertToDate(value: string | Date): Date {
+  
+  convertToDate(value: string | Date | null | undefined): Date | null {
+    if (!value || value === '') {
+      return null;
+    }
+  
     if (value instanceof Date) {
       return value;
     }
-
-    if (typeof value === 'string') {
-      // Extraemos los componentes de la fecha
+  
+    if (typeof value === 'string' && value.includes('-')) {
       const [year, month, day] = value.split('-').map(Number);
-
-      // Creamos la fecha ajustándola directamente como local sin desfase
-      return new Date(year, month - 1, day); // `month - 1` porque los meses empiezan desde 0 en JavaScript
+      return new Date(year, month - 1, day);
     }
-
-    // Retornamos una fecha por defecto si el valor no es válido
-    return new Date();
-  }
+  
+    return null;
+    }
+  
 
   escucharCambiosFormulario() {
     this.formGroup.valueChanges.subscribe(() => {
@@ -268,13 +286,13 @@ export class EditarDialogComponent implements OnInit {
       errors.push('Este campo es requerido.');
     }
     if (control.errors['minlength']) {
-      errors.push(`Debe tener al menos ${control.errors['minlength'].minlength} caracteres.`);
+      errors.push(`Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`);
     }
     if (control.errors['min']) {
       errors.push(`El valor minimo a ingresar es: ${control.errors['min'].min} caracteres.`);
     }
     if (control.errors['maxlength']) {
-      errors.push(`No puede tener más de ${control.errors['maxlength'].maxlength} caracteres.`);
+      errors.push(`No puede tener más de ${control.errors['maxlength'].requiredLength} caracteres.`);
     }
     if (control.errors['pattern']) {
       errors.push('El formato no es válido.');

@@ -122,6 +122,22 @@ export class PermisosService {
               { role: 'ADMINISTRADOR', module: 'PLANILLA' },
               { role: 'CONSULTA PLANILLA', module: 'PLANILLA' }
             ]
+          },
+          'planilla/Beneficios/editar-beneficio': {
+            title: 'Editar Beneficio',
+            permisos: [
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+              { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'CONSULTA PLANILLA', module: 'PLANILLA' }
+            ]
+          },
+          'planilla/Beneficios/editar-tipo-deduccion': {
+            title: 'Editar Beneficio',
+            permisos: [
+              { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+              { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+              { role: 'CONSULTA PLANILLA', module: 'PLANILLA' }
+            ]
           }
         }
       },

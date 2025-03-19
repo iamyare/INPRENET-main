@@ -1549,7 +1549,7 @@ GROUP BY
         AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
         AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaList})
         AND plan."ID_PLANILLA" IN (${idsPlanillaArray})
-        AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+        AND ded."ID_CENTRO_TRABAJO" != 1
       ORDER BY 
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ded."NOMBRE_DEDUCCION" ASC
@@ -4270,10 +4270,12 @@ GROUP BY
     try {
       const planillas = await this.planillaRepository
         .createQueryBuilder('planilla')
-        .where(` "planilla"."PERIODO_INICIO" >= TO_DATE('${inicioFormateado}', 'DD/MM/YYYY')
-    AND "planilla"."PERIODO_FINALIZACION" <= TO_DATE('${finFormateado}', 'DD/MM/YYYY')`)
+        .where(`"planilla"."PERIODO_INICIO" >= TO_DATE('${inicioFormateado}', 'DD/MM/YYYY')
+        AND "planilla"."PERIODO_FINALIZACION" <= TO_DATE('${finFormateado}', 'DD/MM/YYYY')`)
         .andWhere('planilla.tipoPlanilla IN (:...tipoPlanilla)', { tipoPlanilla: idTiposPlanilla })
         .andWhere('planilla.ESTADO = \'CERRADA\'')
+        .orderBy('planilla.PERIODO_INICIO', 'DESC')
+        .addOrderBy('planilla.SECUENCIA', 'ASC') // Orden adicional por SECUENCIA
         .getMany();
 
       return planillas;
@@ -5134,7 +5136,7 @@ GROUP BY
                 AND t1.id_causante = t2.id_causante
                 AND t1.id_persona = t2.id_persona
                 AND t1.id_beneficio = t2.id_beneficio
-        ) THEN 'VIGENTE'
+        ) THEN ''
         ELSE 'VENCIDO'
     END AS VENCIDO,
             t3.fecha_efectividad as fecha_efectividad, t3.num_rentas_aprobadas as rentas_aprobadas,
@@ -5173,8 +5175,6 @@ GROUP BY
                 AND t1.id_beneficio = t2.id_beneficio
             )
       `;
-
-      console.log(query);
 
       const beneficios = await this.entityManager.query(query);
       const workbook = new ExcelJS.Workbook();
@@ -5226,53 +5226,66 @@ GROUP BY
     try {
       const query = `
         ---------ALTAS---------------------
-        SELECT 
-            t4.n_identificacion, 
-            TRIM(
-              t4.primer_apellido ||
-              CASE WHEN t4.segundo_apellido IS NOT NULL THEN ' ' || TRIM(t4.segundo_apellido) ELSE '' END ||
-              CASE WHEN t4.primer_nombre IS NOT NULL THEN ' ' || TRIM(t4.primer_nombre) ELSE '' END ||
-              CASE WHEN t4.segundo_nombre IS NOT NULL THEN ' ' || TRIM(t4.segundo_nombre) ELSE '' END ||
-              CASE WHEN t4.tercer_nombre IS NOT NULL THEN ' ' || TRIM(t4.tercer_nombre) ELSE '' END
-            ) AS "NOMBRE_COMPLETO",
-            t1.id_beneficio AS ID_BENEFICIO, 
-            ben.nombre_beneficio,
-            t3.monto_por_periodo AS MONTO_MENSUAL,
-            t3.periodo_inicio AS PERIODO_INICIO, 
-            t3.periodo_finalizacion AS PERIODO_FINALIZACION,
-            t3.num_rentas_aprobadas as RENTAS_APROBADAS,
-            t3.fecha_efectividad AS FECHA_EFECTIVIDAD,
-            t5.CODIGO_PLANILLA, 
-            t3.MONTO_POR_PERIODO,
-            t1.estado
-        FROM net_detalle_pago_beneficio t1
-        JOIN net_detalle_beneficio_afiliado t3 ON 
-            t1.id_detalle_persona = t3.id_detalle_persona
-            AND t1.id_causante = t3.id_causante
-            AND t1.id_persona = t3.id_persona
-            AND t1.id_beneficio = t3.id_beneficio
-        JOIN net_planilla t5 ON t5.id_planilla = t1.id_planilla
-        JOIN net_persona t4 ON t4.id_persona = t1.id_persona
-        JOIN net_beneficio ben on ben.id_beneficio = t1.id_beneficio
-        WHERE 
-            TO_DATE('01/' || ${fecha.mes_finalizacion} || '/' || ${fecha.anio_finalizacion}, 'DD/MM/YY') 
-              BETWEEN t5.periodo_inicio AND t5.periodo_finalizacion
-            AND t5.id_tipo_planilla IN (1,2)
-            AND (t1.estado = 'PAGADA' OR t1.estado = 'EN PRELIMINAR')
-            AND t1.ID_BENEFICIO NOT IN (27)
-            AND NOT EXISTS (
-                SELECT 1 
-                FROM net_detalle_pago_beneficio t2
-                JOIN net_planilla t6 ON t6.id_planilla = t2.id_planilla
-                WHERE t2.estado = 'PAGADA' 
-                AND t6.id_tipo_planilla IN (1,2)
-                AND TO_DATE('01/' || ${fecha.mes_inicio} || '/' || ${fecha.anio_inicio}, 'DD/MM/YY') 
-                    BETWEEN t6.periodo_inicio AND t6.periodo_finalizacion
-                AND t2.id_detalle_persona = t1.id_detalle_persona
-                AND t2.id_causante = t1.id_causante
-                AND t2.id_persona = t1.id_persona
-                AND t2.id_beneficio = t1.id_beneficio
-            )
+        SELECT
+          t4.n_identificacion,
+          TRIM(
+            t4.primer_apellido ||
+            CASE WHEN t4.segundo_apellido IS NOT NULL THEN ' ' || TRIM(t4.segundo_apellido) ELSE '' END ||
+            CASE WHEN t4.primer_nombre IS NOT NULL THEN ' ' || TRIM(t4.primer_nombre) ELSE '' END ||
+            CASE WHEN t4.segundo_nombre IS NOT NULL THEN ' ' || TRIM(t4.segundo_nombre) ELSE '' END ||
+            CASE WHEN t4.tercer_nombre IS NOT NULL THEN ' ' || TRIM(t4.tercer_nombre) ELSE '' END
+          ) AS "NOMBRE_COMPLETO",
+          t1.id_beneficio AS ID_BENEFICIO,
+          ben.nombre_beneficio,
+          t3.monto_por_periodo AS MONTO_MENSUAL,
+          t3.periodo_inicio AS PERIODO_INICIO,
+          t3.periodo_finalizacion AS PERIODO_FINALIZACION,
+          t3.num_rentas_aprobadas AS RENTAS_APROBADAS,
+          t3.fecha_efectividad AS FECHA_EFECTIVIDAD,
+
+          -- Obtener CODIGO_PLANILLA solo si el ID_TIPO_PLANILLA es 3,4,5,6
+          (SELECT t5_2.CODIGO_PLANILLA
+          FROM net_detalle_pago_beneficio t2
+          JOIN net_planilla t5_2
+              ON t5_2.id_planilla = t2.id_planilla
+              AND t5_2.id_tipo_planilla IN (3,4,5,6)
+          WHERE t2.id_persona = t4.id_persona
+          FETCH FIRST 1 ROWS ONLY) AS CODIGO_PLANILLA,
+
+          t3.MONTO_POR_PERIODO,
+          t1.estado
+      FROM net_detalle_pago_beneficio t1
+      JOIN net_detalle_beneficio_afiliado t3
+          ON t1.id_detalle_persona = t3.id_detalle_persona
+          AND t1.id_causante = t3.id_causante
+          AND t1.id_persona = t3.id_persona
+          AND t1.id_beneficio = t3.id_beneficio
+      JOIN net_planilla t5
+          ON t5.id_planilla = t1.id_planilla
+          AND t5.id_tipo_planilla IN (1,2)  -- Solo planillas de tipo 1 y 2
+      JOIN net_persona t4
+          ON t4.id_persona = t1.id_persona
+      JOIN net_beneficio ben
+          ON ben.id_beneficio = t1.id_beneficio
+      WHERE
+          TO_DATE('01/' || ${fecha.mes_finalizacion} || '/' || ${fecha.anio_finalizacion}, 'DD/MM/YY')  
+            BETWEEN t5.periodo_inicio AND t5.periodo_finalizacion
+          AND (t1.estado = 'PAGADA' OR t1.estado = 'EN PRELIMINAR')
+          AND t1.ID_BENEFICIO NOT IN (27)
+          AND NOT EXISTS (
+              SELECT 1
+              FROM net_detalle_pago_beneficio t2
+              JOIN net_planilla t6
+                  ON t6.id_planilla = t2.id_planilla
+              WHERE t2.estado = 'PAGADA'
+              AND t6.id_tipo_planilla IN (1,2)
+              AND TO_DATE('01/' || ${fecha.mes_inicio} || '/' || ${fecha.anio_inicio}, 'DD/MM/YY')
+                  BETWEEN t6.periodo_inicio AND t6.periodo_finalizacion
+              AND t2.id_detalle_persona = t1.id_detalle_persona
+              AND t2.id_causante = t1.id_causante
+              AND t2.id_persona = t1.id_persona
+              AND t2.id_beneficio = t1.id_beneficio
+      )
       `;
 
       const beneficios = await this.entityManager.query(query);

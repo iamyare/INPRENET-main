@@ -168,6 +168,10 @@ export class PermisosService {
             permisos: [
               { role: 'ADMINISTRADOR', module: 'PLANILLA' },
               { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+              { role: 'REPORTES DETALLE A EXCEL', module: 'PLANILLA' },
+              { role: 'REPORTE A EXCEL COMPLETO', module: 'PLANILLA' },
+              { role: 'VER ALTAS', module: 'PLANILLA' },
+              { role: 'VER BAJAS', module: 'PLANILLA' },
             ]
           },
           'planilla/Egresos/ver_estatus_60_rentas': {

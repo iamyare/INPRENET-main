@@ -71,7 +71,6 @@ import { BeneficiarioSinCausanteComponent } from './verPerfil/beneficiario-sin-c
 import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
 import { DialogSuboptionsComponent } from './constancias/dialog-suboptions/dialog-suboptions.component';
 import { EditBeneficiarioModalComponent } from './gestion/edit-beneficiario-modal/edit-beneficiario-modal.component';
-import { CapturarHuellaComponent } from './gestion/capturar-huella/capturar-huella.component';
 import { ColoniaComponent } from './mantenimiento/colonia/colonia.component';
 import { AldeaComponent } from './mantenimiento/aldea/aldea.component';
 
@@ -143,7 +142,6 @@ import { AldeaComponent } from './mantenimiento/aldea/aldea.component';
     ContanciasAfiliadosComponent,
     DialogSuboptionsComponent,
     EditBeneficiarioModalComponent,
-    CapturarHuellaComponent,
     ColoniaComponent,
     AldeaComponent
   ],

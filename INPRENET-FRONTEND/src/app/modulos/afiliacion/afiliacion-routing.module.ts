@@ -14,17 +14,10 @@ import { AfiliarDocenteComponent } from './gestion/afiliar-docente/afiliar-docen
 import { RoleGuard } from 'src/app/guards/role-guard.guard';
 import { PermisosService } from 'src/app/services/permisos.service';
 import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
-import { CapturarHuellaComponent } from './gestion/capturar-huella/capturar-huella.component';
 import { AldeaComponent } from './mantenimiento/aldea/aldea.component';
 import { ColoniaComponent } from './mantenimiento/colonia/colonia.component';
 
 const routes: Routes = [
-  {
-    path: 'huella',
-    component: CapturarHuellaComponent,
-    canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIONES', 'afiliacion/huella') }
-  },
   {
     path: 'constancias-afiliados',
     component: ContanciasAfiliadosComponent,

@@ -18,6 +18,7 @@ import { PermisosService } from 'src/app/services/permisos.service';
 export class EditDatosBancariosComponent implements OnInit, OnChanges {
   public myFormFields: FieldConfig[] = [];
   @Input() Afiliado: any;
+  @Output() bancoAgregado = new EventEmitter<void>();
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   private ejecF: any;
@@ -144,6 +145,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
             if (index > -1) {
               this.filas[index].estado = 'INACTIVO';
             }
+            this.bancoAgregado.emit();
           },
           error: (error) => {
             this.toastr.error('Ocurrió un error al desactivar la Cuenta Bancaria.');
@@ -166,6 +168,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
       });
       dialogRef.afterClosed().subscribe((result: any) => {
         this.getFilas().then(() => this.cargar());
+        this.bancoAgregado.emit();
       });
     }
   }
@@ -214,6 +217,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
             if (index > -1) {
               this.filas[index].estado = 'ACTIVO';
             }
+            this.bancoAgregado.emit();
           },
           error: (error) => {
             console.error('Error al activar la Cuenta Bancaria:', error);
@@ -241,4 +245,6 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
       second: '2-digit'
     });
   }
+
+  
 }

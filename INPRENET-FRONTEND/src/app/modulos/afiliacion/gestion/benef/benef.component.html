@@ -39,11 +39,24 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
+
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Nacionalidad</mat-label>
+              <mat-icon matPrefix>public</mat-icon>
+              <mat-select formControlName="id_pais_nacionalidad">
+                <mat-option *ngFor="let pais of nacionalidades" [value]="pais.value">
+                  {{ pais.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="group.get('id_pais_nacionalidad')?.hasError('required') && group.get('id_pais_nacionalidad')?.touched">
+                <mat-icon>error</mat-icon> La nacionalidad es requerida.
+              </mat-error>
+            </mat-form-field>
           </div>
 
           <!-- Datos de Nacimiento -->
           <div class="form-row">
-            <mat-form-field class="half-width" appearance="outline">
+            <mat-form-field *ngIf="group.get('id_pais_nacionalidad')?.value === 1 || group.get('id_pais_nacionalidad')?.value === null" class="half-width" appearance="outline">
               <mat-label>Departamento De Nacimiento</mat-label>
               <mat-icon matPrefix>location_city</mat-icon>
               <mat-select formControlName="id_departamento_nacimiento" (selectionChange)="onDepartamentoNacimientoChange($event)">
@@ -56,7 +69,7 @@
               </mat-error>
             </mat-form-field>
 
-            <mat-form-field class="half-width" appearance="outline">
+            <mat-form-field *ngIf="group.get('id_pais_nacionalidad')?.value === 1 || group.get('id_pais_nacionalidad')?.value === null" class="half-width" appearance="outline">
               <mat-label>Municipio De Nacimiento</mat-label>
               <mat-icon matPrefix>location_city</mat-icon>
               <mat-select formControlName="id_municipio_nacimiento">
@@ -68,7 +81,6 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
-
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Fecha De Nacimiento</mat-label>
               <mat-datepicker-toggle matSuffix [for]="fechaNac"></mat-datepicker-toggle>
@@ -197,31 +209,31 @@
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Porcentaje De Beneficio</mat-label>
               <mat-icon matPrefix>percent</mat-icon>
-              <input
-                matInput
-                formControlName="porcentaje"
-                type="number"
-
+              <input 
+                matInput 
+                formControlName="porcentaje" 
+                type="number" 
+                step="0.01" 
+                (input)="validarPorcentaje(i)"
               >
-              <!-- (input)="validarPorcentaje(i)" -->
-
-              <!-- Error: No puede superar el disponible -->
-             <!--  <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('excedeTotal')">
-                <mat-icon>error</mat-icon> No puede superar el {{ porcentajeDisponible }}% disponible.
-              </mat-error> -->
-
-              <!-- Error: El porcentaje mínimo permitido -->
-              <!-- <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('minimoInvalido')">
-                <mat-icon>error</mat-icon> El porcentaje mínimo permitido es {{ porcentajeDisponible }}%.
-              </mat-error> -->
-
-              <!-- Error: La suma total debe ser exactamente 100% -->
-             <!--  <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('noCumpleTotal')">
-                <mat-icon>error</mat-icon> La suma total de los porcentajes debe ser exactamente 100%.
-              </mat-error> -->
-
+            
+              <!-- ✅ Siempre mostrar el porcentaje disponible -->
+              <mat-hint align="end">
+                <mat-icon>info</mat-icon> Disponible: {{ porcentajeDisponible | number:'1.2-2' }}%
+              </mat-hint>
+            
+              <!-- 🚨 Muestra errores según el problema específico -->
+              <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('excedeTotal')">
+                <mat-icon>error</mat-icon> No puede superar el {{ porcentajeDisponible | number:'1.2-2' }}% disponible.
+              </mat-error>
+            
+              <mat-error *ngIf="beneficiarios.at(i).get('porcentaje')?.hasError('minimoInvalido')">
+                <mat-icon>error</mat-icon> El porcentaje mínimo permitido es 0.01%.
+              </mat-error>
             </mat-form-field>
-
+            
+            
+              
           </div>
 
           <!-- Botón para eliminar beneficiario -->

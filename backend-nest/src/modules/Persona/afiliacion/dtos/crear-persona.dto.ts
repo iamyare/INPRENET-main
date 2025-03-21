@@ -158,6 +158,16 @@ export class CrearPersonaDto {
   @IsOptional()
   id_departamento_residencia?: number;
 
+  @IsNotEmpty()
+  @IsNumber()
+  @IsOptional()
+  id_colonia?: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsOptional()
+  id_aldea?: number;
+
   @IsOptional()
   @IsNumber()
   id_profesion?: number;

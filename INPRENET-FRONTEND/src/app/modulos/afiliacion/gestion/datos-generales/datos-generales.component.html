@@ -559,7 +559,39 @@
               </div>
             </div>            
           </div>
-        </div>         
+        </div>    
+        <div class="row" *ngIf="discapacidadSeleccionada">
+          <div class="col-lg-12 col-md-12">
+            <label for="fileInput">Carnet de Discapacidad</label>
+            <input 
+              id="fileInput" 
+              type="file" 
+              formControlName="carnet_discapacidad" 
+              (change)="onFileChange($event, 'carnet_discapacidad')"
+              accept="application/pdf"
+            >
+            <mat-error *ngIf="formGroup.get('carnet_discapacidad')?.hasError('required') && formGroup.get('carnet_discapacidad')?.touched">
+              Debes subir el Carnet de Discapacidad si seleccionaste alguna discapacidad.
+          </mat-error>          
+        
+            <!-- Mostrar archivo cargado si existe -->
+            <div *ngIf="formGroup.get('carnet_discapacidad')?.value">
+              <p>Archivo Cargado: {{ formGroup.get('carnet_discapacidad')?.value.name }}</p>
+            </div>
+          </div>
+        </div>
+              
+        <div class="row" *ngIf="carnetDiscapacidadUrl">
+          <div class="col-lg-12 col-md-12">
+            <label>Carnet de Discapacidad:</label>
+            <iframe 
+              [src]="carnetDiscapacidadUrl" 
+              width="100%" 
+              height="600px" 
+              type="application/pdf">
+            </iframe>
+          </div>
+        </div>
       </div>
     </form>
   </div>

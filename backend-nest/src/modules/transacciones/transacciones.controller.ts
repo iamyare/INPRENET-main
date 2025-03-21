@@ -87,40 +87,6 @@ export class TransaccionesController {
     return this.transaccionesService.crearMovimiento(crearMovimientoDto);
   }
 
-  @Get('/tipos-de-cuenta/:dni')
-  async obtenerTiposDeCuentaPorDNI(@Param('dni') dni: string) {
-    try {
-      const tiposDeCuenta = await this.transaccionesService.obtenerTiposDeCuentaPorDNI(dni);
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Tipos de cuenta obtenidos con éxito',
-        data: tiposDeCuenta,
-      };
-    } catch (error) {
-      throw new HttpException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: error.message || 'Ocurrió un error al obtener los tipos de cuenta',
-      }, HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @Get('/tipos-de-cuenta/')
-  async obtenerTiposDeCuenta() {
-    try {
-      const tiposDeCuenta = await this.transaccionesService.obtenerTiposDeCuenta();
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Tipos de cuenta obtenidos con éxito',
-        data: tiposDeCuenta,
-      };
-    } catch (error) {
-      throw new HttpException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: error.message || 'Ocurrió un error al obtener los tipos de cuenta',
-      }, HttpStatus.BAD_REQUEST);
-    }
-  }
-
   @Get('/getAllColegiosMagisteriales/')
   async getAllCentroTrabajo() {
     try {

@@ -31,7 +31,7 @@ export class AfiliacionController {
   async tieneBancoActivo(@Param('idPersona', ParseIntPipe) idPersona: number) {
     return await this.afiliacionService.tieneBancoActivo(idPersona);
   }
-
+ 
   @Post('convertir-afiliado')
   async convertirEnAfiliado(
     @Body() body: { idPersona: number; idTipoPersona: number }

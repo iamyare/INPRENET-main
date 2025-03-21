@@ -11,6 +11,7 @@ type ValidatorConfig = string | { name: string, args: any[] };
 })
 export class DynamicDialogAgregarComponent implements OnInit {
   form!: FormGroup;
+  dynamicOptions: { [key: string]: any[] } = {};
 
   constructor(
     public dialogRef: MatDialogRef<DynamicDialogAgregarComponent>,
@@ -20,12 +21,25 @@ export class DynamicDialogAgregarComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({});
+    
     this.data.fields.forEach((field: any) => {
       const control = new FormControl(
         '',
         field.validators ? this.mapValidators(field.validators) : []
       );
+
       this.form.addControl(field.name, control);
+      
+      if (field.options) {
+        this.dynamicOptions[field.name] = field.options;
+      }
+
+      // Si un campo depende de otro, agregar listener dinámico
+      if (field.dependsOn) {
+        this.form.get(field.dependsOn)?.valueChanges.subscribe((parentValue) => {
+          this.updateDependentOptions(field.name, field.dependsOn, parentValue);
+        });
+      }
     });
   }
 
@@ -36,7 +50,6 @@ export class DynamicDialogAgregarComponent implements OnInit {
       maxLength: Validators.maxLength,
       pattern: Validators.pattern,
       email: Validators.email,
-      // Agrega más validadores aquí según sea necesario
     };
 
     return validators.map(validator => {
@@ -49,11 +62,35 @@ export class DynamicDialogAgregarComponent implements OnInit {
     }).filter(v => v !== null);
   }
 
+  getErrorMessage(fieldName: string): string {
+    const control = this.form.get(fieldName);
+    if (!control || !control.errors) return '';
+
+    if (control.hasError('required')) return 'Este campo es obligatorio.';
+    if (control.hasError('minlength')) return `Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`;
+    if (control.hasError('maxlength')) return `No puede tener más de ${control.errors['maxlength'].requiredLength} caracteres.`;
+    if (control.hasError('pattern')) return 'Solo se permiten letras y espacios.';
+
+    return 'Error desconocido.';
+  }
+
+  updateDependentOptions(childFieldName: string, parentFieldName: string, parentValue: any): void {
+    const childField = this.data.fields.find((f: any) => f.name === childFieldName);
+    if (childField && childField.options) {
+      this.dynamicOptions[childFieldName] = childField.options.filter(
+        (option: any) => option[parentFieldName] === parentValue
+      );
+      this.form.get(childFieldName)?.setValue(null); // Resetear selección al cambiar dependencia
+    }
+  }
+
   onNoClick(): void {
     this.dialogRef.close();
   }
 
   submit(): void {
-    this.dialogRef.close(this.form.value);
+    if (this.form.valid) {
+      this.dialogRef.close(this.form.value);
+    }
   }
 }

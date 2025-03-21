@@ -32,3 +32,20 @@
 button {
   margin-bottom: 20px;
 }
+
+.back-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 20px;
+  margin-bottom: 30px;
+}
+
+.back-button {
+  font-size: 16px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+}

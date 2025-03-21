@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectorRef, EventEmitter, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from '../../../../../../src/app/services/afiliado.service';
@@ -18,6 +18,14 @@ import { PersonaService } from '../../../../services/persona.service';
   styleUrls: ['./edit-datos-generales.component.scss'],
 })
 export class EditDatosGeneralesComponent implements OnInit {
+  tieneBancoActivo = false;
+  beneficiariosValidos = false;
+  tieneReferencias = false;
+  tieneCentroTrabajo = false;
+  datosCompletos = false;
+  ultimaActualizacionValida = false;
+  validacionesCompletas = false;
+  estaEnPeps = false;
   autoResize($event: Event) {
     throw new Error('Method not implemented.');
   }
@@ -31,10 +39,10 @@ export class EditDatosGeneralesComponent implements OnInit {
   //public mostrarBotonGuardar: boolean = false;
   mostrarBotonGuardar: boolean = false;
   image: any;
-  datos!: any;
   form: any;
   datosGeneralesForm: FormGroup;
   puedeEditarTabla : boolean = false;
+  carnetDiscapacidadUrl: SafeResourceUrl | null = null;
 
   usuarioToken: {
     correo: string;
@@ -64,12 +72,9 @@ export class EditDatosGeneralesComponent implements OnInit {
   mostrarBotonGenerar: boolean = false;
   puedeAdministrar: boolean = false;
 
-  // -------------------------------------------
-  // FORMULARIOS
-  // -------------------------------------------
   @Input() Afiliado!: any;
+  @Output() onDatoAgregado = new EventEmitter<void>();
   certificadoDefuncionUrl: SafeResourceUrl | null = null;
-  archivoIdentificacionUrl: SafeResourceUrl | null = null;
 
   certificadoDefuncionFile: File | null = null;
 
@@ -156,7 +161,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     // Si quieres que ambos sean siempre obligatorios, usa Validators.required.
     // Si uno depende de si está fallecido, se podría meter una validación condicional.
     archivoCertDef: [null],        // Certificado defunción
-    archivo_identificacion: [null] // Archivo identificación
   });
 
   constructor(
@@ -217,7 +221,6 @@ export class EditDatosGeneralesComponent implements OnInit {
       id_departamento_residencia: ['', Validators.required],
       id_municipio_residencia: ['', Validators.required],
       grupo_etnico: ['', Validators.required],
-      archivo_identificacion: [null, Validators.required],
       discapacidades: this.fb.group({}) 
     });
   }
@@ -271,9 +274,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     }, 0);
   }
   
-  
-  
-  // Deshabilita los controles anidados en grupos o arrays
   disableNestedControls(formGroup: FormGroup | FormArray): void {
     Object.keys(formGroup.controls).forEach(field => {
       const control = formGroup.get(field);
@@ -285,7 +285,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     });
   }
   
-  // Habilita los controles anidados en grupos o arrays
   enableNestedControls(formGroup: FormGroup | FormArray): void {
     Object.keys(formGroup.controls).forEach(field => {
       const control = formGroup.get(field);
@@ -317,7 +316,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       campos.forEach(field => this.form1.get(field)?.enable());
       this.formDatosGenerales.get('archivoCertDef')?.enable();
   
-      if (!this.datos?.certificado_defuncion) {
+      if (!this.Afiliado?.certificado_defuncion) {
         this.formDatosGenerales.get('archivoCertDef')?.setValidators([Validators.required]);
       }
     }
@@ -325,10 +324,8 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
   }
   
-  
   ngOnInit(): void {
     this.obtenerDatosDesdeToken();
-
     
     setTimeout(() => {
       const puedeEditar = this.permisosService.userHasPermission(
@@ -360,6 +357,7 @@ export class EditDatosGeneralesComponent implements OnInit {
 
     this.svcAfiliado.buscarDetPersona(this.Afiliado.n_identificacion).subscribe(
       (detalles: any[]) => {
+        
         this.tableData = detalles;
 
         // Llamar a cargarEstadosAfiliado después de cargar los datos
@@ -403,15 +401,13 @@ export class EditDatosGeneralesComponent implements OnInit {
         .forEach(field => this.form1.get(field)?.enable());
     
         this.formDatosGenerales.get('archivoCertDef')?.enable();
-        if (!this.datos?.certificado_defuncion) {
+        if (!this.Afiliado?.certificado_defuncion) {
           this.formDatosGenerales.get('archivoCertDef')?.setValidators([Validators.required]);
         }
       }
       this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
     });
     
-
-    // Importante: Si inicias con "NO", deshabilita al cargar
     if (this.form1.get('fallecido')?.value === 'NO') {
       this.form1.get('causa_fallecimiento')?.disable();
       this.form1.get('fecha_defuncion')?.disable();
@@ -421,9 +417,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       this.form1.get('numero_certificado_defuncion')?.disable();
     }
   }
-  // --------------------------------
-  // Validador condicional reusado
-  // --------------------------------
+
   conditionalValidator(predicate: () => boolean, validator: any): any {
     return (control: FormControl) => {
       if (!control.parent) {
@@ -433,9 +427,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     };
   }
 
-  // --------------------------------
-  // Métodos de carga inicial
-  // --------------------------------
   onImageCaptured(image: string): void {
     if (image) {
       const imageBlob = this.dataURItoBlob(image);
@@ -460,7 +451,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   compararEstados(option: any, selected: any): boolean {
-    return option == selected; // Comparar por valor, asegurando que funcione con números y strings
+    return option == selected;
   }
 
   async cargarEstadosAfiliado() {
@@ -544,33 +535,50 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.cargarMunicipios(departamentoId);
   }
 
-  // ---------------------------------------------
-  // Método que setea la data en formDatosGenerales
-  // ---------------------------------------------
   setDatosGenerales(datosGenerales: any) {
+
     if (!datosGenerales || typeof datosGenerales !== 'object') {
-      console.error('datosGenerales no es un objeto válido:', datosGenerales);
-      return;
+        return;
     }
 
     if (!this.formDatosGenerales) {
-      this.formDatosGenerales = this.fb.group({
-        refpers: this.fb.array([], [Validators.required]),
-        archivoCertDef: [this.datos?.certificado_defuncion ? this.datos.certificado_defuncion : null],
-        archivo_identificacion: [this.datos?.archivo_identificacion ? this.datos.archivo_identificacion : null]
-      });
+        this.formDatosGenerales = this.fb.group({
+            refpers: this.fb.array([], [Validators.required]),
+            archivoCertDef: [null], 
+            archivo_carnet_discapacidad: [null] // Campo de carnet de discapacidad
+        });
+    }
+
+    if (!this.formDatosGenerales.get('archivo_carnet_discapacidad')) {
+        this.formDatosGenerales.addControl('archivo_carnet_discapacidad', new FormControl(null));
+    }
+
+    // 🔹 Verificar si la persona tiene discapacidad
+    const tieneDiscapacidad = datosGenerales.discapacidad === true;
+    const carnetControl = this.formDatosGenerales.get('archivo_carnet_discapacidad');
+
+    if (tieneDiscapacidad) {
+        carnetControl?.setValidators([Validators.required]);
+    } else {
+        carnetControl?.clearValidators();
+    }
+    carnetControl?.updateValueAndValidity();
+
+    if (datosGenerales.carnet_discapacidad instanceof File) {
+        carnetControl?.setValue(datosGenerales.carnet_discapacidad);
+    } else if (tieneDiscapacidad) {
     }
 
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
     refpersArray.clear();
-    const dato = datosGenerales;
 
     const newGroup = this.fb.group({
-      dato,
+        dato: datosGenerales
     });
 
     refpersArray.push(newGroup);
-  }
+    this.cdr.detectChanges();
+}
 
   createRefpersGroup(dato: any): FormGroup {
     return this.fb.group({
@@ -613,46 +621,38 @@ export class EditDatosGeneralesComponent implements OnInit {
       )
     });
   }
-  // previsualizarInfoAfil
-  // ---------------------------------------------
+  
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
       this.loading = true;
 
-      // 1) Llamar primero a getAfilByParam(...) para obtener la data principal
       this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
         (result) => {
-          this.datos = result;
           this.Afiliado = result;
-
+          
           this.mostrarBotonGenerar = this.tieneTipoAfiliado();
 
           if (result?.ID_DEPARTAMENTO_DEFUNCION) {
             this.cargarMunicipiosDefuncion(result.ID_DEPARTAMENTO_DEFUNCION);
           }
 
-          // Manejo PDFs
           this.certificadoDefuncionUrl = result?.certificado_defuncion
             ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${result.certificado_defuncion}`)
             : null;
 
-          this.archivoIdentificacionUrl = this.datos?.archivo_identificacion
-            ? this.sanitizer.bypassSecurityTrustResourceUrl(
-              `data:application/pdf;base64,${this.datos.archivo_identificacion}`
-            )
+            this.carnetDiscapacidadUrl = result?.carnet_discapacidad
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${result.carnet_discapacidad}`)
             : null;
 
-          // Validación dinámica del archivo de identificación
-          const archivoIdentificacionControl = this.formDatosGenerales.get('archivo_identificacion');
+          const carnetDiscapacidadControl = this.formDatosGenerales.get('archivo_carnet_discapacidad');
 
-
-          if (result?.archivo_identificacion) {
-            archivoIdentificacionControl?.clearValidators();
-            archivoIdentificacionControl?.updateValueAndValidity();
-            this.formDatosGenerales.patchValue({ archivo_identificacion: result.archivo_identificacion });
+          if (result?.carnet_discapacidad) {
+            carnetDiscapacidadControl?.clearValidators();
+            carnetDiscapacidadControl?.updateValueAndValidity();
+            this.formDatosGenerales.patchValue({ archivo_carnet_discapacidad: result.carnet_discapacidad });
           } else {
-            archivoIdentificacionControl?.setValidators([Validators.required]);
-            archivoIdentificacionControl?.updateValueAndValidity();
+            carnetDiscapacidadControl?.setValidators([Validators.required]);
+            carnetDiscapacidadControl?.updateValueAndValidity();
           }
 
           const archivoCertDefControl = this.formDatosGenerales.get('archivoCertDef');
@@ -682,7 +682,6 @@ export class EditDatosGeneralesComponent implements OnInit {
             );
           }
 
-          // Dirección estructurada
           if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
             const jsonObj = result.DIRECCION_RESIDENCIA_ESTRUCTURADA
               .split('/')
@@ -748,6 +747,7 @@ export class EditDatosGeneralesComponent implements OnInit {
             discapacidad: result?.discapacidades?.length > 0 ? true : false,
             direccion_residencia: result.DIRECCION_RESIDENCIA,
             fallecido: result?.fallecido,
+            carnet_discapacidad: result?.carnet_discapacidad ? `data:application/pdf;base64,${result.carnet_discapacidad}` : null
           };
 
           // Discapacidades
@@ -811,8 +811,10 @@ export class EditDatosGeneralesComponent implements OnInit {
             id_departamento_nacimiento: result?.id_departamento_nacimiento,
             id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
             discapacidad: result?.discapacidades?.length > 0 ? true : false,
-            archivoIdentificacionUrl: result?.archivo_identificacion,
-            direccion_residencia: result.DIRECCION_RESIDENCIA
+            direccion_residencia: result.DIRECCION_RESIDENCIA,
+            archivo_carnet_discapacidad: result?.carnet_discapacidad
+            ? `data:application/pdf;base64,${result.carnet_discapacidad}`
+            : null
           });
 
           // Marcar todos los controles como tocados para mostrar errores
@@ -834,9 +836,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     }
   }
 
-  // ---------------------------------------------
-  // Manejo de discapacidades
-  // ---------------------------------------------
   updateDiscapacidades(discapacidadesSeleccionadas: any[]) {
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
     if (refpersArray.length > 0) {
@@ -856,55 +855,41 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.Afiliado = {};
   }
 
-  // ---------------------------------------------
-  // GUARDAR (con validaciones)
-  // ---------------------------------------------
   GuardarInformacion(): void {
     this.datosGeneralesForm.markAllAsTouched();
     this.form1.markAllAsTouched();
     this.formDatosGenerales.markAllAsTouched();
 
-    if (this.formDatosGenerales.invalid || this.form1.invalid) {
+    /* if (this.formDatosGenerales.invalid || this.form1.invalid) {
       this.checkFormErrors();
       this.toastr.error('Por favor complete los campos requeridos');
       return;
-    }
+    } */
 
     const refpersData = this.formDatosGenerales.get('refpers')?.value?.[0] || {};
 
     const formValues = this.form1.value;
 
-    let archivoIdentificacion = this.formDatosGenerales.get('archivo_identificacion')?.value;
+    const carnetDiscapacidad = this.formDatosGenerales.get('archivo_carnet_discapacidad')?.value;
 
-
-    if (!archivoIdentificacion && this.datos?.archivo_identificacion) {
-      const base64Data = this.datos.archivo_identificacion;
-      const blob: any = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
-      archivoIdentificacion = new File([blob], 'identificacion_existente.pdf', { type: 'application/pdf' });
-    }
+    if (formValues.discapacidad === true && !(carnetDiscapacidad instanceof File)) {
+      this.toastr.warning("Debes seleccionar un archivo válido para el carnet de discapacidad.", "Advertencia");
+      return;
+  }
+  
+  const formData = new FormData();
+  if (carnetDiscapacidad instanceof File) {
+      formData.append('carnet_discapacidad', carnetDiscapacidad);
+  }
 
     let certificadoDefuncion = this.formDatosGenerales.get('archivoCertDef')?.value;
 
-    if (!certificadoDefuncion && this.datos?.certificado_defuncion) {
-      const base64Data = this.datos.certificado_defuncion;
+    if (!certificadoDefuncion && this.Afiliado?.certificado_defuncion) {
+      const base64Data = this.Afiliado.certificado_defuncion;
       const blob: any = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
       certificadoDefuncion = new File([blob], 'certificado_defuncion_existente.pdf', { type: 'application/pdf' });
     }
 
-
-
-    // Si no hay archivo nuevo pero existe uno registrado
-    if (!archivoIdentificacion && this.datos?.archivo_identificacion) {
-      // Convertir base64 a File usando función existente
-      const base64Data = this.datos.archivo_identificacion;
-      const blob = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
-
-      if (blob) {
-        archivoIdentificacion = new File([blob], 'identificacion_existente.pdf', {
-          type: 'application/pdf'
-        });
-      }
-    }
     // Construcción del objeto a enviar
     const datosActualizados: any = {
       ...refpersData,
@@ -919,27 +904,41 @@ export class EditDatosGeneralesComponent implements OnInit {
       numero_certificado_defuncion: formValues.numero_certificado_defuncion,
       fecha_reporte_fallecido: convertirFechaInputs(formValues.fecha_reporte_fallecido),
       fecha_afiliacion: convertirFechaInputs(refpersData.fecha_afiliacion),
-      // Archivos
       certificado_defuncion: certificadoDefuncion,
-      archivo_identificacion: archivoIdentificacion,
-
-      // Foto perfil
+      carnet_discapacidad: carnetDiscapacidad,
       FotoPerfil: this.image ? this.image : undefined,
-
-      // Tabla o detalles adicionales
       detalles: this.tableData
     };
 
-    // Llamada al servicio para actualizar
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, datosActualizados)
-      .subscribe(
-        async (result) => {
-          this.toastr.success('Datos generales modificados correctamente');
+    .subscribe({
+        next: () => {
+            this.toastr.success('Datos generales modificados correctamente');
+            this.onDatoAgregado.emit();
+            this.cdr.detectChanges();
         },
-        (error) => {
-          this.toastr.error(`Error: ${error.error.message}`);
-        }
-      );
+        error: (error) => {
+          console.error("❌ Error recibido del backend:", error);
+      
+          let mensajeError = 'Ocurrió un error al actualizar los datos.';
+          let erroresDetalle: string[] = [];
+      
+          if (error.error?.errors && Array.isArray(error.error.errors)) {
+              erroresDetalle = error.error.errors;
+          }
+          if (erroresDetalle.length > 0) {
+              mensajeError += "<br><br><strong>Errores detectados:</strong><br>";
+              mensajeError += erroresDetalle.map((err, index) => `${index + 1}. ${err}`).join("<br>");
+          } else {
+              mensajeError += "<br><br>No se recibieron detalles de errores.";
+          }
+      
+          // ✅ Mostramos el mensaje de error con formato HTML en el Toastr
+          this.toastr.error(mensajeError, 'Errores en el formulario', { enableHtml: true, timeOut: 7000 });
+      }
+      
+      
+    });
   }
 
   guardarEstadoAfiliacion(element: any) {
@@ -970,9 +969,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     );
   }
 
-  // ---------------------------------------------
-  // Mostrar mensajes de error en HTML
-  // ---------------------------------------------
   getErrors(fieldName: string): string[] {
     const control = this.form1.get(fieldName);
     if (control && control.errors && (control.dirty || control.touched)) {
@@ -991,21 +987,18 @@ export class EditDatosGeneralesComponent implements OnInit {
     return [];
   }
 
-  // ---------------------------------------------
-  // Métodos para adjuntar archivos al form
-  // ---------------------------------------------
+  getCarnetDiscapacidad(event: File): void {
+    if (!this.formDatosGenerales.get('archivo_carnet_discapacidad')) {
+      this.formDatosGenerales.addControl('archivo_carnet_discapacidad', new FormControl(null, [Validators.required]));
+    }
+    this.formDatosGenerales.get('archivo_carnet_discapacidad')?.setValue(event);
+  }
+
   getArchivoDef(event: File): any {
     if (!this.formDatosGenerales.contains('archivoCertDef')) {
       this.formDatosGenerales.addControl('archivoCertDef', new FormControl('', []));
     }
     this.formDatosGenerales.get('archivoCertDef')?.setValue(event);
-  }
-
-  getArchivoIdentificacion(event: File): void {
-    if (!this.formDatosGenerales.contains('archivo_identificacion')) {
-      this.formDatosGenerales.addControl('archivo_identificacion', new FormControl('', []));
-    }
-    this.formDatosGenerales.get('archivo_identificacion')?.setValue(event);
   }
 
   getArchivoFoto(event: File): void {
@@ -1015,9 +1008,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.formDatosGenerales.get('foto_empleado')?.setValue(event);
   }
 
-  // ---------------------------------------------
-  // Util: convertir dataURI a Blob
-  // ---------------------------------------------
   dataURItoBlob(dataURI: string | null): Blob | null {
     if (!dataURI) {
       console.error('dataURI is null or undefined');
@@ -1065,14 +1055,9 @@ export class EditDatosGeneralesComponent implements OnInit {
     });
 
     const archivoCertDef = this.formDatosGenerales.get('archivoCertDef');
-    const archivoIdentificacion = this.formDatosGenerales.get('archivo_identificacion');
 
     if (archivoCertDef?.invalid) {
       console.log('El archivo "Certificado de Defunción" es inválido:', archivoCertDef.errors);
-    }
-
-    if (archivoIdentificacion?.invalid) {
-      console.log('El archivo "Identificación" es inválido:', archivoIdentificacion.errors);
     }
   }
 
@@ -1112,7 +1097,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     return tipo ? tipo.TIPO_PERSONA : 'AFILIADO';
   }
 
-
   convertirEnAfiliado() {
     if (!this.tipoPersonaSeleccionada || !this.Afiliado?.ID_PERSONA) {
       this.toastr.warning('Debe seleccionar un tipo de persona antes de continuar.');
@@ -1124,28 +1108,24 @@ export class EditDatosGeneralesComponent implements OnInit {
       idTipoPersona: this.tipoPersonaSeleccionada
     };
   
-    this.cargandoTabla = true; // Mostrar el spinner en la tabla
+    this.cargandoTabla = true;
   
     this.afiliacionService.convertirEnAfiliado(payload).subscribe({
       next: (response) => {
         this.toastr.success(response.message || 'Persona convertida exitosamente.');
         this.Afiliado.TIPO_PERSONA = 'AFILIADO';
-  
-        // Simula una espera antes de recargar la tabla
         setTimeout(() => {
-          this.cargarEstadosAfiliado(); // Recargar la tabla
-          this.cargandoTabla = false; // Ocultar el spinner después de la carga
+          this.cargarEstadosAfiliado();
+          this.cargandoTabla = false;
         }, 2000);
       },
       error: (error) => {
         this.toastr.error(error.message || 'Error al convertir en afiliado.');
-        this.cargandoTabla = false; // Ocultar el spinner en caso de error
+        this.cargandoTabla = false;
       }
     });
   }
   
-  
-
   cargarMunicipiosDefuncion(departamentoId: number) {
     this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
       next: (data) => {
@@ -1186,33 +1166,42 @@ export class EditDatosGeneralesComponent implements OnInit {
     }
   }
 
-  generarConstanciaAfiliacion() {
-    this.personaService.getPersonaByDni(this.Afiliado.N_IDENTIFICACION).subscribe(
-      (personaActualizada: any) => {
-        if (!personaActualizada) {
-
-          console.error('No se encontró la persona luego de crear la afiliación.');
-          return;
-        }
-        personaActualizada.tipoFormulario = 'ACTUALIZACION';
-        this.svcAfiliado.generarConstanciaQR(
-          personaActualizada,
-          this.usuarioToken,
-          'afiliacion2'
-        ).subscribe((blob: Blob) => {
-          const downloadURL = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = downloadURL;
-          link.download = this.generarNombreArchivo(personaActualizada, 'afiliacion2');
-          link.click();
-          window.URL.revokeObjectURL(downloadURL);
-        });
-      },
-      (err) => {
-        console.error('Error al consultar persona por DNI:', err);
+  async generarConstanciaAfiliacion(): Promise<void> {
+    try {
+      const validacionExitosa = await this.validarDatosAfiliado();
+      if (!validacionExitosa) {
+        return;
       }
-    );
+      
+  
+      this.personaService.getPersonaByDni(this.Afiliado.N_IDENTIFICACION).subscribe(
+        (personaActualizada: any) => {
+          if (!personaActualizada) {
+            console.error("No se encontró la persona luego de crear la afiliación.");
+            return;
+          }
+          personaActualizada.tipoFormulario = "ACTUALIZACION";
+  
+          this.svcAfiliado
+            .generarConstanciaQR(personaActualizada, this.usuarioToken, "afiliacion2")
+            .subscribe((blob: Blob) => {
+              const downloadURL = window.URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = downloadURL;
+              link.download = this.generarNombreArchivo(personaActualizada, "afiliacion2");
+              link.click();
+              window.URL.revokeObjectURL(downloadURL);
+            });
+        },
+        (err) => {
+          console.error("Error al consultar persona por DNI:", err);
+        }
+      );
+    } catch (error) {
+      console.error("Error en la validación antes de generar la constancia:", error);
+    }
   }
+  
 
   generarNombreArchivo(persona: any, tipo: string): string {
     const nombreCompleto = `${persona.primer_nombre}_${persona.primer_apellido}`;
@@ -1238,5 +1227,79 @@ export class EditDatosGeneralesComponent implements OnInit {
     return false;
   }
 
+  
+  
+  validarDatosAfiliado(): Promise<boolean> {
+    
+    return new Promise((resolve) => {
+      if (!this.Afiliado?.ID_PERSONA) {
+        console.warn("No se ha definido el ID_PERSONA para validar.");
+        this.toastr.error("No se ha definido el ID_PERSONA para validar.");
+        resolve(false);
+        return;
+      }
+  
+      this.afiliacionService.tieneBancoActivo(this.Afiliado.ID_PERSONA).subscribe(
+        (res) => {
+          this.tieneBancoActivo = res.tieneBancoActivo;
+          this.beneficiariosValidos = res.beneficiariosValidos;
+          this.tieneReferencias = res.tieneReferencias;
+          this.tieneCentroTrabajo = res.tieneCentroTrabajo;
+          this.datosCompletos = res.datosCompletos;
+          this.ultimaActualizacionValida = res.ultimaActualizacionValida;
+          this.estaEnPeps = res.estaEnPeps;
+  
+          this.validacionesCompletas =
+            this.tieneBancoActivo &&
+            this.beneficiariosValidos &&
+            this.tieneReferencias &&
+            this.tieneCentroTrabajo &&
+            this.datosCompletos &&
+            this.ultimaActualizacionValida;
+  
+          if (!this.validacionesCompletas) {
+            const errores: string[] = [];
+  
+            if (!this.tieneBancoActivo) {
+              errores.push("La persona no tiene un banco activo asociado.");
+            }
+            if (!this.beneficiariosValidos) {
+              errores.push("Los beneficiarios no tienen sus datos completos o la suma de porcentajes no es 100%.");
+            }
+            if (!this.tieneReferencias) {
+              errores.push("Faltan referencias registradas.");
+            }
+            if (!this.tieneCentroTrabajo) {
+              errores.push("No tiene un centro de trabajo registrado.");
+            }
+            if (!this.datosCompletos) {
+              errores.push("Faltan datos personales obligatorios.");
+            }
+            if (!this.ultimaActualizacionValida) {
+              errores.push(
+                this.estaEnPeps
+                  ? "Los datos no han sido actualizados en los últimos 6 meses."
+                  : "Los datos no han sido actualizados en los últimos 2 años."
+              );
+            }
+  
+            this.toastr.warning(
+              `No puedes generar la constancia debido a los siguientes problemas:\n- ${errores.join("\n- ")}`
+            );
+  
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        },
+        (error) => {
+          console.error("Error al validar datos de afiliado:", error);
+          this.toastr.error("Error al validar los datos del afiliado.");
+          resolve(false);
+        }
+      );
+    });
+  }
+  
 
 }

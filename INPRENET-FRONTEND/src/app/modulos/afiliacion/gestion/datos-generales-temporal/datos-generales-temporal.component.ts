@@ -7,6 +7,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { CamaraComponent } from 'src/app/components/camara/camara.component';
 import { FormStateService } from 'src/app/services/form-state.service'; // Importar el servicio
 import { skip } from 'rxjs';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-datos-generales-temporal',
@@ -24,6 +25,7 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   @Output() newDatosGenerales = new EventEmitter<any>();
   @ViewChild(CamaraComponent, { static: false }) camaraComponent!: CamaraComponent;
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('fileCarnetInput', { static: false }) fileCarnetInput!: ElementRef<HTMLInputElement>;
 
   opcion: string = 'NO';
 
@@ -38,15 +40,19 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   genero: { value: string, label: string }[] = [];
   nacionalidades: { value: number, label: string }[] = [];
   discapacidades: { label: string, value: number }[] = [];
+  aldeas: { value: number, label: string }[] = [];
+  colonias: { value: number, label: string }[] = [];
   useCamera: boolean = true;
   mostrarUbicacionNacimiento: boolean = true;
+  filePreviewUrl: SafeResourceUrl | null = null;
+  isImage: boolean = false;
 
   constructor(private fb: FormBuilder,
     private direccionSer: DireccionService,
     private datosEstaticos: DatosEstaticosService,
     private formStateService: FormStateService,
-    private cdr: ChangeDetectorRef,
-    private centroTrabajoService: CentroTrabajoService) { }
+    private centroTrabajoService: CentroTrabajoService,
+    private sanitizer: DomSanitizer) { }
     
 //-----------------------------------
 
@@ -112,6 +118,8 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
   
   // Agregar campo fotoPerfil
   this.formGroup.addControl('fotoPerfil', new FormControl(null, Validators.required));
+  this.formGroup.addControl('id_aldea', new FormControl('', Validators.required));
+  this.formGroup.addControl('id_colonia', new FormControl('', Validators.required));
 
   // Agregar el control de discapacidad
   this.formGroup.addControl('discapacidad', new FormControl(false, Validators.required));
@@ -124,16 +132,6 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
     this.formGroup.patchValue({
       discapacidad: false  // “NO” por defecto
     });
-  }
-
-  // ===========================================
-  // NUEVO: Agregar el control archivo_identificacion como obligatorio
-  // ===========================================
-  if (!this.formGroup.contains('archivo_identificacion')) {
-    this.formGroup.addControl(
-      'archivo_identificacion',
-      new FormControl('', [Validators.required])
-    );
   }
 
   // Resetear la cámara si el componente de cámara existe
@@ -203,6 +201,9 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
       Validators.pattern(/^[0-9]+$/)
     ])
   );
+
+  this.formGroup.addControl('archivo_carnet_discapacidad', new FormControl(null));
+  
 
   this.formGroup.addControl(
     'primer_nombre',
@@ -422,14 +423,6 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
   );
 
   this.formGroup.addControl(
-    'aldea',
-    new FormControl('', [
-      Validators.maxLength(75),
-      Validators.pattern(addressPattern)
-    ])
-  );
-
-  this.formGroup.addControl(
     'caserio',
     new FormControl('', [
       Validators.maxLength(75),
@@ -469,12 +462,31 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
 
   this.setValidacionesIdentificacion(false);
 
+  this.formGroup.get('discapacidad')?.valueChanges.subscribe((value) => {
+    this.updateCarnetDiscapacidadValidation(value);
+  });
+  this.updateCarnetDiscapacidadValidation(this.formGroup.get('discapacidad')?.value || false);
+
   // Cargar datos iniciales
   this.cargarDatosIniciales();
 
   this.marcarCamposComoTocados();
   
 }
+
+updateCarnetDiscapacidadValidation(isDisabled: boolean): void {
+  const control = this.formGroup.get('archivo_carnet_discapacidad');
+
+  if (isDisabled) {
+    control?.setValidators([Validators.required]);
+  } else {
+    control?.clearValidators();
+    control?.setValue(null); // Limpiar el archivo si elige "No"
+  }
+
+  control?.updateValueAndValidity();
+}
+
 //-----------------------------------------------------
   async cargarDatosIniciales() {
     this.cargarDepartamentos();
@@ -514,9 +526,25 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
 
   onDepartamentoChange(event: any) {
     const departamentoId = event.value;
-    this.cargarMunicipios(departamentoId);
+    
+    if (departamentoId) {
+      this.cargarMunicipios(departamentoId);
+    } 
+    this.formGroup.patchValue({
+      id_municipio_residencia: '',
+      id_aldea: '',
+      id_colonia: ''
+    });
+  
+    this.municipios = [];
+    this.aldeas = [];
+    this.colonias = [];
+  
+    this.formGroup.get('id_municipio_residencia')?.updateValueAndValidity();
+    this.formGroup.get('id_aldea')?.updateValueAndValidity();
+    this.formGroup.get('id_colonia')?.updateValueAndValidity();
   }
-
+  
   onDepartamentoNacimientoChange(event: any) {
     const departamentoId = event.value;
     this.cargarMunicipiosNacimiento(departamentoId);
@@ -627,6 +655,20 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
     }
   }
 
+  cargarAldeas(municipioId: number) {
+    this.direccionSer.getAldeasByMunicipio(municipioId).subscribe({
+      next: (data: { value: number; label: string }[]) => {
+        this.aldeas = data.map(aldea => ({
+          value: aldea.value,
+          label: aldea.label
+        }));
+      },
+      error: (error) => {
+        console.error('Error al cargar aldeas:', error);
+      }
+    });
+  }
+
   async cargarTiposIdentificacion() {
     try {
       const response = await this.datosEstaticos.gettipoIdent();
@@ -681,32 +723,6 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
   get isPhotoInvalid(): boolean {
     const control = this.formGroup.get('FotoPerfil');
     return control ? control.invalid && (control.touched || control.dirty) : false;
-  }
-
-  // Función modificada: getArchivo()
-  getArchivo(event: File): void {
-    // Validar tipo y tamaño
-    if (event.type !== 'application/pdf') {
-      this.formGroup.get('archivo_identificacion')?.setErrors({ invalidType: true });
-      return;
-    }
-
-    if (event.size > 5 * 1024 * 1024) { // 5MB
-      this.formGroup.get('archivo_identificacion')?.setErrors({ maxSize: true });
-      return;
-    }
-
-    this.formGroup.get('archivo_identificacion')?.setValue(event);
-  }
-
-  removeArchivoIdentificacion() {
-    // Limpia el FormControl
-    this.formGroup.get('archivo_identificacion')?.setValue(null);
-  
-    // Limpia el valor del input file para que reaccione si suben el mismo archivo
-    if (this.fileInput) {
-      this.fileInput.nativeElement.value = '';
-    }
   }
 
   onTipoIdentificacionChange(tipoIdentificacion: number) {
@@ -774,24 +790,83 @@ this.formGroup.get('id_pais')?.valueChanges.pipe(skip(1)).subscribe((value) => {
       }
     });
   }
-}
 
-const observer = new ResizeObserver(entries => {
-  try {
-    entries.forEach(entry => {
-      // Lógica de manejo de cambios...
-    });
-  } catch (error) {
-    console.error("Error en ResizeObserver:", error);
-  }
-});
-
-const resizeObserverLoopErrSilencer = () => {
-  const resizeObserverErr = /ResizeObserver loop limit exceeded/;
-  window.addEventListener('error', (event) => {
-    if (resizeObserverErr.test(event.message)) {
-      event.stopImmediatePropagation();
+  getArchivoCarnetDiscapacidad(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+  
+    if (inputElement?.files?.length) {
+      const file = inputElement.files[0];
+  
+      // Validar tipo de archivo (PDF o imagen)
+      if (!file.type.match('image.*') && file.type !== 'application/pdf') {
+        return;
+      }
+  
+      // Validar tamaño máximo de 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        return;
+      }
+  
+      this.isImage = file.type.match('image.*') ? true : false;
+  
+      // 🔹 Usar DomSanitizer para evitar el error NG0904
+      this.filePreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(file));
+  
+      // 🔹 Asegurar que el archivo se asigna correctamente al FormControl
+      this.formGroup.patchValue({
+        archivo_carnet_discapacidad: file
+      });
+  
+      this.formGroup.get('archivo_carnet_discapacidad')?.updateValueAndValidity();
     }
-  });
-};
-resizeObserverLoopErrSilencer();
+  }
+  
+  removeArchivoCarnetDiscapacidad(): void {
+    this.filePreviewUrl = null;
+    this.isImage = false;
+  
+    if (this.fileCarnetInput?.nativeElement) {
+      this.fileCarnetInput.nativeElement.value = '';
+    }
+  
+    // 🔹 Establecer el valor en null
+    const control = this.formGroup.get('archivo_carnet_discapacidad');
+    control?.setValue(null);
+  
+    // 🔹 Verificar si "Discapacidad" sigue siendo "Sí", y mantener la validación requerida
+    if (this.formGroup.get('discapacidad')?.value) {
+      control?.setValidators([Validators.required]);
+    } else {
+      control?.clearValidators();
+    }
+  
+    control?.updateValueAndValidity();
+  }
+  
+  onMunicipioChange(event: any) {
+    const municipioId = event.value;
+    if (municipioId) {
+      this.cargarAldeas(municipioId);
+      this.cargarColonias(municipioId);
+    } else {
+      this.aldeas = [];
+      this.colonias = [];
+      this.formGroup.patchValue({ id_aldea: '', id_colonia: '' });
+    }
+  }
+  
+  cargarColonias(municipioId: number): void {
+    this.direccionSer.getColoniasPorMunicipio(municipioId).subscribe({
+      next: (data) => {
+        this.colonias = data.map(colonia => ({
+          value: colonia.id_colonia,
+          label: colonia.nombre_colonia
+        }));
+      },
+      error: (error) => {
+        console.error('Error al cargar colonias:', error);
+        this.colonias = [];
+      }
+    });
+  }
+}

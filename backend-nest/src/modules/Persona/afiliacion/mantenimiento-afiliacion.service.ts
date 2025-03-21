@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
@@ -132,6 +132,13 @@ export class MantenimientoAfiliacionService {
   }
 
   async createBanco(createBancoDto: CreateBancoDto): Promise<Net_Banco> {
+    const bancoExistente = await this.bancoRepository.findOne({
+      where: { codigo_ach: createBancoDto.codigo_ach },
+    });
+  
+    if (bancoExistente) {
+      throw new ConflictException('El código ACH ya está en uso.');
+    }
     const newBanco = this.bancoRepository.create(createBancoDto);
     return this.bancoRepository.save(newBanco);
   }

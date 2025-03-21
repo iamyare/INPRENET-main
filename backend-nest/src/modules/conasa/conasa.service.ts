@@ -80,7 +80,7 @@ export class ConasaService {
           : '',
       }));
     }
-  
+
   async obtenerAfiliadosMesAnterior() {
     return this.dataSource.query(`
       WITH planillas_filtradas AS (

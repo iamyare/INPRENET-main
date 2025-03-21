@@ -3,7 +3,6 @@ import { FormArray, FormBuilder, FormGroup, ValidationErrors } from '@angular/fo
 import { MatStepper } from '@angular/material/stepper';
 import { AfiliacionService } from '../../../../services/afiliacion.service';
 import { ToastrService } from 'ngx-toastr';
-import pdfMake from 'pdfmake/build/pdfmake';
 import { HttpClient } from '@angular/common/http';
 import { DatosEstaticosService } from '../../../../services/datos-estaticos.service';
 import { DatosGeneralesTemporalComponent } from '../datos-generales-temporal/datos-generales-temporal.component';
@@ -90,7 +89,7 @@ export class AfiliarDocenteComponent implements OnInit {
         template: this.datosGeneralesTemplate
       },
       {
-        label: 'Referencias Personales',
+        label: 'Referencias',
         formGroup: this.fb.group({}),
         template: this.referenciasPersonalesTemplate
       },
@@ -174,6 +173,8 @@ onSubmit(): void {
         correo_2: datosGenerales.correo_2,
         fecha_nacimiento: datosGenerales.fecha_nacimiento,
         direccion_residencia_estructurada: this.formatDireccion(datosGenerales).toUpperCase(),
+        id_colonia: datosGenerales.id_colonia,
+        id_aldea: datosGenerales.id_aldea,
         id_municipio_residencia: datosGenerales.id_municipio_residencia,
         id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
         id_profesion: datosGenerales.id_profesion,
@@ -205,14 +206,14 @@ onSubmit(): void {
       fileFoto = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
     }
 
-    // Archivo de identificación (ej. escaneo de cédula)
-    const fileIdent = datosGenerales?.archivo_identificacion;
+    // Capturar el archivo de carnet de discapacidad si existe
+    const carnetDiscapacidad = datosGenerales?.archivo_carnet_discapacidad;
 
     console.log(formattedData);
     
 
     // Llamar al servicio para crear afiliación
-    this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
+    this.afiliacionService.crearAfiliacion(formattedData, fileFoto, carnetDiscapacidad).subscribe(
       (response: any) => {
         console.log('Datos enviados con éxito:', response);
         this.toastr.success('Datos enviados con éxito', 'Éxito');
@@ -237,7 +238,7 @@ onSubmit(): void {
                 const url = window.URL.createObjectURL(pdfBlob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `constancia_${response[0].n_identificacion}.pdf`; // Nombre del archivo
+                link.download = `constancia_${response[0].n_identificacion}.pdf`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -271,15 +272,13 @@ onSubmit(): void {
       },
       (error: any) => {
         console.error('Error al enviar los datos:', error);
-      
-        // Extraer correctamente el mensaje del error
         const errorMessage = error.error?.message || error.error?.mensaje || 'Hubo un error al enviar los datos';
-      
-        // Mostrar el mensaje en Toastr
         this.toastr.error(errorMessage, 'Error');
       }
     );
   } else {
+    console.log(datosGenerales);
+    
     this.formErrors = this.generateFormErrors(this.formGroup);
     this.markAllAsTouched(this.formGroup);
     this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
@@ -288,14 +287,12 @@ onSubmit(): void {
 
   private formatDireccion(datosGenerales: any): string {
     return [
-      datosGenerales.barrio_colonia ? `BARRIO_COLONIA: ${datosGenerales.barrio_colonia}` : '',
       datosGenerales.avenida ? `AVENIDA: ${datosGenerales.avenida}` : '',
       datosGenerales.calle ? `CALLE: ${datosGenerales.calle}` : '',
       datosGenerales.sector ? `SECTOR: ${datosGenerales.sector}` : '',
       datosGenerales.bloque ? `BLOQUE: ${datosGenerales.bloque}` : '',
       datosGenerales.numero_casa ? `N° DE CASA: ${datosGenerales.numero_casa}` : '',
       datosGenerales.color_casa ? `COLOR CASA: ${datosGenerales.color_casa}` : '',
-      datosGenerales.aldea ? `ALDEA: ${datosGenerales.aldea}` : '',
       datosGenerales.caserio ? `CASERIO: ${datosGenerales.caserio}` : ''
     ]
       .filter(Boolean)

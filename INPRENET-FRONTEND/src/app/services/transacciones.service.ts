@@ -71,10 +71,6 @@ export class TransaccionesService {
     );
   }
 
-  obtenerTiposDeCuentaPorDNI(dni: string): Observable<any> {
-    return this.http.get(`${environment.API_URL}/api/transacciones/tipos-de-cuenta/${dni}`);
-  }
-
   desactivarCuenta(numCuenta: string, datosGenerales: any): Observable<any> {
     return this.http.put(`${environment.API_URL}/api/transacciones/desactivarCuenta/${numCuenta}`, datosGenerales);
   }

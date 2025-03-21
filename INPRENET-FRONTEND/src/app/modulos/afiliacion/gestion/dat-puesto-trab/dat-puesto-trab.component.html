@@ -10,7 +10,36 @@
         <div *ngFor="let trabajo of trabajosArray.controls; let i = index" [formGroupName]="i" class="reference-group">
           <h4 class="reference-title">Centro De Trabajo Número: {{ i + 1 }}</h4>
           <div class="form-row">
-            <!-- Input de búsqueda -->
+            <!-- Departamento -->
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Departamento</mat-label>
+              <mat-icon matPrefix>location_on</mat-icon>
+              <mat-select 
+                formControlName="id_departamento" 
+                (selectionChange)="onDepartamentoChange($event, i)">
+                <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+                  {{ departamento.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          
+            <!-- Municipio -->
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Municipio</mat-label>
+              <mat-icon matPrefix>location_city</mat-icon>
+              <mat-select formControlName="id_municipio" required>
+                <mat-option *ngFor="let municipio of trabajosArray.at(i).get('municipiosDisponibles')?.value" [value]="municipio.value">
+                  {{ municipio.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="!trabajo.get('id_municipio')?.value">
+                <mat-icon>error</mat-icon> Debes seleccionar un municipio antes de buscar.
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <!-- Input de búsqueda -->
+          <div class="form-row">
             <mat-form-field class="full-width" appearance="outline">
               <mat-label>Buscar Centro de Trabajo</mat-label>
               <mat-icon matPrefix>search</mat-icon>
@@ -18,10 +47,15 @@
             </mat-form-field>
           
             <!-- Botón para ejecutar la búsqueda -->
-            <button mat-button color="primary" (click)="buscarCentroTrabajoAPI(i)">
+            <button 
+              mat-button 
+              color="primary" 
+              (click)="buscarCentroTrabajoAPI(i)" 
+              [disabled]="!trabajo.get('id_municipio')?.value">
               <mat-icon>search</mat-icon> Buscar
             </button>
           </div>
+          
           <p *ngIf="trabajo.get('centroSeleccionado')?.invalid && trabajo.get('centroSeleccionado')?.touched" class="text-danger">
             <mat-icon>error_outline</mat-icon> Debe seleccionar un Centro de Trabajo.
           </p>
@@ -32,7 +66,7 @@
             <mat-list>
               <mat-list-item *ngFor="let centro of trabajo.get('centrosFiltrados')?.value">
                 <button mat-button (click)="seleccionarCentro(i, centro)">
-                  {{ centro.id_centro_trabajo }} - {{ centro.nombre_centro_trabajo }} - {{ centro.direccion_1 || centro.direccion_2 }}
+                  {{ centro.codigo }} - {{ centro.nombre_centro_trabajo }} - {{ centro.direccion_1 || centro.direccion_2 }}
                 </button>
               </mat-list-item>
             </mat-list>
@@ -63,30 +97,23 @@
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Departamento</mat-label>
               <mat-icon matPrefix>location_on</mat-icon>
-              <mat-select formControlName="id_departamento" (selectionChange)="onDepartamentoChange($event, i)">
-                <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+              <mat-select formControlName="id_departamento" disableRipple>
+                <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value" [disabled]="true">
                   {{ departamento.label }}
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="trabajo.get('id_departamento')?.invalid">
-                <mat-icon>error</mat-icon> Departamento es requerido
-              </mat-error>
             </mat-form-field>
-
-            <!-- Municipio -->
-           <!-- Municipio -->
-           <mat-form-field class="half-width" appearance="outline">
-            <mat-label>Municipio</mat-label>
-            <mat-icon matPrefix>location_city</mat-icon>
-            <mat-select formControlName="id_municipio">
-              <mat-option *ngFor="let municipio of trabajosArray.at(i).get('municipiosDisponibles')?.value" [value]="municipio.value">
-                {{ municipio.label }}
-              </mat-option>
-            </mat-select>
-            <mat-error *ngIf="trabajo.get('id_municipio')?.invalid">
-              <mat-icon>error</mat-icon> Municipio es requerido
-            </mat-error>
-          </mat-form-field>
+            
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Municipio</mat-label>
+              <mat-icon matPrefix>location_city</mat-icon>
+              <mat-select formControlName="id_municipio" disableRipple>
+                <mat-option *ngFor="let municipio of trabajosArray.at(i).get('municipiosDisponibles')?.value" [value]="municipio.value" [disabled]="true">
+                  {{ municipio.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
             
           </div>
 
@@ -146,7 +173,7 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
-            <mat-form-field class="half-width" appearance="outline">
+            <!-- <mat-form-field class="half-width" appearance="outline">
               <mat-label>Fecha de Egreso</mat-label>
               <mat-icon matPrefix>calendar_today</mat-icon>
               <input 
@@ -161,7 +188,7 @@
               <mat-error *ngFor="let error of getErrors(i, 'fecha_egreso')">
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
-            </mat-form-field>
+            </mat-form-field> -->
           </div>
 
           <div class="form-row">

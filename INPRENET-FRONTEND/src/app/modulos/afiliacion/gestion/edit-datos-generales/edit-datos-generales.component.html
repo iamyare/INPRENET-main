@@ -3,7 +3,7 @@
     <mat-spinner class="spinner" diameter="50"></mat-spinner>
   </div>
 
-  <div *ngIf="datos && !loading">
+  <div *ngIf="Afiliado && !loading">
 
     <mat-card class="tabla-datos-persona" *ngIf="tieneTipoPersona()">
       <mat-card-title>Estado y Tipo De Persona</mat-card-title>
@@ -102,7 +102,6 @@
             </mat-cell>
           </ng-container>
 
-
           <!-- Observacion -->
           <ng-container matColumnDef="Observacion">
             <mat-header-cell *matHeaderCellDef>Observación</mat-header-cell>
@@ -185,36 +184,6 @@
       [puedeEditar]="mostrarBotonGuardar"
     >
     </app-datos-generales>
-
-    <!-- Sección Archivo de Identificación -->
-    <div class="pdf-preview">
-      <h4>Archivo de Identificación</h4>
-      
-      <!-- Mostrar nombre del archivo existente -->
-      <div *ngIf="archivoIdentificacionUrl && !formDatosGenerales.get('archivo_identificacion')?.value">
-      </div>
-      
-      <iframe
-        *ngIf="archivoIdentificacionUrl"
-        [src]="archivoIdentificacionUrl"
-        width="100%"
-        height="500px"
-      ></iframe>
-      
-      <app-botonarchivos
-      *ngIf="mostrarBotonGuardar"
-        labelBoton="Actualizar Archivo"
-        (setArchivo)="getArchivoIdentificacion($event)"
-      ></app-botonarchivos>
-
-      <!-- Mensajes de error -->
-      <div class="error-message" 
-          *ngIf="formDatosGenerales.get('archivo_identificacion')?.hasError('required') && 
-                (formDatosGenerales.get('archivo_identificacion')?.touched || 
-                  formDatosGenerales.get('archivo_identificacion')?.dirty)">
-        Se requiere adjuntar el archivo de identificación.
-      </div>
-    </div>
 
     <!-- FORMULARIO DE FALLECIMIENTO (formGroup="form1") -->
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">

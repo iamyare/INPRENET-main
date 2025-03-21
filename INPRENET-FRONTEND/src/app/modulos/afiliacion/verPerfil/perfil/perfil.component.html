@@ -56,26 +56,35 @@
   </div>
 
   <mat-tab-group dynamicHeight>
-    <mat-tab label="INFORMACIÓN GENERAL">
-      <app-informacion-general [persona]="persona"></app-informacion-general>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span [ngClass]="{ 'tab-error-text': !datosCompletos || !tieneBancoActivo || !ultimaActualizacionValida }">
+          INFORMACIÓN GENERAL
+        </span>
+      </ng-template>
+      <app-informacion-general 
+      [persona]="persona" 
+      (onDatoAgregado)="onDatoAgregado()"> 
+    </app-informacion-general> 
     </mat-tab>
-    <mat-tab
-      *ngFor="let detalle of detallePersonaUnico; trackBy: trackByPerfil"
-      [label]="detalle.tipoPersona.tipo_persona"
-    >
+
+    <!-- ✅ TABS DINÁMICOS CON VALIDACIÓN -->
+    <mat-tab *ngFor="let detalle of detallePersonaUnico; trackBy: trackByPerfil">
+      <ng-template mat-tab-label>
+        <span 
+          [ngClass]="{ 'tab-error-text': ['JUBILADO', 'PENSIONADO', 'AFILIADO'].includes(detalle.tipoPersona.tipo_persona) 
+            && (!beneficiariosValidos || !tieneCentroTrabajo || !tieneReferencias) }">
+          {{ detalle.tipoPersona.tipo_persona }}
+        </span>
+      </ng-template>
+
       <ng-container [ngSwitch]="detalle.tipoPersona.tipo_persona">
-        <app-afiliado *ngSwitchCase="'AFILIADO'" [persona]="persona"></app-afiliado>
+        <app-afiliado *ngSwitchCase="'AFILIADO'" [persona]="persona" (onDatoAgregado)="onDatoAgregado()"></app-afiliado>
         <app-beneficiario *ngSwitchCase="'BENEFICIARIO'" [persona]="persona"></app-beneficiario>
-        <app-beneficiario
-          *ngSwitchCase="'BENEFICIARIO SIN CAUSANTE'"
-          [persona]="persona"
-        ></app-beneficiario>
-        <app-beneficiario
-          *ngSwitchCase="'DESIGNADO'"
-          [persona]="persona"
-        ></app-beneficiario>
-        <app-afiliado *ngSwitchCase="'JUBILADO'" [persona]="persona"></app-afiliado>
-        <app-afiliado *ngSwitchCase="'PENSIONADO'" [persona]="persona"></app-afiliado>
+        <app-beneficiario *ngSwitchCase="'BENEFICIARIO SIN CAUSANTE'" [persona]="persona"></app-beneficiario>
+        <app-beneficiario *ngSwitchCase="'DESIGNADO'" [persona]="persona"></app-beneficiario>
+        <app-afiliado *ngSwitchCase="'JUBILADO'" [persona]="persona" (onDatoAgregado)="onDatoAgregado()"></app-afiliado>
+        <app-afiliado *ngSwitchCase="'PENSIONADO'" [persona]="persona" (onDatoAgregado)="onDatoAgregado()"></app-afiliado>
       </ng-container>
     </mat-tab>
     <mat-tab *ngIf="isVoluntario()" label="VOLUNTARIO">

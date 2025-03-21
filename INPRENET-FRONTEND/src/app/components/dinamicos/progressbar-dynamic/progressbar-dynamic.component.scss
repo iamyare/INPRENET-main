@@ -90,3 +90,14 @@ $grey-light: White;
     }
   }
 }
+
+.is-error {
+  color: red !important;
+  font-weight: bold;
+
+  &:before {
+    border-color: red !important;
+    color: red !important;
+  }
+}
+

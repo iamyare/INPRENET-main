@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ChangeDetectorRef, EventEmitter, Output } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -25,6 +25,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
   public myFormFields: FieldConfig[] = [];
   form: any;
   @Input() Afiliado: any;
+  @Output() onDatoAgregado = new EventEmitter<void>();
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   prevAfil: boolean = false;
@@ -306,6 +307,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
           next: () => {
             this.toastr.success('Referencia personal inactivada correctamente.');
             this.getFilas();
+            this.onDatoAgregado.emit();
           },
           error: (error) => {
             console.error('Error al inactivar la referencia personal:', error);
@@ -365,6 +367,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.getFilas();
+        this.onDatoAgregado.emit();
         this.cdr.detectChanges();
       }
     });

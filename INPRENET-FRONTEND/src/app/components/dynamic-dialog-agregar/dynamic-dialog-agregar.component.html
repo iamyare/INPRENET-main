@@ -1,15 +1,35 @@
-<h1 mat-dialog-title>Agregar {{ data.title }}</h1>
-<div mat-dialog-content>
+<h1 mat-dialog-title class="dialog-title">Agregar {{ data.title }}</h1>
+
+<div mat-dialog-content class="dialog-content">
   <form [formGroup]="form">
-    <div *ngFor="let field of data.fields">
-      <mat-form-field appearance="fill">
-        <mat-label>{{ field.label }}</mat-label>
-        <input matInput [formControlName]="field.name" [type]="field.type || 'text'">
-      </mat-form-field>
+    <div class="form-grid">
+      <div *ngFor="let field of data.fields" class="form-field">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ field.label }}*</mat-label>
+
+          <!-- Verificamos si el campo tiene opciones y si es un select -->
+          <ng-container *ngIf="field.options; else textInput">
+            <mat-select [formControlName]="field.name">
+              <mat-option *ngFor="let option of dynamicOptions[field.name]" [value]="option.value">
+                {{ option.label }}
+              </mat-option>
+            </mat-select>
+          </ng-container>
+
+          <ng-template #textInput>
+            <input matInput [formControlName]="field.name" [type]="field.type || 'text'">
+          </ng-template>
+
+          <mat-error *ngIf="form.get(field.name)?.invalid">
+            {{ getErrorMessage(field.name) }}
+          </mat-error>
+        </mat-form-field>
+      </div>
     </div>
   </form>
 </div>
-<div mat-dialog-actions>
+
+<div mat-dialog-actions class="dialog-actions">
   <button mat-button (click)="onNoClick()">Cancelar</button>
-  <button mat-button color="primary" (click)="submit()">Agregar</button>
+  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid">Agregar</button>
 </div>

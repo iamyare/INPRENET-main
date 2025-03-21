@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, EventEmitter, Output } from '@angular/core';
 import { AbstractControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -29,6 +29,7 @@ import { EditBeneficiarioModalComponent } from '../edit-beneficiario-modal/edit-
 export class EditBeneficiariosComponent implements OnInit, OnChanges {
   convertirFechaInputs = convertirFechaInputs;
   @Input() persona: any;
+  @Output() onDatoAgregado = new EventEmitter<void>();
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   bancos: { label: string, value: string }[] = [];
@@ -46,6 +47,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   public mostrarBotonAgregarDiscapacidad: boolean = false;
   public mostrarBotonGenerarPDF: boolean = false;
   backgroundImageBase64: string = '';
+  validaciones:any;
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -141,7 +143,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
             id_municipio_nacimiento: item.idMunicipioNacimiento,
             id_municipio_residencia: item.idMunicipioResidencia,
             id_estado_persona: item.idEstadoPersona,
-            porcentaje: item.porcentaje,
+            porcentaje: parseFloat(item.porcentaje.toFixed(2)),
             parentesco: item.parentesco,
             tipo_persona: item.tipoPersona,
             id_departamento_residencia: item.idDepartamentoResidencia,
@@ -156,21 +158,22 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
             lugar_residencia: `${item.nombreDepartamentoResidencia} - ${item.nombreMunicipioResidencia}`
           };
         });
-
-        // Calcular porcentaje total y disponible
         const totalPorcentaje = this.filas.reduce((acc, fila) => acc + (fila.porcentaje || 0), 0);
-        this.porcentajeDisponible = Math.max(100 - totalPorcentaje, 0);
+      this.porcentajeDisponible = parseFloat((100 - totalPorcentaje).toFixed(2));
 
-        if (totalPorcentaje > 100) {
-          this.errorPorcentaje = `La suma total de los porcentajes es ${totalPorcentaje}% y excede el límite permitido (100%).`;
-        } else if (totalPorcentaje < 100) {
-          this.errorPorcentaje = `Aún queda un ${this.porcentajeDisponible}% disponible para asignar.`;
-        } else {
-          this.errorPorcentaje = '';
-        }
+      if (totalPorcentaje > 100) {
+        this.errorPorcentaje = `La suma total de los porcentajes es ${totalPorcentaje}% y excede el límite permitido (100%).`;
+      } else if (totalPorcentaje < 100) {
+        this.errorPorcentaje = `Aún queda un ${this.porcentajeDisponible}% disponible para asignar.`;
+      } else {
+        this.errorPorcentaje = '';
+      }
+      this.cdr.detectChanges();
 
-        this.mostrarBotonGenerarPDF = this.filas.length >= 1;
+      this.afiliacionServicio.tieneBancoActivo(this.persona.id_persona).subscribe(validaciones => {
+        this.validaciones = validaciones || {};
         this.cdr.detectChanges();
+      });
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
         console.error('Error al obtener datos de los beneficiarios', error);
@@ -208,6 +211,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
           () => {
             this.toastr.success('Beneficiario actualizado exitosamente');
             this.getFilas().then(() => this.cargar());
+            this.onDatoAgregado.emit();
           },
           (error) => {
             this.toastr.error('Error al actualizar el beneficiario');
@@ -219,19 +223,32 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   }
   
   eliminarFila(row: any) {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '350px',
-      data: {
-        title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este beneficiario?'
-      }
-    });
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        this.inactivarPersona(row.id_persona, row.id_causante,);
-      }
-    });
-  }
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    width: '350px',
+    data: {
+      title: 'Confirmación de eliminación',
+      message: '¿Estás seguro de querer eliminar este beneficiario?'
+    }
+  });
+  dialogRef.afterClosed().subscribe((result: any) => {
+    if (result) {
+      this.svcAfiliado.inactivarPersona(row.id_persona, row.id_causante).subscribe(
+        () => {
+          this.toastr.success('Beneficiario inactivado exitosamente');
+          this.getFilas().then(() => {
+            this.cargar();
+            this.onDatoAgregado.emit();
+          });
+        },
+        (error) => {
+          this.toastr.error('Error al inactivar beneficiario');
+          console.error('Error al inactivar beneficiario', error);
+        }
+      );
+    }
+  });
+}
+
 
   AgregarBeneficiario() {
     const afiliadoDetalle = this.persona.detallePersona.find(
@@ -242,21 +259,25 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       return;
     }
     const porcentajeOcupado = this.filas.reduce((acc, fila) => acc + (fila.porcentaje || 0), 0);
-  const porcentajeDisponible = 100 - porcentajeOcupado;
+    const porcentajeDisponible = 100 - porcentajeOcupado;
 
-  const dialogRef = this.dialog.open(AgregarBenefCompComponent, {
-    width: '55%',
-    height: '75%',
-    data: {
-      idPersona: this.persona.id_persona,
-      id_detalle_persona: afiliadoDetalle.ID_DETALLE_PERSONA,
-      porcentajeDisponible 
-    }
-  });
+    const dialogRef = this.dialog.open(AgregarBenefCompComponent, {
+      width: '70%',
+      height: '75%',
+      data: {
+        idPersona: this.persona.id_persona,
+        id_detalle_persona: afiliadoDetalle.ID_DETALLE_PERSONA,
+        porcentajeDisponible 
+      }
+    });
 
-  dialogRef.afterClosed().subscribe(() => {
-    this.getFilas().then(() => this.cargar());
-  });
+    dialogRef.afterClosed().subscribe(() => {
+      this.getFilas().then(() => {
+        this.cargar();
+        this.cdr.detectChanges(); // 🔹 Forzar la actualización de la vista
+      });
+      this.onDatoAgregado.emit();
+    });
   }
 
   inactivarPersona(idPersona: number, idCausante: number) {
@@ -264,6 +285,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       () => {
         this.toastr.success('Beneficiario inactivado exitosamente');
         this.getFilas().then(() => this.cargar());
+        this.onDatoAgregado.emit();
       },
       (error) => {
         this.toastr.error('Error al inactivar beneficiario');
@@ -477,6 +499,30 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     });
 }
 
-  
+intentarGenerarPDF() {
+  if (this.puedeGenerarDocumentos()) {
+    this.generarPDF(); // ✅ Si pasa la validación, genera el PDF
+  } else {
+    this.toastr.warning('No se puede generar el pdf porque debe actualizar toda su información.'); // ❌ Muestra mensaje de error
+  }
+}
+
+// 🔹 Manejador para intentar generar el documento de beneficiarios
+intentarDescargarConstancia() {
+  if (this.puedeGenerarDocumentos()) {
+    this.descargarConstanciaBeneficiarios(); // ✅ Si pasa la validación, genera el documento
+  } else {
+    this.toastr.warning('No se puede generar el pdf porque debe actualizar toda su información.'); // ❌ Muestra mensaje de error
+  }
+}
+
+puedeGenerarDocumentos(): boolean {
+  return this.validaciones?.tieneBancoActivo &&
+         this.validaciones?.beneficiariosValidos &&
+         this.validaciones?.tieneReferencias &&
+         this.validaciones?.tieneCentroTrabajo &&
+         this.validaciones?.datosCompletos &&
+         this.validaciones?.ultimaActualizacionValida;
+}
   
 }

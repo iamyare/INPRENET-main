@@ -283,32 +283,6 @@ export class TransaccionesService {
   
     return this.movimientoCuentaRepository.save(nuevoMovimiento);
   }
-  
-  async obtenerTiposDeCuentaPorDNI(n_identificacion: string): Promise<any[]> {
-    const persona = await this.personaRepository.findOne({
-      where: { n_identificacion }
-    });
-
-    if (!persona) {
-      throw new Error('Persona no encontrada');
-    }
-    const cuentasPersona = await this.cuentaPersonaRepository.find({
-      /* where: { persona: { id_persona: persona.id_persona } },
-      relations: ['tipoCuenta'] */
-    });
-
-    if (cuentasPersona.length === 0) {
-      throw new Error('La persona no tiene cuentas asociadas');
-    }
-
-    const cuentasConDescripcion = cuentasPersona.map(cuenta => ({
-      //NUMERO_CUENTA: cuenta.NUMERO_CUENTA,
-      //DESCRIPCION: cuenta.tipoCuenta.DESCRIPCION
-    }));
-
-    return cuentasConDescripcion;
-
-  }
 
   async obtenerTiposDeCuenta(): Promise<any[]> {
     // Encuentra todas las cuentas asociadas a la persona

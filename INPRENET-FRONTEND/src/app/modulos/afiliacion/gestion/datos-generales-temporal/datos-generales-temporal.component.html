@@ -386,7 +386,7 @@
           <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">
             <mat-label>Municipio de Residencia</mat-label>
             <mat-icon matPrefix>place</mat-icon>
-            <mat-select (selectionChange)="onDatosGeneralesChange()" formControlName="id_municipio_residencia">
+            <mat-select (selectionChange)="onMunicipioChange($event)" formControlName="id_municipio_residencia">
               <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
                 {{ municipio.label }}
               </mat-option>
@@ -417,32 +417,36 @@
       <div class="row">
         <div class="col-lg-4 col-md-12">
           <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">
-            <mat-label>Barrio/Colonia</mat-label>
-            <mat-icon matPrefix>home</mat-icon>
-            <input matInput formControlName="barrio_colonia">
-            <mat-error *ngIf="formGroup.get('barrio_colonia')?.hasError('pattern') && formGroup.get('barrio_colonia')?.touched">
-              Solo puede contener letras, números, espacios y puntos.
-            </mat-error>
-            <!-- <mat-error *ngIf="formGroup.get('barrio_colonia')?.invalid && formGroup.get('barrio_colonia')?.touched">
+            <mat-label>Colonia</mat-label>
+            <mat-icon matPrefix>location_city</mat-icon>
+            <mat-select formControlName="id_colonia">
+              <mat-option *ngFor="let colonia of colonias" [value]="colonia.value">
+                {{ colonia.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('id_colonia')?.invalid && formGroup.get('id_colonia')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Barrio/Colonia no puede tener más de 75 caracteres.
-            </mat-error> -->
+              Campo requerido.
+            </mat-error>
           </mat-form-field>
         </div>
+
         <div class="col-lg-4 col-md-12">
           <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">
-            <mat-label>Avenida</mat-label>
-            <mat-icon matPrefix>location_on</mat-icon>
-            <input matInput formControlName="avenida">
-            <mat-error *ngIf="formGroup.get('avenida')?.hasError('pattern') && formGroup.get('avenida')?.touched">
-              Solo puede contener letras, números, espacios y puntos.
-            </mat-error>
-            <!-- <mat-error *ngIf="formGroup.get('avenida')?.invalid && formGroup.get('avenida')?.touched">
+            <mat-label>Aldea</mat-label>
+            <mat-icon matPrefix>map</mat-icon>
+            <mat-select formControlName="id_aldea">
+              <mat-option *ngFor="let aldea of aldeas" [value]="aldea.value">
+                {{ aldea.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('id_aldea')?.invalid && formGroup.get('id_aldea')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Avenida no puede tener más de 75 caracteres.
-            </mat-error> -->
+              Campo requerido.
+            </mat-error>
           </mat-form-field>
         </div>
+        
         <div class="col-lg-4 col-md-12">
           <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">
             <mat-label>Calle</mat-label>
@@ -515,17 +519,18 @@
             </mat-error> -->
           </mat-form-field>
         </div>
+        
         <div class="col-lg-4 col-md-12">
           <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">
-            <mat-label>Aldea</mat-label>
-            <mat-icon matPrefix>map</mat-icon>
-            <input matInput formControlName="aldea">
-            <mat-error *ngIf="formGroup.get('aldea')?.hasError('pattern') && formGroup.get('aldea')?.touched">
+            <mat-label>Avenida</mat-label>
+            <mat-icon matPrefix>location_on</mat-icon>
+            <input matInput formControlName="avenida">
+            <mat-error *ngIf="formGroup.get('avenida')?.hasError('pattern') && formGroup.get('avenida')?.touched">
               Solo puede contener letras, números, espacios y puntos.
             </mat-error>
-            <!-- <mat-error *ngIf="formGroup.get('aldea')?.invalid && formGroup.get('aldea')?.touched">
+            <!-- <mat-error *ngIf="formGroup.get('avenida')?.invalid && formGroup.get('avenida')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Aldea no puede tener más de 75 caracteres.
+              Avenida no puede tener más de 75 caracteres.
             </mat-error> -->
           </mat-form-field>
         </div>
@@ -577,15 +582,12 @@
         </div>
       </div>
 
-      <div>
-        <!-- Componente que maneja la subida del archivo -->
+      <!-- <div>
         <app-botonarchivos
           labelBoton="Archivo de Identificación"
           (setArchivo)="getArchivo($event)"
         >
         </app-botonarchivos>
-      
-        <!-- Mensaje de error si no se ha adjuntado el archivo -->
         <mat-error
           *ngIf="
             formGroup.get('archivo_identificacion')?.hasError('required') &&
@@ -595,9 +597,6 @@
           Por favor, adjuntar el Archivo PDF de Identificación. 
           (Verificar que el archivo sea el correcto).
         </mat-error>
-      
-        <!-- Botón estilizado para eliminar el archivo -->
-        <!-- (Se puede condicionar con *ngIf para solo mostrarlo si hay un archivo) -->
         <button
           mat-raised-button
           color="warn"
@@ -608,11 +607,57 @@
           <mat-icon>delete</mat-icon>
           Eliminar Archivo adjuntado.
         </button>
+      </div> -->
+
+      <div *ngIf="formGroup.get('discapacidad')?.value" class="upload-container">
+        <label for="archivoCarnetDiscapacidad" class="custom-file-upload">
+          <mat-icon class="upload-icon">cloud_upload</mat-icon>
+          <span class="upload-text">Subir Carnet de Discapacidad</span>
+        </label>
+        <input
+          type="file"
+          id="archivoCarnetDiscapacidad"
+          #fileCarnetInput
+          (change)="getArchivoCarnetDiscapacidad($event)"
+          accept="image/*,application/pdf"
+          hidden
+        />
+      
+        <mat-error
+          *ngIf="
+            formGroup.get('archivo_carnet_discapacidad')?.hasError('required') &&
+            !formGroup.get('archivo_carnet_discapacidad')?.value
+          "
+          class="error-message"
+        >
+          <mat-icon class="error-icon">error_outline</mat-icon>
+          Por favor, adjuntar el Carnet de Discapacidad en formato PDF o imagen.
+        </mat-error>
+      
+        <!-- Previsualización del archivo -->
+        <div *ngIf="filePreviewUrl" class="file-preview">
+          <div *ngIf="isImage">
+            <img [src]="filePreviewUrl" alt="Previsualización" class="preview-image" />
+          </div>
+          <div *ngIf="!isImage">
+            <iframe [src]="filePreviewUrl" class="pdf-preview"></iframe>
+          </div>
+        </div>
+      
+        <button
+          mat-raised-button
+          color="warn"
+          class="delete-file-btn"
+          (click)="removeArchivoCarnetDiscapacidad()"
+          *ngIf="filePreviewUrl"
+        >
+          <mat-icon>delete</mat-icon>
+          Eliminar Archivo
+        </button>
       </div>
       
-      <!-- <div class="col-md-12">
-        <app-peps [parentForm]="formGroup"></app-peps>
-      </div> -->
+      
+
     </form>
   </div>
 </div>    

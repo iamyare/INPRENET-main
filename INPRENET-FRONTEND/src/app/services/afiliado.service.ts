@@ -69,11 +69,6 @@ export class AfiliadoService {
     return this.http.get<any>(url);
   }
 
-  obtenerTiposCuentas(): Observable<any> {
-    const url = `${environment.API_URL}/api/Transacciones/tipos-de-cuenta/`;
-    return this.http.get<any>(url);
-  }
-
   getAllAfiliados(): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/Afiliado`;
     return this.http.get<any>(
@@ -113,16 +108,22 @@ export class AfiliadoService {
     const formData: FormData = new FormData();
     formData.append('datosGenerales', JSON.stringify(datosGenerales));
     if (datosGenerales.certificado_defuncion) {
-      formData.append('arch_cert_def', datosGenerales.certificado_defuncion);
+        formData.append('arch_cert_def', datosGenerales.certificado_defuncion);
     }
     if (datosGenerales.dato && datosGenerales.archivo_identificacion) {
-      formData.append('archivo_identificacion', datosGenerales.archivo_identificacion);
+        formData.append('archivo_identificacion', datosGenerales.archivo_identificacion);
     }
     if (datosGenerales.FotoPerfil) {
-      formData.append('FotoPerfil', datosGenerales.FotoPerfil);
+        formData.append('FotoPerfil', datosGenerales.FotoPerfil);
+    }
+    if (datosGenerales.carnet_discapacidad instanceof File) {
+        formData.append('carnet_discapacidad', datosGenerales.carnet_discapacidad);
+    } else {
+        console.warn("⚠️ El carnet de discapacidad NO es un archivo válido:", datosGenerales.carnet_discapacidad);
     }
     return this.http.put(`${environment.API_URL}/api/Persona/updateDatosGenerales/${idPersona}`, formData);
-  }
+}
+
 
   updateReferenciaPersonal(id: string, updateDto: any): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/afiliacion/referencia/actualizar/${id}`, updateDto);

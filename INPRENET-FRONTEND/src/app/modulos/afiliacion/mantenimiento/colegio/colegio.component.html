@@ -1,32 +1,27 @@
+<br>
+<div class="back-button-container">
+    <button mat-raised-button color="primary" class="back-button" routerLink="/home/afiliacion/mantenimiento">
+        <mat-icon>arrow_back</mat-icon> Regresar al Menú
+    </button>
+</div>
+
 <mat-card class="mantenimiento-card">
   <mat-card-header>
     <mat-card-title class="title">Gestión de Colegios Magisteriales</mat-card-title>
   </mat-card-header>
   <mat-card-content>
     <button mat-raised-button color="primary" class="add-button" (click)="openDialogAgregar()">Agregar Colegio</button>
-    <mat-table [dataSource]="dataSource">
 
-      <ng-container matColumnDef="numero">
-        <mat-header-cell *matHeaderCellDef> # </mat-header-cell>
-        <mat-cell *matCellDef="let element; let i = index"> {{i + 1}} </mat-cell>
-      </ng-container>
+    <app-dynamic-table
+      titulo="Listado de Colegios Magisteriales"
+      subtitulo="Administración de Colegios Magisteriales"
+      [columns]="myColumns"
+      [data]="dataSource"
+      [getData]="getData"
+      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+      [mostrarBotonEditar]="true"
+      (editar)="openDialogEditar($event)">
+    </app-dynamic-table>
 
-      <ng-container matColumnDef="descripcion">
-        <mat-header-cell *matHeaderCellDef> Descripción </mat-header-cell>
-        <mat-cell *matCellDef="let element"> {{element.descripcion}} </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="acciones">
-        <mat-header-cell *matHeaderCellDef> Acciones </mat-header-cell>
-        <mat-cell *matCellDef="let element">
-          <button mat-icon-button color="primary" (click)="openDialogEditar(element)">
-            <mat-icon>edit</mat-icon>
-          </button>
-        </mat-cell>
-      </ng-container>
-
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-    </mat-table>
   </mat-card-content>
 </mat-card>

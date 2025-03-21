@@ -6,7 +6,7 @@
 
   <div class="card-body">
     <form [formGroup]="formGroup" class="form-container" (ngModelChange)="onDatosRefPerChange()">
-      <div formGroupName="conyuge">
+      <div *ngIf="mostrarConyuge" formGroupName="conyuge">
         <h4 class="reference-title">Datos de Cónyuge</h4>
       
         <div class="form-row">

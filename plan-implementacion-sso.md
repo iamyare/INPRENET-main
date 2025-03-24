@@ -112,9 +112,8 @@ export class SessionEventsService {
    - Redireccionar en invalidación
 
 3. **UI Components**
-   - Modal de sesión terminada
+   - Modal de sesión terminada (informando que se cerró la sesión por inicio en otro dispositivo)
    - Indicador de sesión activa
-   - Opción de mantener sesión
 
 ## 3. Flujos de Trabajo
 

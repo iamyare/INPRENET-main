@@ -89,25 +89,23 @@ export class ConasaController {
   } 
 
   @Post('crear-contrato')
-  async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
+async procesarContrato(@Body() payload: ManejarTransaccionDto, @Res() res) {
     try {
-      const resultado = await this.conasaService.manejarTransaccion(payload);
-      // Devuelve una respuesta clara y el status 201
-      return res.status(201).json({
-        statusCode: 201,
-        message: 'Contrato y beneficiarios creados exitosamente.',
-        data: resultado,
-      });
+        const resultado = await this.conasaService.procesarContrato(payload);
+        return res.status(201).json({
+            statusCode: 201,
+            message: 'Contrato y beneficiarios creados exitosamente.',
+            data: resultado,
+        });
     } catch (error) {
-      console.error('Error en la creación del contrato:', error.message);
-      // Si hay un error, devuelve el estado 500 con un mensaje claro
-      return res.status(500).json({
-        statusCode: 500,
-        message: 'Error al crear el contrato.',
-        error: error.message,
-      });
+        console.error('Error en la creación del contrato:', error.message);
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Error al crear el contrato.',
+            error: error.message,
+        });
     }
-  }
+}
 
   @Get('verificar-contrato/:idPersona')
   async verificarContrato(@Param('idPersona') idPersona: number) {

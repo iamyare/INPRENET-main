@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Response, BadRequestException, HttpStatus, HttpException, Put, HttpCode } from '@nestjs/common';
 import { DetalleBeneficioService } from './detalle_beneficio.service';
-import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 
@@ -8,6 +7,30 @@ import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio
 @Controller('beneficio-planilla')
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) { }
+
+  @Get('verificar-tipo-persona')
+  async verificarPersonaConTipo(@Query('dni') dni: string) {
+    try {
+      const esValido = await this.detallebeneficioService.verificarPersonaConTipo(dni);
+      return {
+        statusCode: HttpStatus.OK,
+        message: esValido
+          ? 'La persona tiene un tipo válido (1, 2 o 3).'
+          : 'La persona no tiene un tipo válido (1, 2 o 3).',
+        esValido,
+      };
+    } catch (error) {
+      console.error('Error en el controlador al verificar tipo de persona:', error.message);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Error al verificar el tipo de persona',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 
   @Get('verificar-pagos')
   async verificarBeneficiariosSinPago(@Query('n_identificacion') n_identificacion: string) {
@@ -26,6 +49,7 @@ export class DetalleBeneficioController {
 
     return await this.detallebeneficioService.obtenerBeneficiosPorPersona(dni, incluirCosto);
   }
+
   @Get('verificar-afiliado/:dni')
   async verificarAfiliado(@Param('dni') dni: string): Promise<{ esAfiliado: boolean }> {
     const esAfiliado = await this.detallebeneficioService.verificarSiEsAfiliado(dni);
@@ -110,20 +134,6 @@ export class DetalleBeneficioController {
     }
   }
 
-  /* @Post('createBenBenefic/:idAfiliado')
-  async createBenBenefic(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto, @Param('idAfiliado') idAfiliado: string) {
-    try {
-      const nuevoDetalle = await this.detallebeneficioService.createBenBenefic(createDetalleBeneficioDto, idAfiliado);
-      return {
-        statusCode: HttpStatus.CREATED,
-        message: 'Detalle de beneficio afiliado creado exitosamente',
-        data: nuevoDetalle
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  } */
-
   @Get('detallesPreliminar')
   async getDetalleBeneficiosPreliminar(
     @Query('idAfiliado') idAfiliado: string,
@@ -193,23 +203,6 @@ export class DetalleBeneficioController {
     return await this.detallebeneficioService.getRangoDetalleBeneficios(idAfiliado, fechaInicio, fechaFin);
   }
 
-  @Get('inconsistencias/:idAfiliado')
-  async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
-    return this.detallebeneficioService.findInconsistentBeneficiosByAfiliado(idAfiliado);
-  }
-
-  @Get()
-  findAll() {
-    return this.detallebeneficioService.findAll();
-  }
-
-  @Get(':term')
-  findOne(@Param('term') term: number) {
-    return this.detallebeneficioService.findOne(term);
-  }
-
-
-
   @Patch('actualizar-estado/:idPlanilla')
   async actualizarEstadoPorPlanilla(
     @Param('idPlanilla') idPlanilla: string,
@@ -228,20 +221,6 @@ export class DetalleBeneficioController {
     return respuesta;
   }
 
-  /* @Patch('/actualizar-beneficio-planilla')
-  actualizarPlanillasYEstados(@Body() detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]) {
-    return this.detallebeneficioService.actualizarPlanillaYEstadoDeBeneficio(detalles);
-  } */
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDetalleBeneficioDto: UpdateDetalleBeneficioDto) {
-    return this.detallebeneficioService.update(+id, updateDetalleBeneficioDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.detallebeneficioService.remove(+id);
-  }
 
   @Put('/updateBeneficioPersona/:token')
   @HttpCode(HttpStatus.OK)

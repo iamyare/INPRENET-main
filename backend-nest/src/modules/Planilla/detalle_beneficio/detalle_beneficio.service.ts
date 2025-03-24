@@ -7,7 +7,6 @@ import { EntityManager, In, Repository } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
-import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 import { net_detalle_persona } from 'src/modules/Persona/entities/net_detalle_persona.entity';
@@ -51,6 +50,40 @@ export class DetalleBeneficioService {
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) { }
 
+  async verificarPersonaConTipo(dni: string): Promise<boolean> {
+    try {
+        // Consulta SQL directa para verificar si la persona existe con un tipo válido
+        const query = `
+            SELECT COUNT(*) AS count
+            FROM NET_PERSONA P
+            JOIN NET_DETALLE_PERSONA DP ON P.ID_PERSONA = DP.ID_PERSONA
+            WHERE P.N_IDENTIFICACION = :dni
+            AND DP.ID_TIPO_PERSONA IN (1, 2, 3)
+        `;
+        
+        const result = await this.personaRepository.query(query, [dni]);
+
+        // Verificar el resultado
+        if (result && result[0] && result[0].COUNT > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (error) {
+        console.error('Error al verificar el tipo de persona:', error.message);
+        throw new HttpException(
+            {
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: 'Error al verificar el tipo de persona',
+                error: error.message,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
+}
+
+
+
   async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
     const causante = await this.personaRepository.findOne({
       where: { n_identificacion },
@@ -85,69 +118,78 @@ export class DetalleBeneficioService {
   async obtenerBeneficiosPorPersona(dni: string, incluirCostoVida: boolean): Promise<any> {
     let query = '';
     if (incluirCostoVida) {
-      query = `
-        SELECT
-            P.N_IDENTIFICACION,
-            M.NOMBRE_MUNICIPIO,
-            MAX(B.NOMBRE_BENEFICIO) AS NOMBRE_BENEFICIO,
-            B.PERIODICIDAD,
-            SUM(PAGO.MONTO_POR_PERIODO) AS MONTO_POR_PERIODO,
-            MAX(
-                CASE
-                    WHEN PAGO.ID_BENEFICIO NOT IN (6, 26, 27) 
-                    THEN TO_CHAR(PAGO.FECHA_EFECTIVIDAD, 'DD/MM/YYYY')
-                    ELSE NULL
-                END
-            ) AS FECHA_EFECTIVIDAD,
-            MAX(PAGO.NUM_RENTAS_APROBADAS) AS NUM_RENTAS_APROBADAS,
-            MAX(PAGO.PERIODO_FINALIZACION) AS PERIODO_FINALIZACION
-        FROM
-            NET_DETALLE_BENEFICIO_AFILIADO PAGO
-        JOIN NET_PERSONA P ON P.ID_PERSONA = PAGO.ID_PERSONA
-        LEFT JOIN NET_MUNICIPIO M ON P.ID_MUNICIPIO_RESIDENCIA = M.ID_MUNICIPIO
-        JOIN NET_BENEFICIO B ON B.ID_BENEFICIO = PAGO.ID_BENEFICIO
-        WHERE
-            P.N_IDENTIFICACION = :dni
-            AND PAGO.ID_BENEFICIO NOT IN (26, 27)
-        GROUP BY
-            P.N_IDENTIFICACION,
-            M.NOMBRE_MUNICIPIO,
-            B.PERIODICIDAD
-      `;
+        query = `
+            SELECT
+                P.N_IDENTIFICACION,
+                M.NOMBRE_MUNICIPIO,
+                D.NOMBRE_DEPARTAMENTO,
+                MAX(B.NOMBRE_BENEFICIO) AS NOMBRE_BENEFICIO,
+                B.PERIODICIDAD,
+                SUM(PAGO.MONTO_POR_PERIODO) AS MONTO_POR_PERIODO,
+                MAX(
+                    CASE
+                        WHEN PAGO.ID_BENEFICIO NOT IN (6, 27, 28) 
+                        THEN TO_CHAR(PAGO.FECHA_EFECTIVIDAD, 'DD/MM/YYYY')
+                        ELSE NULL
+                    END
+                ) AS FECHA_EFECTIVIDAD,
+                MAX(PAGO.NUM_RENTAS_APROBADAS) AS NUM_RENTAS_APROBADAS,
+                MAX(PAGO.PERIODO_FINALIZACION) AS PERIODO_FINALIZACION
+            FROM
+                NET_DETALLE_BENEFICIO_AFILIADO PAGO
+            JOIN NET_PERSONA P ON P.ID_PERSONA = PAGO.ID_PERSONA
+            LEFT JOIN NET_MUNICIPIO M ON P.ID_MUNICIPIO_RESIDENCIA = M.ID_MUNICIPIO
+            LEFT JOIN NET_DEPARTAMENTO D ON M.ID_DEPARTAMENTO = D.ID_DEPARTAMENTO
+            JOIN NET_BENEFICIO B ON B.ID_BENEFICIO = PAGO.ID_BENEFICIO
+            WHERE
+                P.N_IDENTIFICACION = :dni
+                AND PAGO.ID_BENEFICIO NOT IN (27, 28)
+            GROUP BY
+                P.N_IDENTIFICACION,
+                M.NOMBRE_MUNICIPIO,
+                D.NOMBRE_DEPARTAMENTO,
+                B.PERIODICIDAD
+        `;
     } else {
-      query = `
-        SELECT 
-          P.N_IDENTIFICACION,
-          M.NOMBRE_MUNICIPIO,
-          B.NOMBRE_BENEFICIO,
-          B.PERIODICIDAD,
-          PAGO.MONTO_POR_PERIODO,
-          TO_CHAR(PAGO.FECHA_EFECTIVIDAD, 'DD/MM/YYYY') AS FECHA_EFECTIVIDAD,
-          PAGO.NUM_RENTAS_APROBADAS,
-          PAGO.PERIODO_FINALIZACION
-        FROM 
-          NET_DETALLE_BENEFICIO_AFILIADO PAGO
-        JOIN 
-          NET_PERSONA P ON P.ID_PERSONA = PAGO.ID_PERSONA
-        LEFT JOIN 
-          NET_MUNICIPIO M ON P.ID_MUNICIPIO_RESIDENCIA = M.ID_MUNICIPIO
-        JOIN 
-          NET_BENEFICIO B ON B.ID_BENEFICIO = PAGO.ID_BENEFICIO
-        WHERE 
-          P.N_IDENTIFICACION = :dni 
-        ORDER BY 
-          PAGO.FECHA_EFECTIVIDAD DESC
-      `;
+        query = `
+            SELECT 
+                P.N_IDENTIFICACION,
+                M.NOMBRE_MUNICIPIO,
+                D.NOMBRE_DEPARTAMENTO,
+                B.NOMBRE_BENEFICIO,
+                B.PERIODICIDAD,
+                PAGO.MONTO_POR_PERIODO,
+                TO_CHAR(PAGO.FECHA_EFECTIVIDAD, 'DD/MM/YYYY') AS FECHA_EFECTIVIDAD,
+                PAGO.NUM_RENTAS_APROBADAS,
+                PAGO.PERIODO_FINALIZACION
+            FROM 
+                NET_DETALLE_BENEFICIO_AFILIADO PAGO
+            JOIN 
+                NET_PERSONA P ON P.ID_PERSONA = PAGO.ID_PERSONA
+            LEFT JOIN 
+                NET_MUNICIPIO M ON P.ID_MUNICIPIO_RESIDENCIA = M.ID_MUNICIPIO
+            LEFT JOIN 
+                NET_DEPARTAMENTO D ON M.ID_DEPARTAMENTO = D.ID_DEPARTAMENTO
+            JOIN 
+                NET_BENEFICIO B ON B.ID_BENEFICIO = PAGO.ID_BENEFICIO
+            WHERE 
+                P.N_IDENTIFICACION = :dni
+                AND PAGO.ID_BENEFICIO NOT IN (6, 27, 28)
+            ORDER BY 
+                PAGO.FECHA_EFECTIVIDAD DESC
+        `;
     }
 
+    // ✅ Forma correcta de pasar el parámetro a la consulta
     const beneficios = await this.personaRepository.query(query, [dni]);
 
     if (!beneficios || beneficios.length === 0) {
-      throw new NotFoundException(`No se encontraron beneficios para la persona con DNI ${dni}`);
+        throw new NotFoundException(`No se encontraron beneficios para la persona con DNI ${dni}`);
     }
 
     return beneficios;
-  }
+}
+
 
   async verificarSiEsAfiliado(n_identificacion: string): Promise<any> {
     const persona = await this.personaRepository
@@ -733,37 +775,6 @@ export class DetalleBeneficioService {
     });
 
   }
-
-  /* async createBenBenefic(beneficiario: CreateDetalleBeneficioDto, idPersona: string): Promise<any> {
-    try {
-      const query = `
-        SELECT 
-            "Afil"."id_persona",
-            "Afil"."dni",
-            "Afil"."primer_nombre",
-            "Afil"."segundo_nombre",
-            "Afil"."tercer_nombre",
-            "Afil"."primer_apellido",
-            "Afil"."segundo_apellido",
-            "Afil"."genero",
-            "detA"."porcentaje",
-            "detA"."tipo_persona"
-        FROM
-            "detalle_persona" "detA" INNER JOIN 
-            "net_persona" "Afil" ON "detA"."id_persona" = "Afil"."id_persona"
-        WHERE 
-            "detA"."id_detalle_persona_padre" = ${idPersona} AND
-            "Afil"."dni" = '${beneficiario.dni}' AND
-            "detA"."tipo_persona" = 'BENEFICIARIO'
-      `;
-
-      const beneficiarios = await this.entityManager.query(query);
-      return beneficiarios;
-    } catch {
-
-    }
-  } */
-
   async cargarBenRec(): Promise<any> {
     let connection;
     try {
@@ -1128,49 +1139,6 @@ export class DetalleBeneficioService {
     return resultados;
   }
 
-  /* async create(datos: any): Promise<any> {
-    try {
-      const afiliado = await this.afiliadoRepository.findOne({
-        where: { dni: datos.dni },
-      });
-      if (!afiliado) {
-        throw new BadRequestException('Afiliado no encontrado');
-      }
-
-      const tipoBeneficio = await this.tipoBeneficioRepository.findOne({
-        where: { nombre_beneficio: datos.tipo_beneficio },
-      });
-      if (!tipoBeneficio) {
-        throw new BadRequestException('Tipo de beneficio no encontrado');
-      }
-
-      // Conversión de las fechas
-      const periodoInicio = this.convertirCadenaAFecha(datos.periodoInicio);
-      const periodoFinalizacion = this.convertirCadenaAFecha(datos.periodoFinalizacion);
-
-      // Verificar que las fechas sean válidas
-      if (!periodoInicio || !periodoFinalizacion) {
-        throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
-      }
-
-      // Creación del nuevo detalle de beneficio
-      const nuevoDetalle = this.detPagBenRepository.create({
-        afiliado,
-        beneficio: tipoBeneficio,
-        periodoInicio,
-        periodoFinalizacion,
-        monto: datos.monto,
-        estado: datos.estado || 'NO PAGADO',  // Asume un estado por defecto si no se proporciona
-        modalidad_pago: datos.modalidad_pago,
-        num_rentas_aprobadas: datos.num_rentas_aprobadas,
-      });
-
-      return await this.detPagBenRepository.save(nuevoDetalle);
-    } catch (error) {
-      this.handleException(error);
-    }
-  } */
-
   private convertirCadenaAFecha(cadena: string): string | null {
     if (cadena) {
       const fecha = parseISO(cadena);
@@ -1191,35 +1159,6 @@ export class DetalleBeneficioService {
     }
   }
 
-  findAll() {
-    return `This action returns all beneficioPlanilla`;
-  }
-
-  async findOne(term: number) {
-    let benAfil: Net_Detalle_Pago_Beneficio;
-    if (isUUID(term)) {
-      benAfil = await this.detPagBenRepository.findOneBy({ id_beneficio_planilla: term });
-    } else {
-
-      const queryBuilder = this.detPagBenRepository.createQueryBuilder('afiliado');
-      benAfil = await queryBuilder
-        .where('"id_beneficio_planilla" = :term', { term })
-        .getOne();
-    }
-    if (!benAfil) {
-      throw new NotFoundException(`el beneficio  ${term} para el afiliado no existe no existe`);
-    }
-    return benAfil;
-  }
-
-  update(id: number, updateDetalleBeneficioDto: UpdateDetalleBeneficioDto) {
-    return `This action updates a #${id} beneficioPlanilla`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} beneficioPlanilla`;
-  }
-
   private handleException(error: any): void {
     this.logger.error(error);
     // Verifica si el error es un BadRequestException y propaga el mismo
@@ -1236,28 +1175,6 @@ export class DetalleBeneficioService {
     } else {
       // Para cualquier otro tipo de error, lanza una excepción genérica
       throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
-    }
-  }
-
-  async findInconsistentBeneficiosByAfiliado(idPersona: string) {
-    try {
-      const query = `
-      SELECT detB."id_beneficio_planilla",
-        detBA."periodoInicio",
-        detBA."periodoFinalizacion",
-        ben."nombre_beneficio",
-        ben."id_beneficio",
-        detB."monto_a_pagar" as "monto",
-        detB."estado"
-      FROM "net_detalle_pago_beneficio" detB
-      INNER JOIN "net_detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
-      INNER JOIN "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
-      WHERE detB."estado" = 'INCONSISTENCIA'
-    `;
-      return await this.detPagBenRepository.query(query);
-    } catch (error) {
-      this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');
     }
   }
 
@@ -1323,9 +1240,3 @@ export class DetalleBeneficioService {
     }
   }
 }
-
-/* 
-function Net_Estado_Afiliado(qb: SelectQueryBuilder<any>): SelectQueryBuilder<any> {
-  throw new Error('Function not implemented.');
-}
- */

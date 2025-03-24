@@ -16,6 +16,7 @@ import { PermisosService } from 'src/app/services/permisos.service';
 import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
 import { AldeaComponent } from './mantenimiento/aldea/aldea.component';
 import { ColoniaComponent } from './mantenimiento/colonia/colonia.component';
+import { AfiliarCentrosComponent } from './centros/afiliar-centros/afiliar-centros.component';
 
 const routes: Routes = [
   {
@@ -26,7 +27,7 @@ const routes: Routes = [
   },
   {
     path: 'nuevo-centro',
-    component: AfiliacionCentrosComponent,
+    component: AfiliarCentrosComponent,
     canActivate: [RoleGuard],
     data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('AFILIACIONES', 'afiliacion/nuevo-centro') }
   },

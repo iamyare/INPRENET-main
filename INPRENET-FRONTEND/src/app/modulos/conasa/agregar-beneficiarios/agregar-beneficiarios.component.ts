@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormArray, Validators, FormGroup, AbstractControl } from '@angular/forms';
 import moment from 'moment';
-
+import { DatosEstaticosService } from '../../../services/datos-estaticos.service';
 @Component({
   selector: 'app-agregar-beneficiarios',
   templateUrl: './agregar-beneficiarios.component.html',
@@ -9,13 +9,16 @@ import moment from 'moment';
 })
 export class AgregarBeneficiariosComponent implements OnInit {
   @Input() beneficiariosForm!: FormArray;
+  parentescos: any[] = [];
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService) {}
 
   ngOnInit(): void {
     if (!this.beneficiariosForm) {
       throw new Error('El FormArray beneficiariosForm es requerido.');
     }
+
+    this.parentescos = this.datosEstaticosService.parentesco;
   }
 
   agregarBeneficiario(): void {

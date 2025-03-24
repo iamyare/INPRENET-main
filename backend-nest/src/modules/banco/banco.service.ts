@@ -367,25 +367,24 @@ export class BancoService {
             monto_pagos_fallidos,
         });
 
-        // 📌 Insertar pagos fallidos en el historial
         if (pagos_fallidos.length > 0) {
-            const pagosFallidosRecords = pagos_fallidos.map((pago) => ({
-                id_planilla,
-                fecha_procesamiento,
-                numero_identificacion: pago.numero_identificacion,
-                motivo_fallo: pago.motivo_fallo,
-            }));
+          const pagosFallidosRecords = pagos_fallidos.map((pago) => ({
+              id_planilla,
+              fecha_procesamiento,
+              numero_identificacion: pago.numero_identificacion,
+              motivo_fallo: pago.motivo_fallo,
+          }));
 
-            await this.historialPagosFallidosRepository.save(pagosFallidosRecords);
+          await this.historialPagosFallidosRepository.save(pagosFallidosRecords);
 
-            // 📌 Actualizar pagos fallidos en la base de datos
-            await this.actualizarPagosFallidos(id_planilla.toString(), idsPagosFallidos);
-        }
+          // 📌 Actualizar pagos fallidos en la base de datos
+          await this.actualizarPagosFallidos(id_planilla.toString(), idsPagosFallidos);
+      }
 
         // 📌 Registrar pagos exitosos
         if (idsPagosExitosos.length > 0) {
-            await this.actualizarPagosExitosos(id_planilla.toString(), idsPagosExitosos);
-        }
+          await this.actualizarPagosExitosos(id_planilla.toString(), idsPagosExitosos);
+      }
 
         // 📌 Cerrar la planilla
         await this.entityManager.query(

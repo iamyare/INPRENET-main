@@ -73,6 +73,7 @@ import { DialogSuboptionsComponent } from './constancias/dialog-suboptions/dialo
 import { EditBeneficiarioModalComponent } from './gestion/edit-beneficiario-modal/edit-beneficiario-modal.component';
 import { ColoniaComponent } from './mantenimiento/colonia/colonia.component';
 import { AldeaComponent } from './mantenimiento/aldea/aldea.component';
+import { AfiliarCentrosComponent } from './centros/afiliar-centros/afiliar-centros.component';
 
 @NgModule({
   declarations: [
@@ -143,7 +144,8 @@ import { AldeaComponent } from './mantenimiento/aldea/aldea.component';
     DialogSuboptionsComponent,
     EditBeneficiarioModalComponent,
     ColoniaComponent,
-    AldeaComponent
+    AldeaComponent,
+    AfiliarCentrosComponent
   ],
   imports: [
     CommonModule,

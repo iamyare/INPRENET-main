@@ -49,6 +49,5 @@ export class ResultadosPagosDto {
   @IsArray({ message: 'Debe ser un array.' })
   @ValidateNested({ each: true })
   @Type(() => PagoFallidoDto)
-  @ArrayNotEmpty({ message: 'Debe haber al menos un pago fallido.' })
   pagos_fallidos: PagoFallidoDto[];
 }

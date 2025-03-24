@@ -6,8 +6,6 @@ import * as path from 'path';
 import { MailService } from 'src/common/services/mail.service';
 import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 import * as QRCode from 'qrcode';
-
-// Importamos pdfmake como en el frontend
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 

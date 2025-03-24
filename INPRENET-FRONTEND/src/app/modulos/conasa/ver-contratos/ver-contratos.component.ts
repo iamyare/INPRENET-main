@@ -8,18 +8,16 @@ import { ConasaService } from 'src/app/services/conasa.service';
 })
 export class VerContratosComponent {
   persona: any = null;
-  contratos: any = null;
+  contratos: any[] = [];
 
   constructor(private conasaService: ConasaService) {
     
   }
 
   handlePersonaEncontrada(persona: any): void {
-    console.log(persona);
     if (!persona) {
-      console.log(this.persona);
       this.persona = null;
-      this.contratos = null;
+      this.contratos = [];
       return;
     }
 
@@ -29,12 +27,15 @@ export class VerContratosComponent {
     if (dni) {
       this.conasaService.obtenerContratoYBeneficiariosPorDNI(dni).subscribe({
         next: (data) => {
-          this.contratos = data;
-          console.log('Contratos y Beneficiarios:', data);
+          // Ordenar los contratos para que los "ACTIVO" estén primero
+          this.contratos = data.sort((a: any, b: any) => 
+            a.status === 'ACTIVO' ? -1 : b.status === 'ACTIVO' ? 1 : 0
+          );
+          console.log('Contratos y Beneficiarios:', this.contratos);
         },
         error: (err) => {
           console.error('Error al obtener contratos:', err);
-          this.contratos = null;
+          this.contratos = [];
         }
       });
     }

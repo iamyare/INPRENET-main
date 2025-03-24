@@ -1,62 +1,101 @@
 .basic-container {
-    padding: 30px;
-  }
-  
-  .card {
-    margin: 20px 0;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .card-header.tittle {
-    background: #229e92;
-    color: white;
-    padding: 16px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-  }
-  
-  .card-title {
-    margin: 0;
-    font-size: 18px;
-    font-weight: bold;
-  }
-  
-  .card-category {
-    margin-top: 5px;
-    font-size: 14px;
-  }
-  
-  .card-body {
-    padding: 16px;
-  }
-  
-  .contract-info,
-  .beneficiaries-section {
-    margin-top: 20px;
-  }
-  
-  .beneficiaries-section h4 {
-    margin: 10px 0;
-    color: #229e92;
-  }
-  
-  .beneficiary-card {
-    margin-bottom: 10px;
-  }
-  
-  .mat-card {
-    margin-bottom: 10px;
-  }
-  
-  .no-contracts {
-    margin-top: 20px;
-    padding: 16px;
-    background-color: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    text-align: center;
-    font-size: 16px;
-    color: #666;
-  }
-  
+  padding: 30px;
+}
+
+.card {
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header.title {
+  background: #229e92;
+  color: white;
+  padding: 16px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.card-category {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.card-body {
+  padding: 16px;
+}
+
+.contract-card {
+  margin: 12px 0;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 5px solid #229e92;
+  background-color: #f3f3f3;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.contract-card.active {
+  border-left-color: #229e92;
+  background-color: #e0f7e0;
+}
+
+.contract-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.status-active {
+  background-color: #229e92;
+}
+
+.status-inactive {
+  background-color: #f44336;
+}
+
+.beneficiaries-section {
+  margin-top: 12px;
+  padding: 10px;
+  background-color: #f0f7fa;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.beneficiaries-section h4 {
+  margin: 5px 0;
+  color: #229e92;
+  font-size: 18px;
+}
+
+.beneficiary-card {
+  margin: 8px 0;
+  padding: 10px;
+  background-color: #e0f2f1;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.no-contracts {
+  margin-top: 20px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 16px;
+  color: #666;
+}

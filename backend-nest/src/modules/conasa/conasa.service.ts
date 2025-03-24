@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException, UnauthorizedExcepti
 import { InjectRepository } from '@nestjs/typeorm';
 import { Net_Plan } from './entities/net_planes.entity';
 import { Net_Categoria } from './entities/net_categorias.entity';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, Repository, UpdateResult } from 'typeorm';
 import { Net_Contratos_Conasa } from './entities/net_contratos_conasa.entity';
 import { net_persona } from '../Persona/entities/net_persona.entity';
 import { Net_Beneficiarios_Conasa } from './entities/net_beneficiarios_conasa.entity';
@@ -203,80 +203,83 @@ export class ConasaService {
     return !!contratoExistente;
   }
 
-  async asignarContrato(contratoData: AsignarContratoDto): Promise<string> {
-    const persona = await this.verificarPersona(contratoData.idPersona);
-    const plan = await this.verificarPlan(contratoData.idPlan);
-    const existeContrato = await this.verificarContratoExistente(contratoData.idPersona);
-
-    if (existeContrato) {
-      throw new BadRequestException('La persona ya tiene un contrato activo.');
-    }
-
-    const numeroProducto = this.generateNumeroProducto();
-
-    const contrato = this.contratosRepository.create({
-      titular: persona,
-      plan,
-      numero_producto: numeroProducto,
-      lugar_cobro: contratoData.lugarCobro,
-      fecha_inicio_contrato: this.formatDateToYYYYMMDD(contratoData.fechaInicioContrato),
-      fecha_cancelacion_contrato: contratoData.fechaCancelacionContrato
-        ? this.formatDateToYYYYMMDD(contratoData.fechaCancelacionContrato)
-        : null,
-      status: 'ACTIVO',
-      observacion: contratoData.observacion,
-    });
-
-    await this.contratosRepository.save(contrato);
-    return 'Contrato asignado exitosamente.';
-  }
-
-  async manejarTransaccion(payload: ManejarTransaccionDto): Promise<string> {
+  async procesarContrato(payload: ManejarTransaccionDto): Promise<string> {
     const { contrato, beneficiarios } = payload;
+    try {
+        const resultadoActualizacion = await this.actualizarDatosPersona(contrato);
 
-    return await this.dataSource.transaction(async (manager) => {
-      // Verificar la persona
-      const persona = await this.verificarPersona(contrato.idPersona, manager);
-      const plan = await this.verificarPlan(contrato.idPlan, manager);
-      const existeContrato = await this.verificarContratoExistente(contrato.idPersona, manager);
+        if (resultadoActualizacion.affected === 0) {
+            throw new Error('No se pudo actualizar la información de la persona.');
+        }
+        const resultadoContrato = await this.crearContratoConBeneficiarios(contrato, beneficiarios);
+        return resultadoContrato;
+    } catch (error) {
+        console.error('Error en procesarContrato:', error.message);
+        throw new BadRequestException('Error al procesar el contrato.');
+    }
+}
 
-      if (existeContrato) {
-        throw new BadRequestException(
-          `La persona con ID ${contrato.idPersona} ya tiene un contrato activo.`,
-        );
-      }
+private async actualizarDatosPersona(contrato: AsignarContratoDto): Promise<UpdateResult> {
+    try {
+        const resultado = await this.dataSource
+            .createQueryBuilder()
+            .update(net_persona)
+            .set({
+                telefono_1: contrato.telefono_1 || null,
+                telefono_2: contrato.telefono_2 || null,
+                telefono_3: contrato.telefono_3 || null,
+                correo_1: contrato.correo_1 || null,
+            })
+            .where('id_persona = :idPersona', { idPersona: contrato.idPersona })
+            .execute();
+        return resultado;
+    } catch (error) {
+        console.error('Error al actualizar datos de la persona:', error.message);
+        throw new Error('Error al actualizar datos de la persona.');
+    }
+}
 
-      // Crear el contrato
-      const nuevoContrato = manager.create(Net_Contratos_Conasa, {
-        titular: persona,
-        plan,
-        numero_producto: this.generateNumeroProducto(),
-        lugar_cobro: contrato.lugarCobro,
-        fecha_inicio_contrato: this.formatDateToYYYYMMDD(contrato.fechaInicioContrato),
-        fecha_cancelacion_contrato: contrato.fechaCancelacionContrato
-          ? this.formatDateToYYYYMMDD(contrato.fechaCancelacionContrato)
-          : null,
-        status: 'ACTIVO',
-        observacion: contrato.observacion,
-      });
+private async crearContratoConBeneficiarios(contrato: AsignarContratoDto, beneficiarios: CrearBeneficiarioDto[]): Promise<string> {
+    try {
+        const persona = await this.verificarPersona(contrato.idPersona);
+        const plan = await this.verificarPlan(contrato.idPlan);
+        const existeContrato = await this.verificarContratoExistente(contrato.idPersona);
 
-      const savedContrato = await manager.save(nuevoContrato);
+        if (existeContrato) {
+            throw new BadRequestException(`La persona con ID ${contrato.idPersona} ya tiene un contrato activo.`);
+        }
 
-      // Crear beneficiarios si existen
-      if (beneficiarios && beneficiarios.length > 0) {
-        const beneficiariosRepo = manager.getRepository(Net_Beneficiarios_Conasa);
-        const nuevosBeneficiarios = beneficiarios.map((beneficiario) =>
-          beneficiariosRepo.create({
-            contrato: savedContrato,
-            ...beneficiario,
-          }),
-        );
-        await beneficiariosRepo.save(nuevosBeneficiarios);
-      }
+        const nuevoContrato = this.contratosRepository.create({
+            titular: persona,
+            plan,
+            numero_producto: this.generateNumeroProducto(),
+            lugar_cobro: contrato.lugarCobro,
+            fecha_inicio_contrato: this.formatDateToYYYYMMDD(contrato.fechaInicioContrato),
+            fecha_cancelacion_contrato: contrato.fechaCancelacionContrato ? this.formatDateToYYYYMMDD(contrato.fechaCancelacionContrato) : null,
+            status: 'ACTIVO',
+            direccion_trabajo: contrato.direccionTrabajo || null,
+            empresa: contrato.empresa || null,
+            observacion: contrato.observacion || '',
+        });
 
-      return 'Contrato y beneficiarios procesados exitosamente.';
-    });
-  }
+        const savedContrato = await this.contratosRepository.save(nuevoContrato);
+
+        if (beneficiarios && beneficiarios.length > 0) {
+            const beneficiariosRepo = this.dataSource.getRepository(Net_Beneficiarios_Conasa);
+            const nuevosBeneficiarios = beneficiarios.map((beneficiario) =>
+                beneficiariosRepo.create({
+                    contrato: savedContrato,
+                    ...beneficiario,
+                }),
+            );
+            await beneficiariosRepo.save(nuevosBeneficiarios);
+        }
+        return 'Contrato y beneficiarios creados exitosamente.';
+    } catch (error) {
+        console.error('Error al crear contrato y beneficiarios:', error.message);
+        throw new Error('Error al crear contrato y beneficiarios.');
+    }
+}
 
   formatDateToYYYYMMDD(dateString: string): string {
     if (!dateString) return null;
@@ -288,56 +291,60 @@ export class ConasaService {
   }
 
   async obtenerContratoYBeneficiariosPorDNI(dni: string): Promise<any> {
+    // Obtener la persona por su DNI
     const persona = await this.personaRepository.findOne({
-      where: { n_identificacion: dni },
-      relations: ['detallePersona'],
+        where: { n_identificacion: dni },
+        relations: ['detallePersona'],
     });
 
     if (!persona) {
-      throw new NotFoundException(`No se encontró ninguna persona con el DNI ${dni}`);
+        throw new NotFoundException(`No se encontró ninguna persona con el DNI ${dni}`);
     }
 
-    const contrato = await this.contratosRepository.findOne({
-      where: { titular: { id_persona: persona.id_persona } },
-      relations: ['plan', 'plan.categoria', 'beneficiarios'],
+    // Obtener todos los contratos asociados a la persona
+    const contratos = await this.contratosRepository.find({
+        where: { titular: { id_persona: persona.id_persona } },
+        relations: ['plan', 'plan.categoria', 'beneficiarios'],
     });
 
-    if (!contrato) {
-      throw new NotFoundException(`No se encontró ningún contrato para la persona con DNI ${dni}`);
+    if (!contratos || contratos.length === 0) {
+        throw new NotFoundException(`No se encontró ningún contrato para la persona con DNI ${dni}`);
     }
 
-    const contratoFormateado = {
-      idContrato: contrato.id_contrato,
-      numeroProducto: contrato.numero_producto,
-      lugarCobro: contrato.lugar_cobro,
-      fechaInicioContrato: contrato.fecha_inicio_contrato,
-      fechaCancelacionContrato: contrato.fecha_cancelacion_contrato,
-      status: contrato.status,
-      plan: {
-        idPlan: contrato.plan.id_plan,
-        nombrePlan: contrato.plan.nombre_plan,
-        precio: contrato.plan.precio,
-        descripcion: contrato.plan.descripcion,
-        proteccionPara: contrato.plan.proteccion_para,
-        categoria: contrato.plan.categoria
-          ? {
-            idCategoria: contrato.plan.categoria.id_categoria,
-            nombre: contrato.plan.categoria.nombre,
-          }
-          : null,
-      },
-      beneficiarios: contrato.beneficiarios.map((beneficiario) => ({
-        idBeneficiario: beneficiario.id_beneficiario,
-        primerNombre: beneficiario.primer_nombre,
-        segundoNombre: beneficiario.segundo_nombre,
-        primerApellido: beneficiario.primer_apellido,
-        segundoApellido: beneficiario.segundo_apellido,
-        parentesco: beneficiario.parentesco,
-        fechaNacimiento: beneficiario.fecha_nacimiento,
-      })),
-    };
-    return contratoFormateado;
-  }
+    // Formatear los contratos
+    const contratosFormateados = contratos.map((contrato) => ({
+        idContrato: contrato.id_contrato,
+        numeroProducto: contrato.numero_producto,
+        lugarCobro: contrato.lugar_cobro,
+        fechaInicioContrato: contrato.fecha_inicio_contrato,
+        fechaCancelacionContrato: contrato.fecha_cancelacion_contrato,
+        status: contrato.status,
+        plan: {
+            idPlan: contrato.plan.id_plan,
+            nombrePlan: contrato.plan.nombre_plan,
+            precio: contrato.plan.precio,
+            descripcion: contrato.plan.descripcion,
+            proteccionPara: contrato.plan.proteccion_para,
+            categoria: contrato.plan.categoria
+                ? {
+                    idCategoria: contrato.plan.categoria.id_categoria,
+                    nombre: contrato.plan.categoria.nombre,
+                }
+                : null,
+        },
+        beneficiarios: contrato.beneficiarios.map((beneficiario) => ({
+            idBeneficiario: beneficiario.id_beneficiario,
+            primerNombre: beneficiario.primer_nombre,
+            segundoNombre: beneficiario.segundo_nombre,
+            primerApellido: beneficiario.primer_apellido,
+            segundoApellido: beneficiario.segundo_apellido,
+            parentesco: beneficiario.parentesco,
+            fechaNacimiento: beneficiario.fecha_nacimiento,
+        })),
+    }));
+
+    return contratosFormateados;
+}
 
 
   async obtenerPlanillaContratosActivos(email: string, password: string): Promise<any[]> {

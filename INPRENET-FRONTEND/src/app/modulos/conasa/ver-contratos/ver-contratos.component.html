@@ -1,36 +1,39 @@
 <div class="basic-container">
-    <!-- Header para búsqueda -->
-    <app-perfil-header (personaEncontrada)="handlePersonaEncontrada($event)"></app-perfil-header>
-  
-    <!-- Mostrar detalles del contrato -->
-    <div *ngIf="contratos" class="card">
-      <div class="card-header tittle">
-        <h4 class="card-title">Contratos del Titular</h4>
-        <p class="card-category">Información detallada de los contratos</p>
-      </div>
-      <div class="card-body">
-        <!-- Información general del contrato -->
-        <div >
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>Contrato</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <p><strong>Número de Producto:</strong> {{ contratos.numeroProducto }}</p>
-              <p><strong>Lugar de Cobro:</strong> {{ contratos.lugarCobro }}</p>
-              <p><strong>Fecha de Inicio:</strong> {{ contratos.fechaInicioContrato }}</p>
-              <p><strong>Estado:</strong> {{ contratos.status }}</p>
-              <p><strong>Plan:</strong> {{ contratos.plan.nombrePlan }}</p>
-              <p><strong>Monto del Plan:</strong> L. {{ contratos.plan.precio | number: '1.2-2' }}</p>
+  <!-- Header para búsqueda -->
+  <app-perfil-header (personaEncontrada)="handlePersonaEncontrada($event)"></app-perfil-header>
 
-            </mat-card-content>
-          </mat-card>
-        </div>
-  
+  <!-- Mostrar detalles de los contratos -->
+  <div *ngIf="contratos.length > 0" class="card">
+    <div class="card-header title">
+      <h4 class="card-title">Contratos del Titular</h4>
+      <p class="card-category">Información detallada de los contratos</p>
+    </div>
+    <div class="card-body">
+      <!-- Recorrer cada contrato -->
+      <div *ngFor="let contrato of contratos" class="contract-card" [ngClass]="{'active': contrato.status === 'ACTIVO'}">
+        <mat-card>
+          <mat-card-header class="contract-header">
+            <mat-card-title>Contrato Nº: {{ contrato.numeroProducto }}</mat-card-title>
+            <span class="status-badge" [ngClass]="{
+                'status-active': contrato.status === 'ACTIVO',
+                'status-inactive': contrato.status !== 'ACTIVO'
+              }">
+              {{ contrato.status }}
+            </span>
+          </mat-card-header>
+          <mat-card-content>
+            <p><strong>Lugar de Cobro:</strong> {{ contrato.lugarCobro }}</p>
+            <p><strong>Fecha de Inicio:</strong> {{ contrato.fechaInicioContrato }}</p>
+            <p><strong>Fecha de Cancelación:</strong> {{ contrato.fechaCancelacionContrato || 'N/A' }}</p>
+            <p><strong>Plan:</strong> {{ contrato.plan.nombrePlan }}</p>
+            <p><strong>Monto del Plan:</strong> L. {{ contrato.plan.precio | number: '1.2-2' }}</p>
+          </mat-card-content>
+        </mat-card>
+
         <!-- Información de los beneficiarios -->
-        <div class="beneficiaries-section" *ngIf="contratos.beneficiarios.length > 0">
+        <div class="beneficiaries-section" *ngIf="contrato.beneficiarios.length > 0">
           <h4>Beneficiarios</h4>
-          <div *ngFor="let beneficiario of contratos.beneficiarios" class="beneficiary-card">
+          <div *ngFor="let beneficiario of contrato.beneficiarios" class="beneficiary-card">
             <mat-card>
               <mat-card-content>
                 <p><strong>Nombre:</strong> {{ beneficiario.primerNombre }} {{ beneficiario.primerApellido }}</p>
@@ -42,10 +45,10 @@
         </div>
       </div>
     </div>
-  
-    <!-- Mensaje si no hay contratos -->
-    <div *ngIf="persona && !contratos" class="no-contracts">
-      <p>Este titular no tiene contratos registrados.</p>
-    </div>
   </div>
-  
+
+  <!-- Mensaje si no hay contratos -->
+  <div *ngIf="persona && contratos.length === 0" class="no-contracts">
+    <p>Este titular no tiene contratos registrados.</p>
+  </div>
+</div>

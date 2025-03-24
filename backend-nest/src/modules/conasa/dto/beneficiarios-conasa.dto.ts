@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsString, IsDateString, IsOptional } from 'class-validator';
 
 export class CrearBeneficiarioDto {
   @IsString()
@@ -6,14 +6,16 @@ export class CrearBeneficiarioDto {
   primer_nombre: string;
 
   @IsString()
-  segundo_nombre?: string;
+  @IsOptional()
+  segundo_nombre?: string | null;
 
   @IsString()
   @IsNotEmpty()
   primer_apellido: string;
 
   @IsString()
-  segundo_apellido?: string;
+  @IsOptional()
+  segundo_apellido?: string | null;
 
   @IsString()
   @IsNotEmpty()

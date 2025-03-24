@@ -43,7 +43,11 @@
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Parentesco</mat-label>
-            <input matInput formControlName="parentesco" />
+            <mat-select formControlName="parentesco">
+              <mat-option *ngFor="let parentesco of parentescos" [value]="parentesco.value">
+                {{ parentesco.label }}
+              </mat-option>
+            </mat-select>
             <mat-error *ngIf="beneficiario.get('parentesco')?.invalid && beneficiario.get('parentesco')?.touched">
               El parentesco es obligatorio.
             </mat-error>
@@ -71,19 +75,7 @@
           </mat-form-field>
           
         </div>
-  
-        <!-- <div class="action-buttons">
-          <button mat-button color="warn" (click)="eliminarBeneficiario(i)">
-            <mat-icon>delete</mat-icon> Eliminar Beneficiario
-          </button>
-        </div> -->
       </div>
-  
-      <!-- <div class="action-buttons">
-        <button mat-button color="primary" (click)="agregarBeneficiario()">
-          <mat-icon>add</mat-icon> Agregar Beneficiario
-        </button>
-      </div> -->
     </div>
   </div>
   

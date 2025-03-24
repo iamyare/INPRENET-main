@@ -31,6 +31,12 @@ export class Net_Contratos_Conasa {
   @Column({ name: 'STATUS', type: 'varchar2', length: 10, default: 'ACTIVO' })
   status: string;
 
+  @Column({ name: 'DIRECCION_TRABAJO', type: 'varchar2', length: 200, nullable: true })
+  direccion_trabajo: string;
+
+  @Column({ name: 'EMPRESA', type: 'varchar2', length: 100, nullable: true })
+  empresa: string;
+
   @Column({ name: 'OBSERVACION', type: 'varchar2', length: 500, nullable: true })
   observacion: string;
 

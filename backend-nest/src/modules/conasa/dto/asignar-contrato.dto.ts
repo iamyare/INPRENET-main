@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, IsDate, IsOptional, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsOptional, IsDateString } from 'class-validator';
 
 export class AsignarContratoDto {
   @IsNumber()
@@ -21,7 +21,31 @@ export class AsignarContratoDto {
   @IsDateString()
   fechaCancelacionContrato?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  observacion: string;
+  observacion?: string;
+
+  @IsOptional()
+  @IsString()
+  telefono_1?: string;
+
+  @IsOptional()
+  @IsString()
+  telefono_2?: string;
+
+  @IsOptional()
+  @IsString()
+  telefono_3?: string;
+
+  @IsOptional()
+  @IsString()
+  correo_1?: string;
+
+  @IsOptional()
+  @IsString()
+  direccionTrabajo?: string;
+
+  @IsOptional()
+  @IsString()
+  empresa?: string;
 }

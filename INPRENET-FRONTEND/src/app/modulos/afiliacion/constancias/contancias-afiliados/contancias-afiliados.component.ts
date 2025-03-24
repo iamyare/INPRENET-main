@@ -28,8 +28,8 @@ export class ContanciasAfiliadosComponent implements OnInit {
 
   constanciaButtons = [
     { label: 'Constancia de Afiliación', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
-    { label: 'Constancia de Beneficio Vitalicio', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
-    { label: 'Constancia de Beneficio Periodico', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO', 'BENEFICIARIO', 'DESIGNADO', 'BENEFICIARIO SIN CAUSANTE'] },
+    { label: 'Constancia de Jubilados/Pensionados', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
+    { label: 'Constancia de Beneficio', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO', 'BENEFICIARIO', 'DESIGNADO', 'BENEFICIARIO SIN CAUSANTE'] },
     { label: 'Constancia de Jubilado Fallecido', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
     { label: 'Constancia de Beneficiarios Sin Pago', allowedTypes: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] },
   ];
@@ -164,7 +164,7 @@ export class ContanciasAfiliadosComponent implements OnInit {
             }
           });
   
-          if (selectedConstanciaLabel === 'Constancia de Beneficio Vitalicio') {
+          if (selectedConstanciaLabel === 'Constancia de Jubilados/Pensionados') {
             if (this.beneficiosConPeriodicidadV.length > 0) {
               this.openSubOptionsDialog(this.beneficiosConPeriodicidadV, this.generateConstanciaBeneficio.bind(this));
             } else {
@@ -177,7 +177,7 @@ export class ContanciasAfiliadosComponent implements OnInit {
           else if (selectedConstanciaLabel === 'Constancia de Beneficiarios Sin Pago') {
             this.generateConstanciaBeneficiariosSinPago();
           } 
-          else if (selectedConstanciaLabel === 'Constancia de Beneficio Periodico') {
+          else if (selectedConstanciaLabel === 'Constancia de Beneficio') {
             if (this.beneficiosSinPeriodicidadV.length > 0) {
               this.openSubOptionsDialog(this.beneficiosSinPeriodicidadV, this.generateNuevaConstanciaBeneficio.bind(this));
             } else {
@@ -221,11 +221,14 @@ export class ContanciasAfiliadosComponent implements OnInit {
       .join(' ')
       .toUpperCase();
 
+      console.log(beneficioData);
+      
+
     const data = {
       nombre_completo: nombre_completo,
       n_identificacion: beneficioData.N_IDENTIFICACION,
       beneficio: beneficio.toUpperCase(),
-      departamento: beneficioData.NOMBRE_MUNICIPIO?.toUpperCase() || 'NO DEFINIDO',
+      departamento: beneficioData.NOMBRE_DEPARTAMENTO?.toUpperCase() || 'N/D',
       monto: beneficioData.MONTO_POR_PERIODO || 0,
       monto_letras: this.convertirNumeroALetrasConCentavos(beneficioData.MONTO_POR_PERIODO || 0),
       fecha_inicio: this.convertirFechaAPalabras(beneficioData.FECHA_EFECTIVIDAD),
@@ -349,12 +352,11 @@ export class ContanciasAfiliadosComponent implements OnInit {
       nombre_completo: nombre_completo,
       n_identificacion: beneficioData.N_IDENTIFICACION,
       beneficio: beneficioClean,
-      departamento: beneficioData.NOMBRE_MUNICIPIO?.toUpperCase() || 'NO DEFINIDO',
+      departamento: beneficioData.NOMBRE_DEPARTAMENTO?.toUpperCase() || 'N/D',
       monto: beneficioData.MONTO_POR_PERIODO || 0,
       monto_letras: this.convertirNumeroALetrasConCentavos(beneficioData.MONTO_POR_PERIODO || 0),
       fecha_inicio: this.convertirFechaAPalabras(beneficioData.FECHA_EFECTIVIDAD),
       fecha_fin: this.convertirFechaAPalabras(beneficioData.PERIODO_FINALIZACION),
-      num_rentas_aprobadas: beneficioData.NUM_RENTAS_APROBADAS || 'INDEFINIDO'
     };
   
   
@@ -596,7 +598,6 @@ export class ContanciasAfiliadosComponent implements OnInit {
   
     const dni = this.persona.N_IDENTIFICACION;
   
-    // ✅ Verificar si los beneficiarios han recibido pagos antes de generar la constancia
     this.beneficiosService.verificarPagosBeneficiarios(dni).subscribe(
       (recibioPagos: boolean) => {
         console.log(`Estado de pagos para los beneficiarios de ${dni}:`, recibioPagos);

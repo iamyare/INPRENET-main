@@ -344,6 +344,7 @@ export class AfiliadoService {
       ID_PROFESION: persona.profesion?.id_profesion,
       TELEFONO_1: persona.telefono_1,
       TELEFONO_2: persona.telefono_2,
+      TELEFONO_3: persona.telefono_3,
       CORREO_1: persona.correo_1,
       CORREO_2: persona.correo_2,
       ESTADO_CIVIL: persona.estado_civil,

@@ -26,54 +26,57 @@
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Fecha de Contrato</mat-label>
             <input matInput type="date" formControlName="fechaContrato" readonly />
-            <mat-error *ngIf="contratoData.get('fechaContrato')?.invalid && contratoData.get('fechaContrato')?.touched">
-              Este campo es obligatorio.
+            <mat-error *ngIf="contratoData.get('fechaContrato')?.hasError('required')">
+              La fecha de contrato es obligatoria.
             </mat-error>
           </mat-form-field>
 
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Lugar de Cobro</mat-label>
             <input matInput type="text" formControlName="lugarCobro" />
-            <mat-error *ngIf="contratoData.get('lugarCobro')?.invalid && contratoData.get('lugarCobro')?.touched">
-              Este campo es obligatorio.
+            <mat-error *ngIf="contratoData.get('lugarCobro')?.hasError('required')">
+              El lugar de cobro es obligatorio.
             </mat-error>
           </mat-form-field>
         </div>
 
         <!-- Datos de la empresa -->
         <div class="form-row">
-          <mat-form-field class="half-width" appearance="outline">
+          <!-- <mat-form-field class="half-width" appearance="outline">
             <mat-label>Empresa</mat-label>
             <input matInput type="text" formControlName="empresa" />
-            <mat-error *ngIf="contratoData.get('empresa')?.invalid && contratoData.get('empresa')?.touched">
-              Este campo es obligatorio.
+            <mat-error *ngIf="contratoData.get('empresa')?.hasError('required')">
+              El nombre de la empresa es obligatorio.
             </mat-error>
           </mat-form-field>
 
           <mat-form-field class="full-width" appearance="outline">
             <mat-label>Dirección de Trabajo</mat-label>
             <textarea matInput rows="2" formControlName="direccionTrabajo"></textarea>
-            <mat-error *ngIf="contratoData.get('direccionTrabajo')?.invalid && contratoData.get('direccionTrabajo')?.touched">
-              Este campo es obligatorio.
+            <mat-error *ngIf="contratoData.get('direccionTrabajo')?.hasError('required')">
+              La dirección de trabajo es obligatoria.
             </mat-error>
-          </mat-form-field>
+          </mat-form-field> -->
         </div>
 
         <!-- Datos de contacto -->
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Teléfono Celular</mat-label>
-            <input matInput type="text" formControlName="telCelular" />
-            <mat-error *ngIf="contratoData.get('telCelular')?.invalid && contratoData.get('telCelular')?.touched">
-              Este campo es obligatorio o no es válido.
+            <input matInput type="text" formControlName="telefono_1" />
+            <mat-error *ngIf="contratoData.get('telefono_1')?.hasError('required')">
+              El teléfono celular es obligatorio.
+            </mat-error>
+            <mat-error *ngIf="contratoData.get('telefono_1')?.hasError('pattern')">
+              El número debe tener entre 8 y 12 dígitos.
             </mat-error>
           </mat-form-field>
 
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Teléfono de Casa</mat-label>
-            <input matInput type="text" formControlName="telCasa" />
-            <mat-error *ngIf="contratoData.get('telCasa')?.invalid && contratoData.get('telCasa')?.touched">
-              El número debe ser válido.
+            <input matInput type="text" formControlName="telefono_2" />
+            <mat-error *ngIf="contratoData.get('telefono_2')?.hasError('pattern')">
+              El número de teléfono debe tener entre 8 y 12 dígitos.
             </mat-error>
           </mat-form-field>
         </div>
@@ -81,17 +84,20 @@
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Teléfono de Trabajo</mat-label>
-            <input matInput type="text" formControlName="telTrabajo" />
-            <mat-error *ngIf="contratoData.get('telTrabajo')?.invalid && contratoData.get('telTrabajo')?.touched">
-              El número debe ser válido.
+            <input matInput type="text" formControlName="telefono_3" />
+            <mat-error *ngIf="contratoData.get('telefono_3')?.hasError('pattern')">
+              El número de teléfono debe tener entre 8 y 12 dígitos.
             </mat-error>
           </mat-form-field>
 
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Correo Electrónico</mat-label>
-            <input matInput type="email" formControlName="correoElectronico" />
-            <mat-error *ngIf="contratoData.get('correoElectronico')?.invalid && contratoData.get('correoElectronico')?.touched">
-              Este campo es obligatorio o el correo no es válido.
+            <input matInput type="email" formControlName="correo_1" />
+            <mat-error *ngIf="contratoData.get('correo_1')?.hasError('required')">
+              El correo electrónico es obligatorio.
+            </mat-error>
+            <mat-error *ngIf="contratoData.get('correo_1')?.hasError('email')">
+              El formato del correo no es válido.
             </mat-error>
           </mat-form-field>
         </div>
@@ -105,6 +111,9 @@
                 {{ categoria.nombre }}
               </mat-option>
             </mat-select>
+            <mat-error *ngIf="contratoData.get('categoria')?.hasError('required')">
+              La categoría es obligatoria.
+            </mat-error>
           </mat-form-field>
 
           <mat-form-field class="half-width" appearance="outline">
@@ -114,8 +123,8 @@
                 {{ plan.nombre_plan }}
               </mat-option>
             </mat-select>
-            <mat-error *ngIf="contratoData.get('plan')?.invalid && contratoData.get('plan')?.touched">
-              Seleccione un plan.
+            <mat-error *ngIf="contratoData.get('plan')?.hasError('required')">
+              El plan es obligatorio.
             </mat-error>
           </mat-form-field>
         </div>
@@ -130,8 +139,8 @@
           <mat-form-field class="full-width" appearance="outline">
             <mat-label>Observación</mat-label>
             <textarea matInput rows="2" formControlName="observacion"></textarea>
-            <mat-error *ngIf="contratoData.get('observacion')?.invalid && contratoData.get('observacion')?.touched">
-              Este campo no puede exceder los 500 caracteres.
+            <mat-error *ngIf="contratoData.get('observacion')?.hasError('maxlength')">
+              La observación no puede exceder los 500 caracteres.
             </mat-error>
           </mat-form-field>
         </div>
@@ -140,19 +149,16 @@
     </mat-card>
 
     <!-- Componente de Beneficiarios -->
-    <app-agregar-beneficiarios
-      *ngIf="persona"
-      [beneficiariosForm]="beneficiariosForm">
-    </app-agregar-beneficiarios>
+    <ng-container *ngIf="beneficiariosForm.length > 0">
+      <app-agregar-beneficiarios 
+        *ngIf="persona" 
+        [beneficiariosForm]="beneficiariosForm">
+      </app-agregar-beneficiarios>
+    </ng-container>
 
     <!-- Botón de registro -->
     <div *ngIf="persona" class="actions">
-      <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        [disabled]="asistenciaForm.invalid"
-      >
+      <button mat-raised-button color="primary" type="submit" [disabled]="asistenciaForm.invalid">
         Registrar Asistencia
       </button>
     </div>

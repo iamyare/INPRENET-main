@@ -58,6 +58,9 @@
       <p><strong>Correo Principal:</strong> {{ persona?.CORREO_1 }}</p>
       <p><strong>Género:</strong> {{ persona?.GENERO || 'No especificado' }}</p>
       <p><strong>Fecha de Nacimiento:</strong> {{ persona?.FECHA_NACIMIENTO | date: 'dd MMMM yyyy' }}</p>
+      <p *ngIf="persona.fallecido === 'SI'" class="alerta-fallecido">
+        <strong>ESTADO:</strong> FALLECIDO
+      </p>
     </div>
   </div>
 </div>

@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrl: './modificar-asistencias.component.scss'
 })
 export class ModificarAsistenciasComponent {
-  menuTitle: string = 'Modificar Asistencias';
+  menuTitle: string = 'Detalle de Asistencias';
 }

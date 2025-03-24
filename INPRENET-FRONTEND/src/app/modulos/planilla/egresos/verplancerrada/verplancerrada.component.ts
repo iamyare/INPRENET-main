@@ -385,7 +385,7 @@ export class VerplancerradaComponent {
             NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
             MontoAPagar: montoPorPeriodo,
             METODO_PAGO: beneficio.metodo_pago,
-            NOMBRE_BANCO: beneficio.detallePagBeneficio[0]?.personaporbanco?.banco?.nombre_banco || 'NO PROPORCIONADO',
+            NOMBRE_BANCO: beneficio.detallePagBeneficio[0].bancoPlanilla[0].personaBanco ? beneficio.detallePagBeneficio[0].bancoPlanilla[0].personaBanco.banco.nombre_banco : 'NO PROPORCIONADO',
             NUMERO_PAGOS: nombrePlanilla === '60 RENTAS' ? beneficio.detallePagBeneficio[0]?.planilla?.numero_pagos || 'N/A' : '',
             NUMERO_LOTE: nombrePlanilla === '60 RENTAS' ? beneficio.detallePagBeneficio[0]?.planilla?.numero_lote || 'N/A' : ''
           };
@@ -592,8 +592,8 @@ export class VerplancerradaComponent {
             NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
             MontoAPagar: montoPorPeriodo,
             METODO_PAGO: beneficio.metodo_pago,
-            NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
-            NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
+            NOMBRE_BANCO: beneficio.detallePagBeneficio[0].bancoPlanilla[0].personaBanco ? beneficio.detallePagBeneficio[0].bancoPlanilla[0].personaBanco.banco.nombre_banco : 'NO PROPORCIONADO',
+            NUM_CUENTA: beneficio.detallePagBeneficio[0].bancoPlanilla.personaBanco ? beneficio.detallePagBeneficio[0].bancoPlanilla.personaBanco.num_cuenta : 'NO PROPORCIONADO'
           });
         });
       });

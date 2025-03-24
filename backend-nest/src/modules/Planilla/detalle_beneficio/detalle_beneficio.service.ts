@@ -269,7 +269,7 @@ export class DetalleBeneficioService {
     const nuevoDetallePagoBeneficio = this.detPagBenRepository.create({
       estado: 'EN PRELIMINAR',
       monto_a_pagar,
-      personaporbanco: personaBancoActivo,
+      //personaporbanco: personaBancoActivo,
       detalleBeneficioAfiliado: [detalleBeneficioAfiliado], // Convertimos el objeto en un arreglo
       planilla: { id_planilla },
     });
@@ -412,6 +412,12 @@ export class DetalleBeneficioService {
           }
         });
 
+        const planillaRespository = await this.planillaRepository.findOne({
+          where: {
+            codigo_planilla: cod_planilla
+          }
+        });
+
         const detalleBeneficioAfiliadoRepository = await this.detalleBeneficioAfiliadoRepository.update(
           {
             ID_DETALLE_PERSONA: resultado2.ID_DETALLE_PERSONA,
@@ -429,7 +435,11 @@ export class DetalleBeneficioService {
 
         const detPagBenRepository = await this.detPagBenRepository.update(
           {
-            id_beneficio_planilla: idBenPlanilla,
+            ID_PERSONA: ID_PERSONA,
+            ID_DETALLE_PERSONA: ID_DETALLE_PERSONA,
+            ID_CAUSANTE: ID_CAUSANTE,
+            ID_BENEFICIO: ID_BENEFICIO,
+            ID_PLANILLA: planillaRespository.id_planilla,
           },
           {
             estado: "NO PAGADA",
@@ -446,7 +456,11 @@ export class DetalleBeneficioService {
             ID_BENEFICIO: ID_BENEFICIO,
             estado_solicitud: "APROBADO",
             detallePagBeneficio: {
-              id_beneficio_planilla: idBenPlanilla,
+              ID_PERSONA: ID_PERSONA,
+              ID_DETALLE_PERSONA: ID_DETALLE_PERSONA,
+              ID_CAUSANTE: ID_CAUSANTE,
+              ID_BENEFICIO: ID_BENEFICIO,
+              ID_PLANILLA: planillaRespository.id_planilla,
             }
           },
           relations: ["detallePagBeneficio"]
@@ -1116,7 +1130,7 @@ export class DetalleBeneficioService {
     }
   }
 
-  async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: number; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Pago_Beneficio[]> {
+  /* async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: number; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Pago_Beneficio[]> {
     const resultados = [];
     const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
 
@@ -1137,7 +1151,7 @@ export class DetalleBeneficioService {
       resultados.push(await entityManager.save(beneficio));
     }
     return resultados;
-  }
+  } */
 
   private convertirCadenaAFecha(cadena: string): string | null {
     if (cadena) {

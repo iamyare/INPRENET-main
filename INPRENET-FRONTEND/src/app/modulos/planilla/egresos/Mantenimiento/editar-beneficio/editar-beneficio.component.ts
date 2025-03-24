@@ -25,6 +25,12 @@ export class EditarBeneficioComponent implements OnInit {
   ngOnInit(): void {
     this.myColumns = [
       {
+        header: 'Id Beneficio',
+        col: 'id_beneficio',
+        isEditable: true,
+        validationRules: [Validators.required, Validators.minLength(3)]
+      },
+      {
         header: 'Nombre del Beneficio',
         col: 'nombre_beneficio',
         isEditable: true,
@@ -52,6 +58,7 @@ export class EditarBeneficioComponent implements OnInit {
 
   editar = (row: any) => {
     const beneficioData = {
+      id_beneficio: row.id_beneficio,
       nombre_beneficio: row.nombre_beneficio,
       descripcion_beneficio: row.descripcion_beneficio,
       numero_rentas_max: row.numero_rentas_max,
@@ -72,7 +79,7 @@ export class EditarBeneficioComponent implements OnInit {
     try {
       const data = await this.svcBeneficioServ.getTipoBeneficio().toPromise();
       this.filas = data.map((item: any) => ({
-        id: item.id_beneficio,
+        id_beneficio: item.id_beneficio,
         nombre_beneficio: item.nombre_beneficio,
         descripcion_beneficio: item.descripcion_beneficio || 'No disponible',
         numero_rentas_max: item.numero_rentas_max,

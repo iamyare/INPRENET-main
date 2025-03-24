@@ -9,7 +9,7 @@
         <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === '60 RENTAS'}" (click)="seleccionarTipoPlanilla('60 RENTAS')">60 RENTAS</button>
         <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'ordinaria'}" (click)="seleccionarTipoPlanilla('ordinaria')">ORDINARIA</button>
         <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'complementaria'}" (click)="seleccionarTipoPlanilla('complementaria')">COMPLEMENTARIA</button>
-        <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'extraordinaria'}" (click)="seleccionarTipoPlanilla('extraordinaria')">EXTRAORDINARIA</button>
+        <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'extraordinaria'}" (click)="seleccionarTipoPlanilla('extraordinaria')" *ngIf="tieneRol('OFICIAL DE PLANILLA')">EXTRAORDINARIA</button>
       </div>
 
       <div class="form-fields">
@@ -33,7 +33,7 @@
           </mat-error>
         </mat-form-field>
       </div>
-      <button class="button" mat-raised-button color="primary" (click)="generarReportePensionadosActivos()">Generar Reporte de Planilla (Con y Sin Cuenta Bancaria)</button>
+      <!-- <button class="button" mat-raised-button color="primary" (click)="generarReportePensionadosActivos()">Generar Reporte de Planilla (Con y Sin Cuenta Bancaria)</button> -->
 
 <!--
       <button mat-raised-button color="primary" (click)="obtenerInformacionPlanillasbyFechas()">Obtener información de planillas cerradas</button> -->
@@ -65,30 +65,30 @@
 
         <div class="button-group-reportes" *ngIf="fechaInicioFormateada && fechaFinFormateada">
           <!-- Botones de generación de reportes -->
-          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarDocumento()">Generar Reporte de Planilla (Con y Sin Cuenta Bancaria)</button>
-          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarDocumentoSinCuenta()">Generar Reporte (Sin Cuenta)</button>
-          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarPDFMontosPorBancoPeriodo()">Generar Reporte de Montos por Banco</button>
-          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="generarReporteTotalesDeducciones()">
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarDocumento()"  *ngIf="tieneRol('OFICIAL DE PLANILLA')">Generar Reporte de Planilla (Con y Sin Cuenta Bancaria)</button>
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarDocumentoSinCuenta()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">Generar Reporte (Sin Cuenta)</button>
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarPDFMontosPorBancoPeriodo()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">Generar Reporte de Montos por Banco</button>
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="generarReporteTotalesDeducciones()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">
             Generar Reporte de Totales de Deducciones por institución
           </button>
-          <button class="button" mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="descargarReporte()">Descargar Archivo De Pago (Con cuenta Bancaria)</button>
-          <button class="button" mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="descargarReporteBSC()">Descargar Desglose de planilla (sin cuenta bancaria)</button>
+          <button class="button" mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="descargarReporte()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">Descargar Archivo De Pago (Con cuenta Bancaria)</button>
+          <button class="button" mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="descargarReporteBSC()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">Descargar Desglose de planilla (sin cuenta bancaria)</button>
           <!-- <button mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="generarReporteTotalesDeduccionesSinCuentBanc()">
             Generar Reporte de Totales de Deducciones Sin Cuenta Banco
           </button> -->
-          <button class="button" mat-raised-button color="accent" [disabled]="!planillaForm.valid" (click)="generarReportePartidaDiario()">
+          <button class="button" mat-raised-button color="accent" [disabled]="!planillaForm.valid" (click)="generarReportePartidaDiario()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">
             Generar Reporte de Partida de Diario
           </button>
 
-          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="openDynamicDialog([{ name: 'codDeduccion', label: 'Código de Deducción', type: 'number' }])">
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="openDynamicDialog([{ name: 'codDeduccion', label: 'Código de Deducción', type: 'number' }])" *ngIf="tieneRol('OFICIAL DE PLANILLA')">
             Descargar excel de deducciones por código de deducción
           </button>
 
-          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="exportarExcelDetallePorPeriodo()">
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="exportarExcelDetallePorPeriodo()"  *ngIf="tieneRol('OFICIAL DE PLANILLA') || tieneRol('REPORTES DETALLE A EXCEL')">
             Exportar Detalle a Excel
           </button>
 
-          <button class="button new-badge" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="exportarExcelDetalleCompletoPorPeriodo()">
+          <button class="button new-badge" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="exportarExcelDetalleCompletoPorPeriodo()" *ngIf="tieneRol('OFICIAL DE PLANILLA') || tieneRol('REPORTE A EXCEL COMPLETO')">
             Exportar Detalle a Excel Completo
           </button>
 
@@ -96,16 +96,17 @@
           <!-- Puedes añadir más botones aquí -->
 
           <!-- Botón Descargar Altas Excel -->
-            <button *ngIf="tipoPlanilla === 'ordinaria'"
+            <button *ngIf="tipoPlanilla === 'ordinaria' && (tieneRol('OFICIAL DE PLANILLA') || tieneRol('VER ALTAS'))"
             class="button"
             mat-raised-button color="primary"
             [disabled]="!planillaForm.valid"
-            (click)="descargarAltasExcel()">
+            (click)="descargarAltasExcel()"
+            >
             Descargar Altas Excel
             </button>
 
             <!-- Botón Descargar Bajas Excel -->
-            <button *ngIf="tipoPlanilla === 'ordinaria'"
+            <button *ngIf="tipoPlanilla === 'ordinaria' && (tieneRol('OFICIAL DE PLANILLA') || tieneRol('VER BAJAS'))"
             class="button"
             mat-raised-button color="warn"
             [disabled]="!planillaForm.valid"

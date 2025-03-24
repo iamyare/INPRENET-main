@@ -6,8 +6,6 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { RolesGuard } from './roles.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SessionGateway } from './session.gateway';
-import { UserSessionRepository } from '../../repositories/user-session.repository';
 
 @Module({
   imports: [
@@ -22,7 +20,7 @@ import { UserSessionRepository } from '../../repositories/user-session.repositor
     }),
     ConfigModule,
   ],
-  providers: [AuthService, UsersService, JwtStrategy, RolesGuard, SessionGateway, UserSessionRepository],
+  providers: [AuthService, UsersService, JwtStrategy, RolesGuard],
   exports: [AuthService, UsersService, RolesGuard, JwtModule],
 })
 

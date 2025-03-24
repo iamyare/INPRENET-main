@@ -3,16 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './sesion-activa/users.service';
 import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { SessionGateway } from './session.gateway';
-import { UserSessionRepository } from '../../repositories/user-session.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly sessionGateway: SessionGateway,
-    private readonly userSessionRepository: UserSessionRepository,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -24,32 +20,19 @@ export class AuthService {
     throw new UnauthorizedException('Credenciales inválidas');
   }
 
-  async login(user: any, userAgent: string) {
+  async login(user: any, userAgent: string){
     const payload = { username: user.username, sub: user.userId };
     const token = this.jwtService.sign(payload);
 
-    // Check for existing active sessions
-    const existingSession = await this.userSessionRepository.findOne({
-      where: { user: { id: user.userId }, token: existingUser?.token }
-    });
-
-    if (existingSession) {
-      // Notify the user of the existing session that they're being logged out
-      this.sessionGateway.notifySessionExpired(user.userId);
-      
-      // Delete the existing session
-      await this.userSessionRepository.delete(existingSession.id);
+    //Cerrar sesión anterior si existe (solo cuando el token es diferente)
+    const existingUser = await this.usersService.findById(user.userId);
+    if (existingUser?. token && existingUser.userAgent !== userAgent ) {
+      await this.logout(existingUser.userId);
     }
 
-    // Create new session
-    const newSession = this.userSessionRepository.create({
-      user: { id: user.userId },
-      token,
-      userAgent
-    });
-    await this.userSessionRepository.save(newSession);
-
-    return { access_token: token };
+    //Actualizar token y userAgent del usuario
+    await this.usersService.updateUserToken(user.userId, token, userAgent);
+    return { access_token: token};
   }
 
   async validateToken(userId: string, token: string): Promise<boolean> {

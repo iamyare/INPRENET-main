@@ -6,6 +6,10 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
 import * as cookieParser from 'cookie-parser';
 import * as fs from 'fs';
 const express = require('express');
+import * as dotenv from 'dotenv';
+
+
+dotenv.config();
 
 async function bootstrap() {
   // Lee los archivos del certificado y la clave privada --LOCAL--

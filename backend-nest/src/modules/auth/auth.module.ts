@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { UsersService } from './sesion-activa/users.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
@@ -18,7 +20,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     ConfigModule,
   ],
-  providers: [JwtStrategy, RolesGuard],
-  exports: [RolesGuard, JwtModule],
+  providers: [AuthService, UsersService, JwtStrategy, RolesGuard],
+  exports: [AuthService, UsersService, RolesGuard, JwtModule],
 })
+
 export class AuthModule {}

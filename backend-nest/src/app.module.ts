@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+//import { ormConfig } from '../ormconfig';
 import { CommonModule } from './common/common.module';
 import { AfiliadoModule } from './modules/Persona/afiliado.module';
 import { BancoModule } from './modules/banco/banco.module';

@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: 'development.env' });
 import * as oracledb from 'oracledb';
 oracledb.initOracleClient({ configDir: '', libDir: '', errorDir: '' });
+
 export const AppDataSource = new DataSource({
   type: 'oracle',
   connectString: process.env.CONNECT_STRING,
@@ -13,4 +14,5 @@ export const AppDataSource = new DataSource({
   entities: [__dirname + '/src/**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/src/migrations/*{.ts,.js}'],
   synchronize: false,
-});
+  
+}); 

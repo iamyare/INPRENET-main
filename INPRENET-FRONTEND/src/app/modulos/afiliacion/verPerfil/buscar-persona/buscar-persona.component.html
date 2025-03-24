@@ -1,0 +1,44 @@
+<div class="buscar-persona-container" *ngIf="!personaSeleccionada">
+  <h1>Buscar Afiliado</h1>
+  <mat-form-field appearance="outline">
+    <mat-label>Número de Identificación</mat-label>
+    <input matInput type="text" [(ngModel)]="n_identificacion" placeholder="Ingrese el Número de Identificación" (input)="terminosBusqueda = ''">
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Nombre o Apellido</mat-label>
+    <input matInput type="text" [(ngModel)]="terminosBusqueda" placeholder="Ingrese Nombre o Apellido" (input)="n_identificacion = ''">
+  </mat-form-field>
+  <button mat-raised-button color="primary" (click)="buscarPersona()">Buscar</button>
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+  <table *ngIf="personasPaginadas.length > 0" class="resultados-busqueda">
+    <thead>
+      <tr>
+        <th>Nombre Completo</th>
+        <th>DNI</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let persona of personasPaginadas">
+        <td>{{ persona.nombre_completo }}</td>
+        <td>{{ persona.dni }}</td>
+        <td>
+          <button mat-button color="primary" (click)="seleccionarPersona(persona)">Seleccionar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <mat-paginator
+    *ngIf="personas.length > 0"
+    [length]="personas.length"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="cambiarPagina($event)">
+  </mat-paginator>
+</div>
+
+<div *ngIf="personaSeleccionada">
+  <app-perfil [persona]="personaSeleccionada" (resetBusqueda)="resetBusqueda()"></app-perfil>
+</div>

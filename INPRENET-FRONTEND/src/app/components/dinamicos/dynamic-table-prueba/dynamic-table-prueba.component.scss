@@ -1,0 +1,72 @@
+.card-header {
+  background-color: white; /* Fondo del contenedor del título */
+  padding: 16px; /* Espaciado alrededor del título */
+  border-radius: 4px; /* Bordes redondeados */
+}
+
+.card-title {
+  font-size: 1.5rem; /* Tamaño de fuente del título */
+  font-weight: bold; /* Peso de la fuente del título */
+  margin: 0; /* Eliminar márgenes */
+  color: #229e92; /* Color del título */
+}
+
+.card-category {
+  font-size: 1rem; /* Tamaño de fuente del subtítulo */
+  color: #757575; /* Color del subtítulo */
+  margin: 0; /* Eliminar márgenes */
+}
+
+.container-fluid {
+  padding: 0 16px; /* Ajuste del espaciado */
+}
+
+table {
+  width: 100%;
+}
+
+th.mat-header-cell {
+  background-color: #229e92;  /* Color para el encabezado de la tabla */
+  color: #ffffff;  /* Color del texto del encabezado */
+  padding: 8px;
+  text-align: left;
+}
+
+td.mat-cell {
+  padding: 8px;
+  text-align: left;
+}
+
+tr.mat-header-row {
+  background-color: #229e92;  /* Color para el encabezado de la tabla */
+  color: #ffffff;  /* Color del texto del encabezado */
+}
+
+.selected {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+tr.selected {
+  background-color: #229e92; 
+  color: white; 
+  font-weight: bold;
+  font-size: 14;
+  letter-spacing: 2px;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.highlight-on-hover:hover {
+  background-color: #d9edf7;
+  transition: background-color 0.3s;
+}
+
+.even-row {
+  background-color: #f2f2f2;
+}
+
+.odd-row {
+  background-color: #ffffff;
+}

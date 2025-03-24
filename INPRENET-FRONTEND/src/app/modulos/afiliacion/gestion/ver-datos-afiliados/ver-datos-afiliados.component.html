@@ -1,0 +1,61 @@
+<div>
+    <app-progressbar-verdatos (newDatBenChange)="setEstadoDatGen($event)"
+        (newEstCentrTrab)="setEstadoDatCentTrab($event)" (newdatosColegiosMag)="setDatosAColegiosMag($event)"
+        (newdatosHS)="setDatosHS($event)" (newEstCentrTrab)="setDatosA($event)" (newdatosRP)="setDatosReferenc($event)"
+        (newdatosB)="setDatosBenef($event)" (newDatosCuentas)="setDatosCuentas($event)"
+        (newGeneracionConstancias)="setGeneracionConstancias($event)"></app-progressbar-verdatos>
+</div>
+
+<div *ngIf="DatosGenerales" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+    <app-dynamic-form [fields]="myFormFields" titulo="Buscar Afiliado"
+        subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
+    <div class="row" style="text-align: center;  margin: 1%;">
+        <div class="col-md-6">
+            <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
+                (click)="previsualizarInfoAfil()">
+                Previsualizar información del afiliado
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="texto" style="text-align: center;" *ngIf="!Afiliado && !loading">
+    <h2 class="anaranjado desapareciendo">No se encuentra ningún registro</h2>
+</div>
+
+<div *ngIf="Afiliado && !loading" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
+    <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
+    <div
+        style="display: grid; grid-template-columns: 1fr 2fr; justify-content: center; align-items: center; gap: 20px; padding: 10px;">
+        <!-- Imagen de perfil cuadrada a la izquierda -->
+        <div style="text-align: center;">
+            <img *ngIf="Afiliado.FOTO_PERFIL" [src]="'data:image/jpeg;base64,' + Afiliado.FOTO_PERFIL"
+                alt="Foto de Perfil" style="width: 150px; height: 150px;" />
+        </div>
+
+        <!-- Información del afiliado a la derecha -->
+        <div>
+            <ul style="list-style-type: none; padding: 0; margin: 0;">
+                <li><strong>Nombre:</strong> {{ Afiliado.nameAfil }}</li>
+                <li><strong>Dirección:</strong> {{ Afiliado.DIRECCION_RESIDENCIA }}</li>
+                <li><strong>Fecha de Nacimiento:</strong> {{ convertirFechaInputs(Afiliado.FECHA_NACIMIENTO) }}</li>
+                <li><strong>Teléfono:</strong> {{ Afiliado.TELEFONO_1 }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<mat-spinner class="spinner" *ngIf="loading" diameter="50"></mat-spinner>
+
+<!-- <app-edit-datos-generales *ngIf="DatosGenerales && Afiliado && !loading"
+    [Afiliado]="Afiliado"></app-edit-datos-generales> -->
+<!-- <app-edit-beneficiarios *ngIf="datosBeneficiario && Afiliado" [Afiliado]="Afiliado"></app-edit-beneficiarios> -->
+
+<!-- <app-edit-colegios-magisteriales *ngIf="ColegiosMagisteriales && Afiliado"
+    [Afiliado]="Afiliado"></app-edit-colegios-magisteriales> -->
+
+<!-- <app-edit-datos-bancarios *ngIf="DatosHS && Afiliado" [Afiliado]="Afiliado"></app-edit-datos-bancarios>
+<app-edit-perfil-puest-trab *ngIf="datosA && Afiliado" [Afiliado]="Afiliado"></app-edit-perfil-puest-trab>
+<app-edit-refer-personales *ngIf="referenc && Afiliado" [Afiliado]="Afiliado"></app-edit-refer-personales>
+<app-ver-cuentas-personas *ngIf="cuentas && Afiliado" [Afiliado]="Afiliado"></app-ver-cuentas-personas>
+<app-constancias-afiliado *ngIf="generacionConstancias && Afiliado" [Afiliado]="Afiliado"></app-constancias-afiliado> -->

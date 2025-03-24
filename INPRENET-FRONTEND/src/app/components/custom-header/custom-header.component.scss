@@ -1,0 +1,32 @@
+.header-toolbar {
+  height: 64px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  background-color: #1c9588; /* Color primario */
+  color: white; /* Texto blanco */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+  padding: 0 16px; /* Padding para espaciado */
+}
+
+.logo-header {
+  max-height: 40px;
+  margin-right: 16px; /* Espaciado más grande */
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin-right: 15px;
+}
+
+nav a:last-child {
+  margin-right: 0;
+}

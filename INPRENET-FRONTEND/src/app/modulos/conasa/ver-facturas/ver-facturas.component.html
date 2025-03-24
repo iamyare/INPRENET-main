@@ -1,0 +1,46 @@
+<div class="facturas-container">
+    <!-- Botón de Volver Atrás -->
+    <div class="back-button-container">
+      <button mat-raised-button color="primary" class="back-button" routerLink="/home/conasa/menu-facturas-conasa">
+        <mat-icon>arrow_back</mat-icon> Regresar al Menú
+      </button>
+    </div>
+  
+    <!-- Filtro de Tipo de Factura -->
+    <div class="filter-container">
+      <mat-form-field appearance="outline">
+        <mat-label>Filtrar por Tipo de Factura</mat-label>
+        <mat-select [(ngModel)]="tipoFactura" (selectionChange)="cargarFacturas()">
+          <mat-option [value]="0">TODOS</mat-option>
+          <mat-option [value]="1">ASISTENCIA MEDICA DOCENTES PENSIONADOS</mat-option>
+          <mat-option [value]="2">CONTRATOS ASISTENCIAS FUNERARIA</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  
+    <!-- Lista de Facturas -->
+    <div class="facturas-list-container">
+      <div *ngIf="facturas.length === 0" class="empty-state">
+        No hay facturas disponibles.
+      </div>
+  
+      <div *ngIf="facturas.length > 0">
+        <mat-card *ngFor="let factura of facturas" class="factura-card">
+          <mat-card-header>
+            <mat-card-title>
+              Factura: {{ factura.periodo_factura }}
+            </mat-card-title>
+            <mat-card-subtitle>
+              {{ factura.tipo_factura === 1 ? 'Asistencia Médica' : 'Contratos Funerarios' }}
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-actions>
+            <button mat-button color="primary" (click)="visualizarFactura(factura.id_factura)">Ver</button>
+            <button mat-button color="accent" (click)="descargarFactura(factura.id_factura)">Descargar</button>
+            <button mat-button color="warn" (click)="eliminarFactura(factura.id_factura)">Eliminar</button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+  

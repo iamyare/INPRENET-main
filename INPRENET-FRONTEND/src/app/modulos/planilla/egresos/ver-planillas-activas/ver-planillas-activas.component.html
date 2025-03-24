@@ -1,0 +1,17 @@
+<div class="basic-container">
+  <div class="card ">
+  <div class="card-body ">
+    <app-dynamic-table-prueba
+        titulo="Planillas Activas"
+        subtitulo="Haga click sobre un un item de la tabla para ver el detalle de la planilla"
+        [columns]="myColumns"
+        [data]="filas"
+        [getData]="getFilas"
+        (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+        (rowClicked)="manejarRowClick($event)"
+        [enableRowClick]="true"
+    ></app-dynamic-table-prueba>
+  </div>
+  </div>
+
+</div>

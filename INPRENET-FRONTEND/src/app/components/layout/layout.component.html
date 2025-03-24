@@ -1,0 +1,49 @@
+<br><br><br>
+<mat-nav-list>
+  <ng-container *ngFor="let section of menuConfig">
+    <span class="section-name">{{ section.name }}</span>
+    <mat-accordion [multi]="false">
+      <ng-container *ngFor="let item of section.items">
+        <mat-expansion-panel 
+          [expanded]="expandedPanel === item" 
+          (opened)="setExpandedPanel(item)"
+        >
+          <mat-expansion-panel-header (click)="togglePanel(item)">
+            <mat-panel-title>
+              <mat-icon class="panel-icon">{{ item.icon }}</mat-icon>
+              <span class="item-title">{{ item.title }}</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <!-- Sólo si tiene hijos -->
+          <ng-container *ngIf="item.children">
+            <mat-nav-list>
+              <ng-container *ngFor="let child of item.children">
+                
+                <!-- Versión NORMAL: si NO es isCustomReset -->
+                <a mat-list-item
+                   *ngIf="!child.isCustomReset; else customResetTemplate"
+                   [routerLink]="child.route"
+                   (click)="selectChild(item)"
+                >
+                  <mat-icon class="list-icon">{{ child.icon }}</mat-icon>
+                  <span mat-line class="child-title">{{ child.title }}</span>
+                </a>
+
+                <!-- Versión CUSTOM RESET: si child.isCustomReset === true -->
+                <ng-template #customResetTemplate>
+                  <a mat-list-item (click)="onMenuBuscarPersona()">
+                    <mat-icon class="list-icon">{{ child.icon }}</mat-icon>
+                    <span mat-line class="child-title">{{ child.title }}</span>
+                  </a>
+                </ng-template>
+
+              </ng-container>
+            </mat-nav-list>
+          </ng-container>
+          <!-- Fin hijos -->
+        </mat-expansion-panel>
+      </ng-container>
+    </mat-accordion>
+  </ng-container>
+</mat-nav-list>

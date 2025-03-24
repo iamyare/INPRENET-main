@@ -1,0 +1,31 @@
+<div class="card">
+  <div class="card-header card-header-danger tittle">
+    <h4 class="card-title">Sociedad Socio</h4>
+    <p class="card-category">Completa la información correspondiente</p>
+  </div>
+  <div class="card-body">
+    <form [formGroup]="parentForm" style="margin: 1%;">
+      <div formArrayName="sociedadSocios" *ngIf="sociedadSocios.length > 0">
+        <div *ngFor="let grupo of sociedadSocios.controls; let i = index" [formGroupName]="i" class="row">
+          <h4 class="card-title">Registro {{ i + 1 }}</h4>
+          <app-shared-form-fields [parentForm]="asFormGroup(grupo)" [fields]="fields"
+            (selectChange)="onDepartamentoChange($event)">
+          </app-shared-form-fields>
+          <app-peps></app-peps>
+        </div>
+      </div>
+      <div class="row" style="text-align: center; margin: 1%;">
+        <div class="col-md-6">
+          <button mat-button color="primary" type="button" (click)="addSociedadSocio()">
+            <mat-icon matSuffix>exposure_plus_1</mat-icon> Agregar Socio
+          </button>
+        </div>
+        <div class="col-md-6" *ngIf="sociedadSocios.length > 0">
+          <button mat-button color="warn" type="button" (click)="removeSociedadSocio(sociedadSocios.length - 1)">
+            <mat-icon matSuffix>exposure_neg_1</mat-icon> Eliminar Socio
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

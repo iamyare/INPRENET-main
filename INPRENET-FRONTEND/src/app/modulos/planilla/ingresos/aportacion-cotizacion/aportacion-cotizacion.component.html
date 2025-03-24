@@ -1,0 +1,104 @@
+<div class="container">
+  <h1 class="title">Parametrización de Cotizaciones y Aportaciones</h1>
+
+  <!-- Formulario para ingresar parámetros -->
+  <section class="form-container">
+    <h2>Agregar Parámetro</h2>
+    <form (submit)="addParametro(+year.value, tipo.value, porcentaje.value, sector.value);
+                    year.value=''; tipo.value=''; porcentaje.value=''; sector.value=''; $event.preventDefault()">
+      
+      <input #year type="number" placeholder="Año" required />
+
+      <select #tipo required>
+        <option value="" disabled selected>Seleccionar Tipo</option>
+        <option value="COTIZACIÓN">COTIZACIÓN</option>
+        <option value="APORTACIÓN">APORTACIÓN</option>
+      </select>
+
+      <select #sector required>
+        <option value="" disabled selected>Seleccionar Sector</option>
+        <option value="Público">Público</option>
+        <option value="Privado">Privado</option>
+      </select>
+
+      <input #porcentaje type="text" placeholder="IPC" required />
+      <!-- <input #descripcion type="text" placeholder="Descripción" required />
+       -->
+      <button type="submit" class="btn primary">Agregar Parámetro</button>
+    </form>
+  </section>
+
+  <!-- 📌 Tabla con Angular Material -->
+  <!-- 📌 Tabla con Angular Material -->
+  <section class="table-container">
+    <h2>Historial de Parámetros por Año</h2>
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+
+        <!-- Año -->
+        <ng-container matColumnDef="year">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Año</th>
+          <td mat-cell *matCellDef="let row">{{ row.year }}</td>
+        </ng-container>
+
+        <!-- Sector -->
+        <ng-container matColumnDef="sector">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Sector</th>
+          <td mat-cell *matCellDef="let row">{{ row.sector }}</td>
+        </ng-container>
+
+        <!-- Sueldo -->
+        <ng-container matColumnDef="sueldoMin">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Sueldo Mínimo</th>
+          <td mat-cell *matCellDef="let row">{{ row.sueldoMin }} L</td>
+        </ng-container>
+
+        <ng-container matColumnDef="sueldoMax">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Sueldo Máximo</th>
+          <td mat-cell *matCellDef="let row">{{ row.sueldoMax }} L</td>
+        </ng-container>
+
+        <!-- Cotización -->
+        <ng-container matColumnDef="cotizacionMin">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Cotización Mínima</th>
+          <td mat-cell *matCellDef="let row">{{ row.cotizacionMin }} L</td>
+        </ng-container>
+
+        <ng-container matColumnDef="cotizacionMax">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Cotización Máxima</th>
+          <td mat-cell *matCellDef="let row">{{ row.cotizacionMax }} L</td>
+        </ng-container>
+
+        <!-- Aportación -->
+        <ng-container matColumnDef="aportacionMin">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Aportación Mínima</th>
+          <td mat-cell *matCellDef="let row">{{ row.aportacionMin }} L</td>
+        </ng-container>
+
+        <ng-container matColumnDef="aportacionMax">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Aportación Máxima</th>
+          <td mat-cell *matCellDef="let row">{{ row.aportacionMax }} L</td>
+        </ng-container>
+
+        <!-- Porcentaje -->
+        <ng-container matColumnDef="porcentajeCotizacion">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Porcentaje Cotización</th>
+          <td mat-cell *matCellDef="let row">{{ row.porcentajeCotizacion }}</td>
+        </ng-container>
+
+        <!-- Nueva columna: Porcentaje de Aportación -->
+        <ng-container matColumnDef="porcentajeAportacion">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Porcentaje Aportación</th>
+          <td mat-cell *matCellDef="let row">{{ row.porcentajeAportacion }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </section>
+
+</div>

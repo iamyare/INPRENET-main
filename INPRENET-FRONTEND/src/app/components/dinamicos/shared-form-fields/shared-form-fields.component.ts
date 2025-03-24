@@ -1,0 +1,113 @@
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { FormGroup, FormControl, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { FieldArrays } from 'src/app/shared/Interfaces/field-arrays';
+
+@Component({
+  selector: 'app-shared-form-fields',
+  templateUrl: './shared-form-fields.component.html',
+  styleUrls: ['./shared-form-fields.component.scss']
+})
+export class SharedFormFieldsComponent implements OnInit {
+  @Input() parentForm!: FormGroup;
+  @Input() fields: FieldArrays[] = [];
+  @Output() selectChange = new EventEmitter<{ fieldName: string, value: any, formGroup: FormGroup }>();
+
+  ngOnInit() {
+    if (!(this.parentForm instanceof FormGroup)) {
+      throw new Error('parentForm is not an instance of FormGroup');
+    }
+
+    // Aplicamos validadores a los campos configurados
+    this.applyUniqueValidators();
+
+    // Marcar todos los controles como "touched" para que se muestren los errores desde el principio
+    this.parentForm.markAllAsTouched();
+  }
+
+  // Obtiene un control del formulario
+  getControl(name: any): FormControl {
+    const control = this.parentForm.get(name);
+    if (!(control instanceof FormControl)) {
+      throw new Error(`Control ${name} is not an instance of FormControl`);
+    }
+    return control as FormControl;
+  }
+
+  // Aplica validadores de unicidad si están configurados
+  applyUniqueValidators() {
+    this.fields.forEach((field) => {
+      if (field.validations?.includes('unique')) {
+        const control = this.getControl(field.name);
+        control.setValidators([
+          ...(control.validator ? [control.validator] : []),
+          this.uniqueFieldValidator(field.name),
+        ]);
+        control.updateValueAndValidity();
+      }
+    });
+  }
+
+  // Validador personalizado para verificar la unicidad del campo
+  uniqueFieldValidator(fieldName: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+
+      const controls = this.parentForm.controls;
+      let count = 0;
+
+      Object.keys(controls).forEach((key) => {
+        const fieldControl = this.parentForm.get(key);
+        // Verificamos cuántos controles tienen el mismo valor
+        if (fieldControl && fieldControl.value === control.value && key !== fieldName) {
+          count++;
+        }
+      });
+
+      return count > 0 ? { fieldNotUnique: true } : null;
+    };
+  }
+
+  // Obtiene los campos que pertenecen a una fila específica
+  getFieldsInRow(rowIndex: number): FieldArrays[] {
+    return this.fields.filter((field: FieldArrays) => field.layout?.row === rowIndex);
+  }
+
+  // Obtiene los índices de filas en el formulario
+  getRowIndices(): number[] {
+    const rows = new Set<number>();
+    this.fields.forEach((field: FieldArrays) => rows.add(field.layout?.row ?? 0));
+    return Array.from(rows).sort((a, b) => a - b);
+  }
+
+  // Manejador de cambio en select
+  onSelectChange(fieldName: string, event: any) {
+    this.selectChange.emit({ fieldName, value: event.value, formGroup: this.parentForm });
+  }
+
+  // Función para hacer el track de los elementos de las filas y mejorar rendimiento
+  trackByFn(index: number, item: any): any {
+    return index;
+  }
+
+  // Función para obtener el mensaje de error basado en el tipo de error
+  getErrorMessage(control: FormControl, errorKey: string): string {
+    const errorMessages: { [key: string]: string } = {
+      required: 'Este campo es requerido',
+      maxlength: `Ha excedido el número máximo de caracteres`,
+      minlength: `El número mínimo de caracteres es ${control.errors?.['minlength']?.requiredLength}`,
+      email: 'Correo electrónico inválido',
+      min: `El valor debe ser mayor o igual a ${control.errors?.['min']?.min}`,
+      max: `El valor debe ser menor o igual a ${control.errors?.['max']?.max}`,
+      pattern: 'Formato incorrecto',
+      fieldNotUnique: 'El número de identificación ya ha sido ingresado.',
+      identificacionDuplicada: 'No puede ser igual al número de identificación del afiliado.'
+    };
+    return errorMessages[errorKey] || 'Error desconocido';
+  }
+
+  // Obtiene los "keys" de error de un control
+  getErrorKeys(controlName: string): string[] {
+    const control = this.getControl(controlName);
+    return control.errors ? Object.keys(control.errors) : [];
+  }
+}

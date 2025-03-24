@@ -1,0 +1,120 @@
+<!-- <form class="example-form" [formGroup]="formGroup" ngNativeValidate>
+  <mat-slide-toggle color="primary" formControlName="acceptTerms">¿Desea asignar los beneficios mediante documento de excel?</mat-slide-toggle>
+</form> -->
+
+<div class="basic-container">
+  <div class="card" style="background-color: white; margin: 1% 0% 1% 0%; padding: 0% 0% 1% 0%; text-align: center;">
+    <app-dynamic-form [fields]="myFormFields" titulo="Buscar Afiliado/Jubilado/Pensionado"
+      subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
+
+      <div class="button-container" style="display: flex; justify-content: center; margin: 1% 0;">
+        <button mat-raised-button color="primary" style="padding: 0rem; width: 15%; color: white;" [disabled]="form.invalid" (click)="previsualizarInfoAfil()">
+          Mostrar información del afiliado
+        </button>
+      </div>
+  </div>
+
+  <!-- Asignación de beneficios uno por uno -->
+  <div  class="card" *ngIf="Afiliado" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
+    <div style="margin: 2% 2% 2% 2%">
+      <h1 class="custom-header"  style="font-size: 2rem">Datos Generales Cliente</h1>
+      <div>
+        <table>
+          <tr style="background-color: #f2f2f2">
+            <th>Tipo Persona</th>
+            <td>{{ Afiliado.tipo_persona }}</td>
+            <th>Fallecido</th>
+            <td>{{ Afiliado.fallecido }}</td>
+
+            <th *ngIf="Afiliado.tipo_persona == 'AFILIADO'">Estado</th>
+            <td *ngIf="Afiliado.tipo_persona  == 'AFILIADO'">{{ Afiliado.estado_persona }}</td>
+
+            <th>DNI de afiliado</th>
+            <td>{{ Afiliado.dni }}</td>
+            <th>Nombre de afiliado</th>
+            <td>{{ Afiliado.nombreCompleto }}</td>
+            <th>Género</th>
+            <td>{{ Afiliado.sexo }}</td>
+            <th>Voluntario</th>
+            <td>{{ Afiliado.voluntario }}</td>
+          </tr>
+          <tr>
+            <th>Fecha nacimiento</th>
+            <td>{{ Afiliado.fecha_nacimiento }}</td>
+            <th>Dirección de residencia</th>
+            <td>{{ Afiliado.direccion_residencia }}</td>
+            <th>Teléfono 1</th>
+            <td>{{ Afiliado.telefono_1 }}</td>
+            <th>Estado civil</th>
+            <td>{{ Afiliado.estado_civil }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+
+    <!--Afiliado.tipo_persona == 'REGISTRADO' ||-->
+    <div *ngIf="Afiliado.fallecido == 'SI' && (
+    Afiliado.tipo_persona == 'AFILIADO' ||
+    Afiliado.tipo_persona == 'JUBILADO' ||
+    Afiliado.tipo_persona == 'PENSIONADO' ||
+    Afiliado.tipo_persona == 'VOLUNTARIO')"
+      style="padding: 1%">
+      <app-dynamic-table-prueba
+      titulo="Beneficiarios Del {{Afiliado.tipo_persona}}"
+      subtitulo="Para asignar Beneficios haga click sobre un item de la siguiente tabla"
+      [columns]="myColumns"
+      [data]="filas"
+      [getData]="getFilas"
+      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+      (rowClicked)="manejarRowClick($event)"
+      [enableRowClick]="true"
+        ></app-dynamic-table-prueba>
+    </div>
+
+  <!-- PARA DESIGNADOS BENEFICIARIOS -->
+   <div *ngIf="filas.length > 0">
+    <div *ngIf="filas[0]?.estado_afil_detalle_persona != 'ERROR' && mostrarB && Afiliado.fallecido == 'SI' && (
+      (Afiliado.tipo_persona == 'AFILIADO' && (Afiliado.estado_persona == 'REGISTRADO' || Afiliado.estado_persona == 'ACTIVO' || Afiliado.estado_persona == 'SUSPENSO AUTOMATICO' || Afiliado.estado_persona == 'SUSPENSO POR OFICIO' )) ||
+      Afiliado.tipo_persona == 'JUBILADO'  && (Afiliado.estado_persona != 'ERROR')||
+      Afiliado.tipo_persona == 'PENSIONADO'  && (Afiliado.estado_persona != 'ERROR'))"
+      style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+      <div *ngIf="filas[0].estado_afil_detalle_persona != 'ERROR'">
+        <app-dynamic-form
+          [fields]="myFormFields2"
+          titulo="Datos sobre el beneficio"
+          subtitulo="Completa la información correspondiente"
+          (selectChange)="prueba1($event)"
+          (newDatBenChange)="obtenerDatosFormBen($event)"
+        ></app-dynamic-form>
+        <button [disabled]="FormBen.invalid" mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0"
+          (click)="guardarNTBenef()">
+          Asignar beneficio
+        </button>
+      </div>
+    </div>
+
+    <div class="anaranjado desapareciendo" *ngIf="filas[0]?.estado_afil_detalle_persona == 'ERROR' && mostrarB">
+      NO SE PUEDE ASIGNAR BENEFICIOS, DEBIDO A QUE LA PERSONA TIENE ESTADO {{filas[0].estado_afil_detalle_persona}}
+      MOTIVO: {{filas[0].observacion_detalle_persona}}
+    </div>
+   </div>
+
+  <!-- [disabled]="FormBen.invalid" -->
+  <!-- && hasBeneficios.length == 0 -->
+  <!-- PARA AFILIADOS -->
+  <div *ngIf="mostrarDB && Afiliado.fallecido == 'NO'  && (
+    (Afiliado.tipo_persona == 'AFILIADO' && Afiliado.estado_persona == 'ACTIVO') ||
+    (Afiliado.tipo_persona == 'AFILIADO' && Afiliado.estado_persona == 'SUSPENSO AUTOMATICO' || Afiliado.estado_persona == 'SUSPENSO POR OFICIO' ) ||
+    Afiliado.tipo_persona == 'JUBILADO'  && (Afiliado.estado_persona != 'ERROR') || Afiliado.tipo_persona == 'PENSIONADO'  && (Afiliado.estado_persona != 'ERROR')
+    )" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+    <app-dynamic-form [fields]="myFormFields1" titulo="Datos sobre el beneficio"
+      subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatos1($event)"(selectChange)="prueba($event)" ></app-dynamic-form>
+      <!-- [disabled]="form1.invalid" -->
+    <button mat-raised-button color="primary" [disabled]="form1.invalid"  style="color: white; margin: 1% 0 1% 0"
+      (click)="guardarNTBenef()">
+      Asignar Beneficio
+    </button>
+  </div>
+
+</div>

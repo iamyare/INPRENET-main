@@ -1,0 +1,21 @@
+<div
+  style="background-color: white; border-radius: 10px; padding: 20px"
+  class="editar-beneficio-container"
+>
+  <app-dynamic-table
+    style="width: 100%"
+    titulo="Editar Tipo De Ingreso"
+    subtitulo="Completa la información correspondiente"
+    [columns]="myColumns"
+    [data]="filas"
+    [getData]="getFilas"
+    (ejecutarFuncionAsincronaEvent)="
+      ejecutarFuncionAsincronaDesdeOtroComponente($event)
+    "
+    [nombreEncabezadoUno]="'Editar'"
+    [mostrarBotonUno]="true"
+    [etiquetaBotonUno]="'Editar'"
+    (accionBotonUno)="manejarAccionUno($event)"
+  >
+  </app-dynamic-table>
+</div>

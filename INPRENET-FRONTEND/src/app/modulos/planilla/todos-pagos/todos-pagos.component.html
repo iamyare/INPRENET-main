@@ -1,0 +1,71 @@
+<div *ngIf="loading" class="loading">
+  <p>Cargando pagos y beneficios...</p>
+</div>
+
+<div *ngIf="!loading && allPagosData.length > 0">
+  <button mat-raised-button color="primary" (click)="generarPDF()">Descargar PDF</button>
+
+  <table mat-table [dataSource]="allPagosData" class="mat-elevation-z8">
+
+    <!-- Planilla Column -->
+    <ng-container matColumnDef="planilla">
+      <th mat-header-cell *matHeaderCellDef> Planilla </th>
+      <td mat-cell *matCellDef="let pago"> {{ pago.planilla.codigo_planilla }} </td>
+    </ng-container>
+
+    <!-- Banco Column -->
+    <ng-container matColumnDef="bancos">
+      <th mat-header-cell *matHeaderCellDef> Banco </th>
+      <td mat-cell *matCellDef="let pago">
+        <ul>
+          <li *ngFor="let beneficio of pago.beneficios">
+            {{ beneficio.pagos[0]?.banco }} - {{ beneficio.pagos[0]?.num_cuenta }}
+          </li>
+        </ul>
+      </td>
+    </ng-container>
+
+    <!-- Monto Pagado Column -->
+    <ng-container matColumnDef="montoPagado">
+      <th mat-header-cell *matHeaderCellDef> Monto Pagado </th>
+      <td mat-cell *matCellDef="let pago">
+        <ul>
+          <li *ngFor="let beneficio of pago.beneficios">
+            {{ beneficio.beneficio }}: {{ beneficio.totalPagado | currency : "L" : "symbol" : "1.2-2" }}
+          </li>
+        </ul>
+      </td>
+    </ng-container>
+
+    <!-- Deducciones Column -->
+    <ng-container matColumnDef="deducciones">
+      <th mat-header-cell *matHeaderCellDef> Deducciones </th>
+      <td mat-cell *matCellDef="let pago">
+        <ul>
+          <li *ngFor="let deduccion of pago.deducciones">
+            {{ deduccion.deduccion }}: {{ deduccion.monto_aplicado | currency : "L" : "symbol" : "1.2-2" }}
+          </li>
+        </ul>
+      </td>
+    </ng-container>
+
+    <!-- Total Column -->
+    <ng-container matColumnDef="total">
+      <th mat-header-cell *matHeaderCellDef> Total </th>
+      <td mat-cell *matCellDef="let pago">
+        {{ calcularTotal(pago) | currency : "L" : "symbol" : "1.2-2" }}
+      </td>
+    </ng-container>
+
+    <!-- Table Header -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+    <!-- Table Rows -->
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+  </table>
+</div>
+
+<div *ngIf="!loading && allPagosData.length === 0">
+  <p>No se encontraron pagos ni beneficios para esta persona.</p>
+</div>

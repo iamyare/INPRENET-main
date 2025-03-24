@@ -1,0 +1,78 @@
+<app-custom-container></app-custom-container>
+<br>
+<br>
+<div class="register-wrapper">
+  <div class="register-container mat-elevation-z8">
+    <div class="logo-container">
+      <img src="../assets/images/LOGO INPRENET D.svg" alt="Logo de la Aplicación">
+    </div>
+    <h2>Completa tu Registro</h2>
+    <form [formGroup]="form" (ngSubmit)="enviarInformacionDeSeguridad()">
+      <div class="form-grid">
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field col-12">
+            <mat-label>Correo Electrónico</mat-label>
+            <input matInput type="email" formControlName="correo" readonly>
+          </mat-form-field>
+        </div>
+        <!-- <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field col-12">
+            <mat-label>Número de Identificación</mat-label>
+            <input matInput type="text" formControlName="numero_identificacion">
+          </mat-form-field>
+        </div> -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field col-6">
+            <mat-label>Teléfono</mat-label>
+            <input matInput type="text" formControlName="telefonoEmpleado">
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field col-6">
+            <mat-label>Teléfono Secundario</mat-label>
+            <input matInput type="text" formControlName="telefonoEmpleado2">
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field col-6">
+            <mat-label>Contraseña</mat-label>
+            <input matInput [type]="passwordVisible ? 'text' : 'password'" formControlName="contrasena">
+            <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()" tabindex="-1">
+              <mat-icon>{{ passwordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="form.controls['contrasena'].hasError('required')">
+              La contraseña es obligatoria.
+            </mat-error>
+            <mat-error *ngIf="form.controls['contrasena'].hasError('pattern')">
+              La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field col-6">
+            <mat-label>Confirmar Contraseña</mat-label>
+            <input matInput [type]="confirmPasswordVisible ? 'text' : 'password'" formControlName="confirmarContrasenia">
+            <button mat-icon-button matSuffix type="button" (click)="toggleConfirmPasswordVisibility()" tabindex="-1">
+              <mat-icon>{{ confirmPasswordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="form.controls['confirmarContrasenia'].hasError('confirmarContrasena')">
+              Las contraseñas no coinciden
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <!-- <div class="form-group col-6">
+            <label for="archivo">Sube tu identificación</label>
+            <input id="archivo" type="file" (change)="onFileChange($event, 'archivo')" accept="image/*" />
+          </div> -->
+          <div class="form-group col-6">
+            <label for="fotografia">Sube tu fotografía para tu perfil</label>
+            <input id="fotografia" type="file" (change)="onFileChange($event, 'fotografia')" accept="image/*" />
+          </div>
+        </div>
+        <div class="form-row">
+          <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="!isFormComplete()">
+            Completar Registro
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

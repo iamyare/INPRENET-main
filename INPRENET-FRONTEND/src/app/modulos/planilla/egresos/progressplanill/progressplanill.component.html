@@ -1,0 +1,31 @@
+<div class="container-fluid" style="position: sticky">
+  <ul class="list-unstyled multi-steps pointer-cursor">
+    <!-- <li (click)="prueba()" *ngIf="estadoSubDed" [ngClass]="datosG ? 'is-active' : 'inactive'" id="estado">Subir
+            Deducciones
+        </li> -->
+
+    <!--    <li (click)="prueba2()" [ngClass]="datosCT ? 'is-active' : 'inactive'">Ver Deducciones</li>
+        <li (click)="prueba2()" [ngClass]="datosCT ? 'is-active' : 'inactive'">Ver Beneficios</li> -->
+    <li
+      (click)="prueba()"
+      *ngIf="estadoSubDed"
+      [ngClass]="datosG ? 'is-active' : 'inactive'"
+    >
+      Abrir Nueva Planilla
+    </li>
+    <!--     <li (click)="prueba5()" [ngClass]="datosB ? 'is-active' : 'inactive'">
+      Cargar Beneficios
+    </li> -->
+    <li (click)="prueba2()" [ngClass]="datosCT ? 'is-active' : 'inactive'">
+      Enviar a planilla preliminar
+    </li>
+    <li (click)="prueba3()" [ngClass]="datosHS ? 'is-active' : 'inactive'">
+      Visualización y Cierre de Planilla Preliminar
+    </li>
+    <li (click)="prueba4()" [ngClass]="datosRP ? 'is-active' : 'inactive'">
+      Visualización de Planilla Definitiva
+    </li>
+    <!--  <li (click)="prueba4()" [ngClass]="datosRP ? 'is-active' : 'inactive'">Ver Planilla Definitiva</li>
+        <li (click)="prueba5()" [ngClass]="datosB ? 'is-active' : 'inactive'">Finalizar</li> -->
+  </ul>
+</div>

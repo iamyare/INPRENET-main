@@ -1,0 +1,598 @@
+<div class="card">
+  <div class="card-header card-header-danger tittle">
+    <h4 class="card-title">Datos Generales</h4>
+    <p class="card-category">Completa la información correspondiente</p>
+  </div>
+  <div class="card-body">
+    <app-camara *ngIf="useCamera && puedeEditar" (imageCaptured)="handleImageCaptured($event)">
+    </app-camara>    
+    
+    <!-- Mensaje de error si no se ha capturado la foto -->
+    <div *ngIf="isPhotoInvalid" class="error-message">
+      Por favor, capture su fotografía.
+    </div>    
+
+    <form [formGroup]="formGroup" style="margin: 1%;" (change)="onDatosGeneralesChange()">
+      <div class="row">
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Tipo de Identificación</mat-label>
+            <mat-icon matPrefix>badge</mat-icon>
+            <mat-select formControlName="id_tipo_identificacion">
+              <mat-option *ngFor="let tipo of tipoIdent" [value]="tipo.value">
+                {{ tipo.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('id_tipo_identificacion')?.hasError('required') && formGroup.get('id_tipo_identificacion')?.touched">
+              Tipo de Identificación es requerido.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Número de Identificación</mat-label>
+            <mat-icon matPrefix>credit_card</mat-icon>
+            <input matInput formControlName="n_identificacion" (blur)="formGroup.get('n_identificacion')?.markAsTouched()">
+            <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('required') && formGroup.get('n_identificacion')?.touched">
+              Número de Identificación es requerido.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('minlength') && formGroup.get('n_identificacion')?.touched">
+              El número de identificación debe tener al menos {{ formGroup.get('id_tipo_identificacion')?.value === 3 ? 9 : 13 }} caracteres.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('maxlength') && formGroup.get('n_identificacion')?.touched">
+              El número de identificación no puede tener más de 15 caracteres.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('n_identificacion')?.hasError('pattern') && formGroup.get('n_identificacion')?.touched">
+              El número de identificación {{ formGroup.get('id_tipo_identificacion')?.value === 3 ? 'puede contener números y letras' : 'solo puede contener números' }}.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Número de RTN</mat-label>
+            <mat-icon matPrefix>credit_card</mat-icon>
+            <input matInput formControlName="rtn" (blur)="formGroup.get('rtn')?.markAsTouched()">
+            <mat-error *ngIf="formGroup.get('rtn')?.hasError('required') && formGroup.get('rtn')?.touched">
+              Número de RTN es requerido.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('rtn')?.hasError('maxlength') && formGroup.get('rtn')?.touched">
+              Número de RTN no puede tener más de 14 caracteres.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('rtn')?.hasError('pattern') && formGroup.get('rtn')?.touched">
+              Número de RTN solo puede contener números.
+            </mat-error>
+          </mat-form-field>
+          
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Fecha de Afiliación</mat-label>
+            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+            <input matInput formControlName="fecha_afiliacion" [matDatepicker]="picker2" [max]="minDate" (blur)="formGroup.get('fecha_afiliacion')?.markAsTouched()">
+            <mat-hint>DD/MM/YYYY</mat-hint>
+            <mat-error *ngIf="formGroup.get('fecha_afiliacion')?.hasError('required') && formGroup.get('fecha_afiliacion')?.touched">
+              Fecha de Afiliación es requerida.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Fecha de Nacimiento</mat-label>
+            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
+            <input matInput formControlName="fecha_nacimiento" [matDatepicker]="picker1" [max]="minDate" (blur)="formGroup.get('fecha_nacimiento')?.markAsTouched()">
+            <mat-hint>DD/MM/YYYY</mat-hint>
+            <mat-error *ngIf="formGroup.get('fecha_nacimiento')?.hasError('required') && formGroup.get('fecha_nacimiento')?.touched">
+              Fecha de Nacimiento es requerida.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Género</mat-label>
+            <mat-icon matPrefix>wc</mat-icon>
+            <mat-select formControlName="genero" (blur)="formGroup.get('genero')?.markAsTouched()">
+              <mat-option *ngFor="let item of genero" [value]="item.value">
+                {{ item.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('genero')?.hasError('required') && formGroup.get('genero')?.touched">
+              Género es requerido.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Primer Nombre <span class="requerido">*</span></mat-label>
+            <mat-icon matPrefix>person</mat-icon>
+            <input matInput formControlName="primer_nombre" (blur)="formGroup.get('primer_nombre')?.markAsTouched()">
+            <mat-error *ngIf="formGroup.get('primer_nombre')?.hasError('required') && formGroup.get('primer_nombre')?.touched">
+              Primer Nombre es requerido.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('primer_nombre')?.hasError('maxlength') && formGroup.get('primer_nombre')?.touched">
+              Primer Nombre no puede tener más de 40 caracteres.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Segundo Nombre</mat-label>
+            <mat-icon matPrefix>person_outline</mat-icon>
+            <input matInput formControlName="segundo_nombre">
+            <mat-error *ngIf="formGroup.get('segundo_nombre')?.invalid && formGroup.get('segundo_nombre')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Segundo Nombre no puede tener más de 40 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Tercer Nombre</mat-label>
+            <mat-icon matPrefix>person_outline</mat-icon>
+            <input matInput formControlName="tercer_nombre">
+            <mat-error *ngIf="formGroup.get('tercer_nombre')?.invalid && formGroup.get('tercer_nombre')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Tercer Nombre no puede tener más de 40 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-6 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Primer Apellido</mat-label>
+            <mat-icon matPrefix>person</mat-icon>
+            <input matInput formControlName="primer_apellido" (blur)="formGroup.get('primer_apellido')?.markAsTouched()">
+            <mat-error *ngIf="formGroup.get('primer_apellido')?.hasError('required') && formGroup.get('primer_apellido')?.touched">
+              Primer Apellido es requerido.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('primer_apellido')?.hasError('maxlength') && formGroup.get('primer_apellido')?.touched">
+              Primer Apellido no puede tener más de 40 caracteres.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('primer_apellido')?.hasError('minlength') && formGroup.get('primer_apellido')?.touched">
+              Primer Apellido debe tener al menos 1 carácter.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('primer_apellido')?.hasError('pattern') && formGroup.get('primer_apellido')?.touched">
+              Primer Apellido tiene formato incorrecto.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-6 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Segundo Apellido</mat-label>
+            <mat-icon matPrefix>person_outline</mat-icon>
+            <input matInput formControlName="segundo_apellido">
+            <mat-error *ngIf="formGroup.get('segundo_apellido')?.invalid && formGroup.get('segundo_apellido')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Segundo Apellido no puede tener más de 40 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-3 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Teléfono Principal</mat-label>
+            <mat-icon matPrefix>phone</mat-icon>
+            <input matInput formControlName="telefono_1" maxlength="12" (blur)="formGroup.get('telefono_1')?.markAsTouched()">
+            <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('required') && formGroup.get('telefono_1')?.touched">
+              Teléfono Principal es requerido.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('minlength') && formGroup.get('telefono_1')?.touched">
+              Teléfono Principal debe tener al menos 8 caracteres.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('maxlength') && formGroup.get('telefono_1')?.touched">
+              Teléfono Principal no puede tener más de 12 caracteres.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('telefono_1')?.hasError('pattern') && formGroup.get('telefono_1')?.touched">
+              Teléfono Principal solo puede contener números.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-3 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Teléfono Secundario</mat-label>
+            <mat-icon matPrefix>phone</mat-icon>
+            <input matInput formControlName="telefono_2">
+            <mat-error *ngIf="formGroup.get('telefono_2')?.invalid && formGroup.get('telefono_2')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Teléfono 2 no puede tener más de 12 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-3 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Correo Principal</mat-label>
+            <mat-icon matPrefix>email</mat-icon>
+            <input matInput formControlName="correo_1" type="email" (blur)="formGroup.get('correo_1')?.markAsTouched()">
+            <mat-error *ngIf="formGroup.get('correo_1')?.hasError('required') && formGroup.get('correo_1')?.touched">
+              Correo Principal es requerido.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('correo_1')?.hasError('maxlength') && formGroup.get('correo_1')?.touched">
+              Correo Principal no puede tener más de 40 caracteres.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('correo_1')?.hasError('email') && formGroup.get('correo_1')?.touched">
+              Debes ingresar un correo válido.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-3 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Correo Secundario</mat-label>
+            <mat-icon matPrefix>email</mat-icon>
+            <input matInput formControlName="correo_2" type="email">
+            <mat-error *ngIf="formGroup.get('correo_2')?.invalid && formGroup.get('correo_2')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Debes ingresar un correo válido.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Estado Civil</mat-label>
+            <mat-icon matPrefix>favorite</mat-icon>
+            <mat-select formControlName="estado_civil" (blur)="formGroup.get('estado_civil')?.markAsTouched()">
+              <mat-option *ngFor="let estado of estadoCivil" [value]="estado.label">
+                {{ estado.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('estado_civil')?.hasError('required') && formGroup.get('estado_civil')?.touched">
+              Estado Civil es requerido.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Cantidad de Hijos</mat-label>
+            <mat-icon matPrefix>child_care</mat-icon>
+            <input matInput formControlName="cantidad_hijos" type="number" (blur)="formGroup.get('cantidad_hijos')?.markAsTouched()">
+            <mat-error *ngIf="formGroup.get('cantidad_hijos')?.hasError('required') && formGroup.get('cantidad_hijos')?.touched">
+              Cantidad de Hijos es requerida.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('cantidad_hijos')?.hasError('pattern') && formGroup.get('cantidad_hijos')?.touched">
+              Cantidad de Hijos debe ser un número válido.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Cantidad de Dependientes</mat-label>
+            <mat-icon matPrefix>people</mat-icon>
+            <input matInput formControlName="cantidad_dependientes" type="number" (blur)="formGroup.get('cantidad_dependientes')?.markAsTouched()">
+            <mat-error *ngIf="formGroup.get('cantidad_dependientes')?.hasError('required') && formGroup.get('cantidad_dependientes')?.touched">
+              Cantidad de Dependientes es requerida.
+            </mat-error>
+            <mat-error *ngIf="formGroup.get('cantidad_dependientes')?.hasError('pattern') && formGroup.get('cantidad_dependientes')?.touched">
+              Cantidad de Dependientes debe ser un número válido.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Profesion</mat-label>
+            <mat-icon matPrefix>school</mat-icon>
+            <mat-select formControlName="grado_academico" (blur)="formGroup.get('grado_academico')?.markAsTouched()">
+              <mat-option *ngFor="let grado of grado_academico" [value]="grado.value">
+                {{ grado.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('grado_academico')?.hasError('required') && formGroup.get('grado_academico')?.touched">
+              Grado Académico es requerido.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Sector Economico</mat-label>
+            <mat-icon matPrefix>work</mat-icon>
+            <mat-select (selectionChange)="onDatosGeneralesChange()" formControlName="id_profesion">
+              <mat-option *ngFor="let profesion of profesiones" [value]="profesion.value">
+                {{ profesion.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('id_profesion')?.invalid && formGroup.get('id_profesion')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Profesión es requerida.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Representación</mat-label>
+            <mat-icon matPrefix>account_balance</mat-icon>
+            <mat-select formControlName="representacion" (blur)="formGroup.get('representacion')?.markAsTouched()">
+              <mat-option *ngFor="let item of representacion" [value]="item.value">
+                {{ item.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('representacion')?.hasError('required') && formGroup.get('representacion')?.touched">
+              Representación es requerida.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Nacionalidad</mat-label>
+            <mat-icon matPrefix>public</mat-icon>
+            <mat-select formControlName="id_pais" (blur)="formGroup.get('id_pais')?.markAsTouched()">
+              <mat-option *ngFor="let pais of nacionalidades" [value]="pais.value">
+                {{ pais.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('id_pais')?.hasError('required') && formGroup.get('id_pais')?.touched">
+              Nacionalidad es requerida.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-4 col-md-12" *ngIf="formGroup.get('id_pais')?.value === 1 || formGroup.get('id_pais')?.value === null">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Departamento de Nacimiento</mat-label>
+            <mat-icon matPrefix>location_on</mat-icon>
+            <mat-select formControlName="id_departamento_nacimiento" (selectionChange)="onDepartamentoNacimientoChange($event)" (blur)="formGroup.get('id_departamento_nacimiento')?.markAsTouched()">
+              <mat-option *ngFor="let departamento of departamentosNacimiento" [value]="departamento.value">
+                {{ departamento.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('id_departamento_nacimiento')?.hasError('required') && formGroup.get('id_departamento_nacimiento')?.touched">
+              Departamento de Nacimiento es requerido.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-4 col-md-12" *ngIf="formGroup.get('id_pais')?.value === 1 || formGroup.get('id_pais')?.value === null">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Municipio de Nacimiento</mat-label>
+            <mat-icon matPrefix>location_city</mat-icon>
+            <mat-select formControlName="id_municipio_nacimiento" (blur)="formGroup.get('id_municipio_nacimiento')?.markAsTouched()">
+              <mat-option *ngFor="let municipio of municipiosNacimiento" [value]="municipio.value">
+                {{ municipio.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('id_municipio_nacimiento')?.hasError('required') && formGroup.get('id_municipio_nacimiento')?.touched">
+              Municipio de Nacimiento es requerido.
+            </mat-error>
+          </mat-form-field>                  
+        </div>
+        
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Departamento de Residencia</mat-label>
+            <mat-icon matPrefix>place</mat-icon>
+            <mat-select formControlName="id_departamento_residencia" (selectionChange)="onDepartamentoChange($event)" (blur)="formGroup.get('id_departamento_residencia')?.markAsTouched()">
+              <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+                {{ departamento.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('id_departamento_residencia')?.hasError('required') && formGroup.get('id_departamento_residencia')?.touched">
+              Departamento de Residencia es requerido.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Municipio de Residencia</mat-label>
+            <mat-icon matPrefix>place</mat-icon>
+            <mat-select formControlName="id_municipio_residencia" (blur)="formGroup.get('id_municipio_residencia')?.markAsTouched()">
+              <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
+                {{ municipio.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('id_municipio_residencia')?.hasError('required') && formGroup.get('id_municipio_residencia')?.touched">
+              Municipio de Residencia es requerido.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Grupo Étnico</mat-label>
+            <mat-icon matPrefix>group</mat-icon>
+            <mat-select formControlName="grupo_etnico" (blur)="formGroup.get('grupo_etnico')?.markAsTouched()">
+              <mat-option *ngFor="let grupo of grupo_etnico" [value]="grupo.value">
+                {{ grupo.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formGroup.get('grupo_etnico')?.hasError('required') && formGroup.get('grupo_etnico')?.touched">
+              Grupo Étnico es requerido.
+            </mat-error>
+          </mat-form-field>          
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Barrio/Colonia</mat-label>
+            <mat-icon matPrefix>home</mat-icon>
+            <input matInput formControlName="barrio_colonia">
+            <mat-error *ngIf="formGroup.get('barrio_colonia')?.invalid && formGroup.get('barrio_colonia')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Barrio/Colonia no puede tener más de 75 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Avenida</mat-label>
+            <mat-icon matPrefix>location_on</mat-icon>
+            <input matInput formControlName="avenida">
+            <mat-error *ngIf="formGroup.get('avenida')?.invalid && formGroup.get('avenida')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Avenida no puede tener más de 75 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Calle</mat-label>
+            <mat-icon matPrefix>location_on</mat-icon>
+            <input matInput formControlName="calle">
+            <mat-error *ngIf="formGroup.get('calle')?.invalid && formGroup.get('calle')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Calle no puede tener más de 75 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Sector</mat-label>
+            <mat-icon matPrefix>domain</mat-icon>
+            <input matInput formControlName="sector">
+            <mat-error *ngIf="formGroup.get('sector')?.invalid && formGroup.get('sector')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Sector no puede tener más de 75 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Bloque</mat-label>
+            <mat-icon matPrefix>home_work</mat-icon>
+            <input matInput formControlName="bloque">
+            <mat-error *ngIf="formGroup.get('bloque')?.invalid && formGroup.get('bloque')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Bloque no puede tener más de 25 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Número de Casa</mat-label>
+            <mat-icon matPrefix>home</mat-icon>
+            <input matInput formControlName="numero_casa">
+            <mat-error *ngIf="formGroup.get('numero_casa')?.invalid && formGroup.get('numero_casa')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Número de Casa no puede tener más de 25 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Color de Casa</mat-label>
+            <mat-icon matPrefix>palette</mat-icon>
+            <input matInput formControlName="color_casa">
+            <mat-error *ngIf="formGroup.get('color_casa')?.invalid && formGroup.get('color_casa')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Color de Casa no puede tener más de 40 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Aldea</mat-label>
+            <mat-icon matPrefix>map</mat-icon>
+            <input matInput formControlName="aldea">
+            <mat-error *ngIf="formGroup.get('aldea')?.invalid && formGroup.get('aldea')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Aldea no puede tener más de 75 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Caserío</mat-label>
+            <mat-icon matPrefix>map</mat-icon>
+            <input matInput formControlName="caserio">
+            <mat-error *ngIf="formGroup.get('caserio')?.invalid && formGroup.get('caserio')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              Caserío no puede tener más de 75 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-12 col-md-12">
+          <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+            <mat-label>Otro Punto de Referencia</mat-label>
+            <mat-icon matPrefix>home</mat-icon>
+            <textarea matInput formControlName="direccion_residencia" rows="3"></textarea>
+            <mat-error *ngIf="formGroup.get('direccion_residencia')?.hasError('maxlength')">
+              La dirección no puede exceder los 200 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      
+
+      <div class="row">
+        <div class="col-lg-12 col-md-12">
+          <label>¿Posee alguna discapacidad?</label>
+          <mat-radio-group formControlName="discapacidad" [disabled]="!isEditable" (change)="onDiscapacidadChange($event)">
+            <mat-radio-button [value]="true">Sí</mat-radio-button>
+            <mat-radio-button [value]="false">No</mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <div class="col-lg-12 col-md-12" *ngIf="discapacidadSeleccionada">
+          <div class="discapacidades-container">
+            <div formGroupName="discapacidades" class="grid-container">
+              <div *ngFor="let tipo of discapacidades" class="discapacidad-item">
+                <mat-checkbox [formControlName]="tipo.label" [disabled]="!isEditable">
+                  {{ tipo.label }}
+                </mat-checkbox>
+              </div>
+            </div>            
+          </div>
+        </div>    
+        <div class="row" *ngIf="discapacidadSeleccionada">
+          <div class="col-lg-12 col-md-12">
+            <label for="fileInput">Carnet de Discapacidad</label>
+            <input 
+              id="fileInput" 
+              type="file" 
+              formControlName="carnet_discapacidad" 
+              (change)="onFileChange($event, 'carnet_discapacidad')"
+              accept="application/pdf"
+            >
+            <mat-error *ngIf="formGroup.get('carnet_discapacidad')?.hasError('required') && formGroup.get('carnet_discapacidad')?.touched">
+              Debes subir el Carnet de Discapacidad si seleccionaste alguna discapacidad.
+          </mat-error>          
+        
+            <!-- Mostrar archivo cargado si existe -->
+            <div *ngIf="formGroup.get('carnet_discapacidad')?.value">
+              <p>Archivo Cargado: {{ formGroup.get('carnet_discapacidad')?.value.name }}</p>
+            </div>
+          </div>
+        </div>
+              
+        <div class="row" *ngIf="carnetDiscapacidadUrl">
+          <div class="col-lg-12 col-md-12">
+            <label>Carnet de Discapacidad:</label>
+            <iframe 
+              [src]="carnetDiscapacidadUrl" 
+              width="100%" 
+              height="600px" 
+              type="application/pdf">
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

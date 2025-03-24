@@ -1,0 +1,24 @@
+.dashboard-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.stats-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.stat-card {
+  width: 200px;
+}
+
+.stat-icon {
+  background-color: #3f51b5;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

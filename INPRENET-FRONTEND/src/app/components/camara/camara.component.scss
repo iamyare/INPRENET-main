@@ -1,0 +1,39 @@
+.btn-spin {
+    background-color: #229e92;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+  
+    mat-icon {
+      font-size: 24px;
+    }
+  
+    &:hover mat-icon {
+      animation: spin 1s linear;
+    }
+  
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  }
+  
+  .row {
+    display: flex;
+    justify-content: center;  // Centra el contenido horizontalmente
+    align-items: center;  // Alinea verticalmente al centro si es necesario
+  }
+  
+  button {
+    margin: 0 auto;  // Asegura que el botón esté centrado incluso en tamaños pequeños
+  }

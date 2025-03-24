@@ -1,0 +1,29 @@
+.causante-card {
+  margin: 10px 0;
+  background-color: #e5f4f3;
+
+  .causante-avatar {
+    background-color: #26a69a;
+  }
+
+  mat-card-header {
+    background-color: #bee4e1;
+  }
+
+  mat-card-title {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #0d7b6c;
+  }
+
+  mat-card-subtitle {
+    font-size: 0.9em;
+    color: #1c9588;
+  }
+
+  mat-card-content {
+    p {
+      color: #178b7e;
+    }
+  }
+}

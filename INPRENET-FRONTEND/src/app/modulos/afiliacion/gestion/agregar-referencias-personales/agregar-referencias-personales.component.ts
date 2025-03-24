@@ -1,0 +1,128 @@
+import { Component, Inject, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+
+@Component({
+  selector: 'app-agregar-referencias-personales',
+  templateUrl: './agregar-referencias-personales.component.html',
+  styleUrls: ['./agregar-referencias-personales.component.scss']
+})
+export class AgregarReferenciasPersonalesComponent implements OnInit {
+  formReferencias: FormGroup;
+  tipo_referencia: any[] = [];
+  parentesco: any[] = [];
+
+  constructor(
+    private fb: FormBuilder,
+    private toastr: ToastrService,
+    private afilService: AfiliacionService,
+    private datosEstaticosService: DatosEstaticosService,
+    private dialogRef: MatDialogRef<AgregarReferenciasPersonalesComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { idPersona: number }
+  ) {
+    this.formReferencias = this.fb.group({
+      refpers: this.fb.array([], [Validators.required])
+    });
+  }
+
+  ngOnInit(): void {
+    this.cargarDatosEstaticos();
+  }
+
+  get referencias(): FormArray {
+    return this.formReferencias.get('refpers') as FormArray;
+  }
+
+  agregarReferencia(datos?: any): void {
+    const referenciaForm = this.fb.group({
+      tipo_referencia: [datos?.tipo_referencia || '', [Validators.required]],
+      primer_nombre: [datos?.primer_nombre || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      segundo_nombre: [datos?.segundo_nombre || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      tercer_nombre: [datos?.tercer_nombre || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      primer_apellido: [datos?.primer_apellido || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      segundo_apellido: [datos?.segundo_apellido || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      direccion: [datos?.direccion || '', [Validators.required, Validators.minLength(10), Validators.maxLength(200)]],
+      telefono_domicilio: [datos?.telefono_domicilio || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
+      telefono_trabajo: [datos?.telefono_trabajo || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
+      telefono_personal: [datos?.telefono_personal || '', [Validators.required ,Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
+      parentesco: [datos?.parentesco || '', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
+    });
+
+    referenciaForm.get('tipo_referencia')?.valueChanges.subscribe(value => {
+      this.cambiarListadoParentesco(value, referenciaForm);
+    });
+
+    this.referencias.push(referenciaForm);
+  }
+
+  eliminarReferencia(index: number): void {
+    if (this.referencias.length > 0) {
+      this.referencias.removeAt(index);
+    }
+  }
+
+  cargarDatosEstaticos(): void {
+    this.tipo_referencia = [
+      { label: 'REFERENCIA PERSONAL', value: 'REFERENCIA PERSONAL' },
+      { label: 'REFERENCIA FAMILIAR', value: 'REFERENCIA FAMILIAR' }
+    ];
+
+    // Cargando parentesco desde el servicio
+    this.parentesco = this.datosEstaticosService.parentesco;
+  }
+
+  cambiarListadoParentesco(tipoReferencia: string, referenciaForm: FormGroup): void {
+    if (tipoReferencia === 'REFERENCIA FAMILIAR') {
+      this.parentesco = this.datosEstaticosService.parentesco;
+    } else if (tipoReferencia === 'REFERENCIA PERSONAL') {
+      this.parentesco = this.datosEstaticosService.parentescoReferenciasPersonales;
+    }
+
+    // Resetear el valor del parentesco cuando cambia el tipo de referencia
+    referenciaForm.get('parentesco')?.setValue('');
+  }
+
+  guardarReferencias() {
+    if (!this.formReferencias.get('refpers')) {
+      this.toastr.error('No hay referencias para guardar');
+      return;
+    }
+
+    const referencias = this.formatReferencias(this.formReferencias.value.refpers);
+    this.afilService.agregarReferencias(this.data.idPersona, referencias).subscribe(
+      (res: any) => {
+        if (res.length > 0) {
+          this.toastr.success("Referencia personal agregada con éxito");
+          this.dialogRef.close(true);
+        }
+      },
+      (error) => {
+        this.toastr.error('Error al agregar referencias personales');
+        console.error('Error al agregar referencias personales:', error);
+      }
+    );
+  }
+
+  private formatReferencias(refpers: any[]): any[] {
+    return refpers.map(referencia => ({
+      tipo_referencia: referencia.tipo_referencia,
+      parentesco: referencia.parentesco,
+      primer_nombre: referencia.primer_nombre,
+      segundo_nombre: referencia.segundo_nombre,
+      tercer_nombre: referencia.tercer_nombre,
+      primer_apellido: referencia.primer_apellido,
+      segundo_apellido: referencia.segundo_apellido,
+      telefono_domicilio: referencia.telefono_domicilio,
+      telefono_trabajo: referencia.telefono_trabajo,
+      telefono_personal: referencia.telefono_personal,
+      direccion: referencia.direccion,
+    }));
+  }
+
+  cerrar(): void {
+    this.dialogRef.close();
+  }
+}

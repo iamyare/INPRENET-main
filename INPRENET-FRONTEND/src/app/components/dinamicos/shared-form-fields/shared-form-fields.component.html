@@ -1,0 +1,83 @@
+<div *ngFor="let rowIndex of getRowIndices(); trackBy: trackByFn">
+  <div class="row">
+    <div *ngFor="let field of getFieldsInRow(rowIndex)" [class]="'col-md-' + (field.layout?.col ?? 12)">
+
+      <!-- Campos que NO son radio ni rango de fechas -->
+      <mat-form-field class="example-full-width inputs" appearance="outline" *ngIf="field.type !== 'radio' && field.type !== 'dateRange'">
+        <mat-label>{{ field.label }}</mat-label>
+        <mat-icon matPrefix *ngIf="field.icon">{{ field.icon }}</mat-icon>
+
+        <ng-container [ngSwitch]="field.type">
+          <!-- Input de texto -->
+          <input *ngSwitchCase="'text'" matInput [formControl]="getControl(field.name)" />
+
+          <!-- Select -->
+          <mat-select *ngSwitchCase="'select'" [formControl]="getControl(field.name)" (selectionChange)="onSelectChange(field.name, $event)">
+            <mat-option *ngFor="let option of field.options" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+
+          <!-- Input de fecha -->
+          <ng-container *ngSwitchCase="'date'">
+            <div class="datepicker-input">
+              <input [min]="field.minDate" [max]="field.maxDate" matInput [matDatepicker]="picker" [formControl]="getControl(field.name)" [placeholder]="field.label" />
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </div>
+          </ng-container>
+
+          <!-- Input de número -->
+          <input *ngSwitchCase="'number'" matInput type="number" [formControl]="getControl(field.name)" />
+        </ng-container>
+
+        <!-- Mensajes de error -->
+        <mat-error *ngIf="getControl(field.name)?.invalid && (getControl(field.name)?.dirty || getControl(field.name)?.touched)">
+          <ng-container *ngIf="getControl(field.name)?.errors?.['required']">Este campo es requerido</ng-container>
+          <ng-container *ngIf="getControl(field.name)?.errors?.['maxlength']">
+            Máximo 15 caracteres permitidos
+          </ng-container><ng-container *ngIf="getControl(field.name)?.errors?.['pattern']">Formato incorrecto</ng-container>
+          <ng-container *ngIf="getControl(field.name)?.errors?.['fieldNotUnique']">El número de identificación ya ha sido ingresado.</ng-container>
+          <ng-container *ngIf="getControl(field.name)?.errors?.['identificacionDuplicada']">
+            <mat-icon>error</mat-icon> No puede ser igual al número de identificación del afiliado.
+          </ng-container>
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Grupo de botones de radio -->
+      <div *ngIf="field.type === 'radio'">
+        <label>{{ field.label }}</label>
+        <mat-radio-group [formControl]="getControl(field.name)" (change)="onSelectChange(field.name, $event)">
+          <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
+            {{ option.label }}
+          </mat-radio-button>
+        </mat-radio-group>
+        <mat-error *ngIf="getControl(field.name)?.invalid && (getControl(field.name)?.dirty || getControl(field.name)?.touched)">
+          <ng-container *ngIf="getControl(field.name)?.errors?.['required']">Este campo es requerido</ng-container>
+        </mat-error>
+      </div>
+
+      <!-- Selector de rango de fechas -->
+      <div *ngIf="field.type === 'dateRange'">
+        <mat-form-field class="example-full-width inputs" appearance="outline">
+          <mat-label>{{ field.label }}</mat-label>
+          <mat-date-range-input [rangePicker]="picker">
+            <input matStartDate placeholder="Fecha de Inicio" [formControl]="getControl(field.startDateControlName)" />
+            <input matEndDate placeholder="Fecha de Finalización" [formControl]="getControl(field.endDateControlName)" />
+          </mat-date-range-input>
+          <mat-hint>DD/MM/YYYY – DD/MM/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+
+          <!-- Errores en fechas -->
+          <mat-error *ngIf="getControl(field.startDateControlName)?.invalid && (getControl(field.startDateControlName)?.dirty || getControl(field.startDateControlName)?.touched)">
+            <ng-container *ngIf="getControl(field.startDateControlName)?.errors?.['required']">Fecha de inicio requerida</ng-container>
+          </mat-error>
+          <mat-error *ngIf="getControl(field.endDateControlName)?.invalid && (getControl(field.endDateControlName)?.dirty || getControl(field.endDateControlName)?.touched)">
+            <ng-container *ngIf="getControl(field.endDateControlName)?.errors?.['required']">Fecha de finalización requerida</ng-container>
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+</div>

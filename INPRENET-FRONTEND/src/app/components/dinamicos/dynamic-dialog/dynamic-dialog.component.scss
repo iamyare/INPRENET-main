@@ -1,0 +1,15 @@
+.cerrar-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+/* Ajustar margen inferior para aumentar el espacio entre filas */
+.mat-row {
+  margin: 10px; /* Ajusta el valor según tus necesidades */
+}
+
+/* Ajustar padding dentro de las celdas */
+.mat-cell, .mat-header-cell {
+  padding: 16px; /* Cambia el valor según el espacio que desees dentro de las celdas */
+}

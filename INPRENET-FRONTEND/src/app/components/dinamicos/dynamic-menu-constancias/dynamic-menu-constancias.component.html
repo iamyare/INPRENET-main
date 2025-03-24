@@ -1,0 +1,7 @@
+<div class="menu-container">
+  <ul class="menu-list">
+    <li *ngFor="let item of menuItems" (click)="item.action()">
+      {{ item.name }}
+    </li>
+  </ul>
+</div>

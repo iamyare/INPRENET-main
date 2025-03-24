@@ -1,0 +1,30 @@
+.grid-container {
+  padding: 16px;
+}
+
+.grid-card {
+  width: 100%;
+}
+
+mat-card-header {
+  display: flex;
+  align-items: center;
+}
+
+mat-icon {
+  margin-right: 8px;
+}
+
+.grid-container {
+  padding: 20px;
+}
+
+.causantes-container {
+  margin-top: 20px;
+  h2 {
+    text-align: center;
+    color: #0d7b6c;
+    margin-bottom: 20px;
+  }
+}
+

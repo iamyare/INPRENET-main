@@ -1,0 +1,33 @@
+.admin-layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  background-color: #26A69A;
+  color: white;
+  padding: 10px 20px;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+main {
+  flex-grow: 1;
+  padding: 20px;
+}
+
+.footer-content {
+  text-align: center;
+  padding: 10px 20px;
+  background-color: #f1f1f1;
+}

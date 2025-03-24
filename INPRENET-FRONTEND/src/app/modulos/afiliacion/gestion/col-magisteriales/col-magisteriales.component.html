@@ -1,0 +1,44 @@
+<div class="card">
+  <div class="card-header">
+    <h4 class="card-title">Colegios Magisteriales</h4>
+    <p class="card-category">Completa la información correspondiente</p>
+  </div>
+
+  <div class="card-body">
+    <form [formGroup]="formGroup" class="form-container">
+      <div formArrayName="ColMags">
+        <div *ngFor="let colMag of colMags.controls; let i = index" class="reference-group" [formGroupName]="i">
+          <h4 class="reference-title">Colegio Magisterial Número: {{ i + 1 }}</h4>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Colegio Magisterial</mat-label>
+            <mat-select formControlName="id_colegio">
+              <mat-option *ngFor="let item of getAvailableColegios(i)" [value]="item.value" class="mat-option-text">
+                {{ item.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="colMag.get('id_colegio')?.invalid && colMag.get('id_colegio')?.touched">
+              <mat-icon>error</mat-icon> El colegio es requerido.
+            </mat-error>
+          </mat-form-field>
+          
+          <p class="descripcion-colegio" *ngIf="colMag.get('id_colegio')?.value">
+            {{ getDescripcionById(colMag.get('id_colegio')?.value) }}
+          </p>
+
+          <div class="action-buttons">
+            <button mat-button color="warn" (click)="eliminarColMag(i)">
+              <mat-icon>remove</mat-icon> Eliminar Colegio Magisterial
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button mat-button color="primary" (click)="agregarColMag()">
+          <mat-icon>add</mat-icon> Agregar Colegio Magisterial
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

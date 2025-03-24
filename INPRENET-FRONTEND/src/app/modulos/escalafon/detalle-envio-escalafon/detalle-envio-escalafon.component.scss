@@ -1,0 +1,39 @@
+.card-container {
+  max-width: 900px;
+  /* Aumenta el ancho máximo */
+  margin: 20px auto;
+  padding: 30px;
+  /* Aumenta el padding para más espacio interno */
+  border-radius: 10px;
+}
+
+.table-container {
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+}
+
+.mat-header-cell,
+.mat-cell {
+  padding: 10px;
+  text-align: left;
+}
+
+.mat-header-cell {
+  font-weight: bold;
+  background-color: #f4f4f4;
+}
+
+.mat-elevation-z8 {
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+tr.mat-row:nth-child(even) .mat-cell {
+  background-color: #fafafa;
+}
+
+tr.mat-row:nth-child(odd) .mat-cell {
+  background-color: #ffffff;
+}

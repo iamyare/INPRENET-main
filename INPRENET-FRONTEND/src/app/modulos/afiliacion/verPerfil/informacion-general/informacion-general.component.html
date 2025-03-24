@@ -1,0 +1,21 @@
+<div *ngIf="persona" class="informacion-general-container">
+  <app-progressbar-dynamic [steps]="steps" (stepChange)="onStepChange($event)"></app-progressbar-dynamic>
+
+  
+  <div *ngIf="currentStepIndex === 0">
+    <app-edit-datos-generales [Afiliado]="persona" (onDatoAgregado)="handleDatoActualizado()"></app-edit-datos-generales>
+  </div>
+
+  <div *ngIf="currentStepIndex === 1">
+    <app-edit-datos-bancarios [Afiliado]="persona" (bancoAgregado)="onBancoAgregado()"></app-edit-datos-bancarios>
+  </div>
+
+  <div *ngIf="currentStepIndex === 2">
+    <app-edit-conyugue [Afiliado]="persona"></app-edit-conyugue>
+  </div>
+
+  <div *ngIf="currentStepIndex === 3">
+    <app-edit-peps [Afiliado]="persona"></app-edit-peps>
+  </div>
+  
+</div>

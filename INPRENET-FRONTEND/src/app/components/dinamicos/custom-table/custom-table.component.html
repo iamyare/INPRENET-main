@@ -1,0 +1,68 @@
+<div class="table-wrapper">
+  <!-- Spinner de carga -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Contenido de la tabla -->
+  <div *ngIf="!isLoading">
+    <!-- Encabezado -->
+    <div class="header-container">
+      <h3 class="header-title">{{ titulo }}</h3>
+      <p class="header-subtitle">{{ subtitulo }}</p>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th *ngFor="let column of columns">
+              {{ column.header }}
+              <mat-form-field *ngIf="column.hasFilter" appearance="outline" class="column-filter">
+                <mat-label>Filtrar</mat-label>
+                <input matInput [formControl]="columnFilters[column.col]" />
+              </mat-form-field>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="paginatedData.length > 0; else noData">
+            <tr *ngFor="let row of paginatedData">
+              <td *ngFor="let column of columns">
+                <div [ngStyle]="{ 'text-align': column.moneda ? 'end' : 'left', 'padding': '1rem' }">
+                  <ng-container *ngIf="!column.moneda">
+                    {{ row[column.col] }}
+                  </ng-container>
+              
+                  <ng-container *ngIf="column.moneda">
+                    <span class="moneda-left">{{ row[column.col] | number : '1.2-2' }}</span>
+                  </ng-container>
+                </div>
+              </td>
+              
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginador -->
+    <mat-paginator
+      *ngIf="searchResults.length > 0"
+      [length]="searchResults.length"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 20]"
+      (page)="onPageChange($event)">
+    </mat-paginator>
+  </div>
+
+  <!-- Mensaje si no hay datos -->
+  <ng-template #noData>
+    <tr>
+      <td [attr.colspan]="columns.length" class="no-data-row">
+        No se encontraron datos que coincidan con los filtros aplicados.
+      </td>
+    </tr>
+  </ng-template>
+</div>

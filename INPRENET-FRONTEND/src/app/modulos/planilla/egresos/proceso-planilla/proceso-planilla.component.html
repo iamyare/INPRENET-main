@@ -1,0 +1,8 @@
+<app-progressbar-dynamic [title]="title" [steps]="steps" (stepChange)="onStepChange($event)"></app-progressbar-dynamic>
+
+<div [ngSwitch]="currentStep">
+  <app-nuevaplanilla *ngSwitchCase="0"></app-nuevaplanilla>
+  <app-cargarbef-ded *ngSwitchCase="1"></app-cargarbef-ded>
+  <app-verplanprelcomp *ngSwitchCase="2"></app-verplanprelcomp>
+  <app-verplancerrada *ngSwitchCase="3"></app-verplancerrada>
+</div>

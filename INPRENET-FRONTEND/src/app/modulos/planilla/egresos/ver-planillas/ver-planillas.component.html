@@ -1,0 +1,11 @@
+<br>
+<div class="editar-beneficio-container">
+  <app-dynamic-table
+    [columns]="myColumns"
+    [data]="filas"
+    [getData]="getFilas"
+    [titulo]="'Datos Generales De Las Planillas (CON CUENTA BANCARIA)'"
+    [subtitulo]="'Estatus de Planillas'"
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)">
+  </app-dynamic-table>
+</div>

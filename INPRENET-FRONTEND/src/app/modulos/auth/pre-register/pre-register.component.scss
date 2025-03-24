@@ -1,0 +1,53 @@
+/* pre-register.component.scss */
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+  height: 100vh;
+  width: 100vw;
+  background-color: #1c9588; /* Aplica el color de fondo solo aquí */
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.form-container {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  width: 400px; /* Aumenta el tamaño del logo */
+  margin-bottom: 1rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.file-upload {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+button {
+  width: 100%;
+}

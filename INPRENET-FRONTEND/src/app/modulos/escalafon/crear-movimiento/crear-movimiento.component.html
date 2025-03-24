@@ -1,0 +1,87 @@
+<form [formGroup]="movimientoForm" (ngSubmit)="onSubmit()" class="form-container">
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="numeroCuenta" class="form-label">Número de Cuenta*</label>
+        <select
+            id="numeroCuenta"
+            class="form-select"
+            formControlName="numeroCuenta"
+            (change)="onNumeroCuentaChange($event)"
+            >
+            <option value="" disabled selected>Seleccione una cuenta</option>
+            <option *ngFor="let cuenta of cuentasDisponibles" [value]="cuenta.numeroCuenta">
+                {{ cuenta.tipoCuenta }} ({{ cuenta.numeroCuenta }})
+            </option>
+            </select>
+
+        <div *ngIf="movimientoForm.controls['numeroCuenta'].invalid && movimientoForm.controls['numeroCuenta'].touched" class="text-danger">
+          Número de Cuenta es requerido
+        </div>
+      </div>
+  
+      <div class="col-md-4 mb-3">
+        <label for="tipo" class="form-label">Tipo de Movimiento*</label>
+        <select id="tipo" class="form-select" formControlName="tipo">
+          <option value="" disabled selected>Seleccione el tipo</option>
+          <option value="CREDITO PLANILLA">CREDITO PLANILLA</option>
+        </select>
+        <div *ngIf="movimientoForm.controls['tipo'].invalid && movimientoForm.controls['tipo'].touched" class="text-danger">
+          Tipo de Movimiento es requerido
+        </div>
+      </div>
+  
+      <div class="col-md-4 mb-3">
+        <label for="monto" class="form-label">Monto*</label>
+        <input id="monto" type="number" class="form-control" formControlName="monto" />
+        <div *ngIf="movimientoForm.controls['monto'].invalid && movimientoForm.controls['monto'].touched" class="text-danger">
+          Monto es requerido y debe ser positivo
+        </div>
+      </div>
+    </div>
+  
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="mes" class="form-label">Mes*</label>
+        <select id="mes" class="form-select" formControlName="mes">
+          <option value="" disabled selected>Seleccione el mes</option>
+          <option *ngFor="let mes of meses" [value]="mes.value">{{ mes.viewValue }}</option>
+        </select>
+        <div *ngIf="movimientoForm.controls['mes'].invalid && movimientoForm.controls['mes'].touched" class="text-danger">
+          Mes es requerido
+        </div>
+      </div>
+  
+      <div class="col-md-4 mb-3">
+        <label for="ano" class="form-label">Año*</label>
+        <input id="ano" type="number" class="form-control" formControlName="ano" min="2000" max="2100" />
+        <div *ngIf="movimientoForm.controls['ano'].invalid && movimientoForm.controls['ano'].touched" class="text-danger">
+          Año es requerido
+        </div>
+      </div>
+  
+      <div class="col-md-4 mb-3">
+        <label for="descripcion" class="form-label">Descripción</label>
+        <input id="descripcion" type="text" class="form-control" formControlName="descripcion" maxlength="30" />
+        <div *ngIf="movimientoForm.controls['descripcion'].invalid && movimientoForm.controls['descripcion'].touched" class="text-danger">
+          Máximo 30 caracteres
+        </div>
+      </div>
+    </div>
+  
+    <div class="alert alert-info mt-4" *ngIf="movimientoForm.valid">
+        <h5 class="banner-title">Detalle del Movimiento</h5>
+        <p><strong>Número de Cuenta:</strong> {{ movimientoForm.get('numeroCuenta')?.value || 'No seleccionado' }}</p>
+        <p><strong>Tipo de Cuenta:</strong> {{ tipoCuentaSeleccionada || 'No seleccionado' }}</p>
+        <p><strong>Año:</strong> {{ movimientoForm.get('ano')?.value || 'No especificado' }}</p>
+        <p><strong>Mes:</strong> {{ getMesNombre(movimientoForm.get('mes')?.value) }}</p>
+        <p><strong>Monto:</strong> {{ movimientoForm.get('monto')?.value || 'No especificado' }}</p>
+        <p><strong>Descripción:</strong> {{ movimientoForm.get('descripcion')?.value || 'No especificado' }}</p>
+        <p><strong>Tipo de Movimiento:</strong> {{ movimientoForm.get('tipo')?.value || 'No especificado' }}</p>
+      </div>
+      
+  
+    <div class="text-center mt-3">
+      <button type="submit" mat-raised-button color="primary" [disabled]="!movimientoForm.valid">Guardar Movimiento</button>
+    </div>
+  </form>
+  

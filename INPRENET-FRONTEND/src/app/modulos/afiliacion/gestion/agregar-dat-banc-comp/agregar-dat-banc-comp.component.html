@@ -1,0 +1,10 @@
+<form [formGroup]="formBancario">
+  <app-bancos [formGroup]="formBancario"></app-bancos>
+</form>
+
+<div style="text-align: center;">
+  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="formBancario.invalid"
+    (click)="guardar()">
+    Guardar
+  </button>
+</div>

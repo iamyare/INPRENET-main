@@ -1,0 +1,55 @@
+<div id="texto" style="text-align: center;" *ngIf="filas.length === 0">
+  <h2 class="anaranjado desapareciendo">No se encuentra ningún beneficiario</h2>
+</div>
+
+<button
+  mat-raised-button
+  color="primary"
+  style="color: white; margin: 1% 0"
+  (click)="AgregarBeneficiario()"
+  *ngIf="mostrarBotonAgregar">
+  Agregar Beneficiario
+</button>
+
+<div *ngIf="errorPorcentaje" class="error-message">
+  <mat-icon color="warn">error</mat-icon>
+  {{ errorPorcentaje }}
+</div>
+
+<div *ngIf="filas.length !== 0" style="background-color: white; border-radius: 10px; padding: 20px;">
+  <app-dynamic-table
+    style="width: 100%"
+    titulo="Editar Beneficiarios"
+    subtitulo="Completa la información correspondiente"
+    [columns]="myColumns"
+    [data]="filas"
+    [getData]="getFilas"
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+    [mostrarBotonEditar]="mostrarBotonEditar"
+    (editar)="editarFila($event)"
+    [mostrarBotonEliminar]="mostrarBotonEliminar"
+    (eliminar)="eliminarFila($event);"
+    [nombreEncabezadoUno]="'Gestion'"
+    [mostrarBotonUno]="mostrarBotonAgregarDiscapacidad"
+    etiquetaBotonUno="Gestionar Discapacidades"
+    (accionBotonUno)="agregarDiscapacidad($event)">
+  </app-dynamic-table>
+</div>
+
+<div style="display: flex; justify-content: space-between; margin-top: 20px;">
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="intentarGenerarPDF()" 
+    *ngIf="filas.length >= 1">
+    Generar PDF
+  </button>
+
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="intentarDescargarConstancia()" 
+    *ngIf="filas.length >= 1">
+    Generar Documento De Beneficiario
+  </button>
+</div>

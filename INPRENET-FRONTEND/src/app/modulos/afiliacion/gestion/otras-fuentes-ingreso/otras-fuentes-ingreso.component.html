@@ -1,0 +1,62 @@
+<div class="card">
+  <div class="card-header">
+    <h4 class="card-title">Otras Fuentes De Ingreso</h4>
+    <p class="card-category">Completa la información correspondiente</p>
+  </div>
+
+  <div class="card-body">
+    <form [formGroup]="formGroup" class="form-container">
+      <div formArrayName="otrasFuentesIngreso">
+        <div *ngFor="let fuenteIngreso of otrasFuentesIngresoArray.controls; let i = index" [formGroupName]="i" class="reference-group">
+          <h4 class="reference-title">Fuente De Ingreso N°: {{ i + 1 }}</h4>
+
+          <div class="form-row">
+            <!-- Actividad Económica -->
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Actividad Económica</mat-label>
+              <mat-icon matPrefix>business</mat-icon>
+              <input matInput formControlName="actividad_economica">
+              <mat-error *ngFor="let error of getErrors(i, 'actividad_economica')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Monto de Ingreso -->
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Monto De Ingreso</mat-label>
+              <mat-icon matPrefix>money</mat-icon>
+              <input matInput formControlName="monto_ingreso" type="number">
+              <mat-error *ngFor="let error of getErrors(i, 'monto_ingreso')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <!-- Observación -->
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Observación</mat-label>
+              <mat-icon matPrefix>visibility</mat-icon>
+              <input matInput formControlName="observacion">
+              <mat-error *ngFor="let error of getErrors(i, 'observacion')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="action-buttons">
+            <button mat-button color="warn" (click)="eliminarFuenteIngreso(i)">
+              <mat-icon>remove</mat-icon> Eliminar Fuente De Ingreso
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button mat-button color="primary" (click)="agregarFuenteIngreso()">
+          <mat-icon>add</mat-icon> Agregar Fuente De Ingreso
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,63 @@
+<div class="full-width-container" style="text-align: center; background-color: white">
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Buscar Afiliado/Jubilado/Pensionado/Voluntario"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatos($event)">
+  </app-dynamic-form>
+
+  <div class="button-container">
+    <button mat-raised-button color="primary" style="padding: 5px;" [disabled]="form.invalid" (click)="previsualizarInfoAfil()">
+      Mostrar información del afiliado
+    </button>
+  </div>
+</div>
+
+<div *ngIf="Afiliado.nombreCompleto" class="full-width-container" style="background-color: white; padding: 1% 0;">
+  <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
+  <div>
+    <table>
+      <tr>
+        <th>DNI</th>
+        <td>{{ Afiliado.dni }}</td>
+        <th>Fallecido</th>
+        <td>{{ Afiliado.fallecido }}</td>
+        <th>Nombre de afiliado</th>
+        <td>{{ Afiliado.nombreCompleto }}</td>
+        <th>Género</th>
+        <td>{{ Afiliado.genero }}</td>
+      </tr>
+      <tr>
+        <th>Fecha nacimiento</th>
+        <td>{{ Afiliado.fecha_nacimiento }}</td>
+        <th>Dirección de residencia</th>
+        <td>{{ Afiliado.direccion_residencia }}</td>
+        <th>Teléfono 1</th>
+        <td>{{ Afiliado.telefono_1 }}</td>
+        <th>Estado civil</th>
+        <td>{{ Afiliado.estado_civil }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div *ngIf="Afiliado.dni" class="full-width-container">
+  <form [formGroup]="formDeduccion" (ngSubmit)="guardarDeduccion()">
+    <app-dynamic-form
+      [fields]="myFormFieldsDeduccion"
+      (selectChange)="onDeduccionChange($event)"
+      (newDatBenChange)="obtenerDatosDeduccion($event)"
+      titulo="Nueva Deducción"
+      subtitulo="Completa la información de la deducción">
+    </app-dynamic-form>
+
+    <div *ngIf="selectedDeduccion">
+      <p><strong>Institución:</strong> {{ selectedDeduccion?.nombre_centro_trabajo || 'N/A' }}</p>
+      <p><strong>Código de la deducción:</strong> {{ selectedDeduccion?.codigo_deduccion || 'N/A' }}</p>
+    </div>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="formDeduccion.invalid">
+      Guardar Deducción
+    </button>
+  </form>
+</div>

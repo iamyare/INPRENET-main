@@ -1,0 +1,13 @@
+<div style="text-align: center; margin: 20px 0;">
+  <mat-slide-toggle [(ngModel)]="mostrarFormularioIndividual" color="primary">
+    {{ mostrarFormularioIndividual ? 'Deducción Individual' : 'Carga Masiva de Deducciones' }}
+  </mat-slide-toggle>
+</div>
+
+<div *ngIf="mostrarFormularioIndividual; else cargaMasiva">
+  <app-nueva-deduccion-pers ></app-nueva-deduccion-pers>
+</div>
+
+<ng-template #cargaMasiva>
+  <app-subir-deducciones-terceros [tipoDeduccion]="tipoDeduccion" [id_planilla]="id_planilla" [idTipoPlanilla]="idTipoPlanilla" [tipo_planilla]="tipo_planilla"></app-subir-deducciones-terceros>
+</ng-template>

@@ -1,0 +1,139 @@
+<mat-dialog-actions>
+  <button
+    mat-button
+    [mat-dialog-close]="true"
+    color="warn"
+    class="cerrar-button"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-dialog-actions>
+
+<h1 mat-dialog-title style="font-size: 18px; font-weight: bold">
+  {{ dialogTitle }}
+</h1>
+<mat-dialog-content class="mat-typography">
+  <div *ngFor="let log of data.logs">
+    <h3 style="font-size: 16px">{{ log.message }}</h3>
+
+    <div *ngIf="isArray(log.detail)">
+      <!-- Tabla de beneficios -->
+      <table
+        *ngIf="log.detail.length > 0 && log.type == 'beneficios'"
+        mat-table
+        [dataSource]="log.detail"
+      >
+        <!-- Nombre Beneficio Column -->
+        <ng-container
+          matColumnDef="NOMBRE_BENEFICIO"
+          *ngIf="displayedColumnsB.includes('NOMBRE_BENEFICIO')"
+        >
+          <th mat-header-cell *matHeaderCellDef>Nombre Beneficio</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.NOMBRE_BENEFICIO }}
+          </td>
+        </ng-container>
+
+        <!-- Monto a Pagar Column -->
+        <ng-container
+          matColumnDef="MontoAPagar"
+          *ngIf="displayedColumnsB.includes('MontoAPagar')"
+        >
+          <th mat-header-cell *matHeaderCellDef>Monto a Pagar</th>
+          <td mat-cell *matCellDef="let element" style="text-align: end">
+            {{ element.MontoAPagar | currency : "L" : "symbol" : "1.2-2" }}
+          </td>
+        </ng-container>
+
+        <!-- Observacion Column -->
+        <ng-container matColumnDef="OBSERVACION">
+          <th mat-header-cell *matHeaderCellDef>Observación</th>
+          <td mat-cell *matCellDef="let element">
+            <mat-form-field appearance="outline">
+              <mat-label>Observación</mat-label>
+              <input
+                matInput
+                [(ngModel)]="element.observacion"
+                placeholder="Escribe una observación"
+              />
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <!-- Condicionalmente muestra la columna de acción -->
+        <ng-container matColumnDef="accion" *ngIf="mostrarAccion">
+          <th mat-header-cell *matHeaderCellDef>Eliminar</th>
+          <td mat-cell *matCellDef="let element">
+            <button
+              (click)="accionBeneficio(element)"
+              mat-fab
+              aria-label="Icono de eliminar"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsB"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsB"></tr>
+      </table>
+
+      <!-- Tabla de deducciones -->
+      <table
+        *ngIf="log.detail.length > 0 && log.type == 'deducciones'"
+        mat-table
+        [dataSource]="log.detail"
+      >
+        <!-- Nombre Institucion Column -->
+        <ng-container
+          matColumnDef="NOMBRE_INSTITUCION"
+          *ngIf="displayedColumnsD.includes('NOMBRE_INSTITUCION')"
+        >
+          <th mat-header-cell *matHeaderCellDef>Nombre Institución</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.NOMBRE_INSTITUCION }}
+          </td>
+        </ng-container>
+
+        <!-- Nombre Deducción Column -->
+        <ng-container
+          matColumnDef="NOMBRE_DEDUCCION"
+          *ngIf="displayedColumnsD.includes('NOMBRE_DEDUCCION')"
+        >
+          <th mat-header-cell *matHeaderCellDef>Nombre Deducción</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.NOMBRE_DEDUCCION }}
+          </td>
+        </ng-container>
+
+        <!-- Monto Aplicado Column -->
+        <ng-container
+          matColumnDef="MontoAplicado"
+          *ngIf="displayedColumnsD.includes('MontoAplicado')"
+        >
+          <th mat-header-cell *matHeaderCellDef>Monto Aplicado</th>
+          <td mat-cell *matCellDef="let element" style="text-align: end">
+            {{ element.MontoAplicado | currency : "L" : "symbol" : "1.2-2" }}
+          </td>
+        </ng-container>
+
+        <!-- Condicionalmente muestra la columna de acción -->
+        <ng-container matColumnDef="accion" *ngIf="mostrarAccion">
+          <th mat-header-cell *matHeaderCellDef>Eliminar</th>
+          <td mat-cell *matCellDef="let element">
+            <button
+              (click)="accionDeduccion(element)"
+              mat-fab
+              aria-label="Icono de eliminar"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsD"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsD"></tr>
+      </table>
+    </div>
+  </div>
+</mat-dialog-content>

@@ -1,0 +1,54 @@
+.sidenav-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; /* Evita la doble barra de desplazamiento */
+}
+
+.mat-sidenav-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Evita la doble barra de desplazamiento */
+}
+
+.mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Asegura que el contenido ocupe toda la ventana */
+  overflow: hidden; /* Evita la doble barra de desplazamiento */
+}
+
+.content {
+  flex: 1;
+  overflow: auto; /* Barra de desplazamiento solo aquí */
+  padding-top: 64px; /* Ajusta el espacio superior para que el contenido no quede cubierto */
+  padding-bottom: 64px; /* Ajusta el espacio inferior según sea necesario */
+  box-sizing: border-box;
+}
+
+.footer {
+  height: 64px; /* Asegura que el footer tenga la altura correcta */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.mat-toolbar {
+  height: 64px; /* Altura del header */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  background-color: #51a7f9; /* Color primario */
+  color: white; /* Texto blanco */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+  padding: 0 16px; /* Padding para espaciado */
+}

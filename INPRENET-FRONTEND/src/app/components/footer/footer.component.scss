@@ -1,0 +1,24 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.footer {
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  height: 64px;
+  /* Altura de la barra */
+  flex-shrink: 0;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+main {
+  flex-grow: 1;
+}

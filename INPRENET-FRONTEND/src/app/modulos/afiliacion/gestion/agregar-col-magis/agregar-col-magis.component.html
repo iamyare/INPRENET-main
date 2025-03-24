@@ -1,0 +1,12 @@
+<form [formGroup]="formColMag">
+  <app-col-magisteriales
+    [formGroup]="formColMag">
+  </app-col-magisteriales>
+</form>
+
+<div style="text-align: center;">
+  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="formColMag.invalid"
+    (click)="guardar()">
+    Guardar
+  </button>
+</div>

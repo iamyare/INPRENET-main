@@ -1,0 +1,122 @@
+.sidenav-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff; /* Fondo blanco */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mat-sidenav-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 64px); /* Ajusta según la altura de tu toolbar */
+  padding-top: 64px; /* Ajusta según la altura de tu toolbar */
+  background: #f7f7f7;
+}
+
+.mat-sidenav-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 64px; /* Ajusta según la altura del footer */
+  box-sizing: border-box;
+  padding: 20px;
+  background: #ffffff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.mat-expansion-panel {
+  border: none !important;
+  box-shadow: none !important;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.mat-expansion-panel-header {
+  padding: 0 16px;
+  background: #fff; /* Fondo blanco */
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.mat-expansion-panel-header:hover {
+  background: #f0f0f0; /* Color de fondo al pasar el mouse */
+}
+
+.mat-expansion-panel-header.mat-expanded {
+  background: #e9eef5; /* Color de fondo al estar expandido */
+}
+
+.mat-expansion-panel-header .mat-panel-title {
+  display: flex;
+  align-items: center; /* Alinea verticalmente los iconos y el texto */
+}
+
+.mat-expansion-panel-header .mat-icon {
+  margin-right: 8px;
+  color: #6c757d; /* Color de los iconos */
+}
+
+.mat-expansion-panel-body {
+  padding: 0 16px;
+  background: #f8f9fa;
+}
+
+.section-name {
+  font-size: 0.85em; /* Ajustar tamaño de fuente */
+  color: #6c757d;
+  padding-left: 16px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  display: block; /* Asegura que ocupe toda la línea */
+  text-transform: uppercase; /* Mayúsculas */
+  font-weight: 500;
+}
+
+.item-title {
+  font-size: 0.75em; /* Ajustar tamaño de fuente */
+  color: #6c757d;
+}
+
+.child-title {
+  font-size: 0.75em; /* Ajustar tamaño de fuente */
+  color: #6c757d;
+  margin-left: 8px; /* Alineación mejorada */
+}
+
+a.mat-list-item {
+  color: #6c757d;
+  display: flex;
+  align-items: center; /* Alinea verticalmente los iconos y el texto */
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+  font-size: 0.9em; /* Ajustar tamaño de fuente */
+}
+
+a.mat-list-item:hover {
+  background-color: #e9eef5; /* Fondo azul claro al pasar el mouse */
+}
+
+a.mat-list-item:active {
+  background-color: #d9e2ef; /* Fondo azul más oscuro al hacer clic */
+}
+
+a.mat-list-item:focus {
+  background-color: #e9eef5; /* Fondo azul claro al enfocarse */
+}
+
+.mat-list-icon {
+  color: #6c757d;
+  margin-right: 8px;
+  font-size: 20px; /* Asegura que los iconos tengan el mismo tamaño */
+  display: flex;
+  align-items: center; /* Asegura que los iconos estén alineados verticalmente */
+}
+.side-menu-container {
+  max-height: 100vh;      // O la altura deseada
+  overflow-y: auto;       // Fuerza el scroll cuando excede la altura
+}

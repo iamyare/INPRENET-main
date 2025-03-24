@@ -1,0 +1,36 @@
+// complete-registration.dto.ts
+import { IsString, IsEmail, IsNotEmpty, Length, Matches, IsOptional } from 'class-validator';
+
+export class CompleteRegistrationDto {
+  @IsEmail()
+  @IsNotEmpty()
+  correo: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(8, 20)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).+$/, {
+    message: 'Password too weak',
+  })
+  contrasena: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 255)
+  telefonoEmpleado: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 255)
+  telefonoEmpleado2?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 255)
+  numero_identificacion: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  foto_empleado?: Buffer;
+}

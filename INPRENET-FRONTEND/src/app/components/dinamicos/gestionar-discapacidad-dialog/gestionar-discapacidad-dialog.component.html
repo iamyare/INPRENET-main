@@ -1,0 +1,27 @@
+<h2 mat-dialog-title>Gestionar Discapacidades</h2>
+<mat-dialog-content>
+  <h3>Discapacidades Disponibles</h3>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Selecciona una Discapacidad</mat-label>
+    <mat-select #discapacidadSelect>
+      <mat-option *ngFor="let disc of discapacidadesDisponibles" [value]="disc.value">
+        {{ disc.label }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <button mat-button color="primary" (click)="agregarDiscapacidad(discapacidadSelect.value)">Agregar</button>
+
+  <h3>Discapacidades Actuales</h3>
+  <mat-list>
+    <mat-list-item *ngFor="let disc of discapacidadesActuales">
+      {{ disc }}
+      <button mat-icon-button color="warn" (click)="eliminarDiscapacidad(disc)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-list-item>
+  </mat-list>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+</mat-dialog-actions>

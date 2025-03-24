@@ -1,0 +1,44 @@
+<div class="card">
+  <div class="card-header">
+    <h4 class="card-title">Cuenta en Bancos</h4>
+    <p class="card-category">Completa la información correspondiente</p>
+  </div>
+
+  <div class="card-body" [formGroup]="formGroup">
+    <div formArrayName="bancos">
+      <div *ngFor="let banco of bancosArray.controls; let i = index" [formGroupName]="i" class="reference-group">
+        <h4 class="reference-title">Banco</h4>
+    
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Nombre del Banco</mat-label>
+            <mat-icon matPrefix>account_balance</mat-icon>
+            <mat-select formControlName="id_banco">
+              <mat-option *ngFor="let banco of bancos" [value]="banco.value">
+                {{ banco.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="bancosArray.at(i).get('id_banco')?.invalid">
+              <mat-icon>error</mat-icon> El banco es requerido.
+            </mat-error>
+          </mat-form-field>
+    
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Número de Cuenta</mat-label>
+            <mat-icon matPrefix>credit_card</mat-icon>
+            <input matInput formControlName="num_cuenta" type="text">
+            <mat-error *ngIf="bancosArray.at(i).get('num_cuenta')?.invalid">
+              <mat-icon>error</mat-icon> {{ getErrors(i, 'num_cuenta')[0] }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+    
+        <div class="action-buttons">
+          <button mat-button color="warn" (click)="eliminarBanco(i)" *ngIf="bancosArray.length > 1">
+            <mat-icon>delete</mat-icon> Eliminar Banco
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

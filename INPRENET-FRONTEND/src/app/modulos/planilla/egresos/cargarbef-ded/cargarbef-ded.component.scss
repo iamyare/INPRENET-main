@@ -1,0 +1,78 @@
+.table-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  max-width: 1000px;
+}
+
+.mat-tab-group {
+  padding: 20px;
+  margin: 20px auto;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 1000px;
+}
+
+.manual-benefits-section {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h3 {
+  margin: 20px 0;
+  color: #229e92;
+  text-align: center;
+}
+
+button {
+  margin: 10px 0;
+  display: block;
+  //background-color: #229e92;
+  //color: white;
+  border-radius: 5px;
+}
+
+button:hover {
+  //background-color: #1b7a70;
+}
+
+button.asignar-beneficios-btn {
+  display: block;
+  /* Hace que el botón ocupe una fila completa */
+  margin: 20px auto;
+  /* Centrado horizontalmente y con espacio alrededor */
+  //background-color: #229e92;
+  /* Color de fondo */
+  //color: white;
+  /* Color de texto */
+  border-radius: 5px;
+  /* Bordes redondeados */
+  padding: 10px 20px;
+  /* Espacio interno del botón */
+}
+
+button.asignar-beneficios-btn:hover {
+  //background-color: #1b7a70;
+  /* Color de hover */
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  background-color: white;
+  margin-bottom: 20px;
+}
+
+.basic-container {
+  padding: 30px;
+}

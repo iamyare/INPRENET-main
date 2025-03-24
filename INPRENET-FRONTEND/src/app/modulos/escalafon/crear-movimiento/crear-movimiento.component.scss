@@ -1,0 +1,149 @@
+// Contenedor Principal
+.rounded-container {
+    border-radius: 15px; /* Bordes redondeados para el contenedor principal */
+    overflow: hidden; /* Evita que el contenido sobresalga */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para resaltar el diseño */
+    background-color: #ffffff; /* Fondo blanco */
+  }
+  
+  // Tarjeta Principal
+  .card-container {
+    border-radius: 20px !important; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para resaltar */
+  
+    .custom-card-header {
+      background-color: #229e92 !important; /* Verde oscuro */
+      color: white !important;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      border-top-left-radius: 20px; /* Bordes superiores redondeados */
+      border-top-right-radius: 20px;
+  
+      .toggle-button {
+        background-color: #bee4e1 !important; /* Verde claro */
+        color: #1c9588 !important; /* Verde intermedio */
+        font-weight: bold;
+        padding: 5px 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+  
+        &:hover {
+          background-color: #93d3cd !important; /* Verde más claro */
+          transform: scale(1.05); /* Animación de hover */
+        }
+      }
+    }
+  
+    mat-card-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin: 0;
+    }
+  
+    mat-card-content {
+      padding: 20px;
+      background-color: #ffffff; /* Fondo blanco */
+      border-bottom-left-radius: 20px; /* Bordes inferiores redondeados */
+      border-bottom-right-radius: 20px;
+    }
+  }
+  
+  // Formulario
+  form .form-label {
+    font-weight: bold;
+    color: #1c9588; /* Verde intermedio */
+  }
+  
+  form .form-control,
+  form .form-select {
+    border-radius: 10px; /* Bordes redondeados para inputs y selects */
+    border: 1px solid #ced4da; /* Borde gris claro */
+    padding: 10px;
+    transition: all 0.3s ease;
+  
+    &:focus {
+      border-color: #26a69a; /* Verde */
+      box-shadow: 0 0 5px rgba(38, 166, 154, 0.5); /* Sombra en foco */
+    }
+  }
+  
+  // Mensajes de error
+  .text-danger {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #e57373; /* Rojo de alerta */
+  }
+  
+  // Banner de Detalle
+  .alert {
+    background-color: #bee4e1; /* Fondo verde claro */
+    border: 2px solid #26a69a; /* Borde verde */
+    border-radius: 10px; /* Bordes redondeados */
+    padding: 20px;
+  
+    h5.banner-title {
+      color: #229e92; /* Verde oscuro */
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+  }
+  
+  // Botón de Guardar
+  button[type='submit'] {
+    background-color: #26a69a !important; /* Verde */
+    color: white !important;
+    border-radius: 10px; /* Bordes redondeados */
+    padding: 10px 20px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  
+    &:hover {
+      background-color: #1c9588 !important; /* Verde más oscuro */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra */
+      transform: scale(1.05); /* Animación de hover */
+    }
+  
+    &:disabled {
+      background-color: #b3b3b3 !important; /* Gris apagado */
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+    }
+  }
+  
+  // Botones de Acción (Descargar PDF, Crear Movimiento, Crear Cuenta)
+  .text-end button,
+  button {
+    background-color: #26a69a !important; /* Verde */
+    color: white !important;
+    border-radius: 10px; /* Bordes redondeados */
+    padding: 10px 20px;
+    font-weight: bold;
+  
+    &:hover {
+      background-color: #1c9588 !important; /* Verde más oscuro */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra */
+      transform: scale(1.05); /* Animación de hover */
+    }
+  }
+  
+  // Inputs y Selects
+  .rounded-input {
+    border-radius: 10px !important; /* Bordes redondeados para inputs */
+  }
+  
+  // Tabla de Movimientos
+  app-custom-table {
+    border-radius: 15px; /* Bordes redondeados */
+    overflow: hidden; /* Evitar contenido sobresalga */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra */
+    background-color: #ffffff; /* Fondo blanco */
+  }
+  
+  // Estado de Carga
+  .is-loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  

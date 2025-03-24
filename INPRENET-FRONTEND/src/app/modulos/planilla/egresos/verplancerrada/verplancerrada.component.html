@@ -1,0 +1,88 @@
+<div class="basic-container" >
+
+
+
+  <app-ver-planillas-cerradas (getElemSeleccionados)="getElemSeleccionados($event)"></app-ver-planillas-cerradas>
+
+  <div class="card" *ngIf="detallePlanilla">
+    <div class="card-body" style="padding: 1%">
+      <h4 class="card-title custom-header">Datos Generales De La Planilla (CON CUENTA BANCARIA)</h4>
+      <table>
+        <tr style="background-color: #f2f2f2">
+          <th>Nombre Planilla</th>
+          <td>{{ detallePlanilla?.tipoPlanilla.nombre_planilla }}</td>
+          <th>Fecha Apertura</th>
+          <td>{{ convertirFecha(detallePlanilla?.fecha_apertura, true) }}</td>
+        </tr>
+        <tr>
+          <th>Secuencia</th>
+          <td>{{ detallePlanilla?.secuencia }}</td>
+          <th>Estado</th>
+          <td>{{ detallePlanilla?.estado }}</td>
+        </tr>
+        <tr style="background-color: #f2f2f2">
+          <th>Fecha Inicio</th>
+          <td>{{ convertirFecha(detallePlanilla?.periodoInicio,false) }}</td>
+          <th>Fecha Finalización</th>
+          <td>{{ convertirFecha(detallePlanilla?.periodoFinalizacion,false) }}</td>
+        </tr>
+        <tr>
+          <th>Total Beneficios</th>
+          <td>L {{ detallePlanilla?.totalBeneficios | number: '1.2-2':'en-HN' }}</td>
+          <th>Deducciones INPREMA</th>
+          <td>L {{ detallePlanilla?.deduccionesI | number: '1.2-2':'en-HN' }}</td>
+
+        </tr>
+        <tr style="background-color: #f2f2f2">
+          <th>Total Neto</th>
+          <td>L {{ detallePlanilla?.totalNeto | number: '1.2-2':'en-HN' }}</td>
+          <th>Deducciones Terceros</th>
+          <td>L {{ detallePlanilla?.deduccionesT | number: '1.2-2':'en-HN' }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%; " *ngIf="verDat">
+
+
+    <app-dynamic-table-prueba
+      titulo="Datos De Planilla Definitiva"
+      [verOpcEditar]="false"
+      [columns]="myColumnsDed"
+      [data]="datosTabl"
+
+      [mostrarBotonUno]="true"
+      [etiquetaBotonUno]="'Ingresos'"
+      [nombreEncabezadoUno]="'Detalle Ingresos'"
+      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+      (accionBotonUno)="manejarAccionUno($event)"
+
+      [nombreEncabezadoDos]="'Detalle Deducciones'"
+      [etiquetaBotonDos]="'Deducciones'"
+      [mostrarBotonDos]="true"
+      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+      (accionBotonDos)="manejarAccionDos($event)"
+
+      [nombreEncabezadoTres]="'Voucher'"
+      [etiquetaBotonTres]="'Generar Voucher'"
+      [mostrarBotonTres]="true"
+      (accionBotonTres)="manejarAccionTres($event)">
+    </app-dynamic-table-prueba>
+  </div>
+
+  <!-- Spinner de carga -->
+  <div class="spinner-container" *ngIf="isLoading" style="text-align: center; margin: 20px;">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    <p>Generando reporte, por favor espere...</p>
+  </div>
+
+  <!-- Botón para descargar Excel (visible solo si hay una planilla seleccionada) -->
+  <div style="text-align: right; margin: 10px;" *ngIf="idPlanilla">
+    <button mat-raised-button color="accent" [disabled]="isLoading" (click)="descargarExcelCompleto()">
+      Descargar detalles en Excel
+    </button>
+  </div>
+
+  
+</div>

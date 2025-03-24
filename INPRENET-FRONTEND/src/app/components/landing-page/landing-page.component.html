@@ -1,0 +1,26 @@
+<app-custom-container></app-custom-container>
+<br><br>
+<div class="landing-page">
+  <section class="hero">
+    <div class="hero-content">
+      <h1>¡Bienvenido a INPRENET!</h1>
+      <p>Descubre cómo podemos ayudarte a gestionar tus pensiones de manera eficiente.</p>
+      <button mat-raised-button color="primary" (click)="login()">Empezar Ahora</button>
+    </div>
+    <div class="hero-image">
+      <img src="../assets/images/people creating robot-rafiki.svg" alt="Hero Image">
+    </div>
+  </section>
+
+  <section class="features">
+    <mat-card class="feature" *ngFor="let feature of features">
+      <img mat-card-image [src]="feature.image" alt="{{ feature.title }}">
+      <mat-card-header>
+        <mat-card-title>{{ feature.title }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ feature.description }}</p>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</div>

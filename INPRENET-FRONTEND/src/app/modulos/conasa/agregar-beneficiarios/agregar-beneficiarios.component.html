@@ -1,0 +1,89 @@
+<div class="card">
+    <div class="card-header">
+      <h4 class="card-title">Beneficiarios</h4>
+      <p class="card-category">Agrega los beneficiarios del contrato</p>
+    </div>
+  
+    <div class="card-body">
+      <div *ngFor="let beneficiario of beneficiariosForm.controls; let i = index" [formGroup]="asFormGroup(beneficiario)" class="reference-group">
+        <h4 class="reference-title">Beneficiario {{ i + 1 }}</h4>
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Primer Nombre</mat-label>
+            <input matInput formControlName="primer_nombre" />
+            <mat-error *ngIf="beneficiario.get('primer_nombre')?.invalid && beneficiario.get('primer_nombre')?.touched">
+              El primer nombre es obligatorio.
+            </mat-error>
+          </mat-form-field>
+  
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Segundo Nombre</mat-label>
+            <input matInput formControlName="segundo_nombre" />
+          </mat-form-field>
+        </div>
+  
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Primer Apellido</mat-label>
+            <input matInput formControlName="primer_apellido" />
+            <mat-error *ngIf="beneficiario.get('primer_apellido')?.invalid && beneficiario.get('primer_apellido')?.touched">
+              El primer apellido es obligatorio.
+            </mat-error>
+          </mat-form-field>
+  
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Segundo Apellido</mat-label>
+            <input matInput formControlName="segundo_apellido" />
+            <mat-error *ngIf="beneficiario.get('segundo_apellido')?.invalid && beneficiario.get('segundo_apellido')?.touched">
+              El segundo apellido es obligatorio.
+            </mat-error>
+          </mat-form-field>
+        </div>
+  
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Parentesco</mat-label>
+            <input matInput formControlName="parentesco" />
+            <mat-error *ngIf="beneficiario.get('parentesco')?.invalid && beneficiario.get('parentesco')?.touched">
+              El parentesco es obligatorio.
+            </mat-error>
+          </mat-form-field>
+  
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Fecha de Nacimiento</mat-label>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="fecha_nacimiento"
+              (keydown)="blockManualInput($event)"
+              (input)="clearManualInput($event)"
+            />
+            <mat-error
+              *ngIf="
+                beneficiario.get('fecha_nacimiento')?.invalid &&
+                beneficiario.get('fecha_nacimiento')?.touched
+              "
+            >
+              La fecha de nacimiento es obligatoria.
+            </mat-error>
+          </mat-form-field>
+          
+        </div>
+  
+        <!-- <div class="action-buttons">
+          <button mat-button color="warn" (click)="eliminarBeneficiario(i)">
+            <mat-icon>delete</mat-icon> Eliminar Beneficiario
+          </button>
+        </div> -->
+      </div>
+  
+      <!-- <div class="action-buttons">
+        <button mat-button color="primary" (click)="agregarBeneficiario()">
+          <mat-icon>add</mat-icon> Agregar Beneficiario
+        </button>
+      </div> -->
+    </div>
+  </div>
+  

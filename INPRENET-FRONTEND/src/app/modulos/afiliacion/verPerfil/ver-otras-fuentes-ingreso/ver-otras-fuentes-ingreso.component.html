@@ -1,0 +1,28 @@
+<div id="texto" style="text-align: center;" *ngIf="filas.length === 0">
+  <h2 class="anaranjado desapareciendo">No se encuentran otras fuentes de ingreso</h2>
+</div>
+
+<button
+  mat-raised-button
+  color="primary"
+  style="color: white; margin: 1% 0"
+  (click)="AgregarOtraFuenteIngreso()"
+  *ngIf="mostrarBotonFuente">
+  Agregar Otra Fuente de Ingreso
+</button>
+
+<div *ngIf="filas.length !== 0" style="background-color: white; border-radius: 10px; padding: 20px;">
+  <app-dynamic-table
+    style="width: 100%"
+    titulo="Editar Otras Fuentes de Ingreso"
+    subtitulo="Completa la información correspondiente"
+    [columns]="myColumns"
+    [data]="filas"
+    [getData]="getFilas"
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+    [mostrarBotonEditar]="mostrarBotonEditar"
+    (editar)="manejarAccionUno($event)"
+    [mostrarBotonEliminar]="mostrarBotonEliminar"
+    (eliminar)="manejarAccionDos($event)">
+  </app-dynamic-table>
+</div>

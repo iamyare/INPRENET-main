@@ -1,0 +1,15 @@
+<div style="background-color: white; border-radius: 10px;">
+    <div class="row">
+        <div class="col-md-6">
+            <mat-form-field style="width: 100%; margin: 2%;" class="example-full-width inputs" appearance="outline">
+                <mat-label>Buscar ...</mat-label>
+                <input matInput [formControl]="searchControl">
+            </mat-form-field>
+        </div>
+        <div class="col-md-6">
+            <button mat-raised-button style="color:white; margin: 4%;
+            color: white;
+            width: 19%;" color="primary" (click)=" onSearch()">Buscar</button>
+        </div>
+    </div>
+</div>

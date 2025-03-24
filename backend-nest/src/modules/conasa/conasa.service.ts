@@ -65,21 +65,21 @@ export class ConasaService {
       .orderBy('c.fecha_consulta', 'DESC')
       .getRawMany();
 
-      return consultas.map((row) => ({
-        dni: row.DNI ? row.DNI : '',
-        fecha_consulta: row.FECHA_CONSULTA ? row.FECHA_CONSULTA: '',
-        motivo_consulta: row.MOTIVO_CONSULTA ? row.MOTIVO_CONSULTA.toUpperCase() : '',
-        tiempo_sintomas: row.TIEMPO_SINTOMAS ? row.TIEMPO_SINTOMAS.toUpperCase() : '',
-        tipo_atencion: row.TIPO_ATENCION ? row.TIPO_ATENCION: '',
-        triage: row.TRIAGE ? row.TRIAGE.toUpperCase() : '',
-        diagnostico_presuntivo: row.DIAGNOSTICO_PRESUNTIVO ? row.DIAGNOSTICO_PRESUNTIVO.toUpperCase() : '',
-        detalle_atencion: row.DETALLE_ATENCION ? row.DETALLE_ATENCION.toUpperCase() : '',
-        fecha_cierre: row.FECHA_CIERRE ? row.FECHA_CIERRE : '',
-        nombre_completo: row.PRIMER_NOMBRE
-          ? `${row.PRIMER_NOMBRE || ''} ${row.SEGUNDO_NOMBRE || ''} ${row.PRIMER_APELLIDO || ''} ${row.SEGUNDO_APELLIDO || ''}`.trim().toUpperCase()
-          : '',
-      }));
-    }
+    return consultas.map((row) => ({
+      dni: row.DNI ? row.DNI : '',
+      fecha_consulta: row.FECHA_CONSULTA ? row.FECHA_CONSULTA : '',
+      motivo_consulta: row.MOTIVO_CONSULTA ? row.MOTIVO_CONSULTA.toUpperCase() : '',
+      tiempo_sintomas: row.TIEMPO_SINTOMAS ? row.TIEMPO_SINTOMAS.toUpperCase() : '',
+      tipo_atencion: row.TIPO_ATENCION ? row.TIPO_ATENCION : '',
+      triage: row.TRIAGE ? row.TRIAGE.toUpperCase() : '',
+      diagnostico_presuntivo: row.DIAGNOSTICO_PRESUNTIVO ? row.DIAGNOSTICO_PRESUNTIVO.toUpperCase() : '',
+      detalle_atencion: row.DETALLE_ATENCION ? row.DETALLE_ATENCION.toUpperCase() : '',
+      fecha_cierre: row.FECHA_CIERRE ? row.FECHA_CIERRE : '',
+      nombre_completo: row.PRIMER_NOMBRE
+        ? `${row.PRIMER_NOMBRE || ''} ${row.SEGUNDO_NOMBRE || ''} ${row.PRIMER_APELLIDO || ''} ${row.SEGUNDO_APELLIDO || ''}`.trim().toUpperCase()
+        : '',
+    }));
+  }
 
   async obtenerAfiliadosMesAnterior() {
     return this.dataSource.query(`
@@ -98,9 +98,24 @@ export class ConasaService {
               net_tipo_planilla tp ON p.id_tipo_planilla = tp.id_tipo_planilla
           INNER JOIN
               net_persona_por_banco ppb ON dpb.id_persona = ppb.id_persona
+
+          LEFT JOIN NET_BANCO_PLANILLA BB ON
+              BB.ID_PERSONA = dpb.ID_PERSONA
+              AND BB.ID_CAUSANTE = dpb.ID_CAUSANTE
+              AND BB.ID_DETALLE_PERSONA = dpb.ID_DETALLE_PERSONA
+              AND BB.ID_BENEFICIO = dpb.ID_BENEFICIO
+              AND BB.ID_PLANILLA = dpb.ID_PLANILLA
+
+            LEFT JOIN NET_PERSONA_POR_BANCO perPorBan
+                ON perPorBan.ID_PERSONA = BB.ID_PERSONA
+                AND perPorBan.ID_AF_BANCO = BB.ID_AF_BANCO
+
+            LEFT JOIN NET_BANCO banco
+                ON perPorBan.ID_BANCO = banco.ID_BANCO
+          
           WHERE
               tp.nombre_planilla IN ('ORDINARIA DE JUBILADOS Y PENSIONADOS')
-              AND dpb.id_af_banco IS NOT NULL
+              AND perPorBan.id_af_banco IS NOT NULL
               AND dpb.estado = 'PAGADA'
       ),
       mes_anterior_1 AS (
@@ -730,9 +745,24 @@ export class ConasaService {
             net_tipo_planilla tp ON p.id_tipo_planilla = tp.id_tipo_planilla
         INNER JOIN
             net_persona_por_banco ppb ON dpb.id_persona = ppb.id_persona
+        
+         LEFT JOIN NET_BANCO_PLANILLA BB ON
+              BB.ID_PERSONA = dpb.ID_PERSONA
+              AND BB.ID_CAUSANTE = dpb.ID_CAUSANTE
+              AND BB.ID_DETALLE_PERSONA = dpb.ID_DETALLE_PERSONA
+              AND BB.ID_BENEFICIO = dpb.ID_BENEFICIO
+              AND BB.ID_PLANILLA = dpb.ID_PLANILLA
+
+            LEFT JOIN NET_PERSONA_POR_BANCO perPorBan
+                ON perPorBan.ID_PERSONA = BB.ID_PERSONA
+                AND perPorBan.ID_AF_BANCO = BB.ID_AF_BANCO
+
+            LEFT JOIN NET_BANCO banco
+                ON perPorBan.ID_BANCO = banco.ID_BANCO
+        
         WHERE
             tp.nombre_planilla IN ('ORDINARIA DE JUBILADOS Y PENSIONADOS', 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS')
-            AND dpb.id_af_banco IS NOT NULL
+            AND perPorBan.id_af_banco IS NOT NULL
             AND dpb.estado = 'PAGADA'
             AND p.generar_voucher = 'SI'
     ),

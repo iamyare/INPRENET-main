@@ -203,10 +203,10 @@ export class DetalleBeneficioController {
     return this.detallebeneficioService.findAll();
   }
 
-  @Get(':term')
+  /* @Get(':term')
   findOne(@Param('term') term: number) {
     return this.detallebeneficioService.findOne(term);
-  }
+  } */
 
 
 

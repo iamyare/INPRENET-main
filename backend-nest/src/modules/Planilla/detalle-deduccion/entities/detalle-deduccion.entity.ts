@@ -54,9 +54,9 @@ export class Net_Detalle_Deduccion {
     @JoinColumn({ name: 'ID_DEDUCCION_ASIGNADA', foreignKeyConstraintName: 'FK_ID_DEDUCCION_ASIGNADA_DETDED' })
     deduccionAsignada: Net_Deducciones_Asignadas;
 
-    @ManyToOne(() => Net_Persona_Por_Banco, personaPorBanco => personaPorBanco.detallePagoBen, { cascade: true })
+    /* @ManyToOne(() => Net_Persona_Por_Banco, personaPorBanco => personaPorBanco.detallePagoBen, { cascade: true })
     @JoinColumn({ name: 'ID_AF_BANCO', foreignKeyConstraintName: "FK_ID_AF_BANCO_DETDED" })
-    personaPorBanco: Net_Persona_Por_Banco;
+    personaPorBanco: Net_Persona_Por_Banco; */
 
     @ManyToOne(() => Net_Usuario_Empresa, { nullable: true })
     @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_DET_DEDUCCION' })

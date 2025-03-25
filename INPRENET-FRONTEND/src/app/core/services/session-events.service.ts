@@ -1,43 +1,55 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SessionEventsService {
+export class SessionEventsService implements OnDestroy {
   private eventSource: EventSource | null = null;
   private sessionEvents = new Subject<any>();
+  private connectionError = new Subject<any>();
+  private isConnected = false;
 
-  constructor(private ngZone: NgZone) {}
+  constructor() {}
 
   connect(): void {
-    if (this.eventSource) {
-      this.eventSource.close();
-    }
+    if (this.isConnected) return;
 
-    this.ngZone.runOutsideAngular(() => {
-      this.eventSource = new EventSource(`${environment.API_URL}/api/sse/session-events`);
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+
+    try {
+      // Asegurarse de usar la URL base correcta
+      const apiUrl = `${environment.API_URL}/api/sse/session-events`;
+      
+      this.eventSource = new EventSource(apiUrl, { withCredentials: true });
+      
+      this.eventSource.onopen = () => {
+        console.log('SSE connection established');
+        this.isConnected = true;
+      };
 
       this.eventSource.onmessage = (event) => {
-        this.ngZone.run(() => {
+        try {
           const data = JSON.parse(event.data);
           this.sessionEvents.next(data);
-        });
+        } catch (error) {
+          console.error('Error parsing SSE event data:', error);
+        }
       };
 
       this.eventSource.onerror = (error) => {
-        this.ngZone.run(() => {
-          console.error('SSE Error:', error);
-          if (this.eventSource) {
-            this.eventSource.close();
-            this.eventSource = null;
-          }
-          // Intentar reconectar después de 5 segundos
-          setTimeout(() => this.connect(), 5000);
-        });
+        console.error('SSE connection error:', error);
+        this.connectionError.next(error);
+        this.disconnect();
+        
+        // Intentar reconectar después de un tiempo
+        setTimeout(() => this.connect(), 5000);
       };
-    });
+    } catch (error) {
+      console.error('Error creating SSE connection:', error);
+    }
   }
 
   disconnect(): void {
@@ -45,9 +57,18 @@ export class SessionEventsService {
       this.eventSource.close();
       this.eventSource = null;
     }
+    this.isConnected = false;
   }
 
   getSessionEvents(): Observable<any> {
     return this.sessionEvents.asObservable();
+  }
+
+  getConnectionErrors(): Observable<any> {
+    return this.connectionError.asObservable();
+  }
+
+  ngOnDestroy(): void {
+    this.disconnect();
   }
 }

@@ -24,7 +24,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // No interceptar peticiones a SSE
-    if (request.url.includes('/api/sse/')) {
+    if (request.url.includes('/sse/')) {
       return next.handle(request);
     }
 

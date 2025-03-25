@@ -21,6 +21,7 @@ import { BitacoraModule } from './modules/bitacora/bitacora.module';
 import { PrestamosModule } from './modules/prestamos/prestamos.module';
 import { ConasaModule } from './modules/conasa/conasa.module';
 import { WhatsappPruebaModule } from './modules/whatsapp-prueba/whatsapp-prueba.module';
+import { SessionModule } from './modules/session/session.module';
 
 @Module({
   imports: [
@@ -73,7 +74,8 @@ import { WhatsappPruebaModule } from './modules/whatsapp-prueba/whatsapp-prueba.
     PrestamosModule,
     ConasaModule,
     WhatsappPruebaModule,
-    BitacoraModule
+    BitacoraModule,
+    SessionModule // Agregamos el SessionModule aquí
   ],
   providers: [MantenimientoAfiliacionService],
 })

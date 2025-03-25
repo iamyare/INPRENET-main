@@ -1,20 +1,22 @@
-import { Controller, Get, Sse, UseGuards } from '@nestjs/common';
+import { Controller, Get, Sse, UseGuards, Request, Logger } from '@nestjs/common';
 import { Observable, interval } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RolesGuard } from '../../../guards/auth/auth.guard';
 import { SessionService } from '../services/session.service';
 import { MessageEvent } from '@nestjs/common';
 
-@Controller('api/sse')
+@Controller('sse')
 export class SSEController {
+  private readonly logger = new Logger(SSEController.name);
   private readonly connectedClients: Map<number, any[]> = new Map();
 
   constructor(private readonly sessionService: SessionService) {}
 
-  @UseGuards(RolesGuard)
   @Get('session-events')
   @Sse()
-  sessionEvents(): Observable<MessageEvent> {
+  sessionEvents(@Request() req): Observable<MessageEvent> {
+    this.logger.log('New SSE connection established');
+    
     return interval(30000).pipe(  // Verificar cada 30 segundos
       map(() => ({
         data: {

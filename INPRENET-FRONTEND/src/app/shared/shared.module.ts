@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';  // Asegúrate de importar esto
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from '../core/interceptors/auth.interceptor';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,10 +32,12 @@ import { GoogleMapsModule } from '@angular/google-maps';
 
 // Importa el componente de mensajes de error
 import { ErrorMessagesComponent } from './error-messages/error-messages.component';
+import { SessionDialogComponent } from './components/session-dialog/session-dialog.component';
 
 @NgModule({
   declarations: [
-    ErrorMessagesComponent,  // Declara el componente
+    ErrorMessagesComponent,
+    SessionDialogComponent
   ],
   imports: [
     CommonModule,  // Importa CommonModule aquí para usar *ngIf
@@ -67,8 +71,9 @@ import { ErrorMessagesComponent } from './error-messages/error-messages.componen
     MatTabsModule,
   ],
   exports: [
-    ErrorMessagesComponent,  
-    CommonModule,  // Exporta CommonModule si es necesario
+    ErrorMessagesComponent,
+    SessionDialogComponent,
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -95,6 +100,13 @@ import { ErrorMessagesComponent } from './error-messages/error-messages.componen
     MatTableModule,
     MatStepperModule,
     MatTabsModule,
+  ],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
   ]
 })
 export class SharedModule { }

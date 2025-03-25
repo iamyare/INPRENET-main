@@ -1,10 +1,12 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, NgZone } from '@angular/core';
 import { Observable, catchError, map, of, throwError } from 'rxjs';
-import { environment } from 'src/environments/environment';
 import { jwtDecode } from 'jwt-decode';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
+import { AuthResponse, LoginResponse, RefreshTokenResponse } from '../core/interfaces/auth.interfaces';
+
 
 @Injectable({
   providedIn: 'root'
@@ -113,27 +115,62 @@ export class AuthService {
     });
   }
 
-  login(correo: string, contrasena: string): Observable<{ accessToken: string }> {
+  login(correo: string, contrasena: string): Observable<LoginResponse> {
     const url = `${environment.API_URL}/api/usuario/login`;
     const body = { correo, contrasena };
-    return this.http.post<{ accessToken: string }>(url, body).pipe(
+    return this.http.post<LoginResponse>(url, body).pipe(
       map(response => {
+        this.toastr.success('Inicio de sesión exitoso');
         sessionStorage.setItem('token', response.accessToken);
+        sessionStorage.setItem('refresh_token', response.refreshToken);
         return response;
       }),
       catchError(error => {
         console.error('Login failed:', error);
         this.toastr.error('Inicio de sesión fallido', 'Error');
-        return throwError(error);
+        return throwError(() => error);
       })
     );
   }
+refreshToken(refreshToken: string): Observable<RefreshTokenResponse> {
+  return this.http.post<RefreshTokenResponse>(`${environment.API_URL}/api/auth/refresh`, { refreshToken }).pipe(
+    map(response => {
+      sessionStorage.setItem('token', response.accessToken);
+      sessionStorage.setItem('refresh_token', response.refreshToken);
+      return response;
+    }),
+    catchError(error => {
+      console.error('Token refresh failed:', error);
+      this.logout();
+      return throwError(() => error);
+    })
+  );
+}
 
-  logout(): void {
-    sessionStorage.removeItem('token');
-    this.toastr.info('Sesión cerrada');
-    this.router.navigate(['/']);
+logout(): void {
+  const token = sessionStorage.getItem('token');
+  if (token) {
+    // Intentar cerrar sesión en el servidor
+    this.http.post(`${environment.API_URL}/api/auth/logout`, {}).pipe(
+      catchError(error => {
+        console.error('Error durante el logout:', error);
+        return of(null);
+      })
+    ).subscribe(() => {
+      this.clearSession();
+    });
+  } else {
+    this.clearSession();
   }
+}
+
+private clearSession(): void {
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('refresh_token');
+  this.toastr.info('Sesión cerrada');
+  this.router.navigate(['/']);
+}
+
 
   isAuthenticated(): boolean {
     return sessionStorage.getItem('token') !== null;

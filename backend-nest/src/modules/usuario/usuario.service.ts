@@ -18,29 +18,30 @@ import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
 import * as fs from 'fs';
 import * as path from 'path';
+import { SessionService } from '../session/services/session.service';
 
 @Injectable()
 export class UsuarioService {
   private readonly logger = new Logger(UsuarioService.name)
+constructor(
+  @InjectRepository(Net_Empleado)
+  private readonly empleadoRepository: Repository<Net_Empleado>,
+  private readonly jwtService: JwtService,
+  private readonly mailService: MailService,
+  @InjectRepository(Net_Empleado_Centro_Trabajo)
+  private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
+  @InjectRepository(Net_Usuario_Empresa)
+  private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>,
+  @InjectRepository(net_rol_modulo)
+  private readonly rolModuloRepository: Repository<net_rol_modulo>,
+  @InjectRepository(net_usuario_modulo)
+  private readonly usuarioModuloRepository: Repository<net_usuario_modulo>,
+  @InjectRepository(net_modulo)
+  private readonly moduloRepository: Repository<net_modulo>,
+  private readonly sessionService: SessionService,
+) { }
 
-  constructor(
-    @InjectRepository(Net_Empleado)
-    private readonly empleadoRepository: Repository<Net_Empleado>,
-    private readonly jwtService: JwtService,
-    private readonly mailService: MailService,
-    @InjectRepository(Net_Empleado_Centro_Trabajo)
-    private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
-    @InjectRepository(Net_Usuario_Empresa)
-    private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>,
-    @InjectRepository(net_rol_modulo)
-    private readonly rolModuloRepository: Repository<net_rol_modulo>,
-    @InjectRepository(net_usuario_modulo)
-    private readonly usuarioModuloRepository: Repository<net_usuario_modulo>,
-    @InjectRepository(net_modulo)
-    private readonly moduloRepository: Repository<net_modulo>,
-  ) { }
-
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, req: any) {
     const { correo, contrasena } = loginDto;
     const usuario = await this.usuarioEmpresaRepository.findOne({
       where: {
@@ -90,13 +91,40 @@ export class UsuarioService {
       nombreEmpleado,
     };
   
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '100d' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '24h' }); // Reducido a 24 horas
+    const refreshToken = this.jwtService.sign(
+      { sub: usuario.id_usuario_empresa },
+      { expiresIn: '7d' } // Token de refresco válido por 7 días
+    );
+
+    // Crear sesión
+    await this.sessionService.createSession(usuario.id_usuario_empresa, {
+      token: accessToken,
+      refreshToken: refreshToken,
+      userAgent: req.headers['user-agent'] || 'Unknown',
+      ipAddress: req.ip || 'Unknown'
+    });
   
-    return { accessToken };
+    return {
+      accessToken,
+      refreshToken
+    };
   }
   
-  async logout(req, res) {
-    return res.json({ message: 'Sesión cerrada' });
+  async logout(req: any): Promise<{ message: string }> {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (token) {
+      try {
+        const decoded = this.jwtService.verify(token);
+        if (decoded.sub) {
+          // Invalidar la sesión actual
+          await this.sessionService.invalidatePreviousSessions(decoded.sub);
+        }
+      } catch (error) {
+        this.logger.error('Error al cerrar sesión:', error);
+      }
+    }
+    return { message: 'Sesión cerrada' };
   }
 
   async obtenerPerfilPorCorreo(correo: string) {

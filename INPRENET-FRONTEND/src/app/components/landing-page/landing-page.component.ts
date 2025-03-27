@@ -10,18 +10,19 @@ export class LandingPageComponent {
   features = [
     {
       image: '../assets/images/Conference-rafiki.svg',
-      title: 'Gestión Integral',
-      description: 'Ofrecemos una solución completa para gestionar tus pensiones.'
+      title: 'Gestión de Trámites',
+      description: 'Facilita la gestión de trámites administrativos de manera rápida y organizada.'
     },
     {
       image: '../assets/images/Sync-rafiki.svg',
-      title: 'Soporte Dedicado',
-      description: 'Contamos con un equipo de soporte disponible para ti en todo momento.'
+      title: 'Generación de Constancias y Reportes',
+      description: 'Emite constancias y genera reportes de trámites realizados para los pensionados de manera ágil y segura.'
     },
+    
     {
       image: '../assets/images/Teacher-rafiki.svg',
-      title: 'Fácil de Usar',
-      description: 'Nuestra plataforma es intuitiva y fácil de usar.'
+      title: 'Interfaz Intuitiva',
+      description: 'Navega fácilmente por los diferentes servicios con una experiencia amigable y moderna.'
     }
   ];
 

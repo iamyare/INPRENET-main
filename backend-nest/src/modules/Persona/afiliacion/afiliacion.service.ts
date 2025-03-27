@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, InternalServerError
 import { Net_Tipo_Persona } from '../entities/net_tipo_persona.entity';
 import { net_persona } from '../entities/net_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, In, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { CrearPersonaDto } from './dtos/crear-persona.dto';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Tipo_Identificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
@@ -44,6 +44,7 @@ import * as moment from 'moment';
 export class AfiliacionService {
   private readonly logger = new Logger(AfiliacionService.name);
   constructor(
+    private readonly dataSource: DataSource,
     @InjectRepository(net_persona)
     private readonly personaRepository: Repository<net_persona>,
     @InjectRepository(Net_Tipo_Persona)
@@ -87,6 +88,147 @@ export class AfiliacionService {
     private readonly entityManager: EntityManager,
   ) { }
 
+  async obtenerAfiliacion(idCausante: number): Promise<any> {
+    const query = `
+      WITH Referencias AS (
+          SELECT
+              R.ID_PERSONA,
+              R.PRIMER_NOMBRE || ' ' || COALESCE(R.SEGUNDO_NOMBRE, '') || ' ' || R.PRIMER_APELLIDO || ' ' || COALESCE(R.SEGUNDO_APELLIDO, '') AS NOMBRE_REFERENCIA,
+              R.DIRECCION,
+              R.PARENTESCO,
+              ROW_NUMBER() OVER (PARTITION BY R.ID_PERSONA ORDER BY R.PARENTESCO) AS RN
+          FROM NET_REFERENCIAS R
+      ),
+      CentrosTrabajo AS (
+          SELECT
+              PPC.ID_PERSONA,
+              JSON_OBJECT(
+                  'sector_economico' VALUE CT.SECTOR_ECONOMICO,
+                  'nombre_centro_trabajo' VALUE CT.NOMBRE_CENTRO_TRABAJO,
+                  'municipio' VALUE M3.NOMBRE_MUNICIPIO,
+                  'departamento' VALUE D3.NOMBRE_DEPARTAMENTO,
+                  'region' VALUE CASE
+                      WHEN D3.NOMBRE_DEPARTAMENTO IN ('COPÁN', 'OCOTEPEQUE', 'LEMPIRA', 'INTIBUCÁ', 'SANTA BÁRBARA') THEN 'Región Occidental'
+                      WHEN D3.NOMBRE_DEPARTAMENTO IN ('CORTÉS', 'YORO') THEN 'Región Noroccidental'
+                      WHEN D3.NOMBRE_DEPARTAMENTO IN ('ATLÁNTIDA', 'COLÓN', 'ISLAS DE LA BAHÍA') THEN 'Región Norte y Atlántida'
+                      WHEN D3.NOMBRE_DEPARTAMENTO IN ('FRANCISCO MORAZÁN', 'COMAYAGUA', 'LA PAZ') THEN 'Región Central'
+                      WHEN D3.NOMBRE_DEPARTAMENTO IN ('OLANCHO', 'EL PARAÍSO', 'GRACIAS A DIOS') THEN 'Región Oriental'
+                      WHEN D3.NOMBRE_DEPARTAMENTO IN ('CHOLUTECA', 'VALLE') THEN 'Región Sur'
+                      ELSE 'Región Desconocida'
+                  END,
+                  'direccion' VALUE CT.DIRECCION_1,
+                  'telefono' VALUE CT.TELEFONO_1
+              ) AS CENTRO_TRABAJO_JSON
+          FROM NET_PERF_PERS_CENT_TRAB PPC
+          LEFT JOIN NET_CENTRO_TRABAJO CT ON PPC.ID_CENTRO_TRABAJO = CT.ID_CENTRO_TRABAJO
+          LEFT JOIN NET_MUNICIPIO M3 ON CT.ID_MUNICIPIO = M3.ID_MUNICIPIO
+          LEFT JOIN NET_DEPARTAMENTO D3 ON CT.DEPARTAMENTO = D3.ID_DEPARTAMENTO
+      )
+      SELECT DISTINCT
+          ND.ID_CAUSANTE,
+          N.ID_TIPO_IDENTIFICACION AS TIPO_DOCENTE,
+          TI.TIPO_IDENTIFICACION,
+          N.N_IDENTIFICACION,
+          N.RTN,
+          (N.PRIMER_NOMBRE || ' ' || COALESCE(N.SEGUNDO_NOMBRE, '') || ' ' || N.PRIMER_APELLIDO || ' ' || COALESCE(N.SEGUNDO_APELLIDO, '')) AS NOMBRE,
+          N.GENERO,
+          N.ESTADO_CIVIL,
+          N.CANTIDAD_HIJOS,
+          N.FECHA_NACIMIENTO,
+          PA.NACIONALIDAD,
+          N.TELEFONO_1,
+          N.CORREO_1,
+          M.NOMBRE_MUNICIPIO AS MUNICIPIO_NACIMIENTO,
+          D.NOMBRE_DEPARTAMENTO AS DEPARTAMENTO_NACIMIENTO,
+          N.DIRECCION_RESIDENCIA AS DIRECCION_DOMICILIO,
+          M2.NOMBRE_MUNICIPIO AS MUNICIPIO_DOMICILIO,
+          D2.NOMBRE_DEPARTAMENTO AS DEPARTAMENTO_DOMICILIO,
+          TP.ID_TIPO_PERSONA,
+          TP.TIPO_PERSONA,
+          E.NOMBRE_ESTADO AS ESTATUS,
+          PR.DESCRIPCION AS ACTIVIDAD_ECONOMICA,
+          N.FECHA_AFILIACION,
+          CM.ABREVIATURA AS COLEGIO_MAGISTERIAL,
+          CM.DESCRIPCION,
+          N.FECHA_DEFUNCION,
+          B.COD_BANCO AS CODIGO_BANCO,
+          B.NOMBRE_BANCO,
+          PB.NUM_CUENTA,
+          JSON_ARRAYAGG(CT.CENTRO_TRABAJO_JSON) AS CENTROS_DE_TRABAJO
+      FROM
+          NET_DETALLE_PERSONA ND
+      LEFT JOIN
+          NET_PERSONA N ON ND.ID_CAUSANTE = N.ID_PERSONA
+      LEFT JOIN
+          NET_PROFESIONES PR ON N.ID_PROFESION = PR.ID_PROFESION
+      LEFT JOIN
+          NET_PAIS PA ON N.ID_PAIS_NACIONALIDAD = PA.ID_PAIS
+      LEFT JOIN
+          NET_MUNICIPIO M2 ON N.ID_MUNICIPIO_RESIDENCIA = M2.ID_MUNICIPIO
+      LEFT JOIN
+          NET_DEPARTAMENTO D2 ON M2.ID_DEPARTAMENTO = D2.ID_DEPARTAMENTO
+      LEFT JOIN
+          NET_MUNICIPIO M ON N.ID_MUNICIPIO_NACIMIENTO = M.ID_MUNICIPIO  
+      LEFT JOIN
+          NET_DEPARTAMENTO D ON M.ID_DEPARTAMENTO = D.ID_DEPARTAMENTO
+      LEFT JOIN
+          CentrosTrabajo CT ON N.ID_PERSONA = CT.ID_PERSONA
+      LEFT JOIN
+          NET_PERSONA_POR_BANCO PB ON N.ID_PERSONA = PB.ID_PERSONA
+      LEFT JOIN
+          NET_BANCO B ON PB.ID_BANCO = B.ID_BANCO
+      LEFT JOIN
+          NET_TIPO_PERSONA TP ON ND.ID_TIPO_PERSONA = TP.ID_TIPO_PERSONA
+      LEFT JOIN
+          NET_TIPO_IDENTIFICACION TI ON N.ID_TIPO_IDENTIFICACION = TI.ID_IDENTIFICACION
+      LEFT JOIN
+          NET_ESTADO_AFILIACION E ON ND.ID_ESTADO_AFILIACION = E.CODIGO
+      LEFT JOIN
+          NET_PERSONA_COLEGIOS_MAGISTERIALES PCM ON N.ID_PERSONA = PCM.ID_PERSONA
+      LEFT JOIN
+          NET_COLEGIOS_MAGISTERIALES CM ON PCM.ID_COLEGIO = CM.ID_COLEGIO
+      WHERE
+          ND.ID_CAUSANTE = ?
+      GROUP BY
+          ND.ID_CAUSANTE,
+          N.ID_TIPO_IDENTIFICACION,
+          TI.TIPO_IDENTIFICACION,
+          N.N_IDENTIFICACION,
+          N.RTN,
+          N.PRIMER_NOMBRE,
+          N.SEGUNDO_NOMBRE,
+          N.PRIMER_APELLIDO,
+          N.SEGUNDO_APELLIDO,
+          N.GENERO,
+          N.ESTADO_CIVIL,
+          N.CANTIDAD_HIJOS,
+          N.TELEFONO_1,
+          N.CORREO_1,
+          N.FECHA_NACIMIENTO,
+          N.FECHA_DEFUNCION,
+          N.FECHA_AFILIACION,
+          N.DIRECCION_RESIDENCIA,
+          M2.NOMBRE_MUNICIPIO,
+          D2.NOMBRE_DEPARTAMENTO,
+          PA.NACIONALIDAD,
+          M.NOMBRE_MUNICIPIO,
+          D.NOMBRE_DEPARTAMENTO,
+          TP.ID_TIPO_PERSONA,
+          TP.TIPO_PERSONA,
+          E.NOMBRE_ESTADO,
+          PR.DESCRIPCION,
+          CM.ABREVIATURA,
+          CM.DESCRIPCION;
+    `;
+
+    try {
+      const result = await this.dataSource.query(query, [idCausante]);
+      return result;
+    } catch (error) {
+      console.error('Error ejecutando la consulta:', error.message);
+      throw new Error('Error al obtener la afiliación');
+    }
+  }
 
   async tieneBancoActivo(idPersona: number): Promise<{
     tieneBancoActivo: boolean;

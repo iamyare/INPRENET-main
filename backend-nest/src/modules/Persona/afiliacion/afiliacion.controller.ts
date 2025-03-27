@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, Query, Res, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { net_persona } from '../entities/net_persona.entity';
-import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
 import { Connection, EntityManager } from 'typeorm';
@@ -20,11 +20,31 @@ import { Net_Familia } from '../entities/net_familia.entity';
 import { CrearFamiliaDto } from './dtos/crear-familiar.dto';
 import { CrearPepsDto } from './dtos/crear-peps.dto';
 import { CrearDiscapacidadDto } from './dtos/crear-discapacidad.dto';
-import { ObtenerFallecidosDto } from './dtos/obtener-fallecidos.dto';
 
 @Controller('afiliacion')
 export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
+  }
+
+  @Get('detalle/:idCausante')
+  async obtenerAfiliacion(@Param('idCausante', ParseIntPipe) idCausante: number) {
+    try {
+      const afiliacion = await this.afiliacionService.obtenerAfiliacion(idCausante);
+      if (!afiliacion || afiliacion.length === 0) {
+        throw new NotFoundException(`No se encontraron datos de afiliación para el ID: ${idCausante}`);
+      }
+      return afiliacion;
+    } catch (error) {
+      console.error('Error al obtener la afiliación:', error.message);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Ocurrió un error al obtener la afiliación',
+          message: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get('tiene-banco-activo/:idPersona')

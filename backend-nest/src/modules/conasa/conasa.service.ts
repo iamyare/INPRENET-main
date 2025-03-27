@@ -178,20 +178,25 @@ export class ConasaService {
     beneficiarios: CrearBeneficiarioDto[],
   ): Promise<string> {
     const contrato = await this.contratosRepository.findOne({ where: { id_contrato: idContrato } });
+  
     if (!contrato) {
       throw new NotFoundException('El contrato no existe.');
     }
-    const nuevosBeneficiarios = beneficiarios.map((beneficiario) =>
-      this.beneficiariosRepository.create({
+  
+    const nuevosBeneficiarios = beneficiarios.map((beneficiario) => {
+      const nombreCompleto = `${beneficiario.primer_nombre} ${beneficiario.segundo_nombre || ''} ${beneficiario.primer_apellido} ${beneficiario.segundo_apellido || ''}`.trim();
+      return this.beneficiariosRepository.create({
         contrato,
-        ...beneficiario,
-      }),
-    );
-
+        nombre_completo: nombreCompleto,
+        parentesco: beneficiario.parentesco,
+        fecha_nacimiento: beneficiario.fecha_nacimiento,
+      });
+    });
+  
     await this.beneficiariosRepository.save(nuevosBeneficiarios);
     return 'Beneficiarios creados exitosamente.';
   }
-
+  
   async verificarPersona(idPersona: number, manager?: any): Promise<net_persona> {
     const repo = manager ? manager.getRepository(net_persona) : this.personaRepository;
     const persona = await repo.findOne({ where: { id_persona: idPersona } });
@@ -232,29 +237,29 @@ export class ConasaService {
         console.error('Error en procesarContrato:', error.message);
         throw new BadRequestException('Error al procesar el contrato.');
     }
-}
+  }
 
-private async actualizarDatosPersona(contrato: AsignarContratoDto): Promise<UpdateResult> {
-    try {
-        const resultado = await this.dataSource
-            .createQueryBuilder()
-            .update(net_persona)
-            .set({
-                telefono_1: contrato.telefono_1 || null,
-                telefono_2: contrato.telefono_2 || null,
-                telefono_3: contrato.telefono_3 || null,
-                correo_1: contrato.correo_1 || null,
-            })
-            .where('id_persona = :idPersona', { idPersona: contrato.idPersona })
-            .execute();
-        return resultado;
-    } catch (error) {
-        console.error('Error al actualizar datos de la persona:', error.message);
-        throw new Error('Error al actualizar datos de la persona.');
-    }
-}
+  private async actualizarDatosPersona(contrato: AsignarContratoDto): Promise<UpdateResult> {
+      try {
+          const resultado = await this.dataSource
+              .createQueryBuilder()
+              .update(net_persona)
+              .set({
+                  telefono_1: contrato.telefono_1 || null,
+                  telefono_2: contrato.telefono_2 || null,
+                  telefono_3: contrato.telefono_3 || null,
+                  correo_1: contrato.correo_1 || null,
+              })
+              .where('id_persona = :idPersona', { idPersona: contrato.idPersona })
+              .execute();
+          return resultado;
+      } catch (error) {
+          console.error('Error al actualizar datos de la persona:', error.message);
+          throw new Error('Error al actualizar datos de la persona.');
+      }
+  }
 
-private async crearContratoConBeneficiarios(contrato: AsignarContratoDto, beneficiarios: CrearBeneficiarioDto[]): Promise<string> {
+  private async crearContratoConBeneficiarios(contrato: AsignarContratoDto, beneficiarios: CrearBeneficiarioDto[]): Promise<string> {
     try {
         const persona = await this.verificarPersona(contrato.idPersona);
         const plan = await this.verificarPlan(contrato.idPlan);
@@ -281,20 +286,24 @@ private async crearContratoConBeneficiarios(contrato: AsignarContratoDto, benefi
 
         if (beneficiarios && beneficiarios.length > 0) {
             const beneficiariosRepo = this.dataSource.getRepository(Net_Beneficiarios_Conasa);
-            const nuevosBeneficiarios = beneficiarios.map((beneficiario) =>
-                beneficiariosRepo.create({
+            const nuevosBeneficiarios = beneficiarios.map((beneficiario) => {
+                const nombreCompleto = `${beneficiario.primer_nombre} ${beneficiario.segundo_nombre || ''} ${beneficiario.primer_apellido} ${beneficiario.segundo_apellido || ''}`.trim();
+                return beneficiariosRepo.create({
                     contrato: savedContrato,
-                    ...beneficiario,
-                }),
-            );
+                    nombre_completo: nombreCompleto,
+                    parentesco: beneficiario.parentesco,
+                    fecha_nacimiento: beneficiario.fecha_nacimiento,
+                });
+            });
             await beneficiariosRepo.save(nuevosBeneficiarios);
         }
+
         return 'Contrato y beneficiarios creados exitosamente.';
     } catch (error) {
         console.error('Error al crear contrato y beneficiarios:', error.message);
         throw new Error('Error al crear contrato y beneficiarios.');
     }
-}
+  }
 
   formatDateToYYYYMMDD(dateString: string): string {
     if (!dateString) return null;
@@ -349,18 +358,14 @@ private async crearContratoConBeneficiarios(contrato: AsignarContratoDto, benefi
         },
         beneficiarios: contrato.beneficiarios.map((beneficiario) => ({
             idBeneficiario: beneficiario.id_beneficiario,
-            primerNombre: beneficiario.primer_nombre,
-            segundoNombre: beneficiario.segundo_nombre,
-            primerApellido: beneficiario.primer_apellido,
-            segundoApellido: beneficiario.segundo_apellido,
+            nombreCompleto: beneficiario.nombre_completo,
             parentesco: beneficiario.parentesco,
             fechaNacimiento: beneficiario.fecha_nacimiento,
         })),
     }));
 
     return contratosFormateados;
-}
-
+  }
 
   async obtenerPlanillaContratosActivos(email: string, password: string): Promise<any[]> {
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
@@ -1191,40 +1196,46 @@ private async crearContratoConBeneficiarios(contrato: AsignarContratoDto, benefi
 
   async generarExcelBeneficiarios(res: Response): Promise<void> {
     try {
-      // Ejecutar la consulta existente
-      const beneficiarios = await this.beneficiariosRepository
-        .createQueryBuilder('beneficiario')
-        .leftJoinAndSelect('beneficiario.contrato', 'contrato')
-        .leftJoinAndSelect('contrato.titular', 'titular')
-        .select([
-          'titular.n_identificacion AS n_identificacion_titular', // DNI del titular
-          'beneficiario.primer_nombre AS primer_nombre',
-          'beneficiario.segundo_nombre AS segundo_nombre',
-          'beneficiario.primer_apellido AS primer_apellido',
-          'beneficiario.segundo_apellido AS segundo_apellido',
-          'beneficiario.parentesco AS parentesco',
-          `TO_CHAR(beneficiario.fecha_nacimiento, 'DD/MM/YYYY') AS fecha_nacimiento`, // Fecha formateada
-          `TRUNC(MONTHS_BETWEEN(SYSDATE, beneficiario.fecha_nacimiento) / 12) AS edad`, // Edad calculada
-        ])
-        .getRawMany();
+        // Ejecutar la consulta existente
+        const beneficiarios = await this.beneficiariosRepository
+            .createQueryBuilder('beneficiario')
+            .leftJoinAndSelect('beneficiario.contrato', 'contrato')
+            .leftJoinAndSelect('contrato.titular', 'titular')
+            .select([
+                'titular.n_identificacion AS n_identificacion_titular', // DNI del titular
+                'beneficiario.nombre_completo AS nombre_completo', // Nombre completo del beneficiario
+                'beneficiario.parentesco AS parentesco', // Parentesco
+                `TO_CHAR(beneficiario.fecha_nacimiento, 'DD/MM/YYYY') AS fecha_nacimiento`, // Fecha formateada
+                `TRUNC(MONTHS_BETWEEN(SYSDATE, beneficiario.fecha_nacimiento) / 12) AS edad`, // Edad calculada
+            ])
+            .getRawMany();
 
-      // Crear la hoja de trabajo
-      const worksheet = XLSX.utils.json_to_sheet(beneficiarios);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Beneficiarios');
+        // Formatear los datos para mostrar "S/D" cuando los valores sean nulos o vacíos
+        const beneficiariosFormateados = beneficiarios.map((beneficiario) => ({
+            n_identificacion_titular: beneficiario.n_identificacion_titular || 'S/D',
+            nombre_completo: beneficiario.nombre_completo || 'S/D',
+            parentesco: beneficiario.parentesco || 'S/D',
+            fecha_nacimiento: beneficiario.fecha_nacimiento || 'S/D',
+            edad: beneficiario.edad !== null && beneficiario.edad !== undefined ? beneficiario.edad : 'S/D',
+        }));
 
-      // Configurar el archivo en formato Excel
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
-      const excelFilename = `Beneficiarios_${new Date().toISOString().split('T')[0]}.xlsx`;
+        // Crear la hoja de trabajo
+        const worksheet = XLSX.utils.json_to_sheet(beneficiariosFormateados);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Beneficiarios');
 
-      // Enviar el archivo como respuesta
-      res.setHeader('Content-Disposition', `attachment; filename=${excelFilename}`);
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.send(excelBuffer);
+        // Configurar el archivo en formato Excel
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+        const excelFilename = `Beneficiarios_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+        // Enviar el archivo como respuesta
+        res.setHeader('Content-Disposition', `attachment; filename=${excelFilename}`);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(excelBuffer);
     } catch (error) {
-      throw new BadRequestException(
-        error.message || 'Error al generar el archivo Excel.',
-      );
+        throw new BadRequestException(
+            error.message || 'Error al generar el archivo Excel.',
+        );
     }
   }
 
@@ -1235,7 +1246,6 @@ private async crearContratoConBeneficiarios(contrato: AsignarContratoDto, benefi
       order: { fecha_subida: 'DESC' },
     });
   }
-
 
   async obtenerFactura(id: number): Promise<Net_Facturas_Conasa | null> {
     return await this.facturasRepository.findOne({ where: { id_factura: id } });

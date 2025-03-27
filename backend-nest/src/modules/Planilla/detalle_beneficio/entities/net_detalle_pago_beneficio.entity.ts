@@ -38,9 +38,9 @@ export class Net_Detalle_Pago_Beneficio {
     @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName: "FK_ID_PLANILLA_DETPAGBEN" })
     planilla: Net_Planilla;
 
-    /* @ManyToOne(() => Net_Persona_Por_Banco, personaPorbanco => personaPorbanco.detallePagoBen, { cascade: true })
+    @ManyToOne(() => Net_Persona_Por_Banco, personaPorbanco => personaPorbanco.detallePagoBen, { cascade: true })
     @JoinColumn({ name: 'ID_AF_BANCO', foreignKeyConstraintName: "FK_ID_AF_BANCO_DETPAGBEN" })
-    personaporbanco: Net_Persona_Por_Banco; */
+    personaporbanco: Net_Persona_Por_Banco;
 
     @ManyToOne(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.detallePagBeneficio, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_BEN_PLAN_AFIL_DETPAGBEN" })
@@ -55,9 +55,6 @@ export class Net_Detalle_Pago_Beneficio {
 
     @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
     ID_USUARIO_EMPRESA: number;
-
-    @OneToMany(() => Net_BANCO_PLANILLA, bancoPlanilla => bancoPlanilla.personaPlanilla)
-    bancoPlanilla: Net_BANCO_PLANILLA[];
 
 }
 

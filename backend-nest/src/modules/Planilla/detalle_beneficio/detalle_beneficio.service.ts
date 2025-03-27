@@ -82,38 +82,37 @@ export class DetalleBeneficioService {
     }
 }
 
+async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
+  const causante = await this.personaRepository.findOne({
+    where: { n_identificacion },
+  });
 
-
-  async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
-    const causante = await this.personaRepository.findOne({
-      where: { n_identificacion },
-    });
-
-    if (!causante) {
-      return false;
-    }
-
-    const beneficiarios = await this.detPersonaRepository.find({
-      where: { ID_CAUSANTE_PADRE: causante.id_persona },
-    });
-
-    if (beneficiarios.length === 0) {
-      return false;
-    }
-    const idsBeneficiarios = beneficiarios.map(b => b.ID_PERSONA);
-
-    if (idsBeneficiarios.length === 0) {
-      return false;
-    }
-
-    const pagos = await this.detPagBenRepository
-      .createQueryBuilder('pago')
-      .innerJoinAndSelect('pago.detalleBeneficioAfiliado', 'detalle')
-      .where('detalle.ID_PERSONA IN (:...ids)', { ids: idsBeneficiarios })
-      .andWhere('pago.estado != :estado', { estado: 'RECHAZADO' })
-      .getCount();
-    return pagos > 0;
+  if (!causante) {
+    return false;
   }
+  const beneficiarios = await this.detPersonaRepository.find({
+    where: [
+      { ID_CAUSANTE: causante.id_persona },
+      { ID_CAUSANTE_PADRE: causante.id_persona }
+    ],
+  });
+  const idsBeneficiarios = beneficiarios
+    .filter(b => b.ID_PERSONA !== causante.id_persona)
+    .map(b => b.ID_PERSONA);
+
+  if (idsBeneficiarios.length === 0) {
+    return false;
+  }
+
+  const pagos = await this.detPagBenRepository
+    .createQueryBuilder('pago')
+    .where('pago.ID_CAUSANTE = :idCausante', { idCausante: causante.id_persona })
+    .andWhere('pago.ID_PERSONA != :idPersona', { idPersona: causante.id_persona })
+    .andWhere('pago.estado != :estado', { estado: 'RECHAZADO' })
+    .getMany();
+
+  return pagos.length > 0;
+}
 
   async obtenerBeneficiosPorPersona(dni: string, incluirCostoVida: boolean): Promise<any> {
     let query = '';

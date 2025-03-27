@@ -16,17 +16,8 @@ export class Net_Beneficiarios_Conasa {
   @JoinColumn({ name: 'ID_CONTRATO', foreignKeyConstraintName: 'FK_NET_CONTRATO_BENEFICIARIO' })
   contrato: Net_Contratos_Conasa;
 
-  @Column({ name: 'PRIMER_NOMBRE', type: 'varchar2', length: 40 })
-  primer_nombre: string;
-
-  @Column({ name: 'SEGUNDO_NOMBRE', type: 'varchar2', length: 40, nullable: true })
-  segundo_nombre: string;
-
-  @Column({ name: 'PRIMER_APELLIDO', type: 'varchar2', length: 40, nullable: true })
-  primer_apellido: string;
-
-  @Column({ name: 'SEGUNDO_APELLIDO', type: 'varchar2', length: 40, nullable: true })
-  segundo_apellido: string;
+  @Column({ name: 'NOMBRE_COMPLETO', type: 'varchar2', length: 150 })
+  nombre_completo: string;
 
   @Column({ name: 'PARENTESCO', type: 'varchar2', length: 50, nullable: true })
   parentesco: string;

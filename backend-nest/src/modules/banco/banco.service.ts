@@ -105,45 +105,45 @@ export class BancoService {
     
         const planillaQuery = `
             SELECT
-                p."ID_PLANILLA" AS "id_planilla",
-                tp."NOMBRE_PLANILLA" AS "tipo_planilla",
-                TO_CHAR(p."PERIODO_FINALIZACION", 'YYYYMMDD') AS "fecha_pago_planilla"
+            p."ID_PLANILLA" AS "id_planilla",
+            tp."NOMBRE_PLANILLA" AS "tipo_planilla",
+            TO_CHAR(p."PERIODO_FINALIZACION", 'YYYYMMDD') AS "fecha_pago_planilla"
             FROM "NET_PLANILLA" p
             JOIN "NET_TIPO_PLANILLA" tp ON p."ID_TIPO_PLANILLA" = tp."ID_TIPO_PLANILLA"
             WHERE p."ESTADO" = 'ENVIADO A BANCO'
         `;
 
     const pagosQuery = `
-        SELECT
-        dp."ID_PLANILLA",
-        persona."N_IDENTIFICACION" AS "numero_identificacion",
-        persona."ID_PERSONA" AS "id_persona",
-        COALESCE(banco."CODIGO_ACH", ' ') AS "codigo_banco_ach",
-        COALESCE(TRIM(personaPorBanco."NUM_CUENTA"), ' ') AS "numero_cuenta",
-        dp."ID_AF_BANCO",
-        SUM(dp."MONTO_A_PAGAR") AS "monto",
-        TRIM(
-            REGEXP_REPLACE(
-                NVL(persona."PRIMER_NOMBRE", '') || ' ' ||
-                NVL(persona."SEGUNDO_NOMBRE", '') || ' ' ||
-                NVL(persona."TERCER_NOMBRE", '') || ' ' ||
-                NVL(persona."PRIMER_APELLIDO", '') || ' ' ||
-                NVL(persona."SEGUNDO_APELLIDO", ''),
-                ' +', ' '
-            )
-        ) AS "nombre_titular"
-    FROM "NET_DETALLE_PAGO_BENEFICIO" dp
-    LEFT JOIN "NET_PERSONA" persona 
-        ON dp."ID_PERSONA" = persona."ID_PERSONA"
-    LEFT JOIN "NET_PERSONA_POR_BANCO" personaPorBanco 
-        ON dp."ID_AF_BANCO" = personaPorBanco."ID_AF_BANCO"
-    LEFT JOIN "NET_BANCO" banco 
-        ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
-    JOIN "NET_PLANILLA" planilla 
-        ON dp."ID_PLANILLA" = planilla."ID_PLANILLA"
-    WHERE planilla."ESTADO" = 'ENVIADO A BANCO'
-    AND dp."ESTADO" = 'ENVIADO A BANCO'
-    GROUP BY dp."ID_PLANILLA", persona."N_IDENTIFICACION", persona."ID_PERSONA", 
+         SELECT
+            dp."ID_PLANILLA",
+            persona."N_IDENTIFICACION" AS "numero_identificacion",
+            persona."ID_PERSONA" AS "id_persona",
+            COALESCE(banco."CODIGO_ACH", ' ') AS "codigo_banco_ach",
+            COALESCE(TRIM(personaPorBanco."NUM_CUENTA"), ' ') AS "numero_cuenta",
+            dp."ID_AF_BANCO",
+            SUM(dp."MONTO_A_PAGAR") AS "monto",
+            TRIM(
+                REGEXP_REPLACE(
+                    NVL(persona."PRIMER_NOMBRE", '') || ' ' ||
+                    NVL(persona."SEGUNDO_NOMBRE", '') || ' ' ||
+                    NVL(persona."TERCER_NOMBRE", '') || ' ' ||
+                    NVL(persona."PRIMER_APELLIDO", '') || ' ' ||
+                    NVL(persona."SEGUNDO_APELLIDO", ''),
+                    ' +', ' '
+                )
+            ) AS "nombre_titular"
+        FROM "NET_DETALLE_PAGO_BENEFICIO" dp
+        LEFT JOIN "NET_PERSONA" persona 
+            ON dp."ID_PERSONA" = persona."ID_PERSONA"
+        LEFT JOIN "NET_PERSONA_POR_BANCO" personaPorBanco 
+            ON dp."ID_AF_BANCO" = personaPorBanco."ID_AF_BANCO"
+        LEFT JOIN "NET_BANCO" banco 
+            ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
+        JOIN "NET_PLANILLA" planilla 
+            ON dp."ID_PLANILLA" = planilla."ID_PLANILLA"
+        WHERE planilla."ESTADO" = 'ENVIADO A BANCO'
+            AND dp."ESTADO" = 'ENVIADO A BANCO'
+        GROUP BY dp."ID_PLANILLA", persona."N_IDENTIFICACION", persona."ID_PERSONA", 
             banco."CODIGO_ACH", personaPorBanco."NUM_CUENTA", dp."ID_AF_BANCO",
             persona."PRIMER_NOMBRE", persona."SEGUNDO_NOMBRE", persona."TERCER_NOMBRE",
             persona."PRIMER_APELLIDO", persona."SEGUNDO_APELLIDO"
@@ -157,7 +157,14 @@ export class BancoService {
         FROM "NET_DETALLE_DEDUCCION" dd
         JOIN "NET_PLANILLA" p ON dd."ID_PLANILLA" = p."ID_PLANILLA"
         WHERE p."ESTADO" = 'ENVIADO A BANCO'
-        AND dd."ESTADO_APLICACION" = 'ENVIADO A BANCO'
+            AND dd."ESTADO_APLICACION" = 'ENVIADO A BANCO'
+            AND EXISTS (
+                SELECT 1 
+                FROM "NET_DETALLE_PAGO_BENEFICIO" dp
+                WHERE dp."ID_PERSONA" = dd."ID_PERSONA"
+                    AND dp."ID_PLANILLA" = dd."ID_PLANILLA"
+                    AND dp."ESTADO" = 'ENVIADO A BANCO'
+            )
         GROUP BY dd."ID_PLANILLA", dd."ID_PERSONA"
     `;
 
@@ -274,7 +281,6 @@ export class BancoService {
     try {
         const errores: string[] = [];
 
-        // 📌 Verificar si la planilla ya tiene un historial de pagos
         const historialExistente = await this.historialPagoPlanillaRepository.findOne({ where: { id_planilla } });
 
         if (historialExistente) {
@@ -283,8 +289,6 @@ export class BancoService {
                 message: `La planilla ${id_planilla} ya ha sido procesada previamente y no puede volver a procesarse.`,
             });
         }
-
-        // 📌 Obtener detalles de la planilla
         const detallePlanilla = await this.obtenerDetallePagoPlanilla();
         const planillaActual = detallePlanilla.find(p => p.id_planilla === id_planilla);
 
@@ -317,8 +321,6 @@ export class BancoService {
                 `Cantidad de pagos fallidos incorrecta: el total_pagos_fallidos es ${total_pagos_fallidos}, pero pagos_fallidos tiene ${pagos_fallidos.length} objetos.`
             );
         }
-
-        // 📌 Buscar personas asociadas a la planilla
         const pagosQuery = `
             SELECT persona."ID_PERSONA", persona."N_IDENTIFICACION"
             FROM "NET_DETALLE_PAGO_BENEFICIO" dp
@@ -339,8 +341,6 @@ export class BancoService {
 
         const idsPagosFallidos = pagos_fallidos.map(p => p.numero_identificacion);
         const idsPagosExitosos = identificacionesPersonasPlanilla.filter(id => !idsPagosFallidos.includes(id));
-
-        // 📌 Validar que los pagos fallidos pertenezcan a la planilla
         const pagosFallidosInvalidos = idsPagosFallidos.filter(id => !identificacionesPersonasPlanilla.includes(id));
 
         if (pagosFallidosInvalidos.length > 0) {
@@ -472,7 +472,6 @@ async actualizarPagosExitosos(id_planilla: string, idsPagosExitosos: string[]) {
     }
 }
 
-
   async procesarPagosPendientes(datos: NotificacionPagosPendientesDto[]): Promise<any> {
     if (!Array.isArray(datos) || datos.length === 0) {
       throw new BadRequestException({
@@ -573,16 +572,16 @@ async actualizarPagosExitosos(id_planilla: string, idsPagosExitosos: string[]) {
           }
 
           const queryPagadas = `
-                    SELECT "ID_PLANILLA" FROM "NET_DETALLE_PAGO_BENEFICIO"
-                    WHERE "ID_PERSONA" = :1
-                    AND "ID_PLANILLA" IN (${placeholders})
-                    AND "ESTADO" = 'PAGADA'
-                `;
+              SELECT "ID_PLANILLA" FROM "NET_DETALLE_PAGO_BENEFICIO"
+              WHERE "ID_PERSONA" = :1
+              AND "ID_PLANILLA" IN (${placeholders})
+              AND "ESTADO" = 'PAGADA'
+          `;
           const pagosYaPagados = await this.entityManager.query(queryPagadas, [idPersona, ...idPlanillasArray]);
 
           if (pagosYaPagados.length > 0) {
-            const planillasPagadas = pagosYaPagados.map(p => p.ID_PLANILLA);
-            errores.push(`Identidad ${numero_identificacion}: Las siguientes planillas ya han sido procesadas previamente: ${planillasPagadas.join(', ')}.`);
+              const planillasPagadas = [...new Set(pagosYaPagados.map(p => p.ID_PLANILLA))];
+              errores.push(`Identidad ${numero_identificacion}: Las siguientes planillas ya han sido procesadas previamente: ${planillasPagadas.join(', ')}.`);
           }
 
           if (errores.length > 0) {
@@ -590,7 +589,7 @@ async actualizarPagosExitosos(id_planilla: string, idsPagosExitosos: string[]) {
             continue;
           }
 
-          const banco = await this.bancoRepository.findOne({ where: { id_banco: codigo_banco_ach } });
+          const banco = await this.bancoRepository.findOne({ where: { codigo_ach: String(codigo_banco_ach) } });
 
           if (!banco) {
               erroresGlobales.push(`Identidad ${numero_identificacion}: No se encontró un banco con el código ${codigo_banco_ach}.`);

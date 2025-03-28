@@ -65,6 +65,10 @@ const routes: Routes = [
         path: 'documentos',
         loadChildren: () => import('./modulos/documentos/documentos.module').then(m => m.DocumentosModule),
       },
+      {
+        path: 'rnp',
+        loadChildren: () => import('./modulos/rnp/rnp.module').then(m => m.RnpModule),
+      },
       { path: 'usuario/editar', component: EditarPerfilComponent },
     ]
   },

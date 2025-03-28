@@ -1,0 +1,210 @@
+$color-primary: #198D92;  // ✅ Color sobrio basado en la segunda imagen
+$color-secondary: #455A64;  // ✅ Color para los textos
+$color-light: #F5F5F5;  // ✅ Fondo claro
+$color-border: #B0BEC5;  // ✅ Bordes más definidos
+$color-verify: #E3F2FD;  // ✅ Fondo del mensaje de validación
+$color-danger: #D32F2F;  // ✅ Rojo más elegante para el botón de cerrar
+$color-text-dark: #000000;  // ✅ Texto negro en el mensaje
+
+.scanner-container {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: "Poppins", sans-serif;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+
+  h2 {
+    font-size: 1.8rem;
+    color: $color-text-dark;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  /* 📌 Estilos del input de identificación */
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  
+    label {
+      font-weight: bold;
+      color: $color-secondary;
+    }
+  
+    input {
+      padding: 12px;
+      border: 1px solid $color-border;
+      border-radius: 5px;
+      font-size: 1rem;
+      width: 100%; // ✅ Asegura que no sobresalga del contenedor
+      max-width: 100%; // ✅ Evita que el input se salga de la card
+      box-sizing: border-box; // ✅ Evita que el padding lo expanda fuera del contenedor
+      transition: border-color 0.3s ease-in-out;
+  
+      &:focus {
+        border-color: $color-primary;
+        outline: none;
+      }
+    }
+  }
+  
+
+  /* 📌 Botones */
+  .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+
+    .btn-verify {
+      background: $color-primary;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease-in-out, transform 0.2s;
+
+      &:hover {
+        background: darken($color-primary, 10%);
+        transform: scale(1.05);
+      }
+    }
+
+    .btn-action {
+      background: darken($color-primary, 5%);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 18px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease-in-out, transform 0.2s;
+
+      &:hover {
+        background: darken($color-primary, 15%);
+        transform: scale(1.05);
+      }
+    }
+
+    .btn-danger {
+      background: $color-danger;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 18px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease-in-out, transform 0.2s;
+
+      &:hover {
+        background: darken($color-danger, 10%);
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  /* 📌 Imagen de la huella */
+  .fingerprint-image {
+    width: 250px;
+    height: 250px;
+    display: block;
+    margin: 0 auto;
+    border-radius: 10px;
+    border: 2px solid $color-border;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 📌 Mensaje de verificación */
+  .verification-message {
+    margin: 10px auto;
+    padding: 15px;
+    color: #fff;
+    background-color: #f39c12;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: pulse 1.5s infinite;
+  }
+
+  /* 📌 Mensaje de error */
+  .error-message {
+    margin-top: 15px;
+    padding: 12px;
+    background: lighten($color-danger, 40%);
+    color: darken($color-danger, 20%);
+    border-left: 5px solid $color-danger;
+    border-radius: 10px;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1rem;
+    animation: fadeIn 0.5s ease-in-out;
+    border: 1px solid $color-danger;
+  }
+
+  /* 📌 Animación de entrada */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+
+.spinner {
+  margin: 10px auto;
+  text-align: center;
+}
+
+.loading-spinner {
+  border: 4px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 4px solid #3498db;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.message {
+  margin: 10px auto;
+  padding: 10px;
+  color: #fff;
+  background-color: #f39c12;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2em;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}

@@ -1,0 +1,66 @@
+<div class="scanner-container">
+  <h2>Validación Biométrica</h2>
+
+  <!-- ✅ Mensaje de verificación -->
+  <div *ngIf="verificado" class="verification-message">
+    ✅ Cédula {{ identificacion }} y huella verificada con éxito por el Registro Nacional de las Personas.
+  </div>
+
+  <!-- ✅ Mensaje de colocar el dedo en el escáner -->
+  <div *ngIf="dispositivoIniciado && !verificado" class="message">
+    Por favor, coloque su dedo en el escáner...
+  </div>
+
+  <!-- ✅ Mensaje de error -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <!-- ✅ Campo para ingresar número de identificación -->
+  <div class="input-group">
+    <label for="identificacion">Número de Identificación</label>
+    <input id="identificacion" type="text" [(ngModel)]="identificacion" placeholder="Ingrese su número de identificación" required />
+  </div>
+
+  <!-- ✅ Botón para iniciar dispositivo -->
+  <div class="btn-group" *ngIf="!dispositivoIniciado">
+    <button class="btn-action" (click)="iniciarDispositivo()">Iniciar Dispositivo</button>
+  </div>
+
+  <!-- ✅ Botón para verificar los datos -->
+  <div class="btn-group" *ngIf="!verificado">
+    <button class="btn-verify" [disabled]="isLoading" (click)="verificarDatos()">
+      {{ isLoading ? 'Verificando...' : 'Verificar Datos' }}
+    </button>
+  </div>
+
+  <!-- ✅ Botón para ingresar otra persona después de la verificación -->
+  <div class="btn-group" *ngIf="verificado">
+    <button class="btn-verify" (click)="ingresarOtraPersona()">Ingresar Otra Persona</button>
+  </div>
+
+  <!-- ✅ Spinner de carga -->
+  <div *ngIf="isLoading" class="spinner">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- ✅ Información General -->
+  <div *ngIf="informacionGeneral" class="info-container">
+    <h3>Información General:</h3>
+    <p><strong>Nombre Completo:</strong> {{ informacionGeneral.nombres }} {{ informacionGeneral.primerApellido }} {{ informacionGeneral.segundoApellido }}</p>
+    <p><strong>Fecha de Nacimiento:</strong> {{ informacionGeneral.fechaDeNacimiento }}</p>
+    <p><strong>Sexo:</strong> {{ informacionGeneral.sexo }}</p>
+    <p><strong>Ocupación:</strong> {{ informacionGeneral.ocupacionLaboral }}</p>
+    <p><strong>Estado Civil:</strong> {{ informacionGeneral.estadoCivil }}</p>
+    <p><strong>Teléfono:</strong> {{ informacionGeneral.telefonoCelular }}</p>
+    <p><strong>Correo Electrónico:</strong> {{ informacionGeneral.correoElectronico }}</p>
+    <p><strong>Dirección de Residencia:</strong> {{ informacionGeneral.direccionResidencia }}</p>
+    <p><strong>Departamento de Nacimiento:</strong> {{ informacionGeneral.deptoNacimiento }}</p>
+    <p><strong>Municipio de Nacimiento:</strong> {{ informacionGeneral.municNacimiento }}</p>
+    <p><strong>País de Nacimiento:</strong> {{ informacionGeneral.paisNacimiento }}</p>
+    <img *ngIf="fotoPersona" [src]="fotoPersona" alt="Foto de la persona" class="persona-image">
+  </div>
+
+  <!-- ✅ Imagen de la huella capturada -->
+  <img *ngIf="fingerprint && !verificado" [src]="fingerprint" alt="Huella capturada" class="fingerprint-image">
+</div>

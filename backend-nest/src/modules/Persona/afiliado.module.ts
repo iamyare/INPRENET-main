@@ -38,7 +38,7 @@ import { Net_Colonia } from '../Regional/provincia/entities/net_colonia.entity';
 
 @Module({
   controllers: [AfiliadoController, AfiliacionController, MantenimientoAfiliacionController],
-  providers: [AfiliadoService, AfiliacionService, MantenimientoAfiliacionService, /* BitacoraService */],
+  providers: [AfiliadoService, AfiliacionService, MantenimientoAfiliacionService],
   imports: [RegionalModule, TransaccionesModule,
     TypeOrmModule.forFeature([Net_Empleado_Centro_Trabajo, net_otra_fuente_ingreso, net_persona, Net_Discapacidad, net_estado_afiliacion, net_detalle_persona, Net_perf_pers_cent_trab,
       Net_Ref_Per_Pers, Net_Persona_Discapacidad,

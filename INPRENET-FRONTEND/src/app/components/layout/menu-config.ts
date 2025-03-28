@@ -14,6 +14,18 @@ export interface Section {
 
 export const MENU_CONFIG: Section[] = [
   {
+    name: 'CARNETIZACION',
+    items: [
+      {
+        title: 'Prueba',
+        icon: 'group',
+        children: [
+          { title: 'Prueba', route: 'rnp/prueba-vida', icon: 'manage_accounts' }
+        ],
+      },
+    ],
+  },
+  {
     name: 'DOCUMENTOS',
     items: [
       {

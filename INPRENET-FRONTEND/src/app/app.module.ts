@@ -20,6 +20,7 @@ import { DocumentosModule } from './modulos/documentos/documentos.module';
 
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
+import { RnpModule } from './modulos/rnp/rnp.module';
 
 const hondurasLocale = { ...localeEs } as any;
 
@@ -51,6 +52,7 @@ registerLocaleData(hondurasLocale, 'es-HN');
     AdminModule,
     FormsModule,
     ConasaModule,
+    RnpModule,
     DocumentosModule,
     ToastrModule.forRoot({
       timeOut: 10000,

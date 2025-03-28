@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Between, EntityManager, In, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { Net_Deduccion } from './entities/net_deduccion.entity';
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
@@ -11,16 +11,13 @@ import * as XLSX from 'xlsx';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 import { Workbook } from 'exceljs';
+import { Worker } from 'worker_threads';
 import * as pLimit from 'p-limit';
 import * as fs from 'fs';
 import * as csv from 'fast-csv';
 import { Net_Deduccion_Tipo_Planilla } from './entities/net_deduccion_tipo_planilla.entity';
 import { Length } from 'class-validator';
 import { net_deducciones_temp } from './entities/net_deducciones_temp.entity';
-import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
-
-import * as path from 'path';
-import * as os from 'os';
 
 @Injectable()
 export class DeduccionService {
@@ -28,8 +25,6 @@ export class DeduccionService {
   private readonly logger = new Logger(DeduccionService.name)
 
   constructor(
-    @InjectEntityManager() private entityManager: EntityManager,
-
     @InjectRepository(Net_Deduccion)
     public deduccionRepository: Repository<Net_Deduccion>,
 
@@ -310,13 +305,9 @@ export class DeduccionService {
 
     if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal && !N_PRESTAMO_INPREMA && TIPO_PRESTAMO_INPREMA) {
       return { error: `Fila vacía: ${JSON.stringify(row)}`, processed: false };
-    } if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
+    }
+    if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
       return { error: 'Faltan columnas obligatorias', processed: false };
-    } if (idTipoPlanilla == 1 || idTipoPlanilla == 2) {
-      const mesActual = new Date().getMonth() + 1;
-      if (mes !== mesActual) {
-        return { error: 'Número de mes incorrecto.', processed: false };
-      }
     }
 
     const parsedAnio = Number(anio);
@@ -383,9 +374,9 @@ export class DeduccionService {
       return { error: `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`, processed: false };
     }
     if (persona) {
-      /* if (!(persona.personasPorBanco)) {
+      if (!(persona.personasPorBanco)) {
         return { error: `No se encontró un banco activo para la persona`, processed: false };
-      } */
+      }
     } else {
       return { error: `No se encontró persona con DNI: ${parsedDni}`, processed: false };
     }
@@ -443,7 +434,7 @@ export class DeduccionService {
           return { error: `Deducción duplicada detectada`, processed: false };
         }
 
-        /*  const activo = persona.personasPorBanco.find(persona => persona.estado === 'ACTIVO') || null; */
+        const activo = persona.personasPorBanco.find(persona => persona.estado === 'ACTIVO') || null;
 
         const detalleDeduccion = repositories.detalleDeduccionRepository.create({
           anio: parsedAnio,
@@ -456,7 +447,7 @@ export class DeduccionService {
           persona: persona.id_persona,
           deduccion,
           planilla: { id_planilla: plan.id_planilla },
-          /* personaPorBanco: activo, */
+          personaPorBanco: activo,
         });
 
         await repositories.detalleDeduccionRepository.save(detalleDeduccion);
@@ -498,7 +489,7 @@ export class DeduccionService {
           return { error: `Deducción duplicada detectada`, processed: false };
         }
 
-        /* const activo = persona.personasPorBanco.find(persona => persona.estado === 'ACTIVO') || null; */
+        const activo = persona.personasPorBanco.find(persona => persona.estado === 'ACTIVO') || null;
 
         const detalleDeduccion = repositories.detalleDeduccionRepository.create({
           anio: parsedAnio,
@@ -511,7 +502,7 @@ export class DeduccionService {
           persona: persona.id_persona,
           deduccion,
           planilla: { id_planilla: plan.id_planilla },
-          /* personaPorBanco: activo, */
+          personaPorBanco: activo,
         });
 
         await repositories.detalleDeduccionRepository.save(detalleDeduccion);
@@ -563,7 +554,7 @@ export class DeduccionService {
           persona: persona.id_persona,
           deduccion,
           planilla: { id_planilla: plan.id_planilla },
-          /* id_af_banco: persona.personasPorBanco[0].id_af_banco */
+          id_af_banco: persona.personasPorBanco[0].id_af_banco
         });
 
         await repositories.detalleDeduccionRepository.save(detalleDeduccion);
@@ -581,28 +572,31 @@ export class DeduccionService {
   }
 
   private async processRowTablaTemporal(planilla: any, idTipoPlanilla: number, id_planilla: number, row: any, repositories: any): Promise<any> {
-    const { anio, mes, dni, codigoDeduccion, montoTotal, n_prestamo_inprema, tipo_prestamo_inprema } = row;
+    const { anio, mes, dni, codigoDeduccion, montoTotal } = row;
 
-    if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal && !n_prestamo_inprema && tipo_prestamo_inprema) {
+    if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal) {
       return { error: `Fila vacía: ${JSON.stringify(row)}`, processed: false };
-    } if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
-      return { error: 'Faltan columnas obligatorias', processed: false };
-    } if (idTipoPlanilla == 1 || idTipoPlanilla == 2) {
-      const mesActual = new Date().getMonth() + 1;
-      if (mes !== mesActual) {
-        return { error: 'Número de mes incorrecto.', processed: false };
-      }
     }
+    if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
+      return { error: 'Faltan columnas obligatorias', processed: false };
+    }
+
 
     const parsedAnio = Number(anio);
     const parsedMes = Number(mes);
-    const parsedDni = dni.toString();
+    const parsedDni = `${dni}`;
     const parsedCodigoDeduccion = parseInt(codigoDeduccion);
     const parsedMontoTotal = Number(montoTotal);
+
 
     if (isNaN(parsedAnio) || isNaN(parsedMes) || parsedDni === '' || isNaN(parsedCodigoDeduccion) || isNaN(parsedMontoTotal)) {
       return { error: 'Error en la conversión de datos', processed: false };
     }
+    console.log(parsedAnio);
+    console.log(parsedMes);
+    console.log(parsedDni);
+    console.log(parsedCodigoDeduccion);
+    console.log(parsedMontoTotal);
 
     const [persona, deduccion, detpersonaJU_PE, detpersonaAfil, detpersonaB] = await Promise.all([
       repositories.personaRepository.findOne({
@@ -646,6 +640,7 @@ export class DeduccionService {
       })
     ]);
 
+
     if (!deduccion) {
       return { error: `No se encontró deducción con código: ${parsedCodigoDeduccion}`, processed: false };
     }
@@ -658,9 +653,9 @@ export class DeduccionService {
       return { error: `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`, processed: false };
     }
     if (persona) {
-      /* if (!(persona.personasPorBanco)) {
+      if (!(persona.personasPorBanco)) {
         return { error: `No se encontró un banco activo para la persona`, processed: false };
-      } */
+      }
     } else {
       return { error: `No se encontró persona con DNI: ${parsedDni}`, processed: false };
     }
@@ -674,29 +669,23 @@ export class DeduccionService {
       return { error: `La persona está marcada como fallecida`, processed: false };
     }
 
-
     if (detpersonaJU_PE && planilla) {
+
       const tipoPersonaJUPE = detpersonaJU_PE.detallePersona[0]?.tipoPersona?.tipo_persona;
 
       const plan = planilla.find(p => {
         const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
-
         const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
-
         const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
 
-        const mesAnioDeduccion = fechaDeduccion.getFullYear() * 100 + fechaDeduccion.getMonth();
-        const mesAnioInicio = periodoInicio.getFullYear() * 100 + periodoInicio.getMonth();
-
-        const mesAnioFinalizacion = periodoFinalizacion.getFullYear() * 100 + periodoFinalizacion.getMonth();
-
         return (
-          (mesAnioDeduccion >= mesAnioInicio &&
-            mesAnioDeduccion <= mesAnioFinalizacion &&
+          (fechaDeduccion >= periodoInicio &&
+            fechaDeduccion <= periodoFinalizacion &&
             (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS'))
-          || (mesAnioDeduccion >= mesAnioInicio &&
-            mesAnioDeduccion <= mesAnioFinalizacion &&
+          || (fechaDeduccion >= periodoInicio &&
+            fechaDeduccion <= periodoFinalizacion &&
             (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS') && isComplementaria)
+
         );
       });
 
@@ -718,21 +707,20 @@ export class DeduccionService {
           return { error: `Deducción duplicada detectada`, processed: false };
         }
 
-        /* const activo = persona.personasPorBanco.find(persona => persona.estado === 'ACTIVO') || null; */
+        const activo = persona.personasPorBanco.find(persona => persona.estado === 'ACTIVO') || null;
 
         const detalleDeduccion = repositories.detalleDeduccionRepository.create({
           anio: parsedAnio,
           mes: parsedMes,
-          n_prestamo_inprema: n_prestamo_inprema === '' || n_prestamo_inprema === undefined ? null : String(n_prestamo_inprema).trim(),
-          tipo_prestamo_inprema: tipo_prestamo_inprema === '' || tipo_prestamo_inprema === undefined ? null : String(tipo_prestamo_inprema).trim(),
           monto_total: parsedMontoTotal,
           monto_aplicado: parsedMontoTotal,
           estado_aplicacion: 'EN PRELIMINAR',
           persona: persona.id_persona,
           deduccion,
           planilla: { id_planilla: plan.id_planilla },
-          /* personaPorBanco: activo, */
+          personaPorBanco: activo,
         });
+
 
         await repositories.detalleDeduccionRepository.save(detalleDeduccion);
         return { processed: true };
@@ -741,8 +729,6 @@ export class DeduccionService {
     else if (detpersonaAfil && planilla) {
       const tipoPersonaAfil = detpersonaAfil.detallePersona[0]?.tipoPersona?.tipo_persona;
       const plan = planilla.find(p => {
-
-        // Pendiente: verificar solo mes y anio en la planilla complementaria.
         const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
         const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
         const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
@@ -773,7 +759,7 @@ export class DeduccionService {
           return { error: `Deducción duplicada detectada`, processed: false };
         }
 
-        /* const activo = persona.personasPorBanco.find(persona => persona.estado === 'ACTIVO') || null; */
+        const activo = persona.personasPorBanco.find(persona => persona.estado === 'ACTIVO') || null;
 
         const detalleDeduccion = repositories.detalleDeduccionRepository.create({
           anio: parsedAnio,
@@ -781,12 +767,10 @@ export class DeduccionService {
           monto_total: parsedMontoTotal,
           monto_aplicado: parsedMontoTotal,
           estado_aplicacion: 'EN PRELIMINAR',
-          n_prestamo_inprema: n_prestamo_inprema === '' || n_prestamo_inprema === undefined ? null : String(n_prestamo_inprema).trim(),
-          tipo_prestamo_inprema: tipo_prestamo_inprema === '' || tipo_prestamo_inprema === undefined ? null : String(tipo_prestamo_inprema).trim(),
           persona: persona.id_persona,
           deduccion,
           planilla: { id_planilla: plan.id_planilla },
-          /* personaPorBanco: activo, */
+          personaPorBanco: activo,
         });
 
         await repositories.detalleDeduccionRepository.save(detalleDeduccion);
@@ -838,7 +822,7 @@ export class DeduccionService {
           persona: persona.id_persona,
           deduccion,
           planilla: { id_planilla: plan.id_planilla },
-          /* id_af_banco: persona.personasPorBanco[0].id_af_banco */
+          id_af_banco: persona.personasPorBanco[0].id_af_banco
         });
 
         await repositories.detalleDeduccionRepository.save(detalleDeduccion);
@@ -852,98 +836,10 @@ export class DeduccionService {
     } else if (!detpersonaAfil) {
       return { error: `No se encontró persona con DNI: ${persona.n_identificacion} en detalle_persona, probablemente la persona no es BENEFICIARIO`, processed: false };
     }
-
   }
+
 
   async uploadDeduccionesTemporal(
-    idTipoPlanilla: number,
-    id_planilla: number,
-    file: Express.Multer.File
-  ): Promise<{ message: string; failedRows: any[] }> {
-    const failedRows: any[] = [];
-
-    try {
-      // Convertir buffer a texto y parsear CSV
-      const csvData = file.buffer.toString();
-      const parsedRows = await new Promise<any[]>((resolve, reject) => {
-        const result: any[] = [];
-        csv.parseString(csvData, { headers: true, delimiter: ';' })
-          .on('error', (error) => reject(error))
-          .on('data', (row) => result.push(row))
-          .on('end', () => resolve(result));
-      });
-
-      this.logger.log(`Registros leídos del CSV: ${parsedRows.length}`);
-
-      if (parsedRows.length === 0) {
-        return { message: 'No se encontraron registros válidos', failedRows };
-      }
-
-      // Filtrar filas que están completamente vacías
-      const filteredRows = parsedRows.filter(row =>
-        Object.values(row).some(value => value && value.toString().trim() !== '')
-      );
-
-      this.logger.log(`Registros después de filtrar filas vacías: ${filteredRows.length}`);
-
-      if (filteredRows.length === 0) {
-        return { message: 'No se encontraron registros válidos después del filtrado', failedRows };
-      }
-
-      // Transformar los datos a formato numérico
-      const transformedData = filteredRows.map(({ dni, anio, mes, codigoDeduccion, montoTotal, N_PRESTAMO_INPREMA, TIPO_PRESTAMO_INPREMA }) => ({
-        dni: dni,
-        anio: Number(anio),
-        mes: Number(mes),
-        codigoDeduccion: Number(codigoDeduccion),
-        montoTotal: Number(montoTotal),
-        n_prestamo_inprema: N_PRESTAMO_INPREMA,
-        tipo_prestamo_inprema: TIPO_PRESTAMO_INPREMA,
-        id_planilla: id_planilla
-      }));
-
-      // Dividir en lotes de 8000 registros
-      const batchSize = 8000;
-      const batches: any[][] = [];
-      for (let i = 0; i < transformedData.length; i += batchSize) {
-        batches.push(transformedData.slice(i, i + batchSize));
-      }
-
-      this.logger.log(`Se dividirán los datos en ${batches.length} lotes.`);
-
-      // Insertar los lotes en paralelo usando Promise.all
-      const insertPromises = batches.map(async (batch, index) => {
-        try {
-          await this.tempDeduccionRepository.insert(batch);
-          this.logger.log(`Lote ${index + 1} insertado correctamente (${batch.length} registros).`);
-        } catch (error) {
-          this.logger.error(`Error insertando lote ${index + 1}: ${error.message}`);
-          failedRows.push(...batch);
-        }
-      });
-
-      await Promise.all(insertPromises);
-
-      // Consultar la tabla temporal después de la inserción
-      try {
-        const tempDeducciones = await this.tempDeduccionRepository.count();
-        this.logger.log(`Total de deducciones en la tabla temporal: ${tempDeducciones}`);
-        this.insertDetDed(idTipoPlanilla, id_planilla)
-      } catch (error) {
-        this.logger.error(`Error al consultar la tabla temporal: ${error.message}`);
-      }
-
-      return {
-        message: 'Deducciones almacenadas en tabla temporal correctamente',
-        failedRows,
-      };
-    } catch (error) {
-      this.logger.error(`Error procesando CSV: ${error.message}`);
-      return { message: 'Error procesando CSV', failedRows };
-    }
-  }
-
-  /* async uploadDeduccionesTemporal(
     idTipoPlanilla: number,
     id_planilla: number,
     file: Express.Multer.File
@@ -1007,13 +903,13 @@ export class DeduccionService {
       this.logger.error(`Error procesando CSV: ${error.message}`);
       return { message: 'Error procesando CSV', failedRows };
     }
-  } */
+  }
 
-  async insertDetDed(idTipoPlanilla: number, id_planilla: number) {
+  async insertDetDed(idTipoPlanilla: number, id_planilla: number,) {
     const failedRows: any[] = [];
-    const planillaQuery = `SELECT * FROM "net_deducciones_temp"`;
-    const planillas = await this.entityManager.query(planillaQuery);
+    const rows: any[] = [];
 
+    const array = await this.tempDeduccionRepository.find();
     const repositories = {
       personaRepository: this.personaRepository,
       deduccionRepository: this.deduccionRepository,
@@ -1027,62 +923,23 @@ export class DeduccionService {
       where: {
         id_planilla: id_planilla,
         estado: 'ACTIVA',
-        tipoPlanilla: { id_tipo_planilla: idTipoPlanilla },
+        tipoPlanilla: { id_tipo_planilla: idTipoPlanilla }
       },
       relations: ['tipoPlanilla', 'tipoPlanilla.dedTipoPlanilla'],
     });
 
-    const batchSize = 100;
-    let batch: any[] = [];
+    for (let row of array) {
+      this.processRowTablaTemporal(planilla, idTipoPlanilla, id_planilla, row, repositories).then(result => {
+        console.log(row);
 
-    // Crear queryRunner para manejar la transacción global
-    const queryRunner = this.entityManager.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      for (let row of planillas) {
-        batch.push(row);
-
-        if (batch.length === batchSize) {
-          await this.processBatch(batch, planilla, idTipoPlanilla, id_planilla, repositories, failedRows, queryRunner);
-          batch = [];
-          await queryRunner.commitTransaction(); // Hacer commit cada 100 filas
-          await queryRunner.startTransaction(); // Iniciar nueva transacción
-        }
-      }
-
-      // Procesar registros restantes
-      if (batch.length > 0) {
-        await this.processBatch(batch, planilla, idTipoPlanilla, id_planilla, repositories, failedRows, queryRunner);
-        await queryRunner.commitTransaction(); // Hacer commit de los registros finales
-      }
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error(`Error procesando registros: ${error.message}`);
-    } finally {
-      await queryRunner.release(); // Cierra la conexión
-    }
-  }
-
-  async processBatch(
-    rows: any[], planilla: any, idTipoPlanilla: number, id_planilla: number,
-    repositories: any, failedRows: any[], queryRunner: any
-  ) {
-    try {
-      for (let row of rows) {
-        const result = await this.processRowTablaTemporal(planilla, idTipoPlanilla, id_planilla, row, repositories);
         if (result.error) {
           failedRows.push({ ...row, error: result.error });
           this.logger.warn(`${result.error}`);
         }
-      }
-    } catch (error) {
-      this.logger.error(`Error procesando lote: ${error.message}`);
-      throw error; // Para que el catch principal haga rollback
+        return result;
+      })
     }
   }
-
 
 
 

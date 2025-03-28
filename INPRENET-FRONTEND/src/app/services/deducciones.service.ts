@@ -107,7 +107,7 @@ export class DeduccionesService {
     formData.append('id_planilla', String(id_planilla));
     formData.append('file', archivo, archivo.name);
 
-    return this.http.post(`${environment.API_URL}/api/deduccion/upload-excel-deducciones-temp`, formData, {
+    return this.http.post(`${environment.API_URL}/api/deduccion/upload-excel-deducciones`, formData, {
       headers: new HttpHeaders({
         'Accept': 'application/json'
       }),

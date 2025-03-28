@@ -45,7 +45,6 @@ import { VoucherService } from './planilla/voucher.service';
 import { net_deducciones_temp } from './deduccion/entities/net_deducciones_temp.entity';
 import { Net_Planilla_Ingresos } from './planilla/entities/net_planilla_ingresos.entity';
 import { Net_Factura_Ingresos } from './planilla/entities/net_factura_ingresos.entity';
-import { Net_BANCO_PLANILLA } from './planilla/entities/net_banco_planilla.entity';
 
 @Module({
   controllers: [DetallePlanIngrController, PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController, VoucherController,
@@ -53,7 +52,7 @@ import { Net_BANCO_PLANILLA } from './planilla/entities/net_banco_planilla.entit
   providers: [PlanillaService, DetallePlanillaIngresoService, BeneficioService, DetalleBeneficioService, DeduccionService,
     TipoPlanillaService, DetalleDeduccionService, AfiliadoService, P60RentasService, VoucherService],
   imports: [AfiliadoModule, TransaccionesModule, AuthModule, CommonModule,
-    TypeOrmModule.forFeature([Net_BANCO_PLANILLA, Net_Planilla_Ingresos, Net_Factura_Ingresos, net_deducciones_temp, Net_Deduccion_Tipo_Planilla, Net_Beneficio_Tipo_Persona, Net_Regimen, Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio,
+    TypeOrmModule.forFeature([Net_Planilla_Ingresos,Net_Factura_Ingresos,net_deducciones_temp, Net_Deduccion_Tipo_Planilla, Net_Beneficio_Tipo_Persona, Net_Regimen, Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio,
       Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion,
       Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso, Net_Clasificacion_Beneficios, Net_Deducciones_Asignadas, P60Renta]),
   ]

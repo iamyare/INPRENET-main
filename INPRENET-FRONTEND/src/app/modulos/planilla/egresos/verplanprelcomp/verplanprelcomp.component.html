@@ -48,6 +48,13 @@
         </tr>
 
         <tr >
+          <th>Total Neto</th>
+          <td>L {{ detallePlanilla?.totalNeto  | number: '1.2-2':'en-HN'}}</td>
+          <th>Deducciones Terceros</th>
+          <td>L {{ detallePlanilla?.deduccionesT  | number: '1.2-2':'en-HN'}}</td>
+        </tr>
+
+        <tr style="background-color: #f2f2f2">
           <th>Cantidad Personas</th>
           <td>{{ datosTabl.length }}</td>
           <th></th>

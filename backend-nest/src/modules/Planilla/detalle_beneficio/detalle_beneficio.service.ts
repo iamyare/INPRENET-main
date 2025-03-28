@@ -268,7 +268,7 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
     const nuevoDetallePagoBeneficio = this.detPagBenRepository.create({
       estado: 'EN PRELIMINAR',
       monto_a_pagar,
-      //personaporbanco: personaBancoActivo,
+      personaporbanco: personaBancoActivo,
       detalleBeneficioAfiliado: [detalleBeneficioAfiliado], // Convertimos el objeto en un arreglo
       planilla: { id_planilla },
     });
@@ -411,12 +411,6 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
           }
         });
 
-        const planillaRespository = await this.planillaRepository.findOne({
-          where: {
-            codigo_planilla: cod_planilla
-          }
-        });
-
         const detalleBeneficioAfiliadoRepository = await this.detalleBeneficioAfiliadoRepository.update(
           {
             ID_DETALLE_PERSONA: resultado2.ID_DETALLE_PERSONA,
@@ -434,11 +428,7 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
 
         const detPagBenRepository = await this.detPagBenRepository.update(
           {
-            ID_PERSONA: ID_PERSONA,
-            ID_DETALLE_PERSONA: ID_DETALLE_PERSONA,
-            ID_CAUSANTE: ID_CAUSANTE,
-            ID_BENEFICIO: ID_BENEFICIO,
-            ID_PLANILLA: planillaRespository.id_planilla,
+            id_beneficio_planilla: idBenPlanilla,
           },
           {
             estado: "NO PAGADA",
@@ -455,11 +445,7 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
             ID_BENEFICIO: ID_BENEFICIO,
             estado_solicitud: "APROBADO",
             detallePagBeneficio: {
-              ID_PERSONA: ID_PERSONA,
-              ID_DETALLE_PERSONA: ID_DETALLE_PERSONA,
-              ID_CAUSANTE: ID_CAUSANTE,
-              ID_BENEFICIO: ID_BENEFICIO,
-              ID_PLANILLA: planillaRespository.id_planilla,
+              id_beneficio_planilla: idBenPlanilla,
             }
           },
           relations: ["detallePagBeneficio"]
@@ -1129,7 +1115,7 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
     }
   }
 
-  /* async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: number; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Pago_Beneficio[]> {
+  async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: number; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Pago_Beneficio[]> {
     const resultados = [];
     const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
 
@@ -1150,7 +1136,7 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
       resultados.push(await entityManager.save(beneficio));
     }
     return resultados;
-  } */
+  }
 
   private convertirCadenaAFecha(cadena: string): string | null {
     if (cadena) {

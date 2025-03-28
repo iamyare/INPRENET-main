@@ -273,7 +273,11 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirmar') {
+        console.log('Cierre de planilla confirmado');
+
         const ben = this.dataPlan.resultBenEnPrel
+        console.log(ben);
+
         // Aquí puedes implementar la lógica para cerrar la planilla.
         this.updatePlanillaACerrada(this.codigoPlanilla, ben);
       } else {

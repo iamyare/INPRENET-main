@@ -15,8 +15,6 @@ import { ConasaService } from '../../../../services/conasa.service';
 import { ToastrService } from 'ngx-toastr';
 import { convertirFecha } from '../../../../shared/functions/formatoFecha';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
-import { AuthService } from 'src/app/services/auth.service';
-
 
 @Component({
   selector: 'app-documentosPlanilla',
@@ -58,12 +56,7 @@ export class DocumentosPlanillaComponent implements OnInit {
   planillasSelected: any = [];
   isLoading: boolean = true;
 
-  userRole: { rol: string; modulo: string }[] = []; // Ahora userRole es un array de objetos
-
-  rolesPermitidos = ['OFICIAL DE PLANILLA', 'REPORTES DETALLE A EXCEL', 'REPORTE A EXCEL COMPLETO', 'VER ALTAS', 'VER BAJAS'];
-  tieneAcceso: boolean = false;
-
-  constructor(private authService: AuthService, private cdr: ChangeDetectorRef, private toastr: ToastrService, private conasaService: ConasaService, private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService, public dialog: MatDialog) {
+  constructor(private cdr: ChangeDetectorRef, private toastr: ToastrService, private conasaService: ConasaService, private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService, public dialog: MatDialog) {
     this.planillaForm = this.fb.group({
       rangoFechas: this.fb.group({
         fechaInicio: ['', Validators.required],
@@ -74,10 +67,7 @@ export class DocumentosPlanillaComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.userRole = this.authService.getRolesModulos(); // Obtener el rol del usuario autenticado
-
     this.obtenerAfiliados();
-
     this.planillaForm.get('rangoFechas.fechaInicio')?.valueChanges.subscribe(() => this.checkFechasCompletas());
     this.planillaForm.get('rangoFechas.fechaFin')?.valueChanges.subscribe(() => this.checkFechasCompletas());
     this.planillaForm.get('rangoFechas')?.valueChanges.subscribe((value) => {
@@ -85,13 +75,10 @@ export class DocumentosPlanillaComponent implements OnInit {
     });
   }
 
-  tieneRol(rol: string): boolean {
-    return this.userRole.some(item => item.rol === rol);
-  }
-
   getFilas = async () => {
     const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
     const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
+    console.log(idTiposPlanilla);
 
     if (idTiposPlanilla.length === 0) {
       console.error('Seleccione un tipo de planilla válido.');

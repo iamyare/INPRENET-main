@@ -24,12 +24,6 @@ export class EditarTipoDeduccionComponent implements OnInit {
   ngOnInit(): void {
     this.myColumns = [
       {
-        header: 'Id Deducción',
-        col: "id_deduccion",
-        isEditable: true,
-        validationRules: [Validators.required, Validators.minLength(3)]
-      },
-      {
         header: 'Nombre de la Deducción',
         col: "nombre_deduccion",
         isEditable: true,
@@ -62,8 +56,8 @@ export class EditarTipoDeduccionComponent implements OnInit {
       const data = await this.deduccionesService.getDeducciones().toPromise();
       this.filas = data.map((item: any) => {
         return {
-          id_deduccion: item.id_deduccion,
-          nombre_institucion: item.nombre_centro_trabajo,
+          id: item.id_deduccion,
+          nombre_institucion: item.nombre_institucion,
           nombre_deduccion: item.nombre_deduccion,
           descripcion_deduccion: item.descripcion_deduccion || 'No disponible',
           tipo_deduccion: item.tipo_deduccion,

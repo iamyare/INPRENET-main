@@ -199,11 +199,10 @@ export class VoucherGeneralMensComponent {
           if (!resultados.persona) {
             this.existB = true;
             this.cuentaB = false;
-
-          } else if (!resultados.persona?.detallePersona[0]?.detalleBeneficio[0]?.detallePagBeneficio[0]?.bancoPlanilla[0].personaBanco) {
+          } else if (!resultados.persona?.detallePersona[0]?.detalleBeneficio[0]?.detallePagBeneficio[0]?.personaporbanco) {
             this.cuentaB = true;
             this.existB = false;
-          } else if (resultados.persona?.detallePersona[0]?.detalleBeneficio[0]?.detallePagBeneficio[0]?.bancoPlanilla[0].personaBanco) {
+          } else if (resultados.persona?.detallePersona[0]?.detalleBeneficio[0]?.detallePagBeneficio[0]?.personaporbanco) {
             this.construirPDFBen(resultados, this.backgroundImageBase64);
             this.existB = false;
             this.cuentaB = false;
@@ -267,8 +266,8 @@ export class VoucherGeneralMensComponent {
                 NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
                 MontoAPagar: montoPorPeriodo,
                 METODO_PAGO: beneficio.metodo_pago,
-                NOMBRE_BANCO: detallePago.bancoPlanilla[0].personaBanco ? detallePago.bancoPlanilla[0].personaBanco.banco.nombre_banco : 'NO PROPORCIONADO',
-                NUM_CUENTA: detallePago.personaBanco ? detallePago.personaBanco.num_cuenta : 'NO PROPORCIONADO'
+                NOMBRE_BANCO: detallePago.personaporbanco ? detallePago.personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
+                NUM_CUENTA: detallePago.personaporbanco ? detallePago.personaporbanco.num_cuenta : 'NO PROPORCIONADO'
               });
             });
           });

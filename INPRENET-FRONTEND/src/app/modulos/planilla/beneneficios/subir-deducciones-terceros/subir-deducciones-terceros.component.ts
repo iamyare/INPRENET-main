@@ -140,34 +140,17 @@ export class SubirDeduccionesTercerosComponent {
 
   generateFailedRowsExcel(failedRows: any[]) {
     const headers = ['anio', 'mes', 'dni', 'codigoDeduccion', 'montoTotal', 'razón'];
-    const formattedRows = failedRows.map(row => ({
-      anio: row.anio,
-      mes: row.mes,
-      dni: row.dni,
-      codigoDeduccion: row.codigoDeduccion,
-      montoTotal: typeof row.montoTotal === 'number' ? row.montoTotal : parseFloat(row.montoTotal),
-      razón: row.error
-    }));
-
+    const formattedRows = failedRows.map(row => {
+      return {
+        anio: row.anio,
+        mes: row.mes,
+        dni: row.dni,
+        codigoDeduccion: row.codigoDeduccion,
+        montoTotal: row.montoTotal,
+        razón: row.error
+      };
+    });
     if (formattedRows && formattedRows.length > 0) {
-      // Calcular la suma total de montoTotal (como número)
-      const totalMonto = formattedRows.reduce((sum, row) => {
-        return sum + row.montoTotal;
-      }, 0);
-
-      // Formatear el total con 2 decimales (como número)
-      const totalMontoFormatted = totalMonto.toFixed(2);
-
-      // Agregar fila con la suma al final
-      formattedRows.push({
-        anio: '',
-        mes: '',
-        dni: ' ',
-        codigoDeduccion: ' ',
-        montoTotal: parseFloat(totalMontoFormatted), // Asegurarse de que sea numérico
-        razón: ''
-      });
-
       const worksheet = XLSX.utils.json_to_sheet(formattedRows, { header: headers });
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Deducciones Fallidas');

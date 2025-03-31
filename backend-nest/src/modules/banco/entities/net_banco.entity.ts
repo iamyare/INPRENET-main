@@ -11,11 +11,11 @@ export class Net_Banco {
     @Index("UQ_NOMB_BANC_NET_BANCO")
     nombre_banco: string;
 
-    @Column('varchar2', {nullable:true, length: 80, name: 'COD_BANCO' })
+    @Column('varchar2', { nullable: false, length: 80, name: 'COD_BANCO' })
     @Index("UQ_net_banco_cod_banco")
     cod_banco: string;
 
-    @Column('varchar2', {nullable:true, length: 80, name: 'CODIGO_ACH' })
+    @Column('varchar2', { nullable: true, length: 80, name: 'CODIGO_ACH' })
     @Index("UQ_net_banco_codigo_ach")
     codigo_ach: string;
 

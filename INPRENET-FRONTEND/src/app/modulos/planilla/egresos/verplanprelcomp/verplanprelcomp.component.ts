@@ -407,10 +407,14 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     }
     /* this.isLoading = true; */
     try {
-      const response: any = await this.planillaService.descargarReporteBeneficioAfiliado(this.planillaSelected.id_planilla, this.planillaSelected.idTipoPlanilla).toPromise();
-      const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      saveAs(blob, `Reporte_Beneficios_${this.planillaSelected.id_planilla}.xlsx`);
-      this.toastr.success('Archivo Excel descargado con éxito');
+      if (this.planillaSelected.idTipoPlanilla == 3 || this.planillaSelected.idTipoPlanilla == 4) {
+        const response: any = await this.planillaService.descargarReporteBeneficioAfiliado(this.planillaSelected.id_planilla, this.planillaSelected.idTipoPlanilla).toPromise();
+        const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, `REGISTROS_COMPLEMENTARIA_BENEFICIARIOS.xlsx`);
+        this.toastr.success('Archivo Excel descargado con éxito');
+      } else {
+        this.toastr.warning("solo puede obtener este reporte para planillas complementarias")
+      }
     } catch (error) {
       console.error('Error al descargar el Excel:', error);
       this.toastr.error('Error al descargar el archivo Excel');

@@ -5326,7 +5326,6 @@ GROUP BY
     res: Response,
   ): Promise<void> {
     try {
-      console.log(data);
 
       const workbook = new ExcelJS.Workbook();
 
@@ -5334,11 +5333,11 @@ GROUP BY
         if (!datos) return;
         const sheet = workbook.addWorksheet(nombreHoja);
         sheet.columns = [
-          { header: 'id_persona', key: 'id_persona', width: 15 },
-          { header: 'DNI', key: 'dni', width: 20 },
-          { header: 'ID Beneficio', key: 'id_beneficio', width: 15 },
-          { header: 'num_rentas_aprobadas', key: 'num_rentas_aprobadas', width: 15 },
-          { header: 'Deducciones monto_ultima_cuota', key: 'monto_ultima_cuota', width: 20 },
+          { header: 'ID_PERSONA', key: 'id_persona', width: 15 },
+          { header: 'N_IDENTIFICACION', key: 'dni', width: 20 },
+          { header: 'ID_BENEFICIO', key: 'id_beneficio', width: 15 },
+          { header: 'NUM_RENTAS_APROBADAS', key: 'num_rentas_aprobadas', width: 15 },
+          { header: 'MONTO_ULTIMA_CUOTA', key: 'monto_ultima_cuota', width: 20 },
         ];
 
         datos.forEach(item => {

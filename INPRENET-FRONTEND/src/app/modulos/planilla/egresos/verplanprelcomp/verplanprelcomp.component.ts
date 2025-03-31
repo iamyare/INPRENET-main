@@ -413,7 +413,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
         saveAs(blob, `REGISTROS_COMPLEMENTARIA_BENEFICIARIOS.xlsx`);
         this.toastr.success('Archivo Excel descargado con éxito');
       } else {
-        this.toastr.warning("solo puede obtener este reporte para planillas complementarias")
+        this.toastr.warning("Solo puede obtener este reporte para planillas complementarias")
       }
     } catch (error) {
       console.error('Error al descargar el Excel:', error);

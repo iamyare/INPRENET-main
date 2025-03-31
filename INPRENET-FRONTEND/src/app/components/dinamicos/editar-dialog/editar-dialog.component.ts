@@ -51,15 +51,15 @@ export class EditarDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    
     this.crearFormulario();
     this.escucharCambiosFormulario();
     this.cdr.detectChanges();
+
   }
 
   crearFormulario() {
     const group: { [key: string]: FormControl | FormGroup } = {};
-  
+
     this.data.campos.forEach(campo => {
       let valorInicial = this.data.valoresIniciales[campo.nombre] || '';
       let validadores = campo.validadores || [];
@@ -67,25 +67,31 @@ export class EditarDialogComponent implements OnInit {
       if (this.data.validacionesDinamicas && this.data.validacionesDinamicas[campo.nombre]) {
         validadores = [...validadores, ...this.data.validacionesDinamicas[campo.nombre]];
       }
-  
+
       if (campo.tipo === 'date') {
         group[campo.nombre] = new FormControl(
           { value: this.convertToDate(valorInicial) || null, disabled: !campo.editable },
           validadores
         );
       } else {
-        group[campo.nombre] = new FormControl({ value: valorInicial, disabled: !campo.editable }, validadores);
+
+        if (campo.tipo == 'number') {
+          console.log(campo);
+          group[campo.nombre] = new FormControl({ value: valorInicial || 0, disabled: !campo.editable }, validadores);
+        } else {
+          group[campo.nombre] = new FormControl({ value: valorInicial, disabled: !campo.editable }, validadores);
+        }
       }
     });
 
     this.formGroup = this.fb.group(group);
-  
+
     // 🔹 Escuchar cambios en los campos que afectan la visibilidad y validación de otros campos
     this.data.campos.forEach(campo => {
       if (campo.dependeDe) {
         this.formGroup.get(campo.dependeDe)?.valueChanges.subscribe(value => {
           const campoControl = this.formGroup.get(campo.nombre);
-  
+
           if (value === campo.valorDependiente) {
             campoControl?.enable();
             if (campo.nombre === 'numero_acuerdo') {
@@ -96,32 +102,32 @@ export class EditarDialogComponent implements OnInit {
             campoControl?.setValue(null);
             campoControl?.clearValidators();
           }
-  
+
           campoControl?.updateValueAndValidity();
         });
       }
     });
-  
+
     this.cdr.detectChanges();
   }
-  
+
   convertToDate(value: string | Date | null | undefined): Date | null {
     if (!value || value === '') {
       return null;
     }
-  
+
     if (value instanceof Date) {
       return value;
     }
-  
+
     if (typeof value === 'string' && value.includes('-')) {
       const [year, month, day] = value.split('-').map(Number);
       return new Date(year, month - 1, day);
     }
-  
+
     return null;
-    }
-  
+  }
+
 
   escucharCambiosFormulario() {
     this.formGroup.valueChanges.subscribe(() => {
@@ -135,10 +141,10 @@ export class EditarDialogComponent implements OnInit {
         monto_ultima_cuota
       } = values;
 
-      let num_rentas_pagar_primer_pago: number = values.num_rentas_pagar_primer_pago ? Number(values.num_rentas_pagar_primer_pago) || 0.00 : 0.00;
+      let num_rentas_pagar_primer_pago: number = values.num_rentas_pagar_primer_pago ? Number(values.num_rentas_pagar_primer_pago) || 0 : 0;
       let monto_por_periodo: number = values.monto_por_periodo ? Number(values.monto_por_periodo) || 0.00 : 0.00;
       let monto_retroactivo: number = values.monto_retroactivo ? Number(values.monto_retroactivo) || 0.00 : 0.00;
-      let num_rentas_aprobadas: number = values.num_rentas_aprobadas ? Number(values.num_rentas_aprobadas) || 0.00 : 0.00;
+      let num_rentas_aprobadas: number = values.num_rentas_aprobadas ? Number(values.num_rentas_aprobadas) || 0 : 0;
 
 
       // Actualizar `monto_total` si se cumple la condición
@@ -158,7 +164,17 @@ export class EditarDialogComponent implements OnInit {
           .get('monto_primera_cuota')
           ?.patchValue(Number(monto_primera_cuota).toFixed(2), { emitEvent: false });
         values.monto_primera_cuota = Number(monto_primera_cuota).toFixed(2)
+
       } else if (num_rentas_pagar_primer_pago == 0) {
+        if (this.formGroup
+          .get('num_rentas_pagar_primer_pago') || this.formGroup
+            .get('monto_retroactivo')) {
+          monto_primera_cuota = (num_rentas_pagar_primer_pago * monto_por_periodo) + monto_retroactivo
+          this.formGroup
+            .get('monto_primera_cuota')
+            ?.patchValue(Number(monto_primera_cuota).toFixed(2), { emitEvent: false });
+          values.monto_primera_cuota = Number(monto_primera_cuota).toFixed(2)
+        }
         /* monto_primera_cuota = (num_rentas_pagar_primer_pago * monto_por_periodo) + monto_retroactivo
         this.formGroup
           .get('monto_primera_cuota')

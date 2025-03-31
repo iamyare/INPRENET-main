@@ -254,6 +254,18 @@ export class PlanillaController {
     await this.planillaService.generarReporteTotalDetallePago(data, res);
   }
 
+  @Get('generar-reporte-beneficio-afiliado')
+  async exportarExcelBeneficioAfiliado(
+    @Query('idPlanilla') idPlanilla: number,
+    @Query('idTipoPlanilla') idTipoPlanilla: number,
+    @Query('estadoBen') estadoBen: string,
+    @Query('estadoDed') estadoDed: string,
+    @Res() res,
+  ) {
+    const data = await this.planillaService.exportarExcelBeneficioAfiliado(idPlanilla, idTipoPlanilla, estadoBen, estadoDed);
+    await this.planillaService.generarReporteBeneficioAfiliado(data, res);
+  }
+
   @Get('detalle-pago-beneficio')
   async obtenerDetallePagoBeneficioPorPlanilla(
     idsPlanillaArray: number[],
@@ -678,7 +690,7 @@ export class PlanillaController {
 
   @Post('generar-complementaria/:token')
   async generarComplementaria(@Param('token') token: string, @Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
-    await this.planillaService.generarPlanillaComplementaria(token, generatePlanillaDto.tipos_persona);
+    await this.planillaService.generarPlanillaComplementaria(token, generatePlanillaDto.tipos_persona, generatePlanillaDto.v_id_planilla, generatePlanillaDto.secuencia);
   }
 
   @Post('generar-60Rentas/:token')

@@ -40,7 +40,8 @@ export class DesglosePagoComponent implements OnInit {
         this.persona = response.persona;
         this.beneficios = response.beneficios;
         this.deducciones = response.deducciones;
-        this.bancos = response.bancos;
+        this.bancos = response.beneficios[0].pagos;
+
         this.calcularTotalPagado();
         this.loading = false;
       },

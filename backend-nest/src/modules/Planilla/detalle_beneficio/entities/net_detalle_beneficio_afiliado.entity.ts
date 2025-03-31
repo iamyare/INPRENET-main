@@ -7,7 +7,7 @@ import { Net_Usuario_Empresa } from "src/modules/usuario/entities/net_usuario_em
 
 @Entity({ name: 'NET_DETALLE_BENEFICIO_AFILIADO' })
 @Check("CK_PRESTAMO_NET_DET_BEN_AFIL", `prestamo IN ('SI', 'NO')`)
-@Check("CK_LISTO_COMP_NET_DE_BN_AFIL", `listo_complementaria IN ('SI', 'NO')`)
+@Check("CK_LISTO_COMP_NET_DE_BN_AFIL", `listo_complementaria IN ('COMPLEMENTARIA', 'EXTRAORDINARIA', 'NO')`)
 export class Net_Detalle_Beneficio_Afiliado {
     @PrimaryColumn({ name: 'ID_DETALLE_PERSONA', primaryKeyConstraintName: 'PK_ID_DET_BEN_AFIL' })
     ID_DETALLE_PERSONA: number;
@@ -30,7 +30,7 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, name: 'ESTADO_SOLICITUD' })
     estado_solicitud: string;
 
-    @Column({ nullable: true, default: 'SI', name: 'LISTO_COMPLEMENTARIA' })
+    @Column({ nullable: true, default: 'COMPLEMENTARIA', name: 'LISTO_COMPLEMENTARIA' })
     listo_complementaria: string;
 
     @Column({ type: 'date', nullable: true, name: 'FECHA_EFECTIVIDAD' })

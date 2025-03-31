@@ -38,7 +38,7 @@ export class net_persona {
     @JoinColumn({ name: 'ID_PAIS_NACIONALIDAD', foreignKeyConstraintName: "FK_ID_PAIS_NET_PERSONA" })
     pais: Net_Pais;
 
-    @Column('varchar2', { length: 15, nullable: true, name: 'N_IDENTIFICACION' })
+    @Column('varchar2', { length: 20, nullable: true, name: 'N_IDENTIFICACION' })
     @Index("UQ_N_IDENTIFICACION_NET_PERSONA", { unique: true })
     n_identificacion: string;
 

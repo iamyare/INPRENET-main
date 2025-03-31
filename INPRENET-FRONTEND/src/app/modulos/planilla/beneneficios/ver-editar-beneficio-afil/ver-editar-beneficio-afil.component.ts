@@ -13,6 +13,7 @@ import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialo
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { format, parseISO } from 'date-fns';
 import { montoTotalValidator, noDecimalValidator } from '../nuevo-beneficio-afil/nuevo-beneficio-afil.component';
+import { AuthService } from 'src/app/services/auth.service';
 
 interface Campo {
   nombre: string;
@@ -50,8 +51,14 @@ export class VerEditarBeneficioAfilComponent {
   filasEst?: any[];
   ejecF2: any;
   monstrarBeneficiarios: boolean = false;
+  userRole: { rol: string; modulo: string }[] = []; // Ahora userRole es un array de objetos
+
+  rolesPermitidos = ['ASIGNADOR DE BENEFICIOS', 'EDITOR DE BENEFICIOS ASIGNADOS'];
+  tieneAcceso: boolean = false;
+  mostrarEdi: boolean = false;
 
   constructor(
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private http: HttpClient,
@@ -62,6 +69,8 @@ export class VerEditarBeneficioAfilComponent {
   }
 
   ngOnInit(): void {
+    this.userRole = this.authService.getRolesModulos(); // Obtener el rol del usuario autenticado
+
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
@@ -181,6 +190,10 @@ export class VerEditarBeneficioAfilComponent {
     ];
   }
 
+  tieneRol(rol: string): boolean {
+    return this.userRole.some(item => item.rol === rol);
+  }
+
   async obtenerDatos(event: any): Promise<any> {
     this.form = event;
   }
@@ -228,7 +241,7 @@ export class VerEditarBeneficioAfilComponent {
         this.toastr.warning("No existe el registro")
       }
 
-      this.filasT = data.detBen.map((item: any) => {
+      /* this.filasT = data.detBen.map((item: any) => {
         return {
           tipoPersona: item.persona.tipoPersona.tipo_persona,
           ID_DETALLE_PERSONA: item.ID_DETALLE_PERSONA,
@@ -266,7 +279,63 @@ export class VerEditarBeneficioAfilComponent {
           numero_rentas_max: item.beneficio.numero_rentas_max,
           num_rentas_pagar_primer_pago: item.num_rentas_pagar_primer_pago
         }
-      });
+      }); */
+
+      this.mostrarEdi = false;
+      this.filasT = data.detBen
+        .map((item: any) => {
+
+          if (item.detallePagBeneficio.length > 0 && (this.tieneRol("EDITOR DE BENEFICIOS ASIGNADOS") || this.tieneRol("ASIGNADOR DE BENEFICIOS"))) {
+            const existeEnPreliminar = item.detallePagBeneficio.some((b: { estado: string; }) => b.estado === 'EN PRELIMINAR');
+
+            if (existeEnPreliminar && (this.tieneRol("EDITOR DE BENEFICIOS ASIGNADOS") || this.tieneRol("ASIGNADOR DE BENEFICIOS"))) {
+              this.mostrarEdi = true;
+            } else if (!existeEnPreliminar && (this.tieneRol("EDITOR DE BENEFICIOS ASIGNADOS"))) {
+              this.mostrarEdi = true;
+            }
+
+          } else if (item.detallePagBeneficio.length == 0 && (this.tieneRol("EDITOR DE BENEFICIOS ASIGNADOS") || this.tieneRol("ASIGNADOR DE BENEFICIOS"))) {
+            this.mostrarEdi = true;
+          }
+
+          return {
+            tipoPersona: item.persona.tipoPersona.tipo_persona,
+            ID_DETALLE_PERSONA: item.ID_DETALLE_PERSONA,
+            ID_PERSONA: item.ID_PERSONA,
+            ID_CAUSANTE: item.ID_CAUSANTE,
+            ID_BENEFICIO: item.ID_BENEFICIO,
+            estado_solicitud: item.estado_solicitud,
+            listo_complementaria: item.listo_complementaria,
+            dni: item.persona.n_identificacion,
+            dni_causante: item.persona?.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
+            n_expediente: item.n_expediente,
+
+            fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
+            fecha_efectividad: item.fecha_efectividad,
+            fecha_presentacion: item.fecha_presentacion,
+
+            periodo_inicio: convertirFecha(item.periodo_inicio, false),
+            periodo_finalizacion: item.beneficio.periodicidad === "V"
+              ? "NO APLICA"
+              : item.periodo_finalizacion,
+
+            nombre_beneficio: item.beneficio.nombre_beneficio,
+            num_rentas_aprobadas: item.num_rentas_aprobadas || 0,
+            ultimo_dia_ultima_renta: item.ultimo_dia_ultima_renta || 0,
+            periodicidad: item.beneficio.periodicidad,
+            monto_por_periodo: item.monto_por_periodo || 0,
+            monto_ultima_cuota: item.monto_ultima_cuota || 0,
+            monto_primera_cuota: item.monto_primera_cuota || 0,
+            monto_retroactivo: item.monto_retroactivo || 0,
+            monto_total: item.monto_total || 0,
+
+            recibiendo_beneficio: item.recibiendo_beneficio,
+            observaciones: item.observaciones || "NO TIENE",
+            voluntario: item.persona.voluntario || "NO TIENE",
+            numero_rentas_max: item.beneficio.numero_rentas_max,
+            num_rentas_pagar_primer_pago: item.num_rentas_pagar_primer_pago
+          };
+        });
 
 
       if (datas) {
@@ -351,16 +420,16 @@ export class VerEditarBeneficioAfilComponent {
       if (row.numero_rentas_max == 1) {
         campos.push(
           { nombre: 'fecha_efectividad', maxDate: new Date(), tipo: 'date', requerido: false, etiqueta: 'Fecha Efectividad', editable: true, validadores: [Validators.required] },
-          /* { nombre: 'monto_retroactivo', tipo: 'number', requerido: false, etiqueta: 'monto retroactivo', editable: true, validadores: [Validators.min(0), montoTotalValidator()] }, */
+          { nombre: 'monto_retroactivo', tipo: 'number', requerido: false, etiqueta: 'monto retroactivo', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
 
           { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto Primera Cuota', editable: true, validadores: [Validators.min(0), montoTotalValidator(), Validators.required] },
-          { nombre: 'monto_ultima_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto Ultima Cuota', editable: false, validadores: [Validators.min(0), montoTotalValidator()] },
+          /* { nombre: 'monto_ultima_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto Ultima Cuota', editable: false, validadores: [Validators.min(0), montoTotalValidator()] }, */
 
           { nombre: 'estado_solicitud', validadores: [Validators.required], tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }, { label: "SUSPENDIDO", value: "SUSPENDIDO" }], etiqueta: 'Estado Solicitud', editable: true },
 
           { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'Observaciones', editable: true },
 
-          { nombre: 'listo_complementaria', validadores: [Validators.required], tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿El monto de primera cuota se paga en planilla complementaria?', editable: true },
+          { nombre: 'listo_complementaria', validadores: [Validators.required], tipo: 'list', requerido: false, opciones: [{ label: "COMPLEMENTARIA", value: "COMPLEMENTARIA" }, { label: "EXTRAORDINARIA", value: "EXTRAORDINARIA" }], etiqueta: '¿Elija el tipo de planilla COMPLEMENTARIA O EXTRAORDINARIA?', editable: true },
         )
       } else if (row.numero_rentas_max > 1 || row.numero_rentas_max == 0) {
         campos.push(
@@ -392,7 +461,7 @@ export class VerEditarBeneficioAfilComponent {
 
           { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'Observaciones', editable: true },
 
-          { nombre: 'listo_complementaria', validadores: [Validators.required], tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿El monto de primera cuota se paga en planilla complementaria?', editable: true },
+          { nombre: 'listo_complementaria', validadores: [Validators.required], tipo: 'list', requerido: false, opciones: [{ label: "COMPLEMENTARIA", value: "COMPLEMENTARIA" }, { label: "EXTRAORDINARIA", value: "EXTRAORDINARIA" }], etiqueta: '¿Elija el tipo de planilla COMPLEMENTARIA O EXTRAORDINARIA?', editable: true },
         )
       }
 
@@ -411,7 +480,7 @@ export class VerEditarBeneficioAfilComponent {
 
         { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'Observaciones', editable: true },
 
-        { nombre: 'listo_complementaria', validadores: [Validators.required], tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Este beneficio va en complementaria?', editable: true },
+        { nombre: 'listo_complementaria', validadores: [Validators.required], tipo: 'list', requerido: false, opciones: [{ label: "COMPLEMENTARIA", value: "COMPLEMENTARIA" }, { label: "EXTRAORDINARIA", value: "EXTRAORDINARIA" }], etiqueta: '¿Este beneficio va en complementaria?', editable: true },
       );
     }
 

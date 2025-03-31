@@ -258,11 +258,15 @@ export class DatosEstaticosService {
   getBancos(): Observable<any[]> {
     return this.bancosService.getAllBancos().pipe(
       map(response => {
-        this.Bancos = response.data.map((item: { nombre_banco: any; id_banco: any; }) => ({
-          label: item.nombre_banco,
-          value: String(item.id_banco)
-        }));
+        this.Bancos = response.data
+          .filter((item: { codigo_ach: any }) => item.codigo_ach !== null) // Filtrar registros con cod_ach !== null
+          .map((item: { nombre_banco: any; id_banco: any }) => ({
+            label: item.nombre_banco,
+            value: String(item.id_banco)
+          }));
+
         return this.Bancos;
+
       })
     );
   }

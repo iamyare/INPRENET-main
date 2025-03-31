@@ -111,7 +111,8 @@ export class NuevaplanillaComponent implements OnInit {
       datosFormulario = {
         ...datosFormulario,
         periodo_inicio: periodoInicio,
-        periodo_finalizacion: periodoFinalizacion
+        periodo_finalizacion: periodoFinalizacion,
+        secuencia: this.datosFormateados.secuencia
       };
     }
     this.planillaService.createPlanilla(datosFormulario).subscribe({
@@ -152,6 +153,14 @@ export class NuevaplanillaComponent implements OnInit {
           label: 'Periodo de Planilla',
           name: 'periodo_planilla',
           validations: [Validators.required],
+          display: true
+        });
+
+        this.myFormFields.push({
+          type: 'number',
+          label: 'Secuencia',
+          name: 'secuencia',
+          validations: [Validators.required, Validators.min(1), Validators.max(2)],
           display: true
         });
       }

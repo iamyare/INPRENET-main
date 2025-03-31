@@ -15,6 +15,8 @@ import { ConasaService } from '../../../../services/conasa.service';
 import { ToastrService } from 'ngx-toastr';
 import { convertirFecha } from '../../../../shared/functions/formatoFecha';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
+import { AuthService } from 'src/app/services/auth.service';
+
 
 @Component({
   selector: 'app-documentosPlanilla',
@@ -56,7 +58,12 @@ export class DocumentosPlanillaComponent implements OnInit {
   planillasSelected: any = [];
   isLoading: boolean = true;
 
-  constructor(private cdr: ChangeDetectorRef, private toastr: ToastrService, private conasaService: ConasaService, private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService, public dialog: MatDialog) {
+  userRole: { rol: string; modulo: string }[] = []; // Ahora userRole es un array de objetos
+
+  rolesPermitidos = ['OFICIAL DE PLANILLA', 'REPORTES DETALLE A EXCEL', 'REPORTE A EXCEL COMPLETO', 'VER ALTAS', 'VER BAJAS'];
+  tieneAcceso: boolean = false;
+
+  constructor(private authService: AuthService, private cdr: ChangeDetectorRef, private toastr: ToastrService, private conasaService: ConasaService, private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService, public dialog: MatDialog) {
     this.planillaForm = this.fb.group({
       rangoFechas: this.fb.group({
         fechaInicio: ['', Validators.required],
@@ -67,7 +74,10 @@ export class DocumentosPlanillaComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.userRole = this.authService.getRolesModulos(); // Obtener el rol del usuario autenticado
+
     this.obtenerAfiliados();
+
     this.planillaForm.get('rangoFechas.fechaInicio')?.valueChanges.subscribe(() => this.checkFechasCompletas());
     this.planillaForm.get('rangoFechas.fechaFin')?.valueChanges.subscribe(() => this.checkFechasCompletas());
     this.planillaForm.get('rangoFechas')?.valueChanges.subscribe((value) => {
@@ -75,10 +85,13 @@ export class DocumentosPlanillaComponent implements OnInit {
     });
   }
 
+  tieneRol(rol: string): boolean {
+    return this.userRole.some(item => item.rol === rol);
+  }
+
   getFilas = async () => {
     const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
     const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
-    console.log(idTiposPlanilla);
 
     if (idTiposPlanilla.length === 0) {
       console.error('Seleccione un tipo de planilla válido.');
@@ -2092,139 +2105,139 @@ export class DocumentosPlanillaComponent implements OnInit {
 
   async generarReportePensionadosActivos() {
     try {
-        const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
+      const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
-        const numeroPensionados = 22194;
+      const numeroPensionados = 22194;
 
-        const docDefinition: any = {
-            pageSize: 'LETTER',
-            background: (currentPage: any, pageSize: any) => ({
-                image: base64Image,
-                width: pageSize.width,
-                height: pageSize.height,
-                absolutePosition: { x: 0, y: 0 }
-            }),
-            pageMargins: [40, 130, 40, 100],
-            header: {
-                text: 'INFORME DE PENSIONADOS ACTIVOS',
-                style: 'header',
+      const docDefinition: any = {
+        pageSize: 'LETTER',
+        background: (currentPage: any, pageSize: any) => ({
+          image: base64Image,
+          width: pageSize.width,
+          height: pageSize.height,
+          absolutePosition: { x: 0, y: 0 }
+        }),
+        pageMargins: [40, 130, 40, 100],
+        header: {
+          text: 'INFORME DE PENSIONADOS ACTIVOS',
+          style: 'header',
+          alignment: 'center',
+          margin: [50, 90, 50, 0]
+        },
+        content: [
+          {
+            columns: [
+              {
+                width: '100%',
+                text: [
+                  { text: 'NÚMERO TOTAL DE PENSIONADOS ACTIVOS (DICIEMBRE 2024): ', bold: true },
+                  `${numeroPensionados.toLocaleString('en-US')}`
+                ],
                 alignment: 'center',
-                margin: [50, 90, 50, 0]
-            },
-            content: [
-                {
-                    columns: [
-                        {
-                            width: '100%',
-                            text: [
-                                { text: 'NÚMERO TOTAL DE PENSIONADOS ACTIVOS (DICIEMBRE 2024): ', bold: true },
-                                `${numeroPensionados.toLocaleString('en-US')}`
-                            ],
-                            alignment: 'center',
-                            fontSize: 14,
-                            margin: [0, 20, 0, 20]
-                        }
-                    ]
-                },
-                {
-                    text: 'El INPREMA informa que el número total de pensionados activos registrados actualmente en el sistema, correspondiente al mes de diciembre de 2024, es el que se detalla en este informe.',
-                    alignment: 'center',
-                    fontSize: 12,
-                    italics: true,
-                    margin: [0, 30, 0, 40]
-                },
-                {
-                    columns: [
-                        {
-                            width: '33%',
-                            canvas: [
-                                {
-                                    type: 'line',
-                                    x1: 0, y1: 0,
-                                    x2: 150, y2: 0,
-                                    lineWidth: 1.5
-                                }
-                            ],
-                            alignment: 'center',
-                            margin: [0, 270, 0, 5]
-                        },
-                        {
-                            width: '33%',
-                            canvas: [
-                                {
-                                    type: 'line',
-                                    x1: 0, y1: 0,
-                                    x2: 150, y2: 0,
-                                    lineWidth: 1.5
-                                }
-                            ],
-                            alignment: 'center',
-                            margin: [0, 270, 0, 5]
-                        },
-                        {
-                            width: '33%',
-                            canvas: [
-                                {
-                                    type: 'line',
-                                    x1: 0, y1: 0,
-                                    x2: 150, y2: 0,
-                                    lineWidth: 1.5
-                                }
-                            ],
-                            alignment: 'center',
-                            margin: [0, 270, 0, 5]
-                        }
-                    ]
-                },
-                {
-                    columns: [
-                        {
-                            width: '33%',
-                            text: 'ELABORÓ',
-                            style: 'signature',
-                            alignment: 'center',
-                            margin: [0, 5, 0, 20]
-                        },
-                        {
-                            width: '33%',
-                            text: 'REVISÓ',
-                            style: 'signature',
-                            alignment: 'center',
-                            margin: [0, 5, 0, 20]
-                        },
-                        {
-                            width: '33%',
-                            text: 'AUTORIZÓ',
-                            style: 'signature',
-                            alignment: 'center',
-                            margin: [0, 5, 0, 20]
-                        }
-                    ]
-                }
-            ],
-            styles: {
-                header: { fontSize: 16, bold: true },
-                signature: { fontSize: 10, bold: true }
-            },
-            footer: (currentPage: any, pageCount: any) => ({
-                table: {
-                    widths: ['*', '*', '*'],
-                    body: [
-                        [
-                            { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
-                            { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false] },
-                            { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
-                        ]
-                    ]
-                },
-                margin: [20, 0, 20, 20]
-            }),
-            defaultStyle: { fontSize: 10 }
-        };
+                fontSize: 14,
+                margin: [0, 20, 0, 20]
+              }
+            ]
+          },
+          {
+            text: 'El INPREMA informa que el número total de pensionados activos registrados actualmente en el sistema, correspondiente al mes de diciembre de 2024, es el que se detalla en este informe.',
+            alignment: 'center',
+            fontSize: 12,
+            italics: true,
+            margin: [0, 30, 0, 40]
+          },
+          {
+            columns: [
+              {
+                width: '33%',
+                canvas: [
+                  {
+                    type: 'line',
+                    x1: 0, y1: 0,
+                    x2: 150, y2: 0,
+                    lineWidth: 1.5
+                  }
+                ],
+                alignment: 'center',
+                margin: [0, 270, 0, 5]
+              },
+              {
+                width: '33%',
+                canvas: [
+                  {
+                    type: 'line',
+                    x1: 0, y1: 0,
+                    x2: 150, y2: 0,
+                    lineWidth: 1.5
+                  }
+                ],
+                alignment: 'center',
+                margin: [0, 270, 0, 5]
+              },
+              {
+                width: '33%',
+                canvas: [
+                  {
+                    type: 'line',
+                    x1: 0, y1: 0,
+                    x2: 150, y2: 0,
+                    lineWidth: 1.5
+                  }
+                ],
+                alignment: 'center',
+                margin: [0, 270, 0, 5]
+              }
+            ]
+          },
+          {
+            columns: [
+              {
+                width: '33%',
+                text: 'ELABORÓ',
+                style: 'signature',
+                alignment: 'center',
+                margin: [0, 5, 0, 20]
+              },
+              {
+                width: '33%',
+                text: 'REVISÓ',
+                style: 'signature',
+                alignment: 'center',
+                margin: [0, 5, 0, 20]
+              },
+              {
+                width: '33%',
+                text: 'AUTORIZÓ',
+                style: 'signature',
+                alignment: 'center',
+                margin: [0, 5, 0, 20]
+              }
+            ]
+          }
+        ],
+        styles: {
+          header: { fontSize: 16, bold: true },
+          signature: { fontSize: 10, bold: true }
+        },
+        footer: (currentPage: any, pageCount: any) => ({
+          table: {
+            widths: ['*', '*', '*'],
+            body: [
+              [
+                { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
+                { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false] },
+                { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
+              ]
+            ]
+          },
+          margin: [20, 0, 20, 20]
+        }),
+        defaultStyle: { fontSize: 10 }
+      };
 
-        pdfMake.createPdf(docDefinition).download('Informe_Pensionados_Activos.pdf');
+      pdfMake.createPdf(docDefinition).download('Informe_Pensionados_Activos.pdf');
     } catch (error) {
-        console.error('Error al generar el reporte:', error);
+      console.error('Error al generar el reporte:', error);
     }
   }
 

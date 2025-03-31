@@ -26,6 +26,9 @@ export class net_deducciones_temp {
     @Column({ nullable: false })
     dni: string;
 
+    @Column({ nullable: true })
+    id_planilla: string;
+
     @Column('decimal', { precision: 10, scale: 2 })
     montoTotal: number;
 

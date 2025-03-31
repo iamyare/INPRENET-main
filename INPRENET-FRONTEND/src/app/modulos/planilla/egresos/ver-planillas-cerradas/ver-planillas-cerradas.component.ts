@@ -55,6 +55,7 @@ export class VerPlanillasCerradasComponent {
     },
     { header: 'Fecha Inicio', col: 'periodoInicio', },
     { header: 'Fecha Finalización', col: 'periodoFinalizacion', },
+    { header: 'Fecha Cierre', col: 'fecha_cierre', },
   ];
   datosTabl: any[] = [];
   filas: any

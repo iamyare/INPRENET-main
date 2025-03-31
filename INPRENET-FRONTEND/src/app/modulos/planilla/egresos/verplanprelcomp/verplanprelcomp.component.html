@@ -91,6 +91,12 @@
         </button>
       </div>
 
+      <div style="flex: 1; text-align: center;">
+        <button  class="button new-badge" mat-raised-button color="accent" (click)="descargarReporteBeneficioAfiliado()">
+          Descargar Reporte Beneficios
+        </button>
+      </div>
+
       <!-- Eliminar toda la planilla preliminar -->
       <div style="flex: 1; text-align: center;">
         <button mat-raised-button color="warn" (click)="confirmarEliminarPlanilla()">
@@ -123,7 +129,8 @@
           style="padding: 10px 20px; color: #ffffff; border-radius: 5px;">
           Cerrar planilla
         </button>
-        <div  class="anaranjado desapareciendo" *ngIf="hayTotalNegativo">No se puede cerrar la planilla debido a que hay al menos un valor negativo.</div>
+        <div  class="anaranjado desapareciendo" *ngIf="hayTotalNegativo">No se puede cerrar la planilla debido a que hay al menos un valor negativo, ó valor 0.00.</div>
+        <div  class="anaranjado desapareciendo" *ngIf="hayCodigoACHNull">No se puede cerrar la planilla debido a que hay al menos un registro que tiene Codigo ACH Vacio.</div>
 
         <!-- Modal de confirmación -->
         <ng-template #confirmacionModal>

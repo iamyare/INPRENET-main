@@ -52,72 +52,72 @@ export class DetalleBeneficioService {
 
   async verificarPersonaConTipo(dni: string): Promise<boolean> {
     try {
-        // Consulta SQL directa para verificar si la persona existe con un tipo válido
-        const query = `
+      // Consulta SQL directa para verificar si la persona existe con un tipo válido
+      const query = `
             SELECT COUNT(*) AS count
             FROM NET_PERSONA P
             JOIN NET_DETALLE_PERSONA DP ON P.ID_PERSONA = DP.ID_PERSONA
             WHERE P.N_IDENTIFICACION = :dni
             AND DP.ID_TIPO_PERSONA IN (1, 2, 3)
         `;
-        
-        const result = await this.personaRepository.query(query, [dni]);
 
-        // Verificar el resultado
-        if (result && result[0] && result[0].COUNT > 0) {
-            return true;
-        } else {
-            return false;
-        }
+      const result = await this.personaRepository.query(query, [dni]);
+
+      // Verificar el resultado
+      if (result && result[0] && result[0].COUNT > 0) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (error) {
-        console.error('Error al verificar el tipo de persona:', error.message);
-        throw new HttpException(
-            {
-                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: 'Error al verificar el tipo de persona',
-                error: error.message,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR
-        );
+      console.error('Error al verificar el tipo de persona:', error.message);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Error al verificar el tipo de persona',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
-}
-
-async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
-  const causante = await this.personaRepository.findOne({
-    where: { n_identificacion },
-  });
-
-  if (!causante) {
-    return false;
-  }
-  const beneficiarios = await this.detPersonaRepository.find({
-    where: [
-      { ID_CAUSANTE: causante.id_persona },
-      { ID_CAUSANTE_PADRE: causante.id_persona }
-    ],
-  });
-  const idsBeneficiarios = beneficiarios
-    .filter(b => b.ID_PERSONA !== causante.id_persona)
-    .map(b => b.ID_PERSONA);
-
-  if (idsBeneficiarios.length === 0) {
-    return false;
   }
 
-  const pagos = await this.detPagBenRepository
-    .createQueryBuilder('pago')
-    .where('pago.ID_CAUSANTE = :idCausante', { idCausante: causante.id_persona })
-    .andWhere('pago.ID_PERSONA != :idPersona', { idPersona: causante.id_persona })
-    .andWhere('pago.estado != :estado', { estado: 'RECHAZADO' })
-    .getMany();
+  async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
+    const causante = await this.personaRepository.findOne({
+      where: { n_identificacion },
+    });
 
-  return pagos.length > 0;
-}
+    if (!causante) {
+      return false;
+    }
+    const beneficiarios = await this.detPersonaRepository.find({
+      where: [
+        { ID_CAUSANTE: causante.id_persona },
+        { ID_CAUSANTE_PADRE: causante.id_persona }
+      ],
+    });
+    const idsBeneficiarios = beneficiarios
+      .filter(b => b.ID_PERSONA !== causante.id_persona)
+      .map(b => b.ID_PERSONA);
+
+    if (idsBeneficiarios.length === 0) {
+      return false;
+    }
+
+    const pagos = await this.detPagBenRepository
+      .createQueryBuilder('pago')
+      .where('pago.ID_CAUSANTE = :idCausante', { idCausante: causante.id_persona })
+      .andWhere('pago.ID_PERSONA != :idPersona', { idPersona: causante.id_persona })
+      .andWhere('pago.estado != :estado', { estado: 'RECHAZADO' })
+      .getMany();
+
+    return pagos.length > 0;
+  }
 
   async obtenerBeneficiosPorPersona(dni: string, incluirCostoVida: boolean): Promise<any> {
     let query = '';
     if (incluirCostoVida) {
-        query = `
+      query = `
             SELECT
                 P.N_IDENTIFICACION,
                 M.NOMBRE_MUNICIPIO,
@@ -150,7 +150,7 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
                 B.PERIODICIDAD
         `;
     } else {
-        query = `
+      query = `
             SELECT 
                 P.N_IDENTIFICACION,
                 M.NOMBRE_MUNICIPIO,
@@ -183,11 +183,11 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
     const beneficios = await this.personaRepository.query(query, [dni]);
 
     if (!beneficios || beneficios.length === 0) {
-        throw new NotFoundException(`No se encontraron beneficios para la persona con DNI ${dni}`);
+      throw new NotFoundException(`No se encontraron beneficios para la persona con DNI ${dni}`);
     }
 
     return beneficios;
-}
+  }
 
 
   async verificarSiEsAfiliado(n_identificacion: string): Promise<any> {
@@ -490,47 +490,65 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
   async createDetalleBeneficioAfiliado(token: string, data: any, idPersonaPadre?: number): Promise<any> {
     const { datos, itemSeleccionado } = data
 
-    data.monto_por_periodo = data.monto_por_periodo !== '' && data.monto_por_periodo != null
-      ? parseFloat(data.monto_por_periodo)
-      : data.monto_por_periodo;
+    let num_rentas_aprobadas = datos.num_rentas_aprobadas !== '' && datos.num_rentas_aprobadas != null
+      ? parseInt(datos.num_rentas_aprobadas)
+      : 0;
 
-    data.num_rentas_aplicadas = data.num_rentas_aplicadas !== '' && data.num_rentas_aplicadas != null
-      ? parseFloat(data.num_rentas_aplicadas)
-      : data.num_rentas_aplicadas;
+    let ultimo_dia_ultima_renta = datos.ultimo_dia_ultima_renta !== '' && datos.ultimo_dia_ultima_renta != null
+      ? parseInt(datos.ultimo_dia_ultima_renta)
+      : 0;
 
-    data.ultimo_dia_ultima_renta = data.ultimo_dia_ultima_renta !== '' && data.ultimo_dia_ultima_renta != null
-      ? parseFloat(data.ultimo_dia_ultima_renta)
-      : data.ultimo_dia_ultima_renta;
+    let num_rentas_pagar_primer_pago = datos.num_rentas_pagar_primer_pago !== '' && datos.num_rentas_pagar_primer_pago != null
+      ? parseInt(datos.num_rentas_pagar_primer_pago)
+      : 0;
 
-    data.monto_ultima_cuota = data.monto_ultima_cuota !== '' && data.monto_ultima_cuota != null
-      ? parseFloat(data.monto_ultima_cuota)
-      : data.monto_ultima_cuota;
+    let monto_ultima_cuota = datos.monto_ultima_cuota !== '' && datos.monto_ultima_cuota != null
+      ? parseFloat(datos.monto_ultima_cuota)
+      : 0;
 
-    data.num_rentas_pagar_primer_pago = data.num_rentas_pagar_primer_pago !== '' && data.num_rentas_pagar_primer_pago != null
-      ? parseFloat(data.num_rentas_pagar_primer_pago)
-      : data.num_rentas_pagar_primer_pago;
+    let monto_por_periodo = datos.monto_por_periodo !== '' && datos.monto_por_periodo != null
+      ? parseFloat(datos.monto_por_periodo)
+      : 0;
 
-    data.monto_primera_cuota = data.monto_primera_cuota !== '' && data.monto_primera_cuota != null
-      ? parseFloat(data.monto_primera_cuota)
-      : data.monto_primera_cuota;
+    let monto_primera_cuota = datos.monto_primera_cuota !== '' && datos.monto_primera_cuota != null
+      ? parseFloat(datos.monto_primera_cuota)
+      : 0;
 
-    data.monto_retroactivo = data.monto_retroactivo !== '' && data.monto_retroactivo != null
-      ? parseFloat(data.monto_retroactivo)
-      : data.monto_retroactivo;
+    let monto_retroactivo = datos.monto_retroactivo !== '' && datos.monto_retroactivo != null
+      ? parseFloat(datos.monto_retroactivo)
+      : 0;
 
-    data.monto_total = data.monto_total !== '' && data.monto_total != null
-      ? parseFloat(data.monto_total)
-      : data.monto_total;
-    //console.log(data);
-    //CALCULO DE MONTO_TOTAL
+    let monto_total = datos.monto_total !== '' && datos.monto_total != null
+      ? parseFloat(datos.monto_total)
+      : 0;
+
+    let periodo_finalizacion = datos.periodo_finalizacion !== '' && datos.periodo_finalizacion != null
+      ? datos.periodo_finalizacion
+      : null;
+
+    let fecha_presentacion = datos.fecha_presentacion !== '' && datos.fecha_presentacion != null
+      ? this.convertirCadenaAFecha(datos.fecha_presentacion)
+      : null;
+
+    let fecha_efectividad = datos.fecha_efectividad !== '' && datos.fecha_efectividad != null
+      ? this.convertirCadenaAFecha(datos.fecha_efectividad)
+      : null;
 
     if (!datos.monto_por_periodo && !datos.monto_primera_cuota && !datos.monto_ultima_cuota) {
-      datos["monto_por_periodo"] = datos.monto_total
-      datos["monto_primera_cuota"] = datos.monto_total
-      datos["monto_ultima_cuota"] = datos.monto_total
+      if (datos.num_rentas_aprobadas == 1) {
+        monto_por_periodo = 0
+        monto_primera_cuota = monto_total
+        monto_retroactivo = monto_total
+        monto_ultima_cuota = 0
+      } else {
+        /* datos["monto_por_periodo"] = datos.monto_total
+        datos["monto_primera_cuota"] = datos.monto_total
+        datos["monto_ultima_cuota"] = datos.monto_total */
+      }
+
     } else if (datos.monto_total) {
       if (datos.num_rentas_aprobadas) {
-        datos["monto_total"] = (
+        monto_total = (
           (parseFloat(datos.monto_total || 0))
         )
       }
@@ -605,24 +623,24 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
                        ${detPer.ID_CAUSANTE},
                        ${detPer.ID_PERSONA},
                        ${beneficio.id_beneficio},
-                       '${this.convertirCadenaAFecha(datos.fecha_efectividad)}',
-                       '${this.convertirCadenaAFecha(datos.fecha_efectividad)}',
-                       ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
-                       ${parseFloat(datos.monto_total) ? parseFloat(datos.monto_total) : null},
+                       '${fecha_efectividad}',
+                       '${fecha_efectividad}',
+                       ${`'${periodo_finalizacion}'`},
+                       ${monto_total},
                        'TRANSFERENCIA',
-                       ${parseFloat(datos.monto_por_periodo) ? parseFloat(datos.monto_por_periodo) : null},
-                       ${parseFloat(datos.monto_primera_cuota) ? parseFloat(datos.monto_primera_cuota) : null},
-                       ${parseFloat(datos.monto_retroactivo) ? parseFloat(datos.monto_retroactivo) : null},
-                       ${parseFloat(datos.monto_ultima_cuota) ? parseFloat(datos.monto_ultima_cuota) : null},
-                       ${datos.num_rentas_aprobadas ? parseFloat(datos.num_rentas_aprobadas) : null},
+                       ${monto_por_periodo},
+                       ${monto_primera_cuota},
+                       ${monto_retroactivo},
+                       ${monto_ultima_cuota},
+                       ${num_rentas_aprobadas},
                        ${datos.estado_solicitud ? `'${datos.estado_solicitud}'` : null},
                        ${datos.observacion ? `'${datos.observacion}'` : null},
-                        ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
-                        ${estadoPP.id_usuario_empresa},
-                        ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null},
-                         ${datos.fecha_presentacion ? `'${this.convertirCadenaAFecha(datos.fecha_presentacion)}'` : null},
-                         ${datos.n_expediente ? `'${datos.n_expediente}'` : null},
-                         'SI'
+                       ${ultimo_dia_ultima_renta},
+                       ${estadoPP.id_usuario_empresa},
+                       ${num_rentas_pagar_primer_pago},
+                       ${`'${fecha_presentacion}'`},
+                       ${datos.n_expediente ? `'${datos.n_expediente}'` : null},
+                       'SI'
                  )`;
 
 
@@ -729,22 +747,22 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
                          ${detPer.ID_CAUSANTE},
                          ${detPer.ID_PERSONA},
                          ${beneficio.id_beneficio},
-                         '${this.convertirCadenaAFecha(datos.fecha_efectividad)}',
-                         '${this.convertirCadenaAFecha(datos.fecha_efectividad)}',
-                         ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
-                         ${parseFloat(datos.monto_total) ? parseFloat(datos.monto_total) : null},
+                         '${fecha_efectividad}',
+                         '${fecha_efectividad}',
+                         ${`'${periodo_finalizacion}'`},
+                         ${monto_total},
                          'TRANSFERENCIA',
-                         ${parseFloat(datos.monto_por_periodo) ? parseFloat(datos.monto_por_periodo) : null},
-                         ${parseFloat(datos.monto_primera_cuota) ? parseFloat(datos.monto_primera_cuota) : null},
-                         ${parseFloat(datos.monto_retroactivo) ? parseFloat(datos.monto_retroactivo) : null},
-                         ${parseFloat(datos.monto_ultima_cuota) ? parseFloat(datos.monto_ultima_cuota) : null},
-                         ${datos.num_rentas_aprobadas ? parseFloat(datos.num_rentas_aprobadas) : null},
+                         ${monto_por_periodo},
+                         ${monto_primera_cuota},
+                         ${monto_retroactivo},
+                         ${monto_ultima_cuota},
+                         ${num_rentas_aprobadas},
                          ${datos.estado_solicitud ? `'${datos.estado_solicitud}'` : null},
                          ${datos.observacion ? `'${datos.observacion}'` : null},
                          ${estadoPP.id_usuario_empresa},
-                         ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
-                         ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null},
-                         ${datos.fecha_presentacion ? `'${this.convertirCadenaAFecha(datos.fecha_presentacion)}'` : null},
+                         ${ultimo_dia_ultima_renta},
+                         ${num_rentas_pagar_primer_pago},
+                         ${`'${fecha_presentacion}'`},
                          ${datos.n_expediente ? `'${datos.n_expediente}'` : null},
                          'SI'
               )`;
@@ -774,6 +792,7 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
     });
 
   }
+
   async cargarBenRec(): Promise<any> {
     let connection;
     try {
@@ -1000,6 +1019,7 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
           'persona.persona',
           'persona.tipoPersona',
           'persona.estadoAfiliacion',
+          'detallePagBeneficio',
           'beneficio',
         ],
       });
@@ -1206,22 +1226,21 @@ async verificarPagosBeneficiarios(n_identificacion: string): Promise<boolean> {
         fecha_presentacion: this.convertirCadenaAFechaPleca(data.fecha_presentacion),
         estado_solicitud: data.estado_solicitud,
 
-        num_rentas_aprobadas: parseNumber(data.num_rentas_aprobadas),
+        ...(data.num_rentas_aprobadas !== undefined && { num_rentas_aprobadas: parseNumber(data.num_rentas_aprobadas) }),
+        ...(data.fecha_efectividad !== undefined && { fecha_efectividad: this.convertirCadenaAFechaPleca(data.fecha_efectividad) }),
+        ...(data.fecha_efectividad !== undefined && { periodo_inicio: this.convertirCadenaAFechaPleca(data.fecha_efectividad) }),
+        ...(data.periodo_finalizacion !== undefined && { periodo_finalizacion: this.convertirCadenaAFechaPleca(data.periodo_finalizacion) }),
 
-        fecha_efectividad: this.convertirCadenaAFechaPleca(data.fecha_efectividad),
-        periodo_inicio: this.convertirCadenaAFechaPleca(data.fecha_efectividad),
-        periodo_finalizacion: this.convertirCadenaAFechaPleca(data.periodo_finalizacion),
+        ...(data.monto_primera_cuota !== undefined && { monto_primera_cuota: parseNumber(data.monto_primera_cuota) }),
+        ...(data.monto_retroactivo !== undefined && { monto_retroactivo: parseNumber(data.monto_retroactivo) }),
+        ...(data.monto_por_periodo !== undefined && { monto_por_periodo: parseNumber(data.monto_por_periodo) }),
+        ...(data.monto_ultima_cuota !== undefined && { monto_ultima_cuota: parseNumber(data.monto_ultima_cuota) }),
+        ...(data.monto_total !== undefined && { monto_total: parseNumber(data.monto_total) }),
 
-        monto_primera_cuota: parseNumber(data.monto_primera_cuota),
-        monto_retroactivo: parseNumber(data.monto_retroactivo),
-        monto_por_periodo: parseNumber(data.monto_por_periodo),
-        monto_ultima_cuota: parseNumber(data.monto_ultima_cuota),
-        monto_total: parseNumber(data.monto_total),
+        ...(data.num_rentas_pagar_primer_pago !== undefined && data.num_rentas_pagar_primer_pago !== 0 && { num_rentas_pagar_primer_pago: parseNumber(data.num_rentas_pagar_primer_pago) }),
+        ...(data.ultimo_dia_ultima_renta !== undefined && data.num_rentas_pagar_primer_pago !== 0 && { ultimo_dia_ultima_renta: parseNumber(data.ultimo_dia_ultima_renta) }),
 
-        num_rentas_pagar_primer_pago: parseNumber(data.num_rentas_pagar_primer_pago),
-        ultimo_dia_ultima_renta: parseNumber(data.ultimo_dia_ultima_renta),
-
-        observaciones: data.observaciones?.trim() || null,
+        ...(data.observaciones !== undefined && { observaciones: data.observaciones.trim() }),
         listo_complementaria: data.listo_complementaria
       };
 

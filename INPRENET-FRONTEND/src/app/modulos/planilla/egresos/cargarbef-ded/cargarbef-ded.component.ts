@@ -27,6 +27,7 @@ export class CargarbefDedComponent implements OnInit {
   beneficios: any[] = [];
   loading: boolean = false;
   id_planilla: any
+  secuencia: any
   idTipoPlanilla: any
 
   displayedColumns: string[] = ['causante', 'beneficio', 'select'];
@@ -51,6 +52,10 @@ export class CargarbefDedComponent implements OnInit {
 
   ngOnInit() {
     this.userRole = this.authService.getRolesModulos(); // Obtener el rol del usuario autenticado
+
+    console.log(this.id_planilla);
+    console.log(this.secuencia);
+
   }
 
   asignarBeneficiosOrdinariaBeneficiariosAfiliados() {
@@ -105,7 +110,7 @@ export class CargarbefDedComponent implements OnInit {
   }
 
   asignarBeneficiosComplementariaBeneficiariosAfiliados() {
-    this.planillaService.generarPlanillaComplementaria('BENEFICIARIO').subscribe({
+    this.planillaService.generarPlanillaComplementaria('BENEFICIARIO', this.id_planilla, this.secuencia).subscribe({
       next: () => {
         this.toastr.success('Planilla complementaria generada para Beneficiarios y Afiliados', 'Éxito');
       },
@@ -217,7 +222,7 @@ export class CargarbefDedComponent implements OnInit {
   }
 
   asignarBeneficiosComplementariaJubiladosPensionados() {
-    this.planillaService.generarPlanillaComplementaria('PENSIONADO,JUBILADO,AFILIADO').subscribe({
+    this.planillaService.generarPlanillaComplementaria('PENSIONADO,JUBILADO,AFILIADO', this.id_planilla, this.secuencia).subscribe({
       next: () => {
         this.toastr.success('Planilla complementaria generada para Jubilados y Pensionados', 'Éxito');
       },
@@ -231,6 +236,7 @@ export class CargarbefDedComponent implements OnInit {
     this.idTipoPlanilla = event.idTipoPlanilla;
     this.tipoPlanilla = event.tipoPlanilla;
     this.id_planilla = event.id_planilla;
+    this.secuencia = event.secuencia
   }
 
   buscarBeneficiosPorDni() {

@@ -145,6 +145,23 @@ export class PlanillaService {
     );
   }
 
+  descargarReporteBeneficioAfiliado(idPlanilla: number, idTipoPlanilla: number): Observable<Blob> {
+    const url = `${environment.API_URL}/api/planilla/generar-reporte-beneficio-afiliado`;
+    let params = new HttpParams()
+      .set('idPlanilla', idPlanilla.toString())
+      .set('idTipoPlanilla', idTipoPlanilla.toString())
+      .set('estadoBen', 'EN PRELIMINAR')
+      .set('estadoDed', 'EN PRELIMINAR');
+
+    return this.http.get<Blob>(url, { params, responseType: 'blob' as 'json' }).pipe(
+      catchError(error => {
+        console.error('Error al descargar el archivo Excel preliminar', error);
+        this.toastr.error('Error al descargar el archivo Excel preliminar');
+        return throwError(() => new Error('Error al descargar el archivo Excel preliminar'));
+      })
+    );
+  }
+
   exportarExcelDetalleCompletoPorPeriodo(
     idsPlanilla: number[],
     periodoInicio: string,
@@ -319,12 +336,11 @@ export class PlanillaService {
   }
 
 
-  generarPlanillaComplementaria(tiposPersona: string): Observable<void> {
+  generarPlanillaComplementaria(tiposPersona: string, v_id_planilla: number, secuencia: number): Observable<void> {
     const accessToken = sessionStorage.getItem('token');
     const url = `${environment.API_URL}/api/planilla/generar-complementaria/${accessToken}`;
 
-
-    return this.http.post<void>(url, { tipos_persona: tiposPersona }).pipe(
+    return this.http.post<void>(url, { tipos_persona: tiposPersona, v_id_planilla: v_id_planilla, secuencia: secuencia }).pipe(
       catchError(error => {
         const errorMessage = error.error.message || 'Error al generar planilla complementaria';
         this.toastr.error(errorMessage);
@@ -552,6 +568,7 @@ export class PlanillaService {
   }
 
   createPlanilla(tipoPlanillaData: any): Observable<any> {
+    tipoPlanillaData.secuencia = Number(tipoPlanillaData.secuencia)
     return this.http.post(`${environment.API_URL}/api/planilla`, tipoPlanillaData).pipe(
       catchError((error: HttpErrorResponse) => {
         return throwError(() => error);

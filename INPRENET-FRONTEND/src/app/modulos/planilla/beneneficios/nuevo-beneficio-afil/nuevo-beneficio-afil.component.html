@@ -74,12 +74,13 @@
 
   <!-- PARA DESIGNADOS BENEFICIARIOS -->
    <div *ngIf="filas.length > 0">
-    <div *ngIf="filas[0]?.estado_afil_detalle_persona != 'ERROR' && mostrarB && Afiliado.fallecido == 'SI' && (
+
+    <div *ngIf="desOBenSeleccionado?.estado_afil_detalle_persona != 'ERROR' && mostrarB && Afiliado.fallecido == 'SI' && (
       (Afiliado.tipo_persona == 'AFILIADO' && (Afiliado.estado_persona == 'REGISTRADO' || Afiliado.estado_persona == 'ACTIVO' || Afiliado.estado_persona == 'SUSPENSO AUTOMATICO' || Afiliado.estado_persona == 'SUSPENSO POR OFICIO' )) ||
       Afiliado.tipo_persona == 'JUBILADO'  && (Afiliado.estado_persona != 'ERROR')||
       Afiliado.tipo_persona == 'PENSIONADO'  && (Afiliado.estado_persona != 'ERROR'))"
       style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
-      <div *ngIf="filas[0].estado_afil_detalle_persona != 'ERROR'">
+      <div *ngIf="desOBenSeleccionado?.estado_afil_detalle_persona != 'ERROR'">
         <app-dynamic-form
           [fields]="myFormFields2"
           titulo="Datos sobre el beneficio"
@@ -94,9 +95,9 @@
       </div>
     </div>
 
-    <div class="anaranjado desapareciendo" *ngIf="filas[0]?.estado_afil_detalle_persona == 'ERROR' && mostrarB">
+    <div class="anaranjado desapareciendo" *ngIf="desOBenSeleccionado?.estado_afil_detalle_persona == 'ERROR' && mostrarB">
       NO SE PUEDE ASIGNAR BENEFICIOS, DEBIDO A QUE LA PERSONA TIENE ESTADO {{filas[0].estado_afil_detalle_persona}}
-      MOTIVO: {{filas[0].observacion_detalle_persona}}
+      MOTIVO: {{desOBenSeleccionado?.observacion_detalle_persona}}
     </div>
    </div>
 

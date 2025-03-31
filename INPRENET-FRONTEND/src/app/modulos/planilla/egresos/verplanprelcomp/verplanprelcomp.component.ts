@@ -46,9 +46,11 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   detallePlanilla: any = {};
 
   data: any[] = [];
+  planillaSelected: any;
+
   mostrarBajasAltas: boolean = false;
   hayTotalNegativo: boolean = false;
-  planillaSelected: any;
+  hayCodigoACHNull: boolean = false;
 
   constructor(
     private planillaService: PlanillaService,
@@ -176,6 +178,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
           correo_1: item.correo_1,
           fecha_cierre: item.fecha_cierre,
           COD_BANCO: item.COD_BANCO,
+          CODIGO_ACH: item.CODIGO_ACH,
           //ID_BANCO: item.ID_BANCO,
           num_cuenta: item.NUM_CUENTA,
           nombre_banco: item.NOMBRE_BANCO,
@@ -189,8 +192,15 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
         if (this.hayTotalNegativo) {
           console.log("Hay al menos un total negativo");
         } else {
-          console.log("Todos los totales son positivos o cero");
+          console.log("Todos los totales son positivos");
         }
+
+        if (this.hayCodigoACHNull) {
+          console.log("Hay al menos un registro que tiene banco con codigo ACH Vacio");
+        } else {
+          console.log("Todos los registros tienen Codigo de banco ACH");
+        }
+
       } else {
         this.datosTabl = [];
         this.toastr.warning('No se encontraron datos para la planilla proporcionada.');
@@ -380,6 +390,26 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       const response: any = await this.planillaService.descargarReporteCompleto(this.planillaSelected.id_planilla, this.planillaSelected.idTipoPlanilla).toPromise();
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(blob, `Reporte_Completo_Planilla_${this.planillaSelected.id_planilla}.xlsx`);
+      this.toastr.success('Archivo Excel descargado con éxito');
+    } catch (error) {
+      console.error('Error al descargar el Excel:', error);
+      this.toastr.error('Error al descargar el archivo Excel');
+    }
+    finally {
+      this.isLoading = false;
+    }
+  }
+
+  async descargarReporteBeneficioAfiliado() {
+    if (!this.planillaSelected) {
+      this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
+      return;
+    }
+    /* this.isLoading = true; */
+    try {
+      const response: any = await this.planillaService.descargarReporteBeneficioAfiliado(this.planillaSelected.id_planilla, this.planillaSelected.idTipoPlanilla).toPromise();
+      const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, `Reporte_Beneficios_${this.planillaSelected.id_planilla}.xlsx`);
       this.toastr.success('Archivo Excel descargado con éxito');
     } catch (error) {
       console.error('Error al descargar el Excel:', error);

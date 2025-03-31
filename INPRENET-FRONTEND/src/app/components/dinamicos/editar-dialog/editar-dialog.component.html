@@ -3,7 +3,7 @@
     <div class="form-grid" fxLayout="row wrap" fxLayoutGap="16px">
       <div *ngFor="let campo of data.campos" fxFlex="30%" class="form-cell">
         <ng-container *ngIf="!campo.dependeDe || formGroup.get(campo.dependeDe)?.value === campo.valorDependiente">
-          
+
           <!-- Campo de rango de fecha -->
           <ng-container *ngIf="campo.tipo === 'daterange'">
             <mat-form-field appearance="fill" class="full-width-input" floatLabel="always">
@@ -24,12 +24,12 @@
               <input matInput  [max]="campo.maxDate" [matDatepicker]="picker" [formControlName]="campo.nombre" />
               <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
-          
+
               <!-- Agregar validación solo para fecha_egreso -->
               <mat-error *ngIf="campo.nombre === 'fecha_egreso' && formGroup.get('fecha_egreso')?.hasError('fechaEgresoInvalida')">
                 No puede ser menor a la de fecha de ingreso.
               </mat-error>
-          
+
             </mat-form-field>
           </ng-container>
 
@@ -38,7 +38,9 @@
             <mat-form-field appearance="fill" class="full-width-input" floatLabel="always">
               <mat-label>{{ campo.etiqueta }}</mat-label>
               <input *ngIf="campo.tipo === 'text'" matInput [formControlName]="campo.nombre" />
-              <input *ngIf="campo.tipo === 'number'" matInput type="number" [formControlName]="campo.nombre" />
+
+              <input *ngIf="campo.tipo === 'number'" matInput type="number" [value]="formGroup.get(campo.nombre)?.value || 1" [formControlName]="campo.nombre" />
+
               <mat-select *ngIf="campo.tipo === 'list'" [formControlName]="campo.nombre">
                 <mat-option *ngFor="let opcion of campo.opciones" [value]="opcion.value">
                   {{ opcion.label }}
@@ -52,7 +54,7 @@
             {{ error }}
           </mat-error>
 
-          
+
 
         </ng-container>
       </div>

@@ -61,6 +61,25 @@ export class TodosPagosComponent implements OnInit {
     });
   }
 
+  obtenerBancosUnicos(beneficios: any[]): { banco: string, num_cuenta: string }[] {
+    const bancosSet = new Set<string>();
+    const bancosUnicos: { banco: string, num_cuenta: string }[] = [];
+
+    beneficios.forEach(b => {
+      const pago = b.pagos[0];
+      if (pago) {
+        const banco = pago.banco;
+        const num_cuenta = pago.num_cuenta;
+        if (!bancosSet.has(`${banco}-${num_cuenta}`)) {
+          bancosSet.add(`${banco}-${num_cuenta}`);
+          bancosUnicos.push({ banco, num_cuenta });
+        }
+      }
+    });
+
+    return bancosUnicos;
+  }
+
   // Función para calcular el total (beneficios - deducciones)
   calcularTotal(pago: any): number {
     const totalBeneficios = pago.beneficios.reduce((acc: number, beneficio: any) => {

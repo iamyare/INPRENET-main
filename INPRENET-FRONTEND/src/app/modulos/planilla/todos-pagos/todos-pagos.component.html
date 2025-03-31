@@ -13,13 +13,12 @@
       <td mat-cell *matCellDef="let pago"> {{ pago.planilla.codigo_planilla }} </td>
     </ng-container>
 
-    <!-- Banco Column -->
     <ng-container matColumnDef="bancos">
       <th mat-header-cell *matHeaderCellDef> Banco </th>
       <td mat-cell *matCellDef="let pago">
         <ul>
-          <li *ngFor="let beneficio of pago.beneficios">
-            {{ beneficio.pagos[0]?.banco }} - {{ beneficio.pagos[0]?.num_cuenta }}
+          <li *ngFor="let item of obtenerBancosUnicos(pago.beneficios)">
+            {{ item.banco }} - {{ item.num_cuenta }}
           </li>
         </ul>
       </td>

@@ -155,10 +155,18 @@ export class PlanillaService {
           dd.estado_aplicacion AS "ESTADO_APLICACION",
           d.id_centro_trabajo AS "ID_CENTRO_TRABAJO"
         FROM net_detalle_deduccion dd
-        INNER JOIN net_persona np ON dd.id_persona = np.id_persona
-        LEFT JOIN net_persona_por_banco pb ON dd.id_af_banco = pb.id_af_banco
-        LEFT JOIN net_banco nb ON pb.id_banco = nb.id_banco
         INNER JOIN net_deduccion d ON dd.id_deduccion = d.id_deduccion
+        INNER JOIN net_persona np ON dd.id_persona = np.id_persona
+        INNER JOIN net_planilla plan ON plan.id_planilla = dd.id_planilla
+        
+        INNER JOIN net_detalle_pago_beneficio dpb ON 
+        dpb.id_planilla = dd.id_planilla
+        AND dpb.id_persona = dd.id_persona
+        
+        LEFT JOIN net_persona_por_banco pb ON 
+        dd.id_persona = dpb.id_persona
+        and dpb.id_af_banco = pb.id_af_banco
+        LEFT JOIN net_banco nb ON pb.id_banco = nb.id_banco
         WHERE dd.id_planilla = ${idPlanilla} AND dd.estado_aplicacion = '${estadoDeducciones}'
       `;
 
@@ -476,7 +484,6 @@ export class PlanillaService {
         beneficios,
         deducciones
       }
-      console.log(data);
 
       return data;
 
@@ -927,17 +934,7 @@ FROM
             PER.NUMERO_PAGOS, 
             PER.NUMERO_LOTE, 
             PER.ID_PLANILLA, 
-            (
-                SELECT SUM(SUB.MONTO_A_PAGAR) 
-                FROM NET_DETALLE_PAGO_BENEFICIO SUB 
-                JOIN NET_PLANILLA PER ON SUB.ID_PLANILLA = PER.ID_PLANILLA 
-                WHERE SUB.ID_PERSONA = PB.ID_PERSONA 
-                  AND SUB.ID_DETALLE_PERSONA = PB.ID_DETALLE_PERSONA 
-                  AND SUB.ID_CAUSANTE = PB.ID_CAUSANTE 
-                  AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
-                  AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
-                  AND PER.ID_TIPO_PLANILLA = 2
-            ) AS TOTAL_MONTO_A_PAGAR 
+            SUM(PB.MONTO_A_PAGAR) AS TOTAL_MONTO_A_PAGAR
         FROM 
             NET_DETALLE_PAGO_BENEFICIO PB 
         JOIN 
@@ -1023,34 +1020,50 @@ GROUP BY
   ): Promise<any[]> {
     const query = `
       SELECT 
-        ded."ID_DEDUCCION" AS "ID_DEDUCCION",
-        ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
-        plan."ID_PLANILLA" AS "ID_PLANILLA",
-        COUNT(DISTINCT dedd."ID_PERSONA") AS "CANTIDAD_DOCENTES",
-        SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
-      FROM 
+    ded."ID_DEDUCCION",
+    ded."NOMBRE_DEDUCCION",
+    plan."ID_PLANILLA",
+    COUNT(DISTINCT dedd."ID_PERSONA") AS "CANTIDAD_DOCENTES",
+    SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
+    FROM
         "NET_DETALLE_DEDUCCION" dedd
-      INNER JOIN 
-        "NET_DEDUCCION" ded 
+    INNER JOIN
+        "NET_DEDUCCION" ded
         ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-      LEFT JOIN "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
-      INNER JOIN 
-        "NET_PLANILLA" plan 
+    LEFT JOIN "NET_CENTRO_TRABAJO" ct 
+        ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+    INNER JOIN
+        "NET_PLANILLA" plan
         ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
-      WHERE 
+    LEFT JOIN (
+        SELECT 
+            ID_PERSONA, 
+            ID_PLANILLA, 
+            LISTAGG(ID_AF_BANCO, ', ') WITHIN GROUP (ORDER BY ID_AF_BANCO) AS ID_AF_BANCO_AGRUPADO
+        FROM (
+            SELECT DISTINCT ID_PERSONA, ID_PLANILLA, ID_AF_BANCO
+            FROM NET_DETALLE_PAGO_BENEFICIO
+        ) T
+        WHERE T.ID_PLANILLA IN (${idsPlanillaArray})
+        GROUP BY ID_PERSONA, ID_PLANILLA
+    ) banco
+        ON banco.ID_PERSONA = dedd."ID_PERSONA" 
+        AND banco.ID_PLANILLA = plan."ID_PLANILLA"
+    WHERE
         plan."PERIODO_INICIO" >= :periodoInicio AND
         plan.ID_PLANILLA IN (${idsPlanillaArray}) AND
         plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
-        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla})
         AND ded."ID_CENTRO_TRABAJO" = 1
         AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
-        AND dedd."ID_AF_BANCO" IS NOT NULL
+        AND banco."ID_AF_BANCO_AGRUPADO" IS NOT NULL
         AND dedd."ESTADO_APLICACION" = 'COBRADA'
-      GROUP BY 
-        ded."ID_DEDUCCION", 
-        ded."NOMBRE_DEDUCCION", 
+    GROUP BY 
+        ded."ID_DEDUCCION",
+        ded."NOMBRE_DEDUCCION",
         plan."ID_PLANILLA"
-      ORDER BY ded."ID_DEDUCCION" ASC
+    ORDER BY 
+        ded."ID_DEDUCCION" ASC
     `;
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
@@ -1068,34 +1081,51 @@ GROUP BY
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const query = `
-      SELECT 
-        ded."ID_DEDUCCION" AS "ID_DEDUCCION",
-        ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
-        plan."ID_PLANILLA" AS "ID_PLANILLA",
-        COUNT(DISTINCT dedd."ID_PERSONA") AS "CANTIDAD_DOCENTES",
-        SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
-      FROM 
+     SELECT 
+    ded."ID_DEDUCCION",
+    ded."NOMBRE_DEDUCCION",
+    plan."ID_PLANILLA",
+    COUNT(DISTINCT dedd."ID_PERSONA") AS "CANTIDAD_DOCENTES",
+    SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
+    FROM
         "NET_DETALLE_DEDUCCION" dedd
-      INNER JOIN 
-        "NET_DEDUCCION" ded 
+    INNER JOIN
+        "NET_DEDUCCION" ded
         ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-      INNER JOIN 
-        "NET_PLANILLA" plan 
+    LEFT JOIN "NET_CENTRO_TRABAJO" ct 
+        ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+    INNER JOIN
+        "NET_PLANILLA" plan
         ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
-      LEFT JOIN  "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
-      WHERE 
+    LEFT JOIN (
+        SELECT 
+            ID_PERSONA, 
+            ID_PLANILLA, 
+            LISTAGG(ID_AF_BANCO, ', ') WITHIN GROUP (ORDER BY ID_AF_BANCO) AS ID_AF_BANCO_AGRUPADO
+        FROM (
+            SELECT DISTINCT ID_PERSONA, ID_PLANILLA, ID_AF_BANCO
+            FROM NET_DETALLE_PAGO_BENEFICIO
+        ) T
+        WHERE T.ID_PLANILLA IN (${idsPlanillaArray})
+        GROUP BY ID_PERSONA, ID_PLANILLA
+    ) banco
+        ON banco.ID_PERSONA = dedd."ID_PERSONA" 
+        AND banco.ID_PLANILLA = plan."ID_PLANILLA"
+    WHERE
         plan."PERIODO_INICIO" >= :periodoInicio AND
         plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
         plan.ID_PLANILLA IN (${idsPlanillaArray}) AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND banco."ID_AF_BANCO_AGRUPADO" IS NOT NULL
+        AND dedd."ESTADO_APLICACION" = 'COBRADA'
         AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
         AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
-        AND dedd."ESTADO_APLICACION" = 'COBRADA'
-      GROUP BY 
-        ded."ID_DEDUCCION", 
-        ded."NOMBRE_DEDUCCION", 
+    GROUP BY 
+        ded."ID_DEDUCCION",
+        ded."NOMBRE_DEDUCCION",
         plan."ID_PLANILLA"
-      ORDER BY ded."ID_DEDUCCION" ASC
+    ORDER BY 
+        ded."ID_DEDUCCION" ASC
     `;
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
@@ -1290,33 +1320,50 @@ GROUP BY
 
     const query = `
       SELECT 
-        ded."ID_DEDUCCION" AS "ID_DEDUCCION",
-        ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
-        plan."ID_PLANILLA" AS "ID_PLANILLA",
-        SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
-      FROM 
-        "NET_DETALLE_DEDUCCION" dedd
-      INNER JOIN 
-        "NET_DEDUCCION" ded 
-        ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-      LEFT JOIN  "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
-      INNER JOIN 
-        "NET_PLANILLA" plan 
-        ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
-      WHERE 
-        plan."PERIODO_INICIO" >= :periodoInicio
-        AND plan."PERIODO_FINALIZACION" <= :periodoFinalizacion
-        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND plan.ID_PLANILLA IN (${idsPlanillaArray})
-        AND ded."ID_CENTRO_TRABAJO" = 1
-        AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
-        AND dedd."ID_AF_BANCO" IS NULL
-        AND dedd."ESTADO_APLICACION" = 'COBRADA'
-      GROUP BY 
-        ded."ID_DEDUCCION", 
+        ded."ID_DEDUCCION",
         ded."NOMBRE_DEDUCCION",
-        plan."ID_PLANILLA"
-      ORDER BY ded."NOMBRE_DEDUCCION" ASC
+        plan."ID_PLANILLA",
+        COUNT(DISTINCT dedd."ID_PERSONA") AS "CANTIDAD_DOCENTES",
+        SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
+        FROM
+            "NET_DETALLE_DEDUCCION" dedd
+        INNER JOIN
+            "NET_DEDUCCION" ded
+            ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        LEFT JOIN "NET_CENTRO_TRABAJO" ct 
+            ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+        INNER JOIN
+            "NET_PLANILLA" plan
+            ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+        LEFT JOIN (
+            SELECT 
+                ID_PERSONA, 
+                ID_PLANILLA, 
+                LISTAGG(ID_AF_BANCO, ', ') WITHIN GROUP (ORDER BY ID_AF_BANCO) AS ID_AF_BANCO_AGRUPADO
+            FROM (
+                SELECT DISTINCT ID_PERSONA, ID_PLANILLA, ID_AF_BANCO
+                FROM NET_DETALLE_PAGO_BENEFICIO
+            ) T
+            WHERE T.ID_PLANILLA IN (${idsPlanillaArray})
+            GROUP BY ID_PERSONA, ID_PLANILLA
+        ) banco
+            ON banco.ID_PERSONA = dedd."ID_PERSONA" 
+            AND banco.ID_PLANILLA = plan."ID_PLANILLA"
+        WHERE
+            plan."PERIODO_INICIO" >= :periodoInicio 
+            AND plan."PERIODO_FINALIZACION" <= :periodoFinalizacion 
+            AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+            AND plan.ID_PLANILLA IN (${idsPlanillaArray}) 
+            AND ded."ID_CENTRO_TRABAJO" = 1
+            AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
+            AND banco."ID_AF_BANCO_AGRUPADO" IS NULL
+            AND dedd."ESTADO_APLICACION" = 'COBRADA'
+        GROUP BY 
+            ded."ID_DEDUCCION",
+            ded."NOMBRE_DEDUCCION",
+            plan."ID_PLANILLA"
+        ORDER BY 
+            ded."NOMBRE_DEDUCCION" ASC
     `;
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
@@ -1335,33 +1382,50 @@ GROUP BY
   ): Promise<any[]> {
     const query = `
       SELECT 
-        ded."ID_DEDUCCION" AS "ID_DEDUCCION",
-        ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
-        plan."ID_PLANILLA" AS "ID_PLANILLA",
-        SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
-      FROM 
-        "NET_DETALLE_DEDUCCION" dedd
-      INNER JOIN 
-        "NET_DEDUCCION" ded 
-        ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-      LEFT JOIN  "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
-      INNER JOIN 
-        "NET_PLANILLA" plan 
-        ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
-      WHERE 
-        plan."PERIODO_INICIO" >= :periodoInicio
-        AND plan."PERIODO_FINALIZACION" <= :periodoFinalizacion
-        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND plan.ID_PLANILLA IN (${idsPlanillaArray})
-        AND dedd."ID_AF_BANCO" IS NULL
-        AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
-        AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
-        AND dedd."ESTADO_APLICACION" = 'COBRADA'
-      GROUP BY 
         ded."ID_DEDUCCION",
         ded."NOMBRE_DEDUCCION",
-        plan."ID_PLANILLA"
-      ORDER BY ded."NOMBRE_DEDUCCION" ASC
+        plan."ID_PLANILLA",
+        COUNT(DISTINCT dedd."ID_PERSONA") AS "CANTIDAD_DOCENTES",
+        SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
+        FROM
+            "NET_DETALLE_DEDUCCION" dedd
+        INNER JOIN
+            "NET_DEDUCCION" ded
+            ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        LEFT JOIN "NET_CENTRO_TRABAJO" ct 
+            ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+        INNER JOIN
+            "NET_PLANILLA" plan
+            ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+        LEFT JOIN (
+            SELECT 
+                ID_PERSONA, 
+                ID_PLANILLA, 
+                LISTAGG(ID_AF_BANCO, ', ') WITHIN GROUP (ORDER BY ID_AF_BANCO) AS ID_AF_BANCO_AGRUPADO
+            FROM (
+                SELECT DISTINCT ID_PERSONA, ID_PLANILLA, ID_AF_BANCO
+                FROM NET_DETALLE_PAGO_BENEFICIO
+            ) T
+            WHERE T.ID_PLANILLA IN (${idsPlanillaArray})
+            GROUP BY ID_PERSONA, ID_PLANILLA
+        ) banco
+            ON banco.ID_PERSONA = dedd."ID_PERSONA" 
+            AND banco.ID_PLANILLA = plan."ID_PLANILLA"
+        WHERE
+            plan."PERIODO_INICIO" >= :periodoInicio 
+            AND plan."PERIODO_FINALIZACION" <= :periodoFinalizacion 
+            AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+            AND plan.ID_PLANILLA IN (${idsPlanillaArray}) 
+            AND ded."ID_CENTRO_TRABAJO" != 1
+            AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
+            AND banco."ID_AF_BANCO_AGRUPADO" IS NULL
+            AND dedd."ESTADO_APLICACION" = 'COBRADA'
+        GROUP BY 
+            ded."ID_DEDUCCION",
+            ded."NOMBRE_DEDUCCION",
+            plan."ID_PLANILLA"
+        ORDER BY 
+            ded."NOMBRE_DEDUCCION" ASC
     `;
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
@@ -1634,46 +1698,89 @@ GROUP BY
     `;
 
     const deduccionesInpremaQuery = `
-      SELECT
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
+      SELECT 
+        COALESCE(banco."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
         SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_INPREMA
-      FROM "NET_PLANILLA" p
+        FROM "NET_PLANILLA" p
       JOIN "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
       JOIN "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
       LEFT JOIN  "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = d."ID_CENTRO_TRABAJO"
-      LEFT JOIN "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
-      LEFT JOIN "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
-      WHERE
+
+        LEFT JOIN (
+            SELECT 
+                T.ID_PERSONA, 
+                T.ID_PLANILLA, 
+                LISTAGG(T.ID_AF_BANCO, ', ') WITHIN GROUP (ORDER BY T.ID_AF_BANCO) AS ID_AF_BANCO_AGRUPADO,
+                MAX(bancos.NOMBRE_BANCO) AS NOMBRE_BANCO  -- Uso de MAX para agrupar
+            FROM (
+                SELECT DISTINCT ID_PERSONA, ID_PLANILLA, ID_AF_BANCO
+                FROM NET_DETALLE_PAGO_BENEFICIO
+            ) T 
+            LEFT JOIN NET_PERSONA_POR_BANCO ppb ON 
+                ppb.id_persona =  T.ID_PERSONA 
+                AND ppb.ID_AF_BANCO =  T.ID_AF_BANCO
+            LEFT JOIN NET_BANCO bancos ON 
+                bancos.id_banco =  ppb.id_banco 
+            WHERE T.ID_PLANILLA IN  (${idsPlanillaArray})
+            GROUP BY T.ID_PERSONA, T.ID_PLANILLA
+
+        ) banco
+            ON banco.ID_PERSONA = ddp."ID_PERSONA" 
+            AND banco.ID_PLANILLA = p."ID_PLANILLA"
+
+       WHERE
         p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND p."ID_PLANILLA" IN (${idsPlanillaArray})
+        AND p."ID_PLANILLA" IN  (${idsPlanillaArray})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
         AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
         AND d."ID_CENTRO_TRABAJO" = 1
       GROUP BY 
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
+        COALESCE(banco."NOMBRE_BANCO", 'SIN BANCO')
+      ORDER BY NOMBRE_BANCO ASC
   `;
 
     const deduccionesTercerosQuery = `
-     SELECT
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
+     SELECT 
+        COALESCE(banco."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
         SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_TERCEROS
-      FROM  "NET_PLANILLA" p
+        FROM "NET_PLANILLA" p
       JOIN "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
       JOIN "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
       LEFT JOIN  "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = d."ID_CENTRO_TRABAJO"
-      LEFT JOIN  "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
-      LEFT JOIN "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
-      WHERE
+
+        LEFT JOIN (
+            SELECT 
+                T.ID_PERSONA, 
+                T.ID_PLANILLA, 
+                LISTAGG(T.ID_AF_BANCO, ', ') WITHIN GROUP (ORDER BY T.ID_AF_BANCO) AS ID_AF_BANCO_AGRUPADO,
+                MAX(bancos.NOMBRE_BANCO) AS NOMBRE_BANCO  -- Uso de MAX para agrupar
+            FROM (
+                SELECT DISTINCT ID_PERSONA, ID_PLANILLA, ID_AF_BANCO
+                FROM NET_DETALLE_PAGO_BENEFICIO
+            ) T 
+            LEFT JOIN NET_PERSONA_POR_BANCO ppb ON 
+                ppb.id_persona =  T.ID_PERSONA 
+                AND ppb.ID_AF_BANCO =  T.ID_AF_BANCO
+            LEFT JOIN NET_BANCO bancos ON 
+                bancos.id_banco =  ppb.id_banco 
+            WHERE T.ID_PLANILLA IN  (${idsPlanillaArray})
+            GROUP BY T.ID_PERSONA, T.ID_PLANILLA
+
+        ) banco
+            ON banco.ID_PERSONA = ddp."ID_PERSONA" 
+            AND banco.ID_PLANILLA = p."ID_PLANILLA"
+
+       WHERE
         p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND p."ID_PLANILLA" IN (${idsPlanillaArray})
+        AND p."ID_PLANILLA" IN  (${idsPlanillaArray})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
-        AND d."ID_DEDUCCION" NOT IN (1,2,3,44,51)
         AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
-      GROUP BY
-      COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
-      ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
+        AND d."ID_CENTRO_TRABAJO" != 1
+      GROUP BY 
+        COALESCE(banco."NOMBRE_BANCO", 'SIN BANCO')
+      ORDER BY NOMBRE_BANCO ASC
       `;
 
     try {
@@ -1827,7 +1934,7 @@ GROUP BY
           }
         },
         relations: [
-          'detalleDeduccion.personaPorBanco',
+          /* 'detalleDeduccion.personaPorBanco', */
           'detalleDeduccion.deduccion',
           'detalleDeduccion.deduccion.centroTrabajo',
           'detalleDeduccion.planilla',
@@ -1864,7 +1971,7 @@ GROUP BY
     const totalDeducciones = await this.detalleDeduccionRepository
       .createQueryBuilder('detalleDeduccion')
       .innerJoin(Net_Planilla, 'plan', 'plan.ID_PLANILLA = detalleDeduccion.ID_PLANILLA')
-      .innerJoin(Net_Persona_Por_Banco, 'perpb', 'perpb.ID_AF_BANCO = detalleDeduccion.ID_AF_BANCO')
+      /* .innerJoin(Net_Persona_Por_Banco, 'perpb', 'perpb.ID_AF_BANCO = detalleDeduccion.ID_AF_BANCO') */
       .select('SUM(detalleDeduccion.monto_aplicado)', 'totalDeducciones')
       .where('plan.ID_PLANILLA = :id_planilla AND detalleDeduccion.ESTADO_APLICACION = \'COBRADA\'', { id_planilla })
       .getRawOne();
@@ -2265,18 +2372,7 @@ GROUP BY
             INNER JOIN "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
             INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
             INNER JOIN "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
-            JOIN
-                      "NET_PERSONA_POR_BANCO" perPorBan
-                  ON
-                      dd."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
-                  JOIN
-                      "NET_BANCO" banco
-                  ON
-                      banco."ID_BANCO" = perPorBan."ID_BANCO"
-
-                      INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA" 
-
-
+          
             INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
 
             WHERE
@@ -2300,18 +2396,7 @@ GROUP BY
           INNER JOIN "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
           INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
           INNER JOIN "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
-          JOIN
-                      "NET_PERSONA_POR_BANCO" perPorBan
-                  ON
-                      dd."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
-                  JOIN
-                      "NET_BANCO" banco
-                  ON
-                      banco."ID_BANCO" = perPorBan."ID_BANCO"
-
-                      INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
-
-
+          
           INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
 
           WHERE
@@ -2650,7 +2735,7 @@ GROUP BY
   }
 
   async create(createPlanillaDto: CreatePlanillaDto) {
-    const { nombre_planilla, periodo_inicio, periodo_finalizacion } = createPlanillaDto;
+    const { nombre_planilla, periodo_inicio, periodo_finalizacion, secuencia } = createPlanillaDto;
 
     try {
       const tipoPlanilla = await this.tipoPlanillaRepository.findOneBy({ nombre_planilla });
@@ -2666,87 +2751,163 @@ GROUP BY
           tipoPlanilla: { id_tipo_planilla: tipoPlanilla.id_tipo_planilla },
           estado: 'ACTIVA',
         },
+        order: {
+          secuencia: 'DESC', // Ordenar de mayor a menor por secuencia
+        },
       });
 
-      if (planillaActiva) {
-        throw new ConflictException(
-          `Ya existe una planilla activa para el tipo de planilla '${nombre_planilla}'.`
-        );
+      if (tipoPlanilla.id_tipo_planilla == 3 || tipoPlanilla.id_tipo_planilla == 4) {
+
+        let codPlanilla = '';
+        const fecha = parse(periodo_inicio, 'dd/MM/yyyy', new Date());
+
+        const mes: number = getMonth(fecha) + 1;
+        const anio: number = getYear(periodo_inicio);
+        const primerDia: Date = startOfMonth(periodo_inicio);
+        const ultimoDia: Date = endOfMonth(periodo_inicio);
+
+        if (planillaActiva?.secuencia > 2) {
+          throw new ConflictException(
+            `Ya existe una planilla activa para el tipo de planilla '${nombre_planilla}' con secuencia ${planillaActiva?.secuencia}.`
+          );
+        } else {
+          switch (nombre_planilla) {
+            case 'ORDINARIA DE JUBILADOS Y PENSIONADOS':
+              codPlanilla = `ORD-JUB-PEN-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'ORDINARIA DE BENEFICIARIOS':
+              codPlanilla = `ORD-BEN-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS':
+              codPlanilla = `COMP-JUB-PEN-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'COMPLEMENTARIA DE BENEFICIARIOS':
+              codPlanilla = `COMP-BEN-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'COMPLEMENTARIA AFILIADO':
+              codPlanilla = `COMP-AFIL-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'EXTRAORDINARIA DE JUBILADOS Y PENSIONADOS':
+              codPlanilla = `EXTRA-JUB-PEN-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'EXTRAORDINARIA DE BENEFICIARIOS':
+              codPlanilla = `EXTRA-JUB-${mes}-${anio}-${secuencia}`;
+              break;
+            case '60 RENTAS':
+              codPlanilla = `60-RENTAS-${mes}-${anio}-${secuencia}`;
+              break;
+            default:
+              throw new BadRequestException('Tipo de planilla no reconocido');
+          }
+
+          const tipoPlanillaInstance = new Net_TipoPlanilla();
+          tipoPlanillaInstance.id_tipo_planilla = tipoPlanilla.id_tipo_planilla;
+
+          // Convertir las fechas al formato adecuado
+          const formato = 'dd/MM/yyyy';
+          const periodoInicio: Date = periodo_inicio
+            ? parse(periodo_inicio, formato, new Date())
+            : primerDia;
+
+          const periodoFinalizacion: Date = periodo_finalizacion
+            ? parse(periodo_finalizacion, formato, new Date())
+            : ultimoDia;
+
+          const data = {
+            codigo_planilla: codPlanilla,
+            secuencia,
+            periodoInicio,
+            periodoFinalizacion,
+            tipoPlanilla: tipoPlanillaInstance,
+            estado: 'ACTIVA',
+          };
+
+          console.log(data);
+
+          const newPlanilla = this.planillaRepository.create(data);
+
+          await this.planillaRepository.save(newPlanilla);
+          return newPlanilla;
+        }
+      } else if (tipoPlanilla.id_tipo_planilla == 1 || tipoPlanilla.id_tipo_planilla == 2) {
+        let codPlanilla = '';
+        const fechaActual: Date = new Date();
+        const mes: number = getMonth(fechaActual) + 1;
+        const anio: number = getYear(fechaActual);
+        const primerDia: Date = startOfMonth(fechaActual);
+        const ultimoDia: Date = endOfMonth(fechaActual);
+        if (planillaActiva) {
+          throw new ConflictException(
+            `Ya existe una planilla activa para el tipo de planilla '${nombre_planilla}'.`
+          );
+        }
+
+        let secuencia = 1
+        let planillaExistente;
+        do {
+          switch (nombre_planilla) {
+            case 'ORDINARIA DE JUBILADOS Y PENSIONADOS':
+              codPlanilla = `ORD-JUB-PEN-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'ORDINARIA DE BENEFICIARIOS':
+              codPlanilla = `ORD-BEN-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS':
+              codPlanilla = `COMP-JUB-PEN-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'COMPLEMENTARIA DE BENEFICIARIOS':
+              codPlanilla = `COMP-BEN-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'COMPLEMENTARIA AFILIADO':
+              codPlanilla = `COMP-AFIL-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'EXTRAORDINARIA DE JUBILADOS Y PENSIONADOS':
+              codPlanilla = `EXTRA-JUB-PEN-${mes}-${anio}-${secuencia}`;
+              break;
+            case 'EXTRAORDINARIA DE BENEFICIARIOS':
+              codPlanilla = `EXTRA-JUB-${mes}-${anio}-${secuencia}`;
+              break;
+            case '60 RENTAS':
+              codPlanilla = `60-RENTAS-${mes}-${anio}-${secuencia}`;
+              break;
+            default:
+              throw new BadRequestException('Tipo de planilla no reconocido');
+          }
+          planillaExistente = await this.planillaRepository.findOneBy({
+            codigo_planilla: codPlanilla,
+          });
+          if (planillaExistente) {
+            secuencia++;
+          }
+        } while (planillaExistente);
+
+        const tipoPlanillaInstance = new Net_TipoPlanilla();
+        tipoPlanillaInstance.id_tipo_planilla = tipoPlanilla.id_tipo_planilla;
+
+        // Convertir las fechas al formato adecuado
+        const formato = 'dd/MM/yyyy';
+        const periodoInicio: Date = periodo_inicio
+          ? parse(periodo_inicio, formato, new Date())
+          : primerDia;
+
+        const periodoFinalizacion: Date = periodo_finalizacion
+          ? parse(periodo_finalizacion, formato, new Date())
+          : ultimoDia;
+
+        const data = {
+          codigo_planilla: codPlanilla,
+          secuencia,
+          periodoInicio,
+          periodoFinalizacion,
+          tipoPlanilla: tipoPlanillaInstance,
+          estado: 'ACTIVA',
+        };
+        const newPlanilla = this.planillaRepository.create(data);
+
+        await this.planillaRepository.save(newPlanilla);
+        return newPlanilla;
       }
 
-      let codPlanilla = '';
-      const fechaActual: Date = new Date();
-      const mes: number = getMonth(fechaActual) + 1;
-      const anio: number = getYear(fechaActual);
-      const primerDia: Date = startOfMonth(fechaActual);
-      const ultimoDia: Date = endOfMonth(fechaActual);
-      let secuencia = 1;
-      let planillaExistente;
-
-      do {
-        switch (nombre_planilla) {
-          case 'ORDINARIA DE JUBILADOS Y PENSIONADOS':
-            codPlanilla = `ORD-JUB-PEN-${mes}-${anio}-${secuencia}`;
-            break;
-          case 'ORDINARIA DE BENEFICIARIOS':
-            codPlanilla = `ORD-BEN-${mes}-${anio}-${secuencia}`;
-            break;
-          case 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS':
-            codPlanilla = `COMP-JUB-PEN-${mes}-${anio}-${secuencia}`;
-            break;
-          case 'COMPLEMENTARIA DE BENEFICIARIOS':
-            codPlanilla = `COMP-BEN-${mes}-${anio}-${secuencia}`;
-            break;
-          case 'COMPLEMENTARIA AFILIADO':
-            codPlanilla = `COMP-AFIL-${mes}-${anio}-${secuencia}`;
-            break;
-          case 'EXTRAORDINARIA DE JUBILADOS Y PENSIONADOS':
-            codPlanilla = `EXTRA-JUB-PEN-${mes}-${anio}-${secuencia}`;
-            break;
-          case 'EXTRAORDINARIA DE BENEFICIARIOS':
-            codPlanilla = `EXTRA-JUB-${mes}-${anio}-${secuencia}`;
-            break;
-          case '60 RENTAS':
-            codPlanilla = `60-RENTAS-${mes}-${anio}-${secuencia}`;
-            break;
-          default:
-            throw new BadRequestException('Tipo de planilla no reconocido');
-        }
-        planillaExistente = await this.planillaRepository.findOneBy({
-          codigo_planilla: codPlanilla,
-        });
-        if (planillaExistente) {
-          secuencia++;
-        }
-      } while (planillaExistente);
-
-      const tipoPlanillaInstance = new Net_TipoPlanilla();
-      tipoPlanillaInstance.id_tipo_planilla = tipoPlanilla.id_tipo_planilla;
-
-      // Convertir las fechas al formato adecuado
-      const formato = 'dd/MM/yyyy';
-      const periodoInicio: Date = periodo_inicio
-        ? parse(periodo_inicio, formato, new Date())
-        : primerDia;
-
-      const periodoFinalizacion: Date = periodo_finalizacion
-        ? parse(periodo_finalizacion, formato, new Date())
-        : ultimoDia;
-
-      const data = {
-        codigo_planilla: codPlanilla,
-        secuencia,
-        periodoInicio,
-        periodoFinalizacion,
-        tipoPlanilla: tipoPlanillaInstance,
-        estado: 'ACTIVA',
-      };
-      console.log(data);
-
-      const newPlanilla = this.planillaRepository.create(data);
-
-      await this.planillaRepository.save(newPlanilla);
-      return newPlanilla;
     } catch (error) {
       if (error instanceof QueryFailedError && error.message.includes('ORA-00001')) {
         throw new ConflictException(
@@ -2889,21 +3050,18 @@ GROUP BY
     }
   }
 
-  async generarPlanillaComplementaria(token: string, tipos_persona: string): Promise<void> {
+  async generarPlanillaComplementaria(token: string, tipos_persona: string, v_id_planilla: number, secuencia: number): Promise<void> {
 
     const decoded = this.jwtService.verify(token);
     const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
     const id_usuario_empresa_in = estadoPP.id_usuario_empresa;
 
-    console.log(token);
-    console.log(tipos_persona);
-
     try {
       await this.entityManager.query(
         `BEGIN
-           InsertarPlanillaComplementaria(:tipos_persona, :id_usuario_empresa_in);
+           InsertarPlanillaComplementaria(:tipos_persona, :v_id_planilla, :secuencia, :id_usuario_empresa_in);
          END;`,
-        [tipos_persona, id_usuario_empresa_in]
+        [tipos_persona, v_id_planilla, secuencia, id_usuario_empresa_in]
       );
     } catch (error) {
       if (error.message.includes('No se encontró una planilla activa para Beneficiarios')) {
@@ -3390,6 +3548,7 @@ GROUP BY
         perPorBan."NUM_CUENTA",
         banco."ID_BANCO",
         banco."COD_BANCO",
+        banco."CODIGO_ACH",
         banco."NOMBRE_BANCO",
         SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIOS",
         TRIM(
@@ -3433,6 +3592,7 @@ GROUP BY
         banco."NOMBRE_BANCO",
         banco."ID_BANCO",
         banco."COD_BANCO",
+        banco."CODIGO_ACH",
         TRIM(
           per."PRIMER_NOMBRE" || ' ' ||
           COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
@@ -3819,7 +3979,7 @@ GROUP BY
         LEFT JOIN
             "NET_BANCO" banco ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
         JOIN
-            "NET_PERSONA" persona ON personaPorBanco."ID_PERSONA" = persona."ID_PERSONA"
+            "NET_PERSONA" persona ON detallePago."ID_PERSONA" = persona."ID_PERSONA"
         WHERE
             planilla."ID_PLANILLA" = :1
             AND detallePago."ESTADO" = 'EN PRELIMINAR'
@@ -3856,7 +4016,6 @@ GROUP BY
         WHERE
             planilla."ID_PLANILLA" = :idPlanilla
             AND dd."ESTADO_APLICACION" = 'EN PRELIMINAR'
-             AND dd.ID_AF_BANCO IS NOT NULL
             AND ded.ID_CENTRO_TRABAJO != 1
         GROUP BY
             dd."ID_PERSONA"
@@ -4631,6 +4790,40 @@ GROUP BY
     }
   }
 
+  async exportarExcelBeneficioAfiliado(idPlanilla: number, idTipoPlanilla: number, estadoBen: string, estadoDed: string): Promise<any> {
+    let JubPenQuery = '';
+
+    try {
+      JubPenQuery = `SELECT p.ID_PERSONA, p.N_IDENTIFICACION, DBAF.ID_BENEFICIO, DBAF.NUM_RENTAS_APROBADAS, DBAF.MONTO_ULTIMA_CUOTA
+          FROM NET_DETALLE_PAGO_BENEFICIO DPB 
+          INNER JOIN net_detalle_beneficio_afiliado DBAF on 
+              DPB.ID_PERSONA = DBAF.ID_PERSONA 
+              AND DPB.ID_CAUSANTE = DBAF.ID_CAUSANTE 
+              AND DPB.ID_DETALLE_PERSONA = DBAF.ID_DETALLE_PERSONA 
+              AND DPB.ID_BENEFICIO = DBAF.ID_BENEFICIO 
+          INNER JOIN net_persona p on p.ID_PERSONA = DPB.ID_PERSONA
+          WHERE ID_PLANILLA IN (
+              ${idPlanilla}
+          )
+          ORDER BY  DBAF.ID_BENEFICIO ASC
+      `;
+      const beneficiosjub = await this.entityManager.query(JubPenQuery);
+      const resultbeneficiosjub = beneficiosjub.map(beneficio => {
+        return {
+          id_persona: beneficio?.ID_PERSONA,
+          dni: beneficio?.N_IDENTIFICACION?.trim(),
+          id_beneficio: beneficio?.ID_BENEFICIO,
+          num_rentas_aprobadas: beneficio?.NUM_RENTAS_APROBADAS,
+          monto_ultima_cuota: beneficio?.MONTO_ULTIMA_CUOTA
+        };
+      });
+      return { resultbeneficiosjub: resultbeneficiosjub };
+    } catch (error) {
+      console.error('Error al obtener los detalles preliminares de pago por planilla:', error);
+      throw new InternalServerErrorException('Error al obtener los detalles preliminares de pago por planilla.');
+    }
+  }
+
   async obtenerDetallePagoBeneficioPorPlanillaPrueba(
     idsPlanillaArray: number[],
     periodoInicio: string,
@@ -4679,58 +4872,91 @@ GROUP BY
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
             AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
             AND detallePago."ESTADO" = 'PAGADA'
+            AND detallePago.ID_AF_BANCO IS NOT NULL
         GROUP BY
             banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, persona.tercer_nombre, persona.n_identificacion, persona.ID_PERSONA
     `;
 
     const deduccionesInpremaQuery = `
         SELECT 
-            dd."ID_PERSONA",
-            SUM(dd.MONTO_APLICADO) AS "deducciones_inprema"
-        FROM 
+          dd."ID_PERSONA",
+          SUM(dd.MONTO_APLICADO) AS "deducciones_inprema"
+        FROM
+            "NET_DETALLE_DEDUCCION" dd
+        INNER JOIN
+            "NET_DEDUCCION" ded
+            ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        LEFT JOIN "NET_CENTRO_TRABAJO" ct 
+            ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+        INNER JOIN
             "NET_PLANILLA" planilla
-        LEFT JOIN 
-            "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
-        LEFT JOIN 
-            "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-        LEFT JOIN  
-            "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
-        WHERE 
-            planilla."PERIODO_INICIO" >= :periodoInicio
-            AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
-            AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-            AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
-            AND dd."ESTADO_APLICACION" = 'COBRADA'
-            --AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
-            AND dd.ID_AF_BANCO IS NOT NULL
+            ON dd."ID_PLANILLA" = planilla."ID_PLANILLA"
+        LEFT JOIN (
+            SELECT 
+                ID_PERSONA, 
+                ID_PLANILLA, 
+                LISTAGG(ID_AF_BANCO, ', ') WITHIN GROUP (ORDER BY ID_AF_BANCO) AS ID_AF_BANCO_AGRUPADO
+            FROM (
+                SELECT DISTINCT ID_PERSONA, ID_PLANILLA, ID_AF_BANCO
+                FROM NET_DETALLE_PAGO_BENEFICIO
+            ) T
+            WHERE T.ID_PLANILLA IN (${idsPlanillaArray})
+            GROUP BY ID_PERSONA, ID_PLANILLA
+        ) banco
+            ON banco.ID_PERSONA = dd."ID_PERSONA" 
+            AND banco.ID_PLANILLA = planilla."ID_PLANILLA"
+        WHERE
+            planilla."PERIODO_INICIO" >= :periodoInicio 
+            AND planilla.ID_PLANILLA IN (${idsPlanillaArray}) 
+            AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion 
+            AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla})
             AND ded."ID_CENTRO_TRABAJO" = 1
+            AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
+            AND banco."ID_AF_BANCO_AGRUPADO" IS NOT NULL
+            AND dd."ESTADO_APLICACION" = 'COBRADA'
         GROUP BY 
-            dd."ID_PERSONA"
+             dd."ID_PERSONA"
     `;
 
     const deduccionesTercerosQuery = `
         SELECT 
-            dd."ID_PERSONA",
-            SUM(dd.MONTO_APLICADO) AS "deducciones_terceros"
-        FROM 
+          dd."ID_PERSONA",
+          SUM(dd.MONTO_APLICADO) AS "deducciones_terceros"
+        FROM
+            "NET_DETALLE_DEDUCCION" dd
+        INNER JOIN
+            "NET_DEDUCCION" ded
+            ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        LEFT JOIN "NET_CENTRO_TRABAJO" ct 
+            ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+        INNER JOIN
             "NET_PLANILLA" planilla
-        LEFT JOIN 
-            "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
-        LEFT JOIN 
-            "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-        LEFT JOIN  
-            "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
-        WHERE 
-            planilla."PERIODO_INICIO" >= :periodoInicio
-            AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
-            AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-            AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
+            ON dd."ID_PLANILLA" = planilla."ID_PLANILLA"
+        LEFT JOIN (
+            SELECT 
+                ID_PERSONA, 
+                ID_PLANILLA, 
+                LISTAGG(ID_AF_BANCO, ', ') WITHIN GROUP (ORDER BY ID_AF_BANCO) AS ID_AF_BANCO_AGRUPADO
+            FROM (
+                SELECT DISTINCT ID_PERSONA, ID_PLANILLA, ID_AF_BANCO
+                FROM NET_DETALLE_PAGO_BENEFICIO
+            ) T
+            WHERE T.ID_PLANILLA IN (${idsPlanillaArray})
+            GROUP BY ID_PERSONA, ID_PLANILLA
+        ) banco
+            ON banco.ID_PERSONA = dd."ID_PERSONA" 
+            AND banco.ID_PLANILLA = planilla."ID_PLANILLA"
+        WHERE
+            planilla."PERIODO_INICIO" >= :periodoInicio 
+            AND planilla.ID_PLANILLA IN (${idsPlanillaArray}) 
+            AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion 
+            AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla})
+            AND ded."ID_CENTRO_TRABAJO" != 1
+            AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
+            AND banco."ID_AF_BANCO_AGRUPADO" IS NOT NULL
             AND dd."ESTADO_APLICACION" = 'COBRADA'
-            --AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
-            AND dd.ID_AF_BANCO IS NOT NULL
-            AND ded.ID_CENTRO_TRABAJO != 1
         GROUP BY 
-            dd."ID_PERSONA"
+             dd."ID_PERSONA"
     `;
 
     try {
@@ -4822,53 +5048,84 @@ GROUP BY
 
     const deduccionesInpremaQuery = `
         SELECT 
-            dd."ID_PERSONA",
-            SUM(dd.MONTO_APLICADO) AS "deducciones_inprema"
-        FROM 
+          dd."ID_PERSONA",
+          SUM(dd.MONTO_APLICADO) AS "deducciones_inprema"
+        FROM
+            "NET_DETALLE_DEDUCCION" dd
+        INNER JOIN
+            "NET_DEDUCCION" ded
+            ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        LEFT JOIN "NET_CENTRO_TRABAJO" ct 
+            ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+        INNER JOIN
             "NET_PLANILLA" planilla
-        LEFT JOIN 
-            "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
-        LEFT JOIN 
-            "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-        LEFT JOIN  
-            "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
-        WHERE 
-            planilla."PERIODO_INICIO" >= :periodoInicio
-            AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
+            ON dd."ID_PLANILLA" = planilla."ID_PLANILLA"
+        LEFT JOIN (
+            SELECT 
+                ID_PERSONA, 
+                ID_PLANILLA, 
+                LISTAGG(ID_AF_BANCO, ', ') WITHIN GROUP (ORDER BY ID_AF_BANCO) AS ID_AF_BANCO_AGRUPADO
+            FROM (
+                SELECT DISTINCT ID_PERSONA, ID_PLANILLA, ID_AF_BANCO
+                FROM NET_DETALLE_PAGO_BENEFICIO
+            ) T
+            WHERE T.ID_PLANILLA IN (${idsPlanillaArrayNumeros})
+            GROUP BY ID_PERSONA, ID_PLANILLA
+        ) banco
+            ON banco.ID_PERSONA = dd."ID_PERSONA" 
+            AND banco.ID_PLANILLA = planilla."ID_PLANILLA"
+        WHERE
+            planilla."PERIODO_INICIO" >= :periodoInicio 
+            AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion 
             AND planilla."ID_TIPO_PLANILLA" IN (1,2)
-            AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
+            AND planilla.ID_PLANILLA IN (${idsPlanillaArrayNumeros}) 
             AND dd."ESTADO_APLICACION" = 'COBRADA'
-            --AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
+            AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
             AND ded."ID_CENTRO_TRABAJO" = 1
-            AND dd."ID_AF_BANCO" IS NULL        
-            GROUP BY 
-            dd."ID_PERSONA"
+            AND banco."ID_AF_BANCO_AGRUPADO" IS NULL
+        GROUP BY 
+             dd."ID_PERSONA"
     `;
 
     const deduccionesTercerosQuery = `
         SELECT 
-            dd."ID_PERSONA",
-            SUM(dd.MONTO_APLICADO) AS "deducciones_terceros"
-        FROM  
+          dd."ID_PERSONA",
+          SUM(dd.MONTO_APLICADO) AS "deducciones_terceros"
+        FROM
+            "NET_DETALLE_DEDUCCION" dd
+        INNER JOIN
+            "NET_DEDUCCION" ded
+            ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        LEFT JOIN "NET_CENTRO_TRABAJO" ct 
+            ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+        INNER JOIN
             "NET_PLANILLA" planilla
-        LEFT JOIN 
-            "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
-        LEFT JOIN 
-            "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-        LEFT JOIN  
-            "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
-        WHERE 
-            planilla."PERIODO_INICIO" >= :periodoInicio
-            AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
-            AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-            AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
+            ON dd."ID_PLANILLA" = planilla."ID_PLANILLA"
+        LEFT JOIN (
+            SELECT 
+                ID_PERSONA, 
+                ID_PLANILLA, 
+                LISTAGG(ID_AF_BANCO, ', ') WITHIN GROUP (ORDER BY ID_AF_BANCO) AS ID_AF_BANCO_AGRUPADO
+            FROM (
+                SELECT DISTINCT ID_PERSONA, ID_PLANILLA, ID_AF_BANCO
+                FROM NET_DETALLE_PAGO_BENEFICIO
+            ) T
+            WHERE T.ID_PLANILLA IN (${idsPlanillaArrayNumeros})
+            GROUP BY ID_PERSONA, ID_PLANILLA
+        ) banco
+            ON banco.ID_PERSONA = dd."ID_PERSONA" 
+            AND banco.ID_PLANILLA = planilla."ID_PLANILLA"
+        WHERE
+            planilla."PERIODO_INICIO" >= :periodoInicio 
+            AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion 
+            AND planilla."ID_TIPO_PLANILLA" IN (1,2)
+            AND planilla.ID_PLANILLA IN (${idsPlanillaArrayNumeros}) 
             AND dd."ESTADO_APLICACION" = 'COBRADA'
-            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+            AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
             AND ded."ID_CENTRO_TRABAJO" != 1
-            --AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
-            AND dd."ID_AF_BANCO" IS NULL
+            AND banco."ID_AF_BANCO_AGRUPADO" IS NULL
         GROUP BY 
-            dd."ID_PERSONA"
+             dd."ID_PERSONA"
     `;
 
     try {
@@ -4925,13 +5182,13 @@ GROUP BY
       // Agregar las filas con los datos
       data.forEach(item => {
         detailedSheet.addRow({
-          codigo_banco: item.codigo_banco,
-          numero_cuenta: item.numero_cuenta,
+          codigo_banco: item?.codigo_banco,
+          numero_cuenta: item?.numero_cuenta,
           monto_a_pagar: Number(parseFloat(item.neto).toFixed(2)),
-          nombre_completo: item.nombre_completo,
+          nombre_completo: item?.nombre_completo,
           fecha_actual: currentDate,
           id_tipo_planilla: 1,
-          n_identificacion: item.n_identificacion,
+          n_identificacion: item?.n_identificacion,
         });
       });
 
@@ -4965,13 +5222,13 @@ GROUP BY
       // Agregar las filas concatenadas en la hoja "Concatenado"
       data.forEach(item => {
         const concatenatedRow = [
-          item.codigo_banco,
-          item.numero_cuenta,
+          item?.codigo_banco,
+          item?.numero_cuenta,
           Number(parseFloat(item.neto).toFixed(2)),
-          item.nombre_completo,
+          item?.nombre_completo,
           currentDate,
           '1',
-          item.n_identificacion
+          item?.n_identificacion
         ].join(',');
 
         concatenatedSheet.addRow([concatenatedRow]);
@@ -5053,6 +5310,50 @@ GROUP BY
       procesarHoja('Detalle de Pago - Beneficiarios', data.resultbeneficiosben);
       procesarHoja('Detalle de Pago - Jubilados', data.resultbeneficiosjub);
 
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=detalle_pago.xlsx');
+
+      await workbook.xlsx.write(res);
+      res.end();
+    } catch (error) {
+      console.error('Error al generar el archivo Excel:', error);
+      res.status(500).send('Error al generar el archivo Excel');
+    }
+  }
+
+  async generarReporteBeneficioAfiliado(
+    data: any,
+    res: Response,
+  ): Promise<void> {
+    try {
+      console.log(data);
+
+      const workbook = new ExcelJS.Workbook();
+
+      const procesarHoja = (nombreHoja: string, datos: any[]) => {
+        if (!datos) return;
+        const sheet = workbook.addWorksheet(nombreHoja);
+        sheet.columns = [
+          { header: 'id_persona', key: 'id_persona', width: 15 },
+          { header: 'DNI', key: 'dni', width: 20 },
+          { header: 'ID Beneficio', key: 'id_beneficio', width: 15 },
+          { header: 'num_rentas_aprobadas', key: 'num_rentas_aprobadas', width: 15 },
+          { header: 'Deducciones monto_ultima_cuota', key: 'monto_ultima_cuota', width: 20 },
+        ];
+
+        datos.forEach(item => {
+          sheet.addRow({
+            id_persona: item.id_persona,
+            dni: item.dni?.trim(),
+            id_beneficio: item.id_beneficio,
+            num_rentas_aprobadas: item.num_rentas_aprobadas,
+            monto_ultima_cuota: item.monto_ultima_cuota,
+          });
+        });
+
+      };
+
+      procesarHoja('REGISTROS_COMPLEMENTARIA', data.resultbeneficiosjub);
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename=detalle_pago.xlsx');
 

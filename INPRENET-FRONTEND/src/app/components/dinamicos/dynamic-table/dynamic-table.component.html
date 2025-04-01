@@ -53,9 +53,12 @@
 
               <!-- Celdas de tipo moneda -->
               <ng-container *ngIf="!row.isEditing && col.moneda">
-                <span class="moneda-left">
+                <span class="moneda-left"
+                      [ngClass]="{'text-red': isNegativeNumber(getCellValue(row, col))}">
                   <span class="moneda-simbolo">L</span>
-                  <span class="moneda-valor">{{ getCellValue(row, col) | number: '1.2-2':'en-HN' }}</span>
+                  <span class="moneda-valor">
+                    {{ getCellValue(row, col) | number: '1.2-2':'en-HN' }}
+                  </span>
                 </span>
               </ng-container>
 

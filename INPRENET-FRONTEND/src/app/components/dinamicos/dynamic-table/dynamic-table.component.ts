@@ -159,6 +159,11 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     return row[column.col];
   }
 
+  isNegativeNumber(value: any): boolean {
+    const num = parseFloat(value);
+    return !isNaN(num) && num < 0;
+  }
+
   getFormControl(row: any, column: TableColumn): FormControl {
     if (!this.editFormControls[row]) {
       this.editFormControls[row] = {};

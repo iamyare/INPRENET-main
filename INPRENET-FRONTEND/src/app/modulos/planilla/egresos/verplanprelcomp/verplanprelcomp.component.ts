@@ -91,8 +91,6 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     }
     try {
       const response = await this.planillaService.getPlanillaPrelimiar(this.codigoPlanilla).toPromise();
-      console.log(response);
-
       if (response) {
         this.detallePlanilla = { ...response };
         await this.calcularTotales(this.codigoPlanilla);

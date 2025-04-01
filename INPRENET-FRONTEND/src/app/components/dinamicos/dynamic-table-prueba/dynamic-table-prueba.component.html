@@ -46,7 +46,7 @@
             </ng-container>
 
             <ng-container *ngIf="!row.isEditing && col.moneda">
-              {{ getCellValue(row, col) | currency : "L" : "symbol" : "1.2-2" }}
+              <span class="moneda-left">{{ getCellValue(row, col) | number: '1.2-2':'en-HN' }}</span>
             </ng-container>
 
             <ng-container *ngIf="row.isEditing">

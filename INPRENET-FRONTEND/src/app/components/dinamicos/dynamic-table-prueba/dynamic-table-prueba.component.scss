@@ -89,11 +89,24 @@ tr.selected {
 
 .moneda-left {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  /* Espaciado entre símbolo y número */
   align-items: center;
+  width: 100%;
+  /* Asegura que ocupe todo el espacio de la celda */
 }
 
-.moneda-left::before {
-  content: 'L';
-  margin-right: 4px;
+.moneda-simbolo {
+  flex-shrink: 0;
+  /* Evita que el símbolo se reduzca */
+  text-align: center;
+  min-width: 15px;
+  /* Ajusta el ancho según necesidad */
+}
+
+.moneda-valor {
+  flex-grow: 1;
+  /* Permite que el número ocupe el espacio restante */
+  text-align: right;
+  /* Alinea los números a la derecha */
 }

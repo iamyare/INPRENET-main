@@ -5,6 +5,7 @@
 .mat-mdc-form-field {
   flex-direction: row;
 }
+
 .search-container {
   justify-content: flex-end !important;
 }
@@ -14,19 +15,24 @@
 }
 
 .custom-row:nth-child(even) {
-  background-color: #f2f2f2; /* Color para filas pares */
-  text-align: center; /* Alineación del texto para filas pares */
+  background-color: #f2f2f2;
+  /* Color para filas pares */
+  text-align: center;
+  /* Alineación del texto para filas pares */
 }
 
 .custom-row:nth-child(odd) {
-  background-color: #ffffff; /* Color para filas impares */
-  text-align: center; /* Alineación del texto para filas impares */
+  background-color: #ffffff;
+  /* Color para filas impares */
+  text-align: center;
+  /* Alineación del texto para filas impares */
 }
 
 .custom-table {
   width: 100%;
   border-collapse: collapse;
-  border-spacing: 0 10px; /* Añade espacio entre filas */
+  border-spacing: 0 10px;
+  /* Añade espacio entre filas */
   margin-bottom: 20px;
 }
 
@@ -39,7 +45,8 @@
 
 .custom-row {
   border-bottom: 1px solid #ddd;
-  border-radius: 0; /* Restablece cualquier radio de borde que se haya aplicado anteriormente */
+  border-radius: 0;
+  /* Restablece cualquier radio de borde que se haya aplicado anteriormente */
 }
 
 .custom-cell {
@@ -75,36 +82,46 @@
 
 /* Estilos para los botones de editar y eliminar */
 .boton-editar mat-icon {
-  color: #26a69a; /* Color del ícono de editar */
+  color: #26a69a;
+  /* Color del ícono de editar */
 }
 
 .boton-eliminar mat-icon {
-  color: #ff5252; /* Color del ícono de eliminar */
+  color: #ff5252;
+  /* Color del ícono de eliminar */
 }
 
 .boton-editar,
 .boton-eliminar {
-  background-color: transparent; /* Fondo transparente */
-  border: none; /* Sin borde */
-  cursor: pointer; /* Cursor de mano */
+  background-color: transparent;
+  /* Fondo transparente */
+  border: none;
+  /* Sin borde */
+  cursor: pointer;
+  /* Cursor de mano */
 }
 
 .boton-editar:hover mat-icon {
-  color: #1d7b5f; /* Color del ícono al pasar el ratón por encima */
+  color: #1d7b5f;
+  /* Color del ícono al pasar el ratón por encima */
 }
 
 .boton-eliminar:hover mat-icon {
-  color: #e04848; /* Color del ícono al pasar el ratón por encima */
+  color: #e04848;
+  /* Color del ícono al pasar el ratón por encima */
 }
 
 /* Estilos para filas clickeables */
 .clickable-row {
-  cursor: pointer; /* Cambia el cursor a una mano para indicar que es clickeable */
+  cursor: pointer;
+  /* Cambia el cursor a una mano para indicar que es clickeable */
 }
 
 .clickable-row:hover {
-  background-color: #d9edf7; /* Color de fondo cuando se pasa el ratón por encima */
-  transition: background-color 0.3s; /* Transición suave del color de fondo */
+  background-color: #d9edf7;
+  /* Color de fondo cuando se pasa el ratón por encima */
+  transition: background-color 0.3s;
+  /* Transición suave del color de fondo */
 }
 
 .boton-inhabilitar mat-icon {
@@ -115,7 +132,7 @@
 }
 
 .boton-inhabilitar {
-  background-color: transparent; 
+  background-color: transparent;
   border: none;
   cursor: pointer;
   display: flex;
@@ -129,13 +146,24 @@
 
 .moneda-left {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  /* Espaciado entre símbolo y número */
   align-items: center;
+  width: 100%;
+  /* Asegura que ocupe todo el espacio de la celda */
 }
 
-.moneda-left::before {
-  content: 'L';
-  margin-right: 4px; 
+.moneda-simbolo {
+  flex-shrink: 0;
+  /* Evita que el símbolo se reduzca */
+  text-align: center;
+  min-width: 15px;
+  /* Ajusta el ancho según necesidad */
 }
 
-
+.moneda-valor {
+  flex-grow: 1;
+  /* Permite que el número ocupe el espacio restante */
+  text-align: right;
+  /* Alinea los números a la derecha */
+}

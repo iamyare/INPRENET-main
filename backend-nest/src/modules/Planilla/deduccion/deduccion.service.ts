@@ -314,7 +314,7 @@ export class DeduccionService {
       return { error: 'Faltan columnas obligatorias', processed: false };
     } if (idTipoPlanilla == 1 || idTipoPlanilla == 2) {
       const mesActual = new Date().getMonth() + 1;
-      if (mes !== mesActual) {
+      if (parseInt(mes) !== mesActual) {
         return { error: 'Número de mes incorrecto.', processed: false };
       }
     }
@@ -589,7 +589,7 @@ export class DeduccionService {
       return { error: 'Faltan columnas obligatorias', processed: false };
     } if (idTipoPlanilla == 1 || idTipoPlanilla == 2) {
       const mesActual = new Date().getMonth() + 1;
-      if (mes !== mesActual) {
+      if (parseInt(mes) !== mesActual) {
         return { error: 'Número de mes incorrecto.', processed: false };
       }
     }

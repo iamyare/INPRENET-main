@@ -3104,6 +3104,9 @@ GROUP BY
 
     const id_usuario_empresa_in = estadoPP.id_usuario_empresa;
     try {
+      console.log(tipos_persona);
+      console.log(id_usuario_empresa_in);
+
       await this.entityManager.query(
         `BEGIN
            InsertarPlanillaOrdinaria(:tipos_persona, :id_usuario_empresa_in);

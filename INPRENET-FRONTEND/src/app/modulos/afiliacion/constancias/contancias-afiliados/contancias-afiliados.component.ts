@@ -224,16 +224,21 @@ export class ContanciasAfiliadosComponent implements OnInit {
       console.log(beneficioData);
       
 
+      const tipos = this.persona?.TIPOS_PERSONA || [];
+const tiposPermitidos = ['BENEFICIARIO', 'DESIGNADO', 'BENEFICIARIO SIN CAUSANTE'];
+const esSoloBeneficiario = tipos.length > 0 && tipos.every((t:any) => tiposPermitidos.includes(t));
+
     const data = {
       nombre_completo: nombre_completo,
       n_identificacion: beneficioData.N_IDENTIFICACION,
       beneficio: beneficio.toUpperCase(),
-      departamento: beneficioData.NOMBRE_DEPARTAMENTO?.toUpperCase() || 'N/D',
+      departamento: beneficioData.NOMBRE_DEPARTAMENTO || 'NO DEFINIDO',
       monto: beneficioData.MONTO_POR_PERIODO || 0,
       monto_letras: this.convertirNumeroALetrasConCentavos(beneficioData.MONTO_POR_PERIODO || 0),
       fecha_inicio: this.convertirFechaAPalabras(beneficioData.FECHA_EFECTIVIDAD),
       fecha_fin: this.convertirFechaAPalabras(beneficioData.PERIODO_FINALIZACION),
-      num_rentas_aprobadas: beneficioData.NUM_RENTAS_APROBADAS || 'INDEFINIDO'
+      num_rentas_aprobadas: beneficioData.NUM_RENTAS_APROBADAS || 'INDEFINIDO',
+      ocultarDepartamento: esSoloBeneficiario
     };
 
     const dto = this.usuarioToken;
@@ -352,7 +357,7 @@ export class ContanciasAfiliadosComponent implements OnInit {
       nombre_completo: nombre_completo,
       n_identificacion: beneficioData.N_IDENTIFICACION,
       beneficio: beneficioClean,
-      departamento: beneficioData.NOMBRE_DEPARTAMENTO?.toUpperCase() || 'N/D',
+      departamento: beneficioData.NOMBRE_DEPARTAMENTO || 'NO DEFINIDO',
       monto: beneficioData.MONTO_POR_PERIODO || 0,
       monto_letras: this.convertirNumeroALetrasConCentavos(beneficioData.MONTO_POR_PERIODO || 0),
       fecha_inicio: this.convertirFechaAPalabras(beneficioData.FECHA_EFECTIVIDAD),
@@ -380,86 +385,67 @@ export class ContanciasAfiliadosComponent implements OnInit {
   
   private convertirNumeroALetrasConCentavos(monto: number): string {
     if (isNaN(monto) || monto === null || monto === undefined) {
-      console.error('El monto proporcionado no es válido:', monto);
       return 'CERO LEMPIRAS';
     }
-
-    const unidades = [
-      '', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'
-    ];
-    const especiales = [
-      'DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISÉIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'
-    ];
-    const decenas = [
-      '', '', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'
-    ];
-    const centenas = [
-      '', 'CIEN', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'
-    ];
-
-    function convertirSeccion(numero: number): string {
-      let texto = '';
-      if (numero >= 100) {
-          const centena = Math.floor(numero / 100);
-          if (centena === 1 && numero > 100) {
-              texto += 'CIENTO ';
-          } else {
-              texto += centenas[centena] + ' ';
-          }
-          numero %= 100;
-      }
   
-      if (numero >= 20) {
-          const decena = Math.floor(numero / 10);
-          texto += decenas[decena] + ' ';
-          numero %= 10;
-      } else if (numero >= 10) {
-          texto += especiales[numero - 10] + ' ';
-          numero = 0;
-      }
+    const unidades = ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+    const especiales = ['DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISÉIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
+    const decenas = ['', '', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+    const centenas = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
   
-      if (numero > 0) {
-          texto += unidades[numero];
+    function convertirCentenas(num: number): string {
+      if (num === 0) return '';
+      if (num === 100) return 'CIEN';
+    
+      const c = Math.floor(num / 100);
+      const d = Math.floor((num % 100) / 10);
+      const u = num % 10;
+    
+      let texto = c > 0 ? `${centenas[c]} ` : '';
+    
+      if (d === 1) {
+        texto += especiales[u];
+      } else if (d === 2 && u > 0) {
+        texto += `VEINTI${unidades[u].toLowerCase()}`;
+      } else {
+        texto += decenas[d];
+        if (d > 2 && u > 0) {
+          texto += ` Y ${unidades[u]}`;
+        } else if (d < 2 && u > 0) {
+          texto += ` ${unidades[u]}`;
+        }
       }
-  
+    
       return texto.trim();
-  }
-
-    function convertirMiles(numero: number): string {
-      if (numero === 0) return '';
-      if (numero === 1) return 'MIL';
-      return convertirSeccion(numero) + ' MIL';
+    }    
+  
+    function convertirMiles(num: number): string {
+      if (num === 0) return '';
+      if (num === 1) return 'MIL';
+      return `${convertirCentenas(num)} MIL`;
     }
-
-    function convertirMillones(numero: number): string {
-      if (numero === 0) return '';
-      if (numero === 1) return 'UN MILLÓN';
-      return convertirSeccion(numero) + ' MILLONES';
+  
+    function convertirMillones(num: number): string {
+      if (num === 0) return '';
+      if (num === 1) return 'UN MILLÓN';
+      return `${convertirCentenas(num)} MILLONES`;
     }
-
+  
     const millones = Math.floor(monto / 1000000);
     const miles = Math.floor((monto % 1000000) / 1000);
     const resto = Math.floor(monto % 1000);
     const centavos = Math.round((monto % 1) * 100);
-
-    let resultado = '';
-
-    if (millones > 0) {
-      resultado += convertirMillones(millones) + ' ';
-    }
-
-    if (miles > 0) {
-      resultado += convertirMiles(miles) + ' ';
-    }
-
-    if (resto > 0) {
-      resultado += convertirSeccion(resto);
-    }
-
-    return resultado.trim() + ' LEMPIRAS' + (centavos > 0 ? ` CON ${centavos}/100 CENTAVOS` : '');
-
+  
+    let letras = '';
+    if (millones > 0) letras += `${convertirMillones(millones)} `;
+    if (miles > 0) letras += `${convertirMiles(miles)} `;
+    if (resto > 0) letras += convertirCentenas(resto);
+  
+    letras = letras.trim();
+  
+    return `${letras} LEMPIRAS${centavos > 0 ? ` CON ${centavos}/100 CENTAVOS` : ''}`;
   }
-
+  
   private convertirFechaAPalabras(fecha: string): string {
     if (!fecha) {
       console.error('Fecha no proporcionada');
@@ -546,7 +532,7 @@ export class ContanciasAfiliadosComponent implements OnInit {
       nombre_completo: nombre_completo,
       n_identificacion: beneficioData.N_IDENTIFICACION,
       beneficio: beneficioClean,
-      departamento: beneficioData.NOMBRE_MUNICIPIO?.toUpperCase() || 'NO DEFINIDO',
+      departamento: beneficioData.NOMBRE_DEPARTAMENTO || 'NO DEFINIDO',
       monto: beneficioData.MONTO_POR_PERIODO || 0,
       monto_letras: this.convertirNumeroALetrasConCentavos(beneficioData.MONTO_POR_PERIODO || 0),
       fecha_inicio: this.convertirFechaAPalabras(beneficioData.FECHA_EFECTIVIDAD),

@@ -1,66 +1,463 @@
 <div class="scanner-container">
   <h2>Validación Biométrica</h2>
 
-  <!-- ✅ Mensaje de verificación -->
-  <div *ngIf="verificado" class="verification-message">
-    ✅ Cédula {{ identificacion }} y huella verificada con éxito por el Registro Nacional de las Personas.
-  </div>
-
-  <!-- ✅ Mensaje de colocar el dedo en el escáner -->
   <div *ngIf="dispositivoIniciado && !verificado" class="message">
-    Por favor, coloque su dedo en el escáner...
+    <strong class="text-warning">⚠️ Por favor, coloque su dedo en el escáner...</strong>
   </div>
 
-  <!-- ✅ Mensaje de error -->
   <div *ngIf="errorMessage" class="error-message">
     {{ errorMessage }}
   </div>
 
-  <!-- ✅ Campo para ingresar número de identificación -->
-  <div class="input-group">
-    <label for="identificacion">Número de Identificación</label>
-    <input id="identificacion" type="text" [(ngModel)]="identificacion" placeholder="Ingrese su número de identificación" required />
+  <div class="input-button-row" [formGroup]="form">
+    <mat-form-field appearance="outline" class="input-identificacion">
+      <mat-label>Número de Identificación</mat-label>
+      <input matInput formControlName="identificacion" placeholder="Ingrese su número de identificación">
+    </mat-form-field>
+  
+    <div class="btn-group-inline">
+      <button
+        *ngIf="!dispositivoIniciado && !informacionGeneral"
+        class="btn-action"
+        (click)="iniciarDispositivo()">
+        Iniciar Dispositivo
+      </button>
+  
+      <button
+        class="btn-verify"
+        [disabled]="isLoading"
+        (click)="verificarDatos()">
+        {{ isLoading ? 'Verificando...' : 'Verificar Datos' }}
+      </button>
+  
+      <button
+        *ngIf="verificado"
+        class="btn-secondary"
+        (click)="ingresarOtraPersona()">
+        Ingresar Otra Persona
+      </button>
+    </div>
   </div>
+  
+  
 
-  <!-- ✅ Botón para iniciar dispositivo -->
-  <div class="btn-group" *ngIf="!dispositivoIniciado">
-    <button class="btn-action" (click)="iniciarDispositivo()">Iniciar Dispositivo</button>
-  </div>
-
-  <!-- ✅ Botón para verificar los datos -->
-  <div class="btn-group" *ngIf="!verificado">
-    <button class="btn-verify" [disabled]="isLoading" (click)="verificarDatos()">
-      {{ isLoading ? 'Verificando...' : 'Verificar Datos' }}
-    </button>
-  </div>
-
-  <!-- ✅ Botón para ingresar otra persona después de la verificación -->
-  <div class="btn-group" *ngIf="verificado">
-    <button class="btn-verify" (click)="ingresarOtraPersona()">Ingresar Otra Persona</button>
-  </div>
-
-  <!-- ✅ Spinner de carga -->
   <div *ngIf="isLoading" class="spinner">
-    <div class="loading-spinner"></div>
+    <mat-spinner diameter="40"></mat-spinner>
   </div>
 
-  <!-- ✅ Información General -->
-  <div *ngIf="informacionGeneral" class="info-container">
-    <h3>Información General:</h3>
-    <p><strong>Nombre Completo:</strong> {{ informacionGeneral.nombres }} {{ informacionGeneral.primerApellido }} {{ informacionGeneral.segundoApellido }}</p>
-    <p><strong>Fecha de Nacimiento:</strong> {{ informacionGeneral.fechaDeNacimiento }}</p>
-    <p><strong>Sexo:</strong> {{ informacionGeneral.sexo }}</p>
-    <p><strong>Ocupación:</strong> {{ informacionGeneral.ocupacionLaboral }}</p>
-    <p><strong>Estado Civil:</strong> {{ informacionGeneral.estadoCivil }}</p>
-    <p><strong>Teléfono:</strong> {{ informacionGeneral.telefonoCelular }}</p>
-    <p><strong>Correo Electrónico:</strong> {{ informacionGeneral.correoElectronico }}</p>
-    <p><strong>Dirección de Residencia:</strong> {{ informacionGeneral.direccionResidencia }}</p>
-    <p><strong>Departamento de Nacimiento:</strong> {{ informacionGeneral.deptoNacimiento }}</p>
-    <p><strong>Municipio de Nacimiento:</strong> {{ informacionGeneral.municNacimiento }}</p>
-    <p><strong>País de Nacimiento:</strong> {{ informacionGeneral.paisNacimiento }}</p>
-    <img *ngIf="fotoPersona" [src]="fotoPersona" alt="Foto de la persona" class="persona-image">
-  </div>
+  <img *ngIf="fingerprint && !verificado" [src]="fingerprint" alt="Huella capturada" class="fingerprint-image" />
 
-  <!-- ✅ Imagen de la huella capturada -->
-  <img *ngIf="fingerprint && !verificado" [src]="fingerprint" alt="Huella capturada" class="fingerprint-image">
+  <!-- 📌 Card doble columna -->
+  <div class="datos-doble-columna mat-elevation-z4" *ngIf="informacionGeneral || docenteData">
+    <!-- Columna 1: RNP -->
+    <mat-card class="columna-info">
+      <mat-card-title>Información del RNP</mat-card-title>
+      <mat-card-content>
+        <div class="rnp-foto-container" *ngIf="fotoPersona">
+          <img [src]="fotoPersona" alt="Foto de la persona" class="persona-image-small" />
+        </div>
+        <div class="info-rnp-grid">
+          <div><strong>Nombre Completo:</strong> {{ informacionGeneral.nombres }} {{ informacionGeneral.primerApellido }} {{ informacionGeneral.segundoApellido }}</div>
+          <div><strong>Sexo:</strong> {{ getSexoDescripcion(informacionGeneral.sexo) }}</div>
+          <div><strong>Fecha de Nacimiento:</strong> {{ informacionGeneral.fechaDeNacimiento | date:'dd/MM/yyyy' }}</div>
+          <div><strong>Estado Civil:</strong> {{ estadoCivilMap[informacionGeneral.estadoCivil] || 'No especificado' }}</div>
+          <div><strong>Estado de Vivencia:</strong> {{ estadoVivenciaMap[informacionGeneral.estadoVivencia] || 'No especificado' }}</div>
+
+          <div><strong>Correo Electrónico:</strong> {{ informacionGeneral.correoElectronico }}</div>
+          <div><strong>Teléfono Celular:</strong> {{ informacionGeneral.telefonoCelular }}</div>
+          <div><strong>Teléfono:</strong> {{ informacionGeneral.numeroTelefono }}</div>
+          <div>
+            <strong>Dirección:</strong> {{ informacionGeneral.direccionResidencia }} - Barrio: {{ informacionGeneral.descrBarrioResidencia }}
+          </div>
+          <div><strong>Departamento de Nacimiento:</strong> {{ informacionGeneral.descrDeptoNacimiento }}</div>
+          <div><strong>Municipio de Nacimiento:</strong> {{ informacionGeneral.descrMunicNacimiento }}</div>
+          <div><strong>Departamento de Residencia:</strong> {{ informacionGeneral.descrDeptoResidencia }}</div>
+          <div><strong>Municipio de Residencia:</strong> {{ informacionGeneral.descrMunicResidencia }}</div>
+        </div>
+        
+      </mat-card-content>
+
+      <mat-divider class="my-3"></mat-divider>
+
+      <h3>ENCUESTA</h3>
+
+<div class="datos-docente-form" [formGroup]="form">
+  <div formGroupName="encuesta" class="form-grid">
+    <!-- Pregunta 1 -->
+    <div>
+      <label>¿Conoce los servicios que ofrece el Departamento de Servicios Sociales de INPREMA?</label>
+      <mat-radio-group formControlName="pregunta1">
+        <mat-radio-button value="si">Sí</mat-radio-button>
+        <mat-radio-button value="no">No</mat-radio-button>
+      </mat-radio-group>
+      <mat-error *ngIf="form.get('encuesta.pregunta1')?.touched && form.get('encuesta.pregunta1')?.invalid">
+        Campo obligatorio
+      </mat-error>
+    </div>
+
+    <!-- Pregunta 2 -->
+    <div>
+      <label>¿Conoce los servicios del programa INPREMA-SALUD?</label>
+      <mat-radio-group formControlName="pregunta2">
+        <mat-radio-button value="si">Sí</mat-radio-button>
+        <mat-radio-button value="no">No</mat-radio-button>
+      </mat-radio-group>
+      <mat-error *ngIf="form.get('encuesta.pregunta2')?.touched && form.get('encuesta.pregunta2')?.invalid">
+        Campo obligatorio
+      </mat-error>
+    </div>
+
+    <!-- Preguntas 3-5, solo si dijo "sí" en la pregunta 2 -->
+    <ng-container *ngIf="conoceInpremaSalud === 'si'">
+      <!-- Pregunta 3 -->
+      <div>
+        <label>¿Ha utilizado los servicios del programa INPREMA-SALUD?</label>
+        <mat-radio-group formControlName="pregunta3">
+          <mat-radio-button value="si">Sí</mat-radio-button>
+          <mat-radio-button value="no">No</mat-radio-button>
+        </mat-radio-group>
+        <mat-error *ngIf="form.get('encuesta.pregunta3')?.touched && form.get('encuesta.pregunta3')?.invalid">
+          Campo obligatorio
+        </mat-error>
+      </div>
+
+      <!-- Pregunta 4 -->
+      <div>
+        <label>¿Cuál ha sido su experiencia utilizando el servicio del programa INPREMA-SALUD?</label>
+        <mat-radio-group formControlName="pregunta4">
+          <mat-radio-button value="positiva">Positiva</mat-radio-button>
+          <mat-radio-button value="negativa">Negativa</mat-radio-button>
+        </mat-radio-group>
+        <mat-error *ngIf="form.get('encuesta.pregunta4')?.touched && form.get('encuesta.pregunta4')?.invalid">
+          Campo obligatorio
+        </mat-error>
+      </div>
+
+      <!-- Pregunta 5 -->
+      <div>
+        <label>¿Recomendaría el servicio del programa INPREMA-SALUD a otros docentes?</label>
+        <mat-radio-group formControlName="pregunta5">
+          <mat-radio-button value="si">Sí</mat-radio-button>
+          <mat-radio-button value="no">No</mat-radio-button>
+        </mat-radio-group>
+        <mat-error *ngIf="form.get('encuesta.pregunta5')?.touched && form.get('encuesta.pregunta5')?.invalid">
+          Campo obligatorio
+        </mat-error>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+
+<div style="margin-top: 30px; display: flex; justify-content: center;">
+  <button mat-raised-button color="primary" (click)="enviarFormulario()" [disabled]="form.invalid">
+    Enviar Información
+  </button>
+</div>
+
+
+    </mat-card>
+
+    <!-- Columna 2: Datos del Docente -->
+    <mat-card class="columna-info" *ngIf="docenteData">
+      <mat-card-title>Datos del Docente</mat-card-title>
+      <mat-card-content>
+        <form [formGroup]="form" class="datos-docente-form">
+          <div formGroupName="datosPersona" class="form-grid">
+            <!-- Nombres -->
+            <mat-form-field appearance="outline">
+              <mat-label>Nombres</mat-label>
+              <input matInput formControlName="nombres">
+              <mat-error *ngIf="form.get('datosPersona.nombres')?.hasError('required')">
+                Campo obligatorio
+              </mat-error>
+              <mat-error *ngIf="form.get('datosPersona.nombres')?.hasError('pattern')">
+                Solo se permiten letras y máximo 3 nombres separados por espacios
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Apellidos -->
+            <mat-form-field appearance="outline">
+              <mat-label>Apellidos</mat-label>
+              <input matInput formControlName="apellidos">
+              <mat-error *ngIf="form.get('datosPersona.apellidos')?.hasError('required')">
+                Campo obligatorio
+              </mat-error>
+              <mat-error *ngIf="form.get('datosPersona.apellidos')?.hasError('pattern')">
+                Solo se permiten letras y máximo 2 apellidos separados por espacio
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Fecha de Nacimiento -->
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Nacimiento</mat-label>
+              <input matInput [matDatepicker]="pickerNacimiento" formControlName="fecha_nacimiento" readonly (keydown)="false">
+              <mat-datepicker-toggle matSuffix [for]="pickerNacimiento"></mat-datepicker-toggle>
+              <mat-datepicker #pickerNacimiento></mat-datepicker>
+              <mat-error *ngIf="form.get('datosPersona.fecha_nacimiento')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Género -->
+            <mat-form-field appearance="outline">
+              <mat-label>Género</mat-label>
+              <mat-select formControlName="genero">
+                <mat-option *ngFor="let option of generoOptions" [value]="option.value">{{ option.label }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('datosPersona.genero')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Estado Civil -->
+            <mat-form-field appearance="outline">
+              <mat-label>Estado Civil</mat-label>
+              <mat-select formControlName="estado_civil">
+                <mat-option *ngFor="let option of estadoCivilOptions" [value]="option.value">{{ option.label }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('datosPersona.estado_civil')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Correo -->
+            <mat-form-field appearance="outline">
+              <mat-label>Correo</mat-label>
+              <input matInput formControlName="correo_1">
+              <mat-error *ngIf="form.get('datosPersona.correo_1')?.hasError('required')">
+                Campo obligatorio
+              </mat-error>
+              <mat-error *ngIf="form.get('datosPersona.correo_1')?.hasError('email')">
+                Correo no válido
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Teléfono -->
+            <mat-form-field appearance="outline">
+              <mat-label>Teléfono</mat-label>
+              <input matInput formControlName="telefono_1">
+              <mat-error *ngIf="form.get('datosPersona.telefono_1')?.hasError('required')">
+                Campo obligatorio
+              </mat-error>
+              <mat-error *ngIf="form.get('datosPersona.telefono_1')?.hasError('pattern')">
+                Solo se permiten números (8 dígitos)
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- RTN -->
+            <mat-form-field appearance="outline">
+              <mat-label>RTN</mat-label>
+              <input matInput formControlName="rtn">
+              <mat-error *ngIf="form.get('datosPersona.rtn')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Departamento de Nacimiento -->
+            <mat-form-field appearance="outline">
+              <mat-label>Departamento de Nacimiento</mat-label>
+              <mat-select formControlName="id_departamento_nacimiento">
+                <mat-option *ngFor="let depto of departamentos" [value]="depto.value">
+                  {{ depto.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('datosPersona.id_departamento_nacimiento')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Municipio de Nacimiento -->
+            <mat-form-field appearance="outline">
+              <mat-label>Municipio de Nacimiento</mat-label>
+              <mat-select formControlName="id_municipio_nacimiento">
+                <mat-option *ngFor="let mun of municipiosNacimiento" [value]="mun.value">
+                  {{ mun.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('datosPersona.id_municipio_nacimiento')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Departamento de Residencia -->
+            <mat-form-field appearance="outline">
+              <mat-label>Departamento de Residencia</mat-label>
+              <mat-select formControlName="id_departamento_residencia">
+                <mat-option *ngFor="let depto of departamentos" [value]="depto.value">
+                  {{ depto.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('datosPersona.id_departamento_residencia')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Municipio de Residencia -->
+            <mat-form-field appearance="outline">
+              <mat-label>Municipio de Residencia</mat-label>
+              <mat-select formControlName="id_municipio_residencia">
+                <mat-option *ngFor="let mun of municipiosResidencia" [value]="mun.value">
+                  {{ mun.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('datosPersona.id_municipio_residencia')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Aldea -->
+            <mat-form-field appearance="outline">
+              <mat-label>Aldea</mat-label>
+              <mat-select formControlName="id_aldea">
+                <mat-option *ngFor="let a of aldeas" [value]="a.value">
+                  {{ a.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('datosPersona.id_aldea')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+      
+            <!-- Dirección de Residencia -->
+            <mat-form-field appearance="outline" style="grid-column: span 2;">
+              <mat-label>Dirección de Residencia</mat-label>
+              <textarea matInput formControlName="direccion_residencia"></textarea>
+              <mat-error *ngIf="form.get('datosPersona.direccion_residencia')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+          </div>
+        
+          <mat-divider class="my-3"></mat-divider>
+          <h3>Datos del Cónyuge</h3>
+          <div formGroupName="conyuge" class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Nombres</mat-label>
+              <input matInput formControlName="nombres">
+              <mat-error *ngIf="form.get('conyuge.nombres')?.hasError('required')">
+                Campo obligatorio
+              </mat-error>
+              <mat-error *ngIf="form.get('conyuge.nombres')?.hasError('pattern')">
+                Solo letras, máximo 3 nombres separados por espacios
+              </mat-error>
+            </mat-form-field>
+        
+            <mat-form-field appearance="outline">
+              <mat-label>Apellidos</mat-label>
+              <input matInput formControlName="apellidos">
+              <mat-error *ngIf="form.get('conyuge.apellidos')?.hasError('required')">
+                Campo obligatorio
+              </mat-error>
+              <mat-error *ngIf="form.get('conyuge.apellidos')?.hasError('pattern')">
+                Solo letras, máximo 2 apellidos
+              </mat-error>
+            </mat-form-field>
+        
+            <mat-form-field appearance="outline">
+              <mat-label>Identificación</mat-label>
+              <input matInput formControlName="n_identificacion">
+              <mat-error *ngIf="form.get('conyuge.n_identificacion')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+          
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Nacimiento</mat-label>
+              <input matInput [matDatepicker]="pickerConyugeNacimiento" formControlName="fecha_nacimiento" readonly (keydown)="false">
+              <mat-datepicker-toggle matSuffix [for]="pickerConyugeNacimiento"></mat-datepicker-toggle>
+              <mat-datepicker #pickerConyugeNacimiento></mat-datepicker>
+              <mat-error *ngIf="form.get('conyuge.fecha_nacimiento')?.invalid">
+                Campo obligatorio
+              </mat-error>
+            </mat-form-field>
+        
+            <mat-form-field appearance="outline">
+              <mat-label>Teléfono</mat-label>
+              <input matInput formControlName="telefono_1">
+              <mat-error *ngIf="form.get('conyuge.telefono_1')?.hasError('required')">
+                Campo obligatorio
+              </mat-error>
+              <mat-error *ngIf="form.get('conyuge.telefono_1')?.hasError('pattern')">
+                Solo se permiten números (8 dígitos)
+              </mat-error>
+            </mat-form-field>
+          </div>
+        
+          <mat-divider class="my-3"></mat-divider>
+          <h3>Referencias Personales</h3>
+          <div formArrayName="referencias">
+            <div *ngFor="let ref of referencias.controls; let i = index" [formGroupName]="i" class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Nombres</mat-label>
+                <input matInput formControlName="nombres">
+                <mat-error *ngIf="ref.get('nombres')?.hasError('required')">
+                  Campo obligatorio
+                </mat-error>
+              </mat-form-field>
+        
+              <mat-form-field appearance="outline">
+                <mat-label>Apellidos</mat-label>
+                <input matInput formControlName="apellidos">
+                <mat-error *ngIf="ref.get('apellidos')?.hasError('required')">
+                  Campo obligatorio
+                </mat-error>
+              </mat-form-field>
+        
+              <mat-form-field appearance="outline">
+                <mat-label>Tipo de Referencia</mat-label>
+                <input matInput formControlName="tipo_referencia">
+                <mat-error *ngIf="ref.get('tipo_referencia')?.hasError('required')">
+                  Campo obligatorio
+                </mat-error>
+              </mat-form-field>
+        
+              <mat-form-field appearance="outline">
+                <mat-label>Parentesco</mat-label>
+                <input matInput formControlName="parentesco">
+                <mat-error *ngIf="ref.get('parentesco')?.hasError('required')">
+                  Campo obligatorio
+                </mat-error>
+              </mat-form-field>
+        
+              <mat-form-field appearance="outline">
+                <mat-label>Teléfono</mat-label>
+                <input matInput formControlName="telefono_personal">
+                <mat-error *ngIf="ref.get('telefono_personal')?.hasError('required')">
+                  Campo obligatorio
+                </mat-error>
+              </mat-form-field>
+        
+              <mat-divider class="my-3" style="grid-column: span 2;"></mat-divider>
+            </div>
+          </div>
+        </form>
+        
+
+        <mat-divider class="my-3"></mat-divider>
+
+        <h3 style="display: flex; align-items: center; justify-content: space-between;">
+          Beneficiarios
+        
+          <div style="display: flex; align-items: center; gap: 8px;" [formGroup]="form">
+            <span>¿Correctos?</span>
+            <mat-radio-group formControlName="beneficiariosCorrectos" aria-label="¿Beneficiarios correctos?">
+              <mat-radio-button value="si">Sí</mat-radio-button>
+              <mat-radio-button value="no">No</mat-radio-button>
+            </mat-radio-group>
+            <mat-error *ngIf="form.get('beneficiariosCorrectos')?.touched && form.get('beneficiariosCorrectos')?.invalid">
+              Campo obligatorio
+            </mat-error>
+          </div>
+        </h3>
+             
+        <mat-list *ngIf="docenteData.beneficiarios?.length">
+          <mat-list-item *ngFor="let ben of docenteData.beneficiarios">
+            {{ ben.primerNombre }} {{ ben.segundoNombre }} {{ ben.tercerApellido }} {{ ben.primerApellido }} {{ ben.segundoApellido }} - {{ ben.parentesco }} - {{ ben.porcentaje }}%
+          </mat-list-item>
+        </mat-list>
+        
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>

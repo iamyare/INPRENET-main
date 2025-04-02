@@ -3,7 +3,7 @@ import { BadRequestException, HttpException, HttpStatus, Injectable, InternalSer
 import { isUUID } from 'class-validator';
 import { format, parseISO } from 'date-fns';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, In, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
@@ -47,7 +47,8 @@ export class DetalleBeneficioService {
     private readonly personaPorBancoRepository: Repository<Net_Persona_Por_Banco>,
     @InjectRepository(net_estado_afiliacion)
     private readonly estadoAfilRepository: Repository<net_estado_afiliacion>,
-    @InjectEntityManager() private readonly entityManager: EntityManager
+    @InjectEntityManager() private readonly entityManager: EntityManager,
+    private readonly dataSource: DataSource,
   ) { }
 
   async verificarPersonaConTipo(dni: string): Promise<boolean> {
@@ -313,67 +314,77 @@ export class DetalleBeneficioService {
     return detallePagoBeneficio;
   }
 
-  async getCausanteByDniBeneficiario(n_identificacion: string): Promise<{ causante: { nombres: string, apellidos: string, n_identificacion: string }, beneficios: Net_Detalle_Beneficio_Afiliado[] }[]> {
-    const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });
-
-    if (!beneficiario) {
-      throw new Error('Beneficiario no encontrado');
+  async getBeneficiosConCausanteAgrupado(n_identificacion: string): Promise<any[]> {
+    const persona = await this.personaRepository.findOne({ where: { n_identificacion } });
+  
+    if (!persona) {
+      throw new Error('Persona no encontrada');
     }
-
-    const tiposPersona = await this.tipoPersonaRepos.find({
-      where: { tipo_persona: In(['BENEFICIARIO', 'BENEFICIARIO SIN CAUSANTE', 'DESIGNADO']) }
-    });
-
-    if (tiposPersona.length === 0) {
-      throw new Error('Tipos de persona "BENEFICIARIO", "BENEFICIARIO SIN CAUSANTE" o "DESIGNADO" no encontrados');
-    }
-
-    const detalles = beneficiario.detallePersona.filter(d => tiposPersona.some(tp => tp.id_tipo_persona === d.ID_TIPO_PERSONA));
-
-    if (detalles.length === 0) {
-      throw new Error('Detalle de beneficiario no encontrado');
-    }
-
-    // Map para almacenar causantes y sus beneficios únicos
-    const causantesMap = new Map<number, { causante: { nombres: string, apellidos: string, n_identificacion: string }, beneficios: Net_Detalle_Beneficio_Afiliado[] }>();
-
-    for (const detalle of detalles) {
-      const causante = await this.personaRepository.findOne({ where: { id_persona: detalle.ID_CAUSANTE } });
-
-      if (!causante) {
-        throw new Error(`Causante con ID ${detalle.ID_CAUSANTE} no encontrado`);
-      }
-
-      // Si el causante aún no ha sido procesado, agregarlo
-      if (!causantesMap.has(causante.id_persona)) {
-        const beneficios = await this.detalleBeneficioAfiliadoRepository.find({
-          where: { ID_CAUSANTE: causante.id_persona },
-          relations: ['beneficio']
-        });
-
-        // Eliminar beneficios duplicados dentro del mismo causante
-        const beneficiosUnicos = beneficios.filter(
-          (beneficio, index, self) =>
-            index === self.findIndex((b) => b.ID_BENEFICIO === beneficio.ID_BENEFICIO)
-        );
-
-        causantesMap.set(causante.id_persona, {
+  
+    const query = this.dataSource.createQueryRunner();
+    await query.connect();
+  
+    const rows = await query.manager.query(`
+      SELECT
+        b.ID_BENEFICIO,
+        nb.NOMBRE_BENEFICIO,
+        b.N_EXPEDIENTE,
+        TO_CHAR(b.FECHA_PRESENTACION, 'YYYY-MM-DD') AS FECHA_PRESENTACION,
+        b.ESTADO_SOLICITUD,
+        b.MONTO_TOTAL,
+        b.MONTO_POR_PERIODO,
+        TO_CHAR(b.PERIODO_INICIO, 'YYYY-MM-DD') AS PERIODO_INICIO,
+        TO_CHAR(b.PERIODO_FINALIZACION, 'YYYY-MM-DD') AS PERIODO_FINALIZACION,
+        c.ID_PERSONA AS ID_CAUSANTE,
+        c.N_IDENTIFICACION AS N_IDENTIFICACION_CAUSANTE,
+        TRIM(NVL(c.PRIMER_NOMBRE, '')) || ' ' || TRIM(NVL(c.SEGUNDO_NOMBRE, '')) AS NOMBRES_CAUSANTE,
+        TRIM(NVL(c.PRIMER_APELLIDO, '')) || ' ' || TRIM(NVL(c.SEGUNDO_APELLIDO, '')) AS APELLIDOS_CAUSANTE
+      FROM NET_DETALLE_BENEFICIO_AFILIADO b
+      INNER JOIN NET_PERSONA p ON p.ID_PERSONA = b.ID_PERSONA
+      INNER JOIN NET_PERSONA c ON c.ID_PERSONA = b.ID_CAUSANTE
+      INNER JOIN NET_BENEFICIO nb ON nb.ID_BENEFICIO = b.ID_BENEFICIO
+      WHERE p.N_IDENTIFICACION = :n_identificacion
+    `, [n_identificacion]);
+  
+    await query.release();
+  
+    const agrupado = new Map<number, {
+      causante: { id: number, n_identificacion: string, nombres: string, apellidos: string },
+      beneficios: any[]
+    }>();
+  
+    for (const row of rows) {
+      const id = row.ID_CAUSANTE;
+  
+      if (!agrupado.has(id)) {
+        agrupado.set(id, {
           causante: {
-            nombres: `${causante.primer_nombre || ''} ${causante.segundo_nombre || ''}`.trim(),
-            apellidos: `${causante.primer_apellido || ''} ${causante.segundo_apellido || ''}`.trim(),
-            n_identificacion: causante.n_identificacion || '',
+            id,
+            n_identificacion: row.N_IDENTIFICACION_CAUSANTE,
+            nombres: row.NOMBRES_CAUSANTE,
+            apellidos: row.APELLIDOS_CAUSANTE
           },
-          beneficios: beneficiosUnicos
+          beneficios: []
         });
       }
+  
+      agrupado.get(id).beneficios.push({
+        id_beneficio: row.ID_BENEFICIO,
+        nombre_beneficio: row.NOMBRE_BENEFICIO,
+        n_expediente: row.N_EXPEDIENTE,
+        fecha_presentacion: row.FECHA_PRESENTACION,
+        estado_solicitud: row.ESTADO_SOLICITUD,
+        monto_total: row.MONTO_TOTAL,
+        monto_por_periodo: row.MONTO_POR_PERIODO,
+        periodo_inicio: row.PERIODO_INICIO,
+        periodo_finalizacion: row.PERIODO_FINALIZACION
+      });
     }
-
-    return Array.from(causantesMap.values());
+  
+    return Array.from(agrupado.values());
   }
-
-
-
-
+  
+  
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {
       const resultado = await this.detPagBenRepository.createQueryBuilder()

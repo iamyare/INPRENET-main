@@ -51,7 +51,7 @@ export class RefPersComponent implements OnInit {
     this.cargarDatosEstaticos();
 
     this.formGroup.root?.get('datosGenerales')?.get('estado_civil')?.valueChanges.subscribe((estadoCivil: string) => {
-      this.mostrarConyuge = estadoCivil === 'CASADO/A' || estadoCivil === 'UNION LIBRE';
+      this.mostrarConyuge = estadoCivil === 'CASADO(A)' || estadoCivil === 'UNION LIBRE';
       
       if (!this.mostrarConyuge) {
         this.formGroup.removeControl('conyuge');

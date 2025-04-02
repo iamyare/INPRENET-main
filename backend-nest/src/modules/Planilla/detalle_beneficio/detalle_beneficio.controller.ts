@@ -91,8 +91,8 @@ export class DetalleBeneficioController {
   @Get('causante/:dni')
   async getCausanteByDniBeneficiario(
     @Param('dni') dni: string
-  ): Promise<{ causante: { nombres: string, apellidos: string, n_identificacion: string }, beneficios: Net_Detalle_Beneficio_Afiliado[] }[]> {
-    return this.detallebeneficioService.getCausanteByDniBeneficiario(dni);
+  ): Promise<any> {
+    return this.detallebeneficioService.getBeneficiosConCausanteAgrupado(dni);
   }
 
 

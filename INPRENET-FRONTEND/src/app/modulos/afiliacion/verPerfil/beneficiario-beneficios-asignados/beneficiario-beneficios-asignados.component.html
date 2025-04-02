@@ -3,19 +3,24 @@
     <h4>Causante: {{ causanteData?.causante?.nombres }} {{ causanteData?.causante?.apellidos }}</h4>
     <p>DNI Causante: {{ causanteData?.causante?.n_identificacion }}</p>
 
-    <div class="row">
+    <div class="row" *ngIf="causanteData.beneficios?.length > 0; else noBeneficios">
       <div class="col-md-4" *ngFor="let beneficio of causanteData.beneficios">
-        <div class="card mb-3">
+        <div class="card mb-3 bg-light">
           <div class="card-body">
-            <h5 class="card-title">{{ beneficio.beneficio.nombre_beneficio }}</h5>
-            <p class="card-text"><strong>Monto por periodo:</strong> {{ beneficio.monto_por_periodo }}</p>
-            <!-- <button class="btn btn-primary" (click)="verHistorial(beneficio, causanteData.causante)">Ver Historial</button> -->
+            <h5 class="card-title">{{ beneficio.nombre_beneficio || 'Beneficio sin nombre' }}</h5>
+            <p class="card-text"><strong>Monto por periodo:</strong> {{ beneficio.monto_por_periodo || 'N/A' }}</p>
+            <button class="btn btn-primary" (click)="verHistorial(beneficio, causanteData.causante)">Ver Historial</button>
           </div>
         </div>
       </div>
     </div>
+
+    <ng-template #noBeneficios>
+      <p class="text-muted">Este causante no tiene beneficios asignados.</p>
+    </ng-template>
   </div>
 </div>
+
 
 <div *ngIf="beneficiosPorCausante.length === 0">
   <p>No hay beneficios asignados.</p>
@@ -23,11 +28,9 @@
 
 <!-- Modal para ver el historial -->
 <ng-template #historialDialog let-modal>
-  <div class="modal-header">
-    <h5 class="modal-title">Historial de Pagos</h5>
-    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-      <span aria-hidden="true">&times;</span>
-    </button>
+  <div class="modal-header align-items-center justify-content-between">
+    <h5 class="modal-title m-0">Historial de Pagos</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
   </div>
   <div class="modal-body">
     <table class="table">
@@ -40,14 +43,15 @@
       </thead>
       <tbody>
         <tr *ngFor="let pago of historialPagos">
-          <td>{{ pago.fecha_carga | date }}</td>
-          <td>{{ pago.monto_a_pagar }}</td>
+          <td>{{ pago.fecha_carga | date:'d MMM y' }}</td>
+          <td>{{ pago.monto_a_pagar | currency:'HNL':'symbol' }}</td>
           <td>{{ pago.planilla?.codigo_planilla }}</td>
         </tr>
       </tbody>
     </table>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="modal.close('Close click')">Cerrar</button>
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.close('Close click')">Cerrar</button>
   </div>
 </ng-template>
+

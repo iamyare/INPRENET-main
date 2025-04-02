@@ -32,8 +32,8 @@ export class RnpController {
     }
   }
 
-  @Post('/data-docentes')
-  async dataDocentes(@Body() body: { numeroIdentidad: string }) {
+  @Post('/data-docente')
+  async obtenerDatosDocente(@Body() body: { numeroIdentidad: string }) {
     const { numeroIdentidad } = body;
 
     if (!numeroIdentidad) {
@@ -41,10 +41,27 @@ export class RnpController {
     }
 
     try {
-      const result = await this.rnpService.obtenerDatosPersona(numeroIdentidad);
+      return await this.rnpService.obtenerDatosPersona(numeroIdentidad);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('/inf-complementaria')
+  async enviarInfComplementaria(@Body() body: { numeroIdentidad: string }) {
+    const { numeroIdentidad } = body;
+
+    if (!numeroIdentidad) {
+      throw new HttpException('El número de identidad es requerido.', HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+      const result = await this.rnpService.enviarInfComplementariaInscripcionSOAP(numeroIdentidad);
       return result;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+
 }

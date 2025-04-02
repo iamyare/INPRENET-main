@@ -9,6 +9,7 @@ import { AfiliacionService } from '../Persona/afiliacion/afiliacion.service';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { net_persona } from '../Persona/entities/net_persona.entity';
 import { EntityManager, Repository } from 'typeorm';
+import { net_detalle_persona } from '../Persona/entities/net_detalle_persona.entity';
 
 @Injectable()
 export class RnpService {
@@ -19,7 +20,9 @@ export class RnpService {
      private readonly afiliacionService: AfiliacionService,
     @InjectRepository(net_persona)
     private readonly personaRepository: Repository<net_persona>,
-    @InjectEntityManager() private readonly entityManager: EntityManager,) {}
+    @InjectEntityManager() private readonly entityManager: EntityManager,
+    @InjectRepository(net_detalle_persona)
+    private detallePersonaRepository: Repository<net_detalle_persona>,) {}
 
   startScannerProcess(filename = 'fingerprint.jpg') {
     if (!this.scannerProcess) {
@@ -159,6 +162,18 @@ export class RnpService {
             throw new Error(`No se encontró la persona con identificación ${numeroIdentidad}`);
         }
 
+        const detallePersona = await this.detallePersonaRepository.find({
+          where: { ID_PERSONA: persona.id_persona },
+          select: ['ID_TIPO_PERSONA']
+        });
+    
+        const tiposPermitidos = [1, 2, 3];
+        const tieneTipoPermitido = detallePersona.some(dp => tiposPermitidos.includes(dp.ID_TIPO_PERSONA));
+    
+        if (!tieneTipoPermitido) {
+          throw new Error(`La persona con identificación ${numeroIdentidad} no tiene un tipo válido (1, 2 o 3).`);
+        }
+
         // Obtener el cónyuge desde la tabla NET_FAMILIA
         const conyuge = await this.entityManager.query(`
             SELECT p.N_IDENTIFICACION, p.PRIMER_NOMBRE, p.SEGUNDO_NOMBRE, p.TERCER_NOMBRE, p.PRIMER_APELLIDO, p.SEGUNDO_APELLIDO, p.FECHA_NACIMIENTO, p.TELEFONO_1
@@ -170,28 +185,34 @@ export class RnpService {
 
         const datosConyuge = conyuge.length ? {
             n_identificacion: conyuge[0].N_IDENTIFICACION,
-            nombre_completo: `${conyuge[0].PRIMER_NOMBRE} ${conyuge[0].SEGUNDO_NOMBRE || ''} ${conyuge[0].TERCER_NOMBRE || ''} ${conyuge[0].PRIMER_APELLIDO} ${conyuge[0].SEGUNDO_APELLIDO}`,
-            fecha_nacimiento: conyuge[0].FECHA_NACIMIENTO,
+            nombres: `${conyuge[0].PRIMER_NOMBRE} ${conyuge[0].SEGUNDO_NOMBRE || ''} ${conyuge[0].TERCER_NOMBRE || ''}`.trim(),
+            apellidos: `${conyuge[0].PRIMER_APELLIDO} ${conyuge[0].SEGUNDO_APELLIDO || ''}`.trim(),
+            fecha_nacimiento: conyuge[0].FECHA_NACIMIENTO ? conyuge[0].FECHA_NACIMIENTO.toISOString().split('T')[0] : null,
             telefono_1: conyuge[0].TELEFONO_1,
         } : null;
 
         const datosPersona = {
-            nombre_completo: `${persona.primer_nombre} ${persona.segundo_nombre || ''} ${persona.tercer_nombre || ''} ${persona.primer_apellido} ${persona.segundo_apellido}`,
-            n_identificacion: persona.n_identificacion,
-            fecha_nacimiento: persona.fecha_nacimiento,
-            municipio_nacimiento: persona.municipio_nacimiento?.nombre_municipio || null,
-            departamento_nacimiento: persona.municipio_nacimiento?.departamento?.nombre_departamento || null,
-            rtn: persona.rtn,
-            genero: persona.genero,
-            estado_civil: persona.estado_civil,
-            telefono_1: persona.telefono_1,
-            municipio_residencia: persona.municipio?.nombre_municipio || null,
-            departamento_residencia: persona.municipio?.departamento?.nombre_departamento || null,
-            correo_1: persona.correo_1,
-            aldea: persona.aldea?.nombre_aldea || null,
-            direccion_residencia: persona.direccion_residencia,
-        };
-
+          nombres: `${persona.primer_nombre} ${persona.segundo_nombre || ''} ${persona.tercer_nombre || ''}`.trim(),
+          apellidos: `${persona.primer_apellido} ${persona.segundo_apellido || ''}`.trim(),
+          fecha_nacimiento: persona.fecha_nacimiento,
+          municipio_nacimiento: persona.municipio_nacimiento?.nombre_municipio || null,
+          departamento_nacimiento: persona.municipio_nacimiento?.departamento?.nombre_departamento || null,
+          id_municipio_nacimiento: persona.municipio_nacimiento?.id_municipio || null,
+          id_departamento_nacimiento: persona.municipio_nacimiento?.departamento?.id_departamento || null,
+          rtn: persona.rtn,
+          genero: persona.genero,
+          estado_civil: persona.estado_civil,
+          telefono_1: persona.telefono_1,
+          municipio_residencia: persona.municipio?.nombre_municipio || null,
+          departamento_residencia: persona.municipio?.departamento?.nombre_departamento || null,
+          id_municipio_residencia: persona.municipio?.id_municipio || null,
+          id_departamento_residencia: persona.municipio?.departamento?.id_departamento || null,
+          correo_1: persona.correo_1,
+          aldea: persona.aldea?.nombre_aldea || null,
+          direccion_residencia: persona.direccion_residencia,
+          id_aldea: persona.aldea?.id_aldea || null,
+      };
+      
         console.log(`✅ Datos de la persona obtenidos para ${numeroIdentidad}:`, datosPersona);
         console.log(`✅ Datos del cónyuge obtenidos para ${numeroIdentidad}:`, datosConyuge);
 

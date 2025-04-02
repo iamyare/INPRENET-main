@@ -8,8 +8,7 @@ import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { obtenerNombreMes } from 'src/app/shared/functions/formatoFecha';/*
-import { obtenerRangoMeses } from 'src/app/shared/functions/obtenerRangoMeses'; */
+import { obtenerNombreMes } from 'src/app/shared/functions/formatoFecha';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { ValidationService } from 'src/app/shared/services/validation.service';

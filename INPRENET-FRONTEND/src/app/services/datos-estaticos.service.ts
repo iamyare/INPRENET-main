@@ -293,26 +293,14 @@ export class DatosEstaticosService {
     }
   ]
   estadoCivil = [
-    {
-      "label": "CASADO/A", "value": "CASADO/A"
-    },
-    {
-      "label": "DIVORCIADO/A", "value": "DIVORCIADO/A"
-    },
-    {
-      "label": "SEPARADO/A", "value": "SEPARADO/A"
-    },
-    {
-      "label": "SOLTERO/A", "value": "SOLTERO/A"
-    },
-    {
-      "label": "UNION LIBRE", "value": "UNION LIBRE"
-    },
-    {
-      "label": "VIUDO/A", "value": "VIUDO/A"
-    }
+    { label: "SOLTERO(A)", value: "SOLTERO(A)" },
+    { label: "CASADO(A)", value: "CASADO(A)" },
+    { label: "DIVORCIADO(A)", value: "DIVORCIADO(A)" },
+    { label: "UNION LIBRE", value: "UNION LIBRE" },
+    { label: "VIUDO(A)", value: "VIUDO(A)" },
+    { label: "SEPARADO(A)", value: "SEPARADO(A)" }
   ];
-
+  
   tiposPlanilla = [
     {
       "idTipoPlanilla": 1, "value": "EGRESO"

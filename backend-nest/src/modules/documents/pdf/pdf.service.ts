@@ -2667,98 +2667,100 @@ export class PdfService {
 
 async generateConstanciaBeneficios(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
   const templateFunction = async (data: any, includeQR: boolean) => {
-      const today = new Date();
-      const formattedDate = `a los ${today.getDate()} días del mes de ${today.toLocaleString('es-HN', { month: 'long' })} del año ${today.getFullYear()}`;
-      const user = dto.correo.split('@')[0]; 
+    const today = new Date();
+    const formattedDate = `a los ${today.getDate()} días del mes de ${today.toLocaleString('es-HN', { month: 'long' })} del año ${today.getFullYear()}`;
+    const user = dto.correo.split('@')[0];
 
-      // Función para capitalizar solo la primera letra
-      const capitalizeFirstLetter = (text: string) => {
-          return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-      };
+    const capitalizeFirstLetter = (text: string) => {
+      return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    };
 
-      // Función para obtener el nombre del departamento
-      const getFormattedDepartamento = (departamento: string) => {
-          return departamento === 'N/D' ? 'N/D,' : capitalizeFirstLetter(departamento);
-      };
+    const toTitleCase = (text: string) => {
+      return text
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
 
-      const content: Array<any> = [
-          // 📌 Título principal
-          { text: `CONSTANCIA DE ${data.beneficio.toUpperCase()}`, style: 'mainTitle' },
-          {
-              text: [
-                  'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
-                  { text: data.nombre_completo.trim().toUpperCase() + ',', bold: true },
-                  'con número de identificación ',
-                  { text: data.n_identificacion.trim() + ',', bold: true },
-                  ' con residencia en el departamento de ',
-                  { text: getFormattedDepartamento(data.departamento), bold: true },
-                  ' goza del beneficio vitalicio de ',
-                  { text: data.beneficio.toUpperCase() + ',', bold: true },
-                  ' otorgado a partir del ',
-                  { text: data.fecha_inicio + ',', bold: true },
-                  ' cuyo monto asciende a la cantidad de ',
-                  { text: data.monto_letras.trim().toUpperCase(), bold: true },
-                  ' (L. ',
-                  { text: data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ')', bold: true }
-              ],
-              style: 'body'
-          },
-          {
-              text: [
-                  'Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de ',
-                  { text: capitalizeFirstLetter(dto.municipio), bold: true },
-                  ', ',
-                  { text: getFormattedDepartamento(dto.departamento), bold: true },
-                  ', ',
-                  { text: formattedDate, bold: true },
-                  '.'
-              ],
-              style: 'body'
-          },
+    const getFormattedDepartamento = (departamento: string) => {
+      const normalizado = departamento.replace(/[^a-zA-Z/]/g, '').toUpperCase();
+      if (normalizado === 'N/D') return 'N/D';
+      return toTitleCase(departamento.trim());
+    };
+    
+    
+    const content: Array<any> = [
+      { text: `CONSTANCIA DE ${data.beneficio.toUpperCase()}`, style: 'mainTitle' },
+      {
+        text: [
+          'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que el(la) Docente: ',
+          { text: `${data.nombre_completo.trim().toUpperCase()} `, bold: true },
+          'con número de identificación ',
+          { text: `${data.n_identificacion.trim()}, `, bold: true },
+          'con residencia en el departamento de ',
+          { text: `${data.departamento || 'N/D'}, `, bold: true },
+          'goza del beneficio vitalicio de ',
+          { text: `${data.beneficio.toUpperCase()}, `, bold: true },
+          'otorgado a partir del ',
+          { text: `${data.fecha_inicio}, `, bold: true },
+          'cuyo monto asciende a la cantidad de ',
+          { text: `${data.monto_letras.trim().toUpperCase()} `, bold: true },
+          '(L. ',
+          { text: `${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, bold: true },
+          ').'
+        ],
+        style: 'body'
+      },
+      {
+        text: [
+          'Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de ',
+          { text: `${capitalizeFirstLetter(dto.municipio)}, `, bold: true },
+          { text: `${getFormattedDepartamento(dto.departamento)}, `, bold: true },
+          { text: `${formattedDate}.`, bold: true }
+        ],
+        style: 'body'
+      },
+      { text: '\n\n\n\n\n\n\n\n\n' },
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
+      { text: dto.nombreEmpleado, style: 'signature' },
+      { text: dto.nombrePuesto, style: 'signatureTitle' }
+    ];
 
-          { text: '\n\n\n\n\n\n\n\n\n' }, // Espaciado antes de la firma
-
-          // 📌 Firma
-          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
-          { text: dto.nombreEmpleado, style: 'signature' },
-          { text: dto.nombrePuesto, style: 'signatureTitle' }
-      ];
-
-      return {
-          pageSize: 'A4',
-          pageMargins: [40, 120, 40, 85],
-          background: {
-              image: data.base64data,
-              width: 595.28,
-              height: 841.89
-          },
-          content: content,
-          footer: (currentPage, pageCount) => ({
-              table: {
-                  widths: ['*', '*', '*'],
-                  body: [
-                      [
-                          { text: 'Fecha y Hora: ' + today.toLocaleString(), alignment: 'left', border: [false, false, false, false], style: 'footerText' },
-                          { text: 'Generado por: ' + user, alignment: 'center', border: [false, false, false, false], style: 'footerText' },
-                          { text: 'Página: ' + currentPage + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: 'footerText' }
-                      ]
-                  ]
-              },
-              margin: [20, 0, 20, 20]
-          }),
-          styles: {
-              mainTitle: { fontSize: 20, bold: true, alignment: 'center', margin: [0, 30, 0, 20] },
-              body: { fontSize: 12, alignment: 'justify', margin: [40, 10, 40, 5], lineHeight: 1.5 },
-              signature: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 10, 0, 0] },
-              signatureTitle: { fontSize: 12, alignment: 'center' },
-              footerText: { fontSize: 8 }
-          }
-      };
+    return {
+      pageSize: 'A4',
+      pageMargins: [40, 120, 40, 85],
+      background: {
+        image: data.base64data,
+        width: 595.28,
+        height: 841.89
+      },
+      content: content,
+      footer: (currentPage, pageCount) => ({
+        table: {
+          widths: ['*', '*', '*'],
+          body: [
+            [
+              { text: 'Fecha y Hora: ' + today.toLocaleString(), alignment: 'left', border: [false, false, false, false], style: 'footerText' },
+              { text: 'Generado por: ' + user, alignment: 'center', border: [false, false, false, false], style: 'footerText' },
+              { text: 'Página: ' + currentPage + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: 'footerText' }
+            ]
+          ]
+        },
+        margin: [20, 0, 20, 20]
+      }),
+      styles: {
+        mainTitle: { fontSize: 20, bold: true, alignment: 'center', margin: [0, 30, 0, 20] },
+        body: { fontSize: 12, alignment: 'justify', margin: [40, 10, 40, 5], lineHeight: 1.5 },
+        signature: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 10, 0, 0] },
+        signatureTitle: { fontSize: 12, alignment: 'center' },
+        footerText: { fontSize: 8 }
+      }
+    };
   };
 
   return this.generateConstancia(data, includeQR, templateFunction);
 }
-
 
 async generateConstanciaBeneficiosFormatoNuevo(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
   const templateFunction = async (data: any, includeQR: boolean) => {
@@ -2766,118 +2768,146 @@ async generateConstanciaBeneficiosFormatoNuevo(data: any, includeQR: boolean, dt
     const formattedDate = `A los ${today.getDate()} días del mes de ${today.toLocaleString('es-HN', { month: 'long' })} del año ${today.getFullYear()}`;
     const user = dto.correo.split('@')[0];
 
-    // Función para capitalizar solo la primera letra
     const capitalizeFirstLetter = (text: string) => {
-        return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+      return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
     };
 
-    // Función para obtener el nombre del departamento
+    const toTitleCase = (text: string) => {
+      return text
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
+
     const getFormattedDepartamento = (departamento: string) => {
-        return departamento === 'N/D' ? 'N/D,' : capitalizeFirstLetter(departamento);
+      if (departamento.trim().toUpperCase() === 'N/D') return 'N/D';
+      return toTitleCase(departamento);
     };
 
-    // Función para convertir la fecha en formato "25 de Noviembre del 2024" a objeto Date
     const parseFecha = (fechaStr: string): Date => {
-        const [dia, , mes, , año] = fechaStr.split(" ");
-        const meses = {
-            "enero": 0, "febrero": 1, "marzo": 2, "abril": 3, "mayo": 4, "junio": 5,
-            "julio": 6, "agosto": 7, "septiembre": 8, "octubre": 9, "noviembre": 10, "diciembre": 11
-        };
-        return new Date(Number(año), meses[mes.toLowerCase()], Number(dia));
+      const [dia, , mes, , año] = fechaStr.split(" ");
+      const meses = {
+        "enero": 0, "febrero": 1, "marzo": 2, "abril": 3, "mayo": 4, "junio": 5,
+        "julio": 6, "agosto": 7, "septiembre": 8, "octubre": 9, "noviembre": 10, "diciembre": 11
+      };
+      return new Date(Number(año), meses[mes.toLowerCase()], Number(dia));
     };
 
-    // Verificación de si el beneficio ya finalizó (exceptuando SEPARACION DEL SISTEMA VOLUNTARIO)
     const isBeneficioFinalizado = () => {
-        if (data.beneficio.trim().toUpperCase() === 'SEPARACION DEL SISTEMA VOLUNTARIO') {
-            return false;
-        }
-        if (data.fecha_fin) {
-            const fechaFin = parseFecha(data.fecha_fin);
-            return fechaFin < today;
-        }
+      if (data.beneficio.trim().toUpperCase() === 'SEPARACION DEL SISTEMA VOLUNTARIO') {
         return false;
+      }
+      if (data.fecha_fin) {
+        const fechaFin = parseFecha(data.fecha_fin);
+        return fechaFin < today;
+      }
+      return false;
     };
 
-    // Texto principal según el tipo de beneficio y su estado
-    let textoConstancia = '';
+    let textoConstancia: any[] = [];
 
     if (data.beneficio.trim().toUpperCase() === 'SEPARACION DEL SISTEMA VOLUNTARIO') {
-        // Caso de separación del sistema
-        textoConstancia = 
-            `El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ${data.nombre_completo.trim().toUpperCase()}, ` +
-            `con número de identificación ${data.n_identificacion.trim()}, con residencia en el departamento de ${getFormattedDepartamento(data.departamento)} ` +
-            `se le otorgó el beneficio de ${data.beneficio.toUpperCase()}, con fecha de efectividad el ${data.fecha_inicio} ` +
-            `, con un monto de ${data.monto_letras.trim().toUpperCase()} (L. ${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}).`;
+      textoConstancia = [
+        'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
+        { text: `${data.nombre_completo.trim()} `, bold: true },
+        'con número de identificación ',
+        { text: `${data.n_identificacion.trim()}, `, bold: true },
+        ...(data.ocultarDepartamento ? [] : ['con residencia en el departamento de ', { text: `${data.departamento}, `, bold: true }]),
+        'se le otorgó el beneficio de ',
+        { text: `${data.beneficio} `, bold: true },
+        'con fecha de efectividad el ',
+        { text: `${data.fecha_inicio}, `, bold: true },
+        'con un monto de ',
+        { text: `${data.monto_letras.trim()} `, bold: true },
+        '(L. ',
+        { text: `${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, bold: true },
+        ').'
+      ];
     } else if (isBeneficioFinalizado()) {
-        // Caso de beneficio ya finalizado
-        textoConstancia = 
-            `El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ${data.nombre_completo.trim().toUpperCase()}, ` +
-            `con número de identificación ${data.n_identificacion.trim()}, con residencia en el departamento de ${getFormattedDepartamento(data.departamento)} ` +
-            `gozó del beneficio de ${data.beneficio.toUpperCase()}, otorgado a partir del ${data.fecha_inicio} ` +
-            `hasta el ${data.fecha_fin}, con un monto de ${data.monto_letras.trim().toUpperCase()} (L. ${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}).`;
+      textoConstancia = [
+        'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
+        { text: `${data.nombre_completo.trim()}, `, bold: true },
+        'con número de identificación ',
+        { text: `${data.n_identificacion.trim()}, `, bold: true },
+        ...(data.ocultarDepartamento ? [] : ['con residencia en el departamento de ', { text: `${data.departamento} `, bold: true }]),
+        'gozó del beneficio de ',
+        { text: `${data.beneficio}, `, bold: true },
+        'otorgado a partir del ',
+        { text: `${data.fecha_inicio} `, bold: true },
+        'hasta el ',
+        { text: `${data.fecha_fin}, `, bold: true },
+        'con un monto de ',
+        { text: `${data.monto_letras.trim()} `, bold: true },
+        '(L. ',
+        { text: `${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, bold: true },
+        ').'
+      ];
     } else {
-        // Caso de beneficio regular activo
-        textoConstancia = 
-            `El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ${data.nombre_completo.trim().toUpperCase()}, ` +
-            `con número de identificación ${data.n_identificacion.trim()}, con residencia en el departamento de ${getFormattedDepartamento(data.departamento)} ` +
-            `goza del beneficio de ${data.beneficio.toUpperCase()}, otorgado a partir del ${data.fecha_inicio} ` +
-            `, con un monto de ${data.monto_letras.trim().toUpperCase()} (L. ${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}).`;
+      textoConstancia = [
+        'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
+        { text: `${data.nombre_completo.trim()}, `, bold: true },
+        'con número de identificación ',
+        { text: `${data.n_identificacion.trim()}, `, bold: true },
+        ...(data.ocultarDepartamento ? [] : ['con residencia en el departamento de ', { text: `${data.departamento} `, bold: true }]),
+        'goza del beneficio de ',
+        { text: `${data.beneficio}, `, bold: true },
+        'otorgado a partir del ',
+        { text: `${data.fecha_inicio}, `, bold: true },
+        'con un monto de ',
+        { text: `${data.monto_letras.trim()} `, bold: true },
+        '(L. ',
+        { text: `${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, bold: true },
+        ').'
+      ];
     }
 
-    const lugarFecha = 
-        `Y para los fines que el interesado estime convenientes, se extiende el presente documento en la ciudad de ${capitalizeFirstLetter(dto.municipio)}, ` +
-        `${getFormattedDepartamento(dto.departamento)}, ${formattedDate}.`;
+    const lugarFecha = [
+      'Y para los fines que el interesado estime convenientes, se extiende el presente documento en la ciudad de ',
+      { text: `${capitalizeFirstLetter(dto.municipio)}, `, bold: true },
+      { text: `${getFormattedDepartamento(dto.departamento)}, `, bold: true },
+      { text: `${formattedDate}.`, bold: true }
+    ];
 
     const content: Array<any> = [
-        { text: 'CONSTANCIA DE BENEFICIO', style: 'mainTitle' },
-        {
-            text: [
-                { text: textoConstancia, bold: true }
-            ],
-            style: 'body'
-        },
-        {
-            text: [
-                { text: lugarFecha, bold: true }
-            ],
-            style: 'body'
-        },
-
-        { text: '\n\n\n\n\n\n\n\n' },
-        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
-        { text: dto.nombreEmpleado, style: 'signature' },
-        { text: dto.nombrePuesto, style: 'signatureTitle' }
+      { text: 'CONSTANCIA DE BENEFICIO', style: 'mainTitle' },
+      { text: textoConstancia, style: 'body' },
+      { text: lugarFecha, style: 'body' },
+      { text: '\n\n\n\n\n\n\n\n' },
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
+      { text: dto.nombreEmpleado, style: 'signature' },
+      { text: dto.nombrePuesto, style: 'signatureTitle' }
     ];
 
     return {
-        pageSize: 'A4',
-        pageMargins: [40, 120, 40, 85],
-        background: {
-            image: data.base64data,
-            width: 595.28,
-            height: 841.89
+      pageSize: 'A4',
+      pageMargins: [40, 120, 40, 85],
+      background: {
+        image: data.base64data,
+        width: 595.28,
+        height: 841.89
+      },
+      content: content,
+      footer: (currentPage, pageCount) => ({
+        table: {
+          widths: ['*', '*', '*'],
+          body: [
+            [
+              { text: 'Fecha y Hora: ' + today.toLocaleString(), alignment: 'left', border: [false, false, false, false], style: 'footerText' },
+              { text: 'Generado por: ' + user, alignment: 'center', border: [false, false, false, false], style: 'footerText' },
+              { text: 'Página: ' + currentPage + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: 'footerText' }
+            ]
+          ]
         },
-        content: content,
-        footer: (currentPage, pageCount) => ({
-            table: {
-                widths: ['*', '*', '*'],
-                body: [
-                    [
-                        { text: 'Fecha y Hora: ' + today.toLocaleString(), alignment: 'left', border: [false, false, false, false], style: 'footerText' },
-                        { text: 'Generado por: ' + user, alignment: 'center', border: [false, false, false, false], style: 'footerText' },
-                        { text: 'Página: ' + currentPage + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: 'footerText' }
-                    ]
-                ]
-            },
-            margin: [20, 0, 20, 20]
-        }),
-        styles: {
-            mainTitle: { fontSize: 20, bold: true, alignment: 'center', margin: [0, 30, 0, 20] },
-            body: { fontSize: 12, alignment: 'justify', margin: [40, 10, 40, 5], lineHeight: 1.5 },
-            signature: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 10, 0, 0] },
-            signatureTitle: { fontSize: 12, alignment: 'center' },
-            footerText: { fontSize: 8 }
-        }
+        margin: [20, 0, 20, 20]
+      }),
+      styles: {
+        mainTitle: { fontSize: 20, bold: true, alignment: 'center', margin: [0, 30, 0, 20] },
+        body: { fontSize: 12, alignment: 'justify', margin: [40, 10, 40, 5], lineHeight: 1.5 },
+        signature: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 10, 0, 0] },
+        signatureTitle: { fontSize: 12, alignment: 'center' },
+        footerText: { fontSize: 8 }
+      }
     };
   };
 
@@ -2891,48 +2921,54 @@ async generateConstanciaBeneficiariosSinPago(data: any, includeQR: boolean, dto:
     const formattedDate = `a los ${today.getDate()} días del mes de ${today.toLocaleString('es-HN', { month: 'long' })} del año ${today.getFullYear()}`;
     const user = dto.correo.split('@')[0];
 
-    const nombre_completo = (data?.nombre_completo || 'NO DEFINIDO').toUpperCase();
-    const n_identificacion = (data?.n_identificacion || 'SIN IDENTIFICACIÓN').toUpperCase();
+    const capitalizeFirstLetter = (text: string) => {
+      return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    };
+
+    const toTitleCase = (text: string) => {
+      return text
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
+
+    const getFormattedDepartamento = (departamento: string) => {
+      return departamento === 'N/D' ? 'N/D,' : toTitleCase(departamento);
+    };
+
+    const nombre_completo = (data?.nombre_completo || 'NO DEFINIDO').trim();
+    const n_identificacion = (data?.n_identificacion || 'SIN IDENTIFICACIÓN').trim();
 
     const content: Array<any> = [
       { text: 'A QUIEN INTERESE', style: 'mainTitle' },
-
       {
         text: [
           'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
-          { text: `${nombre_completo},`, bold: true }, 
+          { text: `${nombre_completo}, `, bold: true },
           'con número de identificación ',
-          { text: `${n_identificacion},`, bold: true },
+          { text: `${n_identificacion}, `, bold: true },
           'gozaba del beneficio de ',
-          { text: `${data.beneficio.toUpperCase()},`, bold: true }, 
+          { text: `${data.beneficio}, `, bold: true },
           'y sus beneficiarios ',
           { text: 'no han recibido', bold: true },
           ' beneficio causado por el(la) docente fallecido(a).'
         ],
         style: 'body'
       },
-
       {
         text: [
           'Y para los fines que el interesado estime convenientes, se extiende el presente documento en la ciudad de ',
-          { text: `${dto.municipio.charAt(0).toUpperCase() + dto.municipio.slice(1).toLowerCase()},`, bold: true },
-          ' ',
-          { text: `${dto.departamento.charAt(0).toUpperCase() + dto.departamento.slice(1).toLowerCase()},`, bold: true },
-          ' ',
-          { text: formattedDate, bold: true } 
+          { text: `${capitalizeFirstLetter(dto.municipio)}, `, bold: true },
+          { text: `${getFormattedDepartamento(dto.departamento)}, `, bold: true },
+          { text: `${formattedDate}.`, bold: true }
         ],
         style: 'body'
       },
-
       { text: '\n\n\n\n\n\n\n\n\n' },
-
-      {
-        canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }],
-        margin: [127, 0, 0, 0]
-      },
-
-      { text: dto.nombreEmpleado, style: 'signature', alignment: 'center' },
-      { text: dto.nombrePuesto, style: 'signatureTitle', alignment: 'center' }
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
+      { text: dto.nombreEmpleado, style: 'signature' },
+      { text: dto.nombrePuesto, style: 'signatureTitle' }
     ];
 
     return {
@@ -2973,104 +3009,97 @@ async generateConstanciaBeneficiariosSinPago(data: any, includeQR: boolean, dto:
 
 async generateConstanciaJubiladoFallecido(data: any, includeQR: boolean, dto: EmpleadoDto): Promise<Buffer> {
   const templateFunction = async (data: any, includeQR: boolean) => {
-      const today = new Date();
-      const formattedDate = `a los ${today.getDate()} días del mes de ${today.toLocaleString('es-HN', { month: 'long' })} del año ${today.getFullYear()}.`;
-      const user = dto.correo.split('@')[0];
+    const today = new Date();
+    const formattedDate = `A los ${today.getDate()} días del mes de ${today.toLocaleString('es-HN', { month: 'long' })} del año ${today.getFullYear()}`;
+    const user = dto.correo.split('@')[0];
 
-      // Función para capitalizar solo la primera letra
-      const capitalizeFirstLetter = (text: string) => {
-          return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-      };
+    const capitalizeFirstLetter = (text: string) => {
+      return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    };
 
-      // Función para obtener el nombre del departamento
-      const getFormattedDepartamento = (departamento: string) => {
-          return departamento === 'N/D' ? 'N/D,' : capitalizeFirstLetter(departamento);
-      };
+    const toTitleCase = (text: string) => {
+      return text
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
 
-      const content: Array<any> = [
-          { text: 'A QUIEN INTERESE', style: 'mainTitle' },
-          {
-              text: [
-                  'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
-                  { text: `${data.nombre_completo.toUpperCase()},`, bold: true },
-                  'con número de identificación ',
-                  { text: `${data.n_identificacion},`, bold: true },
-                  ' con residencia en el departamento de ',
-                  { text: `${getFormattedDepartamento(data.departamento)},`, bold: true },
-                  ' gozaba del beneficio de ',
-                  { text: `${data.beneficio.toUpperCase()},`, bold: true },
-                  ' otorgado a partir del ',
-                  { text: `${data.fecha_inicio}`, bold: true },
-                  '.'
-              ],
-              style: 'body'
-          },
-          {
-              text: [
-                  'Este beneficio fue aprobado con un monto de ',
-                  { text: `${data.monto_letras.toUpperCase()}`, bold: true },
-                  ' (L. ',
-                  { text: `${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, bold: true },
-                  ').'
-              ],
-              style: 'body'
-          },
-          {
-              text: [
-                  'Y para los fines que el interesado estime convenientes, se extiende la presente confirmación en la ciudad de ',
-                  { text: `${capitalizeFirstLetter(dto.municipio)},`, bold: true },
-                  ' ',
-                  { text: `${getFormattedDepartamento(dto.departamento)},`, bold: true },
-                  ' ',
-                  { text: `${formattedDate}`, bold: true }
-              ],
-              style: 'body'
-          },
+    const getFormattedDepartamento = (departamento: string) => {
+      return departamento === 'N/D' ? 'N/D,' : toTitleCase(departamento);
+    };
 
-          { text: '\n\n\n\n\n\n\n\n\n' },
+    const content: Array<any> = [
+      { text: 'A QUIEN INTERESE', style: 'mainTitle' },
+      {
+        text: [
+          'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que ',
+          { text: `${data.nombre_completo}, `, bold: true },
+          'con número de identificación ',
+          { text: `${data.n_identificacion}, `, bold: true },
+          'con residencia en el departamento de ',
+          { text: `${data.departamento} `, bold: true },
+          'gozaba del beneficio de ',
+          { text: `${data.beneficio}, `, bold: true },
+          'otorgado a partir del ',
+          { text: `${data.fecha_inicio}. `, bold: true },
+          'Este beneficio fue aprobado con un monto de ',
+          { text: `${data.monto_letras} `, bold: true },
+          '(L. ',
+          { text: `${data.monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, bold: true },
+          ').'
+        ],
+        style: 'body'
+      },
+      {
+        text: [
+          'Y para los fines que el interesado estime convenientes, se extiende la presente confirmación en la ciudad de ',
+          { text: `${capitalizeFirstLetter(dto.municipio)}, `, bold: true },
+          { text: `${getFormattedDepartamento(dto.departamento)}, `, bold: true },
+          { text: `${formattedDate}.`, bold: true }
+        ],
+        style: 'body'
+      },
+      { text: '\n\n\n\n\n\n\n\n\n' },
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
+      { text: dto.nombreEmpleado, style: 'signature' },
+      { text: dto.nombrePuesto, style: 'signatureTitle' }
+    ];
 
-          // 📌 Firma
-          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
-          { text: dto.nombreEmpleado, style: 'signature' },
-          { text: dto.nombrePuesto, style: 'signatureTitle' }
-      ];
-
-      return {
-          pageSize: 'A4',
-          pageMargins: [40, 120, 40, 85],
-          background: {
-              image: data.base64data,
-              width: 595.28,
-              height: 841.89
-          },
-          content: content,
-          footer: (currentPage, pageCount) => ({
-              table: {
-                  widths: ['*', '*', '*'],
-                  body: [
-                      [
-                          { text: 'Fecha y Hora: ' + today.toLocaleString(), alignment: 'left', border: [false, false, false, false], style: 'footerText' },
-                          { text: 'Generado por: ' + user, alignment: 'center', border: [false, false, false, false], style: 'footerText' },
-                          { text: 'Página: ' + currentPage + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: 'footerText' }
-                      ]
-                  ]
-              },
-              margin: [20, 0, 20, 20]
-          }),
-          styles: {
-              mainTitle: { fontSize: 20, bold: true, alignment: 'center', margin: [0, 30, 0, 20] },
-              body: { fontSize: 12, alignment: 'justify', margin: [40, 10, 40, 5], lineHeight: 1.5 },
-              signature: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 10, 0, 0] },
-              signatureTitle: { fontSize: 12, alignment: 'center' },
-              footerText: { fontSize: 8 }
-          }
-      };
+    return {
+      pageSize: 'A4',
+      pageMargins: [40, 120, 40, 85],
+      background: {
+        image: data.base64data,
+        width: 595.28,
+        height: 841.89
+      },
+      content: content,
+      footer: (currentPage, pageCount) => ({
+        table: {
+          widths: ['*', '*', '*'],
+          body: [
+            [
+              { text: 'Fecha y Hora: ' + today.toLocaleString(), alignment: 'left', border: [false, false, false, false], style: 'footerText' },
+              { text: 'Generado por: ' + user, alignment: 'center', border: [false, false, false, false], style: 'footerText' },
+              { text: 'Página: ' + currentPage + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: 'footerText' }
+            ]
+          ]
+        },
+        margin: [20, 0, 20, 20]
+      }),
+      styles: {
+        mainTitle: { fontSize: 20, bold: true, alignment: 'center', margin: [0, 30, 0, 20] },
+        body: { fontSize: 12, alignment: 'justify', margin: [40, 10, 40, 5], lineHeight: 1.5 },
+        signature: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 10, 0, 0] },
+        signatureTitle: { fontSize: 12, alignment: 'center' },
+        footerText: { fontSize: 8 }
+      }
+    };
   };
 
   return this.generateConstancia(data, includeQR, templateFunction);
 }
-
-
 
   async generateMovimientosPdf(data: any): Promise<Buffer> {
     try {

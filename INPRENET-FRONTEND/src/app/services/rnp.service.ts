@@ -19,4 +19,9 @@ export class RnpService {
   verificarHuella(numeroIdentidad: string, imageName: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/verificar-huella`, { numeroIdentidad, imageName });
   }
+
+  obtenerDatosDocente(numeroIdentidad: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/data-docente`, { numeroIdentidad });
+  }  
+  
 }

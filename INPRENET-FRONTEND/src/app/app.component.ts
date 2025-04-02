@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from './services/auth.service'; // Asegúrate de tener la ruta correcta
+import { AuthService } from './services/auth.service';// Asegúrate de tener la ruta correcta
 
 @Component({
   selector: 'app-root',
@@ -15,6 +15,6 @@ export class AppComponent implements OnInit {
     // Este método se llama después de que el componente se inicializa.
     // No es necesario agregar contenido adicional aquí porque el constructor de AuthService
     // ya inicializa el monitoreo de inactividad.
-    this.authService.startIdleWatch(); // Asegúrate de que el monitoreo se inicie
+    this.authService.startIdleWatch(); // Asegate de que el monitoreo se inicie
   }
 }

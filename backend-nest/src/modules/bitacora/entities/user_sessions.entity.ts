@@ -15,6 +15,12 @@ export class UserSession {
   @Column({ length: 255, nullable: true })
   userAgent: string;
 
+  
+  @Column({ length: 255, nullable: true })
+  ipAddress: string;
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
+
+  
 }

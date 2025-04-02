@@ -21,6 +21,7 @@ import { BitacoraModule } from './modules/bitacora/bitacora.module';
 import { PrestamosModule } from './modules/prestamos/prestamos.module';
 import { ConasaModule } from './modules/conasa/conasa.module';
 import { WhatsappPruebaModule } from './modules/whatsapp-prueba/whatsapp-prueba.module';
+import { SessionModule } from './modules/session/session.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { WhatsappPruebaModule } from './modules/whatsapp-prueba/whatsapp-prueba.
       useFactory: async (configService: ConfigService) => {
         const user = process.env.DB_USERNAME;
         const password = process.env.DB_PASSWORD;
-        const connectString = process.env.CONNECT_STRING;
+        const connectString = process.env.CONNECT_STRING;  
 
         // Ensure Thin mode is used
         oracledb.initOracleClient({ configDir: '', libDir: '', errorDir: '' });
@@ -73,7 +74,8 @@ import { WhatsappPruebaModule } from './modules/whatsapp-prueba/whatsapp-prueba.
     PrestamosModule,
     ConasaModule,
     WhatsappPruebaModule,
-    BitacoraModule
+    BitacoraModule,
+    SessionModule
   ],
   providers: [MantenimientoAfiliacionService],
 })

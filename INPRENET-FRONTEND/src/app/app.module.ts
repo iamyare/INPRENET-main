@@ -17,6 +17,7 @@ import { TokenInterceptor } from './interceptors/token.interceptor';
 import { EscalafonModule } from './modulos/escalafon/escalafon.module';
 import { ConasaModule } from './modulos/conasa/conasa.module';
 import { DocumentosModule } from './modulos/documentos/documentos.module';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
@@ -58,8 +59,10 @@ registerLocaleData(hondurasLocale, 'es-HN');
       preventDuplicates: true,
     }),
   ],
-  providers: [SidenavService,
-    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
+  providers: [
+    SidenavService,
+    // Reemplazamos el TokenInterceptor con el nuevo AuthInterceptor que maneja refresh tokens
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: LOCALE_ID, useValue: 'es-HN' }
   ],
   bootstrap: [AppComponent]

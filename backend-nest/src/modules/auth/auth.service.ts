@@ -186,7 +186,7 @@ export class AuthService {
       if (!user) {
           this.logger.error(`User not found for session ${session.idSession} during refresh.`);
           throw new UnauthorizedException('Usuario asociado al token no encontrado');
-      }
+    }
 
       // 6. Generar nuevos tokens
       const newPayload: JwtPayload = { username: user.username, sub: user.idUsuarioEmpresa };

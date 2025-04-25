@@ -1,84 +1,66 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { AuthService } from 'src/app/services/auth.service';
+import { first } from 'rxjs/operators';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'] // o .css
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
-  loading: boolean = false;
-  passwordVisible: boolean = false; // Variable para controlar la visibilidad de la contraseña
+  isLoading = false;
+  errorMessage: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
-    private toastr: ToastrService
+    private router: Router
   ) {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required],
-      rememberMe: [false]
-    });
-
-    this.loadStoredEmail();
-  }
-
-  loadStoredEmail(): void {
-    const storedEmail = localStorage.getItem('email');
-    if (storedEmail) {
-      this.loginForm.patchValue({
-        email: storedEmail,
-        rememberMe: true
-      });
+    // Redirige si ya está logueado
+    if (this.authService.currentUserValue) {
+        this.router.navigate(['/']); // O a la ruta principal de tu app
     }
-  }
 
-  onLogin() {
-    this.loading = true;
-    const { email, password, rememberMe } = this.loginForm.value;
-
-    this.authService.login(email, password).subscribe({
-      next: (response) => {
-        if (rememberMe) {
-          localStorage.setItem('email', email);
-        } else {
-          localStorage.removeItem('email');
-        }
-
-        setTimeout(() => {
-          this.loading = false;
-          this.router.navigate(['/home']);
-          this.toastr.success('Inicio de sesión exitoso', 'Bienvenido');
-        }, 1000);
-      },
-      error: (err) => {
-        setTimeout(() => {
-          this.loading = false;
-          if (err.status === 401) {
-            this.toastr.error('Credenciales incorrectas. Por favor, intente de nuevo.', 'Error de inicio de sesión', {
-              closeButton: true,
-              timeOut: 3000,
-            });
-          } else {
-            this.toastr.error('Ocurrió un error. Por favor, intente de nuevo.', 'Error');
-            console.error('Login failed:', err);
-          }
-        }, 1000);
-      }
+    this.loginForm = this.fb.group({
+      // Define los controles del formulario
+      username: ['', [Validators.required, Validators.email]], // Asume email como username, ajusta si no
+      password: ['', Validators.required]
     });
   }
 
-  togglePasswordVisibility(): void {
-    this.passwordVisible = !this.passwordVisible; // Cambia el estado de visibilidad de la contraseña
+  ngOnInit(): void {
+    // Lógica adicional al inicializar si es necesaria
   }
 
-  redirectOlvidoContrasena() {
-    this.router.navigate(['/solicitud-restablecimiento']);
+  get username() { return this.loginForm.get('username'); }
+  get password() { return this.loginForm.get('password'); }
+
+  onSubmit(): void {
+    this.errorMessage = null; // Limpia errores previos
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched(); // Marca campos como tocados para mostrar errores
+      return; // No envía si el formulario es inválido
+    }
+
+    this.isLoading = true; // Muestra indicador de carga
+
+    this.authService.login(this.loginForm.value)
+      .pipe(first()) // Toma solo la primera respuesta (éxito o error)
+      .subscribe({
+        next: () => {
+          this.isLoading = false;
+          // Redirección manejada por el AuthService o puedes hacerla aquí
+          this.router.navigate(['/dashboard']); // Redirige a la ruta deseada post-login
+          console.log('Login successful, navigating to dashboard...');
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.errorMessage = error.message || 'Error en el inicio de sesión.'; // Muestra mensaje de error
+          console.error('Login failed:', error);
+        }
+      });
   }
 }

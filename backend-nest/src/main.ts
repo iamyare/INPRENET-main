@@ -73,6 +73,8 @@ async function bootstrap() {
   app.use(express.json({ limit: '8mb' }));
 
   // Cambia el puerto si es necesario
-  await app.listen(process.env.PORT || 3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`Servidor ejecutándose en el puerto: ${port}`);
 }
 bootstrap();

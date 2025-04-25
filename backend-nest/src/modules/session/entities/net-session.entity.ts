@@ -1,41 +1,56 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { Net_Usuario_Empresa } from '../../usuario/entities/net_usuario_empresa.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 
-@Entity('NET_SESSION')
-export class Net_Session {
-  @PrimaryGeneratedColumn({ name: 'ID_SESSION' })
-  id_session: number;
+// Enum para los estados de la sesión para mayor claridad y consistencia
+export enum SessionStatus {
+  ACTIVE = 'ACTIVA',
+  CLOSED = 'CERRADA',
+  REVOKED = 'REVOCADA', // Podrías necesitar otros estados como 'EXPIRADA'
+  USED = 'USADO', // Para refresh tokens
+}
 
-  @Column({ name: 'TOKEN', length: 500 })
-  token: string;
+@Entity('NET_SESSION') // Asegúrate que coincida exactamente con el nombre de tu tabla en Oracle
+export class NetSession {
+  @PrimaryGeneratedColumn({ name: 'ID_SESSION' }) // Mapea al nombre de columna en Oracle
+  idSession: number;
 
-  @Column({ name: 'REFRESH_TOKEN', length: 500, nullable: true })
-  refresh_token: string;
+  @Index() // Indexar el token puede mejorar el rendimiento de búsqueda
+  @Column({ type: 'varchar2', length: 500, name: 'TOKEN', nullable: true }) // Access Token
+  token: string | null;
 
-  @Column({ name: 'USER_AGENT', length: 500 })
-  user_agent: string;
+  @Index() // Indexar también el refresh token
+  @Column({ type: 'varchar2', length: 500, name: 'REFRESH_TOKEN' })
+  refreshToken: string;
 
-  @Column({ name: 'IP_ADDRESS', length: 50 })
-  ip_address: string;
+  @Column({ type: 'number', name: 'ID_USUARIO_EMPRESA' }) // Foreign key al usuario
+  idUsuarioEmpresa: number;
 
-  @CreateDateColumn({ name: 'FECHA_CREACION' })
-  fecha_creacion: Date;
+  @Column({ type: 'varchar2', length: 500, name: 'USER_AGENT', nullable: true })
+  userAgent: string | null;
 
-  @Column({ name: 'FECHA_EXPIRACION' })
-  fecha_expiracion: Date;
+  @Column({ type: 'varchar2', length: 50, name: 'IP_ADDRESS', nullable: true })
+  ipAddress: string | null;
 
-  @Column({ name: 'ULTIMA_ACTIVIDAD', default: () => 'CURRENT_TIMESTAMP' })
-  ultima_actividad: Date;
+  @CreateDateColumn({ type: 'timestamp', name: 'FECHA_CREACION' })
+  fechaCreacion: Date;
 
-  @Column({ 
-    name: 'ESTADO', 
+  @Column({ type: 'timestamp', name: 'FECHA_EXPIRACION' }) // Expiración del Refresh Token
+  fechaExpiracion: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', name: 'ULTIMA_ACTIVIDAD' }) // Se actualiza con la validación del Access Token
+  ultimaActividad: Date;
+
+  @Column({
+    type: 'varchar2',
     length: 20,
-    default: 'ACTIVA',
-    type: 'varchar'
+    name: 'ESTADO',
+    default: SessionStatus.ACTIVE, // Estado por defecto al crear
   })
-  estado: 'ACTIVA' | 'EXPIRADA' | 'REVOCADA' | 'CERRADA';
-
-  @ManyToOne(() => Net_Usuario_Empresa, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'ID_USUARIO_EMPRESA' })
-  usuario_empresa: Net_Usuario_Empresa;
+  estado: string; // Usa el enum SessionStatus para asignar valores
 }

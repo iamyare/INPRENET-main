@@ -1,165 +1,187 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
-import { JwtService } from '@nestjs/jwt';
-import { Net_Session } from '../entities/net-session.entity';
-import { AuthData } from '../interfaces/auth-data.interface';
-import { SseService } from './sse.service';
-import { addDays } from 'date-fns';
+import { Repository } from 'typeorm';
+import { NetSession, SessionStatus } from '../entities/net-session.entity';
 
 @Injectable()
 export class SessionService {
   private readonly logger = new Logger(SessionService.name);
 
   constructor(
-    @InjectRepository(Net_Session)
-    private readonly sessionRepository: Repository<Net_Session>,
-    private readonly jwtService: JwtService,
-    private readonly sseService: SseService,
-  ) {
-    // Iniciar limpieza de sesiones expiradas
-    this.cleanupExpiredSessions();
-  }
+    @InjectRepository(NetSession)
+    private readonly sessionRepository: Repository<NetSession>,
+  ) {}
 
-  async createSession(userId: number, authData: AuthData): Promise<Net_Session> {
-    // Crear nueva sesión
-    const session = this.sessionRepository.create({
-      token: authData.token,
-      refresh_token: authData.refreshToken,
-      user_agent: authData.userAgent,
-      ip_address: authData.ipAddress,
-      fecha_expiracion: addDays(new Date(), 1),
-      estado: 'ACTIVA',
-      usuario_empresa: { id_usuario_empresa: userId },
-    });
+  /**
+   * Crea una nueva sesión en la base de datos.
+   * @param idUsuarioEmpresa - ID del usuario
+   * @param accessToken - El JWT Access Token
+   * @param refreshToken - El JWT Refresh Token
+   * @param refreshTokenExpiresIn - Tiempo de vida del refresh token en segundos
+   * @param ipAddress - IP del cliente
+   * @param userAgent - User Agent del cliente
+   * @returns La entidad NetSession creada.
+   */
+  async createSession(
+    idUsuarioEmpresa: number,
+    accessToken: string,
+    refreshToken: string,
+    refreshTokenExpiresIn: number, // en segundos
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<NetSession> {
+    try {
+      const expirationDate = new Date();
+      expirationDate.setSeconds(expirationDate.getSeconds() + refreshTokenExpiresIn);
 
-    return this.sessionRepository.save(session);
-  }
-
-  async invalidatePreviousSessions(userId: number): Promise<void> {
-    const activeSessions = await this.sessionRepository.find({
-      where: {
-        usuario_empresa: { id_usuario_empresa: userId },
-        estado: 'ACTIVA',
-      },
-    });
-
-    if (activeSessions.length > 0) {
-      await this.sessionRepository.update(
-        activeSessions.map(session => session.id_session),
-        { estado: 'REVOCADA' }
-      );
-
-      // Notificar a los clientes conectados sobre la invalidación
-      activeSessions.forEach(session => {
-        this.sseService.emitToUser(userId, {
-          type: 'session-invalidated',
-          message: 'Tu sesión ha sido cerrada porque se ha iniciado sesión en otro dispositivo',
-          sessionId: session.id_session,
-        });
+      const newSession = this.sessionRepository.create({
+        idUsuarioEmpresa,
+        token: accessToken, // Guardamos el access token actual
+        refreshToken,
+        fechaExpiracion: expirationDate, // Fecha de expiración del refresh token
+        ipAddress: ipAddress || null,
+        userAgent: userAgent || null,
+        estado: SessionStatus.ACTIVE, // Estado inicial
+        // fechaCreacion y ultimaActividad son manejadas por TypeORM (@CreateDateColumn, @UpdateDateColumn)
       });
+
+      return await this.sessionRepository.save(newSession);
+    } catch (error) {
+      this.logger.error(`Error creating session for user ${idUsuarioEmpresa}: ${error.message}`, error.stack);
+      throw error; // Relanzar para manejo superior si es necesario
     }
   }
 
-  async validateSession(token: string): Promise<boolean> {
+  /**
+   * Busca una sesión activa por su Refresh Token.
+   * @param refreshToken - El token de refresco a buscar.
+   * @returns La entidad NetSession si se encuentra y está activa, null en caso contrario.
+   */
+  async findActiveSessionByRefreshToken(refreshToken: string): Promise<NetSession | null> {
     try {
-      // Verificar el token JWT
-      const payload = this.jwtService.verify(token);
-      
-      // Buscar la sesión
-      const session = await this.sessionRepository.findOne({
-        where: { token, estado: 'ACTIVA' },
-        relations: ['usuario_empresa'],
+      return await this.sessionRepository.findOne({
+        where: {
+          refreshToken,
+          estado: SessionStatus.ACTIVE,
+          // Podríamos añadir una condición para fechaExpiracion > NOW() si la DB lo soporta fácilmente
+        },
       });
-
-      if (!session) {
-        return false;
-      }
-
-      // Verificar si la sesión ha expirado
-      if (session.fecha_expiracion < new Date()) {
-        await this.updateSessionStatus(session.id_session, 'EXPIRADA');
-        return false;
-      }
-
-      // Actualizar última actividad
-      await this.updateLastActivity(session.id_session);
-      return true;
     } catch (error) {
-      this.logger.error(`Error validando sesión: ${error.message}`);
+      this.logger.error(`Error finding session by refresh token: ${error.message}`, error.stack);
+      return null; // O relanzar dependiendo de la política de errores
+    }
+  }
+
+  /**
+   * Busca una sesión activa por su Access Token.
+   * Útil para la validación en JwtStrategy.
+   * @param accessToken - El token de acceso a buscar.
+   * @returns La entidad NetSession si se encuentra y está activa, null en caso contrario.
+   */
+  async findActiveSessionByAccessToken(accessToken: string): Promise<NetSession | null> {
+     try {
+       // Nota: Buscar por Access Token puede ser menos eficiente si no está indexado
+       // y si cambian frecuentemente. Considera si esta validación es estrictamente necesaria
+       // en cada request o si la validación JWT estándar es suficiente.
+       return await this.sessionRepository.findOne({
+         where: {
+           token: accessToken,
+           estado: SessionStatus.ACTIVE,
+         },
+       });
+     } catch (error) {
+       this.logger.error(`Error finding session by access token: ${error.message}`, error.stack);
+       return null;
+     }
+   }
+
+
+  /**
+   * Actualiza el estado de una sesión.
+   * @param sessionId - ID de la sesión a actualizar.
+   * @param newStatus - El nuevo estado para la sesión (e.g., SessionStatus.CLOSED).
+   * @returns boolean indicando si la actualización fue exitosa.
+   */
+  async updateSessionStatus(sessionId: number, newStatus: SessionStatus): Promise<boolean> {
+    try {
+      const result = await this.sessionRepository.update(sessionId, { estado: newStatus });
+      return result.affected > 0;
+    } catch (error) {
+      this.logger.error(`Error updating status for session ${sessionId}: ${error.message}`, error.stack);
       return false;
     }
   }
 
-  async updateLastActivity(sessionId: number): Promise<void> {
-    await this.sessionRepository.update(
-      { id_session: sessionId },
-      { ultima_actividad: new Date() }
-    );
-  }
-
-  async refreshToken(refreshToken: string): Promise<{ token: string, refreshToken: string }> {
-    const session = await this.sessionRepository.findOne({
-      where: { refresh_token: refreshToken, estado: 'ACTIVA' },
-      relations: ['usuario_empresa'],
-    });
-
-    if (!session) {
-      throw new UnauthorizedException('Token de actualización inválido');
-    }
-
-    // Generar nuevos tokens
-    const payload = {
-      sub: session.usuario_empresa.id_usuario_empresa,
-    };
-    const newToken = this.jwtService.sign(payload, { expiresIn: '24h' });
-    const newRefreshToken = this.jwtService.sign({}, { expiresIn: '7d' });
-
-    // Actualizar sesión
-    session.token = newToken;
-    session.refresh_token = newRefreshToken;
-    session.ultima_actividad = new Date();
-    session.fecha_expiracion = addDays(new Date(), 1);
-    await this.sessionRepository.save(session);
-
-    return { token: newToken, refreshToken: newRefreshToken };
-  }
-
-  async updateSessionStatus(sessionId: number, status: 'ACTIVA' | 'EXPIRADA' | 'REVOCADA' | 'CERRADA'): Promise<void> {
-    await this.sessionRepository.update(
-      { id_session: sessionId },
-      { estado: status }
-    );
-  }
-
-  private async cleanupExpiredSessions(): Promise<void> {
+  /**
+   * Actualiza los tokens y la fecha de expiración de una sesión existente (usado en refresh).
+   * @param sessionId - ID de la sesión a actualizar.
+   * @param newAccessToken - El nuevo Access Token.
+   * @param newRefreshToken - El nuevo Refresh Token.
+   * @param newRefreshTokenExpiresIn - Nuevo tiempo de expiración en segundos.
+   * @returns La entidad NetSession actualizada.
+   */
+  async updateSessionTokens(
+    sessionId: number,
+    newAccessToken: string,
+    newRefreshToken: string,
+    newRefreshTokenExpiresIn: number,
+  ): Promise<NetSession | null> {
     try {
-      // Marcar sesiones expiradas
-      const result = await this.sessionRepository.update(
-        {
-          fecha_expiracion: LessThan(new Date()),
-          estado: 'ACTIVA',
-        },
-        { estado: 'EXPIRADA' }
-      );
+      const session = await this.sessionRepository.findOneBy({ idSession: sessionId });
+      if (!session) {
+        this.logger.warn(`Session not found for update: ${sessionId}`);
+        return null;
+      }
 
-      this.logger.log(`Sesiones expiradas marcadas: ${result.affected}`);
+      const newExpirationDate = new Date();
+      newExpirationDate.setSeconds(newExpirationDate.getSeconds() + newRefreshTokenExpiresIn);
 
-      // Programar la próxima limpieza en una hora
-      setTimeout(() => this.cleanupExpiredSessions(), 3600000);
+      session.token = newAccessToken;
+      session.refreshToken = newRefreshToken;
+      session.fechaExpiracion = newExpirationDate;
+      session.estado = SessionStatus.ACTIVE; // Asegurarse que sigue activa
+      // ultimaActividad se actualizará automáticamente por @UpdateDateColumn
+
+      return await this.sessionRepository.save(session);
     } catch (error) {
-      this.logger.error(`Error durante la limpieza de sesiones: ${error.message}`);
-      // Reintentar en 5 minutos en caso de error
-      setTimeout(() => this.cleanupExpiredSessions(), 300000);
+      this.logger.error(`Error updating tokens for session ${sessionId}: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
-  async getActiveSessionByUserId(userId: number): Promise<Net_Session[]> {
-    return this.sessionRepository.find({
-      where: {
-        usuario_empresa: { id_usuario_empresa: userId },
-        estado: 'ACTIVA',
-      },
-    });
+  /**
+   * Invalida todas las sesiones activas de un usuario (opcional, para login).
+   * @param idUsuarioEmpresa - ID del usuario.
+   * @returns boolean indicando si la operación fue exitosa.
+   */
+  async invalidateUserSessions(idUsuarioEmpresa: number): Promise<boolean> {
+    try {
+      // Cambia el estado de todas las sesiones ACTIVAS del usuario a REVOCADA (o CERRADA)
+      await this.sessionRepository.update(
+        { idUsuarioEmpresa, estado: SessionStatus.ACTIVE },
+        { estado: SessionStatus.REVOKED }, // O SessionStatus.CLOSED
+      );
+      return true;
+    } catch (error) {
+      this.logger.error(`Error invalidating sessions for user ${idUsuarioEmpresa}: ${error.message}`, error.stack);
+      return false;
+    }
+  }
+
+   /**
+   * Actualiza la última actividad de una sesión (llamado desde JwtStrategy).
+   * @param sessionId - ID de la sesión.
+   * @returns boolean indicando éxito.
+   */
+   async updateLastActivity(sessionId: number): Promise<boolean> {
+    try {
+      // TypeORM @UpdateDateColumn debería manejar esto automáticamente si la entidad
+      // se carga y se guarda. Si no, se puede forzar así:
+      const result = await this.sessionRepository.update(sessionId, { ultimaActividad: new Date() });
+      return result.affected > 0;
+    } catch (error) {
+      this.logger.error(`Error updating last activity for session ${sessionId}: ${error.message}`, error.stack);
+      return false;
+    }
   }
 }

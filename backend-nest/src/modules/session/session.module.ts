@@ -1,21 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
-import { Net_Session } from './entities/net-session.entity';
+import { NetSession } from './entities/net-session.entity';
 import { SessionService } from './services/session.service';
-import { SseController } from './controllers/sse.controller';
-import { SseService } from './services/sse.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Net_Session]),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secretKey',
-      signOptions: { expiresIn: '24h' },
-    }),
+    TypeOrmModule.forFeature([NetSession]), // Registra la entidad NetSession
   ],
-  providers: [SessionService, SseService],
-  controllers: [SseController],
-  exports: [SessionService, SseService],
+  providers: [SessionService], // Declara el servicio
+  exports: [SessionService], // Exporta el servicio para que otros módulos (como AuthModule) puedan usarlo
 })
 export class SessionModule {}

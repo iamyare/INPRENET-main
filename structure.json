@@ -1,0 +1,13 @@
+{
+  "backend-nest": {
+    "src": {
+      "modules": {
+        "auth": {
+          "sesion-activa": {
+            "users.service.ts": "import { Injectable } from '@nestjs/common';\n\n@Injectable()\nexport class UsersService {\n  private users = [\n    // Ejemplo de usuarios\n    { userId: '1', username: 'user1', password: 'pass1', token: null, userAgent: null },\n    { userId: '2', username: 'user2', password: 'pass2', token: null, userAgent: null },\n  ];\n\n  async findOne(username: string) {\n    return this.users.find(user => user.username === username);\n  }\n\n  async findById(userId: string) {\n    return this.users.find(user => user.userId === userId);\n  }\n\n  async updateUserToken(userId: string, token: string, userAgent: string) {\n    const user = await this.findById(userId);\n    if (user) {\n      user.token = token;\n      user.userAgent = userAgent;\n    }\n  }\n}"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,12 +1,16 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { RolesGuard } from './roles.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Sesion } from './entities';
+import { SesionActivaMiddleware } from './sesion-activa/sesion-activa.middleware';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Sesion]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -18,7 +22,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     ConfigModule,
   ],
-  providers: [JwtStrategy, RolesGuard],
-  exports: [RolesGuard, JwtModule],
+  providers: [JwtStrategy, RolesGuard, SesionActivaMiddleware],
+  exports: [RolesGuard, JwtModule, SesionActivaMiddleware],
 })
 export class AuthModule {}

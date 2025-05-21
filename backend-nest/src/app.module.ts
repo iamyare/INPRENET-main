@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from './common/common.module';
@@ -15,6 +15,8 @@ import { AppDataSource } from '../ormconfig';
 import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/mantenimiento-afiliacion.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { SesionActivaMiddleware } from './modules/auth/sesion-activa/sesion-activa.middleware';
+// Removed UsuarioController import as it's not directly used in AppModule for path strings.
 
 @Module({
   imports: [
@@ -65,4 +67,22 @@ import { DocumentsModule } from './modules/documents/documents.module';
   ],
   providers: [MantenimientoAfiliacionService],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(SesionActivaMiddleware)
+      .exclude(
+        { path: 'usuario/login', method: RequestMethod.POST },
+        { path: 'usuario/logout', method: RequestMethod.POST },
+        { path: 'usuario/preregistro', method: RequestMethod.POST },
+        { path: 'usuario/preregistro-admin', method: RequestMethod.POST },
+        { path: 'usuario/completar-registro', method: RequestMethod.POST }, // Query param 'token'
+        { path: 'usuario/olvido-contrasena', method: RequestMethod.POST },
+        { path: 'usuario/restablecer-contrasena/:token', method: RequestMethod.POST },
+        { path: 'usuario/preguntas-seguridad', method: RequestMethod.GET }, // Query param 'correo'
+        { path: 'usuario/loginPrivada', method: RequestMethod.POST }
+        // Any other public routes or controller methods that should not be protected.
+      )
+      .forRoutes('*'); // Apply to all routes not excluded
+  }
+}

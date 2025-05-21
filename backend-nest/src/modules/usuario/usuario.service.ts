@@ -1,20 +1,22 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException, HttpStatus } from '@nestjs/common';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Request, Response } from 'express';
+import { Sesion } from '../auth/entities';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { LessThan, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
-import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
+import { NET_USUARIO_PRIVADA } from '../entities/net_usuario_privada.entity';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
-import { Net_Seguridad } from './entities/net_seguridad.entity';
+import { Net_Seguridad } from '../entities/net_seguridad.entity';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
-import { net_rol_modulo } from './entities/net_rol_modulo.entity';
-import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
-import { net_usuario_modulo } from './entities/net_usuario_modulo.entity';
-import { net_modulo } from './entities/net_modulo.entity';
+import { net_rol_modulo } from '../entities/net_rol_modulo.entity';
+import { Net_Usuario_Empresa } from '../entities/net_usuario_empresa.entity';
+import { net_usuario_modulo } from '../entities/net_usuario_modulo.entity';
+import { net_modulo } from '../entities/net_modulo.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { Cron } from '@nestjs/schedule';
 import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
@@ -46,6 +48,8 @@ export class UsuarioService {
     private readonly usuarioModuloRepository: Repository<net_usuario_modulo>,
     @InjectRepository(net_modulo)
     private readonly moduloRepository: Repository<net_modulo>,
+    @InjectRepository(Sesion)
+    private readonly sesionRepository: Repository<Sesion>,
   ) { }
 
   async login(loginDto: LoginDto) {
@@ -61,6 +65,12 @@ export class UsuarioService {
     if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
+
+    // Update existing active sessions to 'inactiva'
+    await this.sesionRepository.update(
+      { usuario_id: usuario.id_usuario_empresa, estado: 'activa' },
+      { estado: 'inactiva' },
+    );
   
     const isPasswordValid = await bcrypt.compare(contrasena, usuario.contrasena);
     if (!isPasswordValid) {
@@ -79,12 +89,42 @@ export class UsuarioService {
       idCentroTrabajo: usuario.empleadoCentroTrabajo.centroTrabajo.id_centro_trabajo,
     };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+
+    // Create a new session record
+    const nuevaSesion = this.sesionRepository.create({
+      token: accessToken,
+      usuario_id: usuario.id_usuario_empresa,
+      estado: 'activa',
+    });
+    await this.sesionRepository.save(nuevaSesion);
   
     return { accessToken };
   }
   
-  async logout(req, res) {
-    return res.json({ message: 'Sesión cerrada' });
+  async logout(req: Request, res: Response) {
+    const authHeader: string | undefined = req.headers['authorization'];
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
+
+    if (!token) {
+      return res.status(HttpStatus.OK).json({ message: 'Sesión cerrada exitosamente o token no proporcionado.' });
+    }
+
+    try {
+      const updatedResult = await this.sesionRepository.update(
+        { token: token, estado: 'activa' }, // Find the active session with this token
+        { estado: 'inactiva' }             // Set its state to inactive
+      );
+
+      if (updatedResult.affected === 0) {
+        // This means no active session was found for this token.
+        return res.status(HttpStatus.OK).json({ message: 'Sesión no encontrada o ya estaba cerrada.' });
+      }
+
+      return res.status(HttpStatus.OK).json({ message: 'Sesión cerrada exitosamente.' });
+    } catch (error) {
+      this.logger.error('Error during logout:', error);
+      throw new InternalServerErrorException('Ocurrió un error al intentar cerrar la sesión.');
+    }
   }
   
   async obtenerPerfilPorCorreo(correo: string) {

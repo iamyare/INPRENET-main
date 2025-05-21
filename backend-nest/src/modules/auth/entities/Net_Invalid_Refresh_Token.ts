@@ -1,5 +1,5 @@
-/* import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
-import { Length } from 'class-validator';
+import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+// import { Length } from 'class-validator'; // Length is not used, so it can be commented out or removed.
 
 @Entity({ name: 'NET_INVALID_REFRESH_TOKEN' })
 export class Net_Invalid_Refresh_Token {
@@ -13,4 +13,3 @@ export class Net_Invalid_Refresh_Token {
   @CreateDateColumn({ name: 'CREATED_AT', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 }
- */

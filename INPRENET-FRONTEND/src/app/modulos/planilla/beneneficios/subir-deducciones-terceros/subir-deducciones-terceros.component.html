@@ -1,5 +1,6 @@
+
 <div class="container">
-  <h1>Carga de Deducciones por Medio de Documento Excel</h1>
+  <h1 class="custom-header">Carga de Deducciones en planilla: {{tipo_planilla}}</h1>
   <hr class="divider" />
 
   <!-- Contenedor de Subida de Archivos -->
@@ -25,7 +26,9 @@
     </div>
 
     <div class="example-download">
-      <button mat-raised-button color="primary"  class="download-button">
+      <button mat-raised-button color="primary"  class="download-button"
+      (click)="downloadExample()"
+      >
         <!-- <button mat-raised-button color="primary" (click)="downloadExample()" class="download-button"> -->
         <i class="fa fa-download"></i> Descargar Ejemplo De Formato
       </button>
@@ -41,67 +44,71 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="basic-container">
+  <h1 class="custom-header">Buscar Deducciones Cargadas En la Planilla: {{tipo_planilla}}</h1>
 
   <!-- Contenedor de Selección de Deducciones -->
   <div class="deducciones-container">
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Seleccione un Centro de Trabajo</mat-label>
-      <mat-select (selectionChange)="onCentroSeleccionadoChange($event)">
-        <mat-option *ngFor="let centro of centrosTrabajo" [value]="centro.id_centro_trabajo">
-          {{ centro.nombre_centro_trabajo }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+   <mat-form-field appearance="fill" class="full-width">
+     <mat-label>Seleccione un Centro de Trabajo</mat-label>
+     <mat-select (selectionChange)="onCentroSeleccionadoChange($event)">
+       <mat-option *ngFor="let centro of centrosTrabajo" [value]="centro.id_centro_trabajo">
+         {{ centro.nombre_centro_trabajo }}
+       </mat-option>
+     </mat-select>
+   </mat-form-field>
 
-    <mat-form-field appearance="fill" class="full-width" *ngIf="deduccionesCentro.length > 0">
-      <mat-label>Seleccione una Deducción</mat-label>
-      <mat-select (selectionChange)="onDeduccionSeleccionadaChange($event)">
-        <mat-option *ngFor="let deduccion of deduccionesCentro" [value]="deduccion.codigo_deduccion">
-          {{ deduccion.nombre_deduccion }} (Código {{ deduccion.codigo_deduccion }})
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-  </div>
+   <mat-form-field appearance="fill" class="full-width" *ngIf="deduccionesCentro.length > 0">
+     <mat-label>Seleccione una Deducción</mat-label>
+     <mat-select (selectionChange)="onDeduccionSeleccionadaChange($event)">
+       <mat-option *ngFor="let deduccion of deduccionesCentro" [value]="deduccion.codigo_deduccion">
+         {{ deduccion.nombre_deduccion }} (Código {{ deduccion.codigo_deduccion }})
+       </mat-option>
+     </mat-select>
+   </mat-form-field>
+ </div>
 
-  <!-- Botones de Exportación y Eliminación de Datos -->
-  <div *ngIf="detallesDeduccion.length > 0" class="titulo-exportar">
-    <h3>Detalles de Deducción</h3>
-    <button mat-raised-button color="primary" (click)="exportarAExcel()" class="exportar-btn">
-      Exportar a Excel
-    </button>
-    <button mat-raised-button color="warn" (click)="eliminarDatos()" *ngIf="detallesDeduccion.length > 0">
-      Eliminar Excel Cargado
-    </button>
-  </div>
+ <!-- Botones de Exportación y Eliminación de Datos -->
+ <div *ngIf="detallesDeduccion.length > 0" class="titulo-exportar">
+   <h3 class="custom-header">Detalles de Deducción</h3>
+   <button mat-raised-button color="primary" (click)="exportarAExcel()" class="exportar-btn">
+     Exportar a Excel
+   </button>
+   <button mat-raised-button color="warn" (click)="eliminarDatos()" *ngIf="detallesDeduccion.length > 0">
+     Eliminar Excel Cargado
+   </button>
+ </div>
 
-  <!-- Tabla de Detalles de Deducción -->
-  <div *ngIf="detallesDeduccion.length > 0" class="table-container">
-    <table class="table table-bordered">
-      <thead class="thead-light">
-        <tr>
-          <th scope="col">Nº Identificación</th>
-          <th scope="col">Nombre Completo</th>
-          <th scope="col">Código de Deducción</th>
-          <th scope="col">Nombre de Deducción</th>
-          <th scope="col">Monto Total</th>
-          <th scope="col">Monto Aplicado</th>
-          <th scope="col">Estado Aplicación</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let detalle of detallesDeduccion">
-          <td>{{ detalle.N_IDENTIFICACION }}</td>
-          <td>{{ detalle.NOMBRE_COMPLETO }}</td>
-          <td>{{ detalle.CODIGO_DEDUCCION }}</td>
-          <td>{{ detalle.NOMBRE_DEDUCCION }}</td>
-          <td>{{ detalle.MONTO_TOTAL }}</td>
-          <td>{{ detalle.MONTO_APLICADO }}</td>
-          <td>{{ detalle.ESTADO_APLICACION }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+ <!-- Tabla de Detalles de Deducción -->
+ <div *ngIf="detallesDeduccion.length > 0" class="table-container">
+   <table class="table table-bordered">
+     <thead class="thead-light">
+       <tr>
+         <th scope="col">Nº Identificación</th>
+         <th scope="col">Nombre Completo</th>
+         <th scope="col">Código de Deducción</th>
+         <th scope="col">Nombre de Deducción</th>
+         <th scope="col">Monto Total</th>
+         <th scope="col">Monto Aplicado</th>
+         <th scope="col">Estado Aplicación</th>
+       </tr>
+     </thead>
+     <tbody>
+       <tr *ngFor="let detalle of detallesDeduccion">
+         <td>{{ detalle.N_IDENTIFICACION }}</td>
+         <td>{{ detalle.NOMBRE_COMPLETO }}</td>
+         <td>{{ detalle.CODIGO_DEDUCCION }}</td>
+         <td>{{ detalle.NOMBRE_DEDUCCION }}</td>
+         <td>{{ detalle.MONTO_TOTAL }}</td>
+         <td>{{ detalle.MONTO_APLICADO }}</td>
+         <td>{{ detalle.ESTADO_APLICACION }}</td>
+       </tr>
+     </tbody>
+   </table>
+ </div>
 
-  <!-- Botón de Descargar Ejemplo -->
+ <!-- Botón de Descargar Ejemplo -->
 
 </div>

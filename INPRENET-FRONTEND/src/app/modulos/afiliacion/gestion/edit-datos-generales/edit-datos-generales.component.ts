@@ -1,120 +1,439 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectorRef, EventEmitter, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { AfiliadoService } from '../../../../../../src/app/services/afiliado.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
-import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
-import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
+import { PermisosService } from '../../../../../../src/app/services/permisos.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { AfiliacionService } from '../../../../services/afiliacion.service';
+import { AuthService } from '../../../../services/auth.service';
+import { PersonaService } from '../../../../services/persona.service';
 
 @Component({
   selector: 'app-edit-datos-generales',
   templateUrl: './edit-datos-generales.component.html',
-  styleUrls: ['./edit-datos-generales.component.scss']
+  styleUrls: ['./edit-datos-generales.component.scss'],
 })
 export class EditDatosGeneralesComponent implements OnInit {
+  tieneBancoActivo = false;
+  beneficiariosValidos = false;
+  tieneReferencias = false;
+  tieneCentroTrabajo = false;
+  datosCompletos = false;
+  ultimaActualizacionValida = false;
+  validacionesCompletas = false;
+  estaEnPeps = false;
+  autoResize($event: Event) {
+    throw new Error('Method not implemented.');
+  }
+
   datosGen: any;
-  public myFormFields: FieldConfig[] = [];
   municipios: any = [];
   departamentos: any = [];
   unirNombres: any = unirNombres;
-  datosTabl: any[] = [];
   CausaFallecimiento: any[] = [];
   estado: any[] = [];
+  //public mostrarBotonGuardar: boolean = false;
+  mostrarBotonGuardar: boolean = false;
+  image: any;
+  form: any;
+  datosGeneralesForm: FormGroup;
+  puedeEditarTabla : boolean = false;
+  carnetDiscapacidadUrl: SafeResourceUrl | null = null;
 
-  tiposPersona: any[] = [
-    { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' },
-    { ID_TIPO_PERSONA: 2, TIPO_PERSONA: 'JUBILADO' },
-    { ID_TIPO_PERSONA: 3, TIPO_PERSONA: 'PENSIONADO' },
-    { ID_TIPO_PERSONA: 5, TIPO_PERSONA: 'VOLUNTARIO' }
-  ];
+  usuarioToken: {
+    correo: string;
+    numero_empleado: string;
+    departamento: string;
+    municipio: string;
+    nombrePuesto: string;
+    nombreEmpleado: string;
+  } | null = null;
+
+
+  estadosPermitidosPorTipoPersona: Record<string, number[]> = {
+    BENEFICIARIO: [1, 2, 13], // ACTIVO, INACTIVO, NO COTIZA, SUSPENSO POR OFICIO
+    "BENEFICIARIO SIN CAUSANTE": [1, 2, 13], // ACTIVO, NO COTIZA
+    DESIGNADO: [7, 14], // ACTIVO, INACTIVO, NO COTIZA, SUSPENSO VOLUNTARIO
+    AFILIADO: [1, 2, 6, 8], // ACTIVO, COTIZANTE SIN AFILIAR, REGISTRADO
+    JUBILADO: [1, 11, 12, 13], // SUSPENSO POR SOBREVIVENCIA, SUSPENSO POR INVESTIGACIÓN
+    PENSIONADO: [1, 11, 12, 13] // SUSPENSO POR SOBREVIVENCIA, SUSPENSO POR INVESTIGACIÓN
+  };
 
   estadoAfiliacion: any;
   fallecido: any;
-
   minDate: Date;
-
-  public myColumns: TableColumn[] = [];
-  public filas: any[] = [];
-  ejecF: any;
   public loading: boolean = false;
+  cargandoTabla: boolean = false; 
 
-  datos!: any;
-
-  form1 = this.fb.group({
-    causa_fallecimiento: ["", [Validators.required]],
-    estado: ["", [Validators.required]],
-    fecha_defuncion: ["", [Validators.required]],
-    id_departamento_defuncion: ["", [Validators.required]],
-    id_municipio_defuncion: ["", [Validators.required]],
-    tipo_persona: ["", [Validators.required]]
-    //certificado_defuncion: ["", [Validators.required]],
-    //observaciones: ["", [Validators.required]],
-  });
-
-  form: any;
-  formDatosGenerales: any = new FormGroup({
-    refpers: new FormArray([], [Validators.required]),
-  });
+  mostrarBotonGenerar: boolean = false;
+  puedeAdministrar: boolean = false;
 
   @Input() Afiliado!: any;
-  cargada: any = false;
-  initialData = {}
-  indicesSeleccionados: any[] = []
-  discapacidadSeleccionada!: boolean
+  @Output() onDatoAgregado = new EventEmitter<void>();
+  certificadoDefuncionUrl: SafeResourceUrl | null = null;
+
+  certificadoDefuncionFile: File | null = null;
+
+  initialData = {};
+  indicesSeleccionados: any[] = [];
+  discapacidadSeleccionada!: boolean;
+
+  tiposPersona: any[] = [
+    { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' }
+  ];
+  tipoPersonaSeleccionada: number | null = null;
+
+  tiposIdentificacion: any[] = [];
+  profesiones: any[] = [];
+  direccionValida: boolean = true;
+  dniCausante: string = '';
+  displayedColumns: string[] = ['ID_PERSONA', 'ID_CAUSANTE', 'ID_CAUSANTE_PADRE', 'ID_DETALLE_PERSONA', 'ID_ESTADO_AFILIACION', 'DNICausante', 'TipoPersona', 'EstadoAfiliacion', 'Observacion'];
+  tableData: any[] = [];
+  formObservacion = new FormControl('');
+
+  // ----------------------------
+  // Form principal (form1)
+  // ----------------------------
+  form1: FormGroup = this.fb.group({
+    fallecido: ['NO', Validators.required],
+    causa_fallecimiento: [
+      '',
+      this.conditionalValidator(
+        () => this.form1?.get('fallecido')?.value === 'SI',
+        Validators.required
+      )
+    ],
+    fecha_defuncion: [
+      '',
+      this.conditionalValidator(
+        () => this.form1?.get('fallecido')?.value === 'SI',
+        Validators.required
+      )
+    ],
+    id_departamento_defuncion: [
+      '',
+      this.conditionalValidator(
+        () => this.form1?.get('fallecido')?.value === 'SI',
+        Validators.required
+      )
+    ],
+    id_municipio_defuncion: [
+      '',
+      this.conditionalValidator(
+        () => this.form1?.get('fallecido')?.value === 'SI',
+        Validators.required
+      )
+    ],
+    tipo_persona: [''],
+    estado: [''],
+    voluntario: ['NO', Validators.required],
+
+    // <-- NUEVO: Campo para la fecha del reporte del fallecimiento
+    fecha_reporte_fallecido: [
+      '',
+      this.conditionalValidator(
+        () => this.form1?.get('fallecido')?.value === 'SI',
+        Validators.required
+      )
+    ],
+
+    // <-- NUEVO: Campo para número certificado de defunción
+    numero_certificado_defuncion: [
+      '',
+      this.conditionalValidator(
+        () => this.form1?.get('fallecido')?.value === 'SI',
+        Validators.required
+      )
+    ]
+  });
+
+  // ----------------------------
+  // Form para datos generales
+  // ----------------------------
+  formDatosGenerales: FormGroup = this.fb.group({
+    refpers: this.fb.array([], [Validators.required]),
+
+    // <-- NUEVO: Campos para adjuntar archivos (requeridos u opcionales).
+    // Si quieres que ambos sean siempre obligatorios, usa Validators.required.
+    // Si uno depende de si está fallecido, se podría meter una validación condicional.
+    archivoCertDef: [null],        // Certificado defunción
+  });
 
   constructor(
     private fb: FormBuilder,
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     public direccionSer: DireccionService,
-    private datosEstaticosService: DatosEstaticosService
+    private datosEstaticosService: DatosEstaticosService,
+    private permisosService: PermisosService,
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef,
+    private afiliacionService: AfiliacionService,
+    private authService: AuthService,
+    private personaService: PersonaService,
   ) {
     const currentYear = new Date();
-    this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
+    this.minDate = new Date(
+      currentYear.getFullYear(),
+      currentYear.getMonth(),
+      currentYear.getDate(),
+      currentYear.getHours(),
+      currentYear.getMinutes(),
+      currentYear.getSeconds()
+    );
+    this.datosGeneralesForm = this.fb.group({
+      // Campo para tomar foto
+      FotoPerfil: [null, Validators.required],
+
+      // Datos de identificación
+      //id_tipo_identificacion: ['', Validators.required],
+      n_identificacion: ['', [Validators.required, Validators.minLength(13), Validators.maxLength(15), Validators.pattern(/^[0-9]+$/)]],
+      rtn: ['', [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]],
+
+      // Datos personales
+      fecha_nacimiento: ['', Validators.required],
+      fecha_afiliacion: ['', Validators.required],
+      genero: ['', Validators.required],
+      primer_nombre: ['', [Validators.required, Validators.maxLength(40)]],
+      primer_apellido: ['', [Validators.required, Validators.maxLength(40), Validators.minLength(1), Validators.pattern('^[a-zA-Z0-9\\s]*$')]],
+
+      // Contacto
+      telefono_1: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern("^[0-9]*$")]],
+      correo_1: ['', [Validators.required, Validators.maxLength(40), Validators.email]],
+
+      // Estado civil y dependientes
+      estado_civil: ['', [Validators.required, Validators.maxLength(40)]],
+      cantidad_hijos: ['', [Validators.required, Validators.pattern("^[0-9]+$")]],
+      cantidad_dependientes: ['', [Validators.required, Validators.pattern("^[0-9]+$")]],
+
+      // Educación y representación
+      grado_academico: ['', Validators.required],
+      representacion: ['', Validators.required],
+
+      // Nacionalidad y ubicación
+      id_pais: ['', Validators.required],
+      id_departamento_nacimiento: ['', Validators.required],
+      id_municipio_nacimiento: ['', Validators.required],
+      id_departamento_residencia: ['', Validators.required],
+      id_municipio_residencia: ['', Validators.required],
+      grupo_etnico: ['', Validators.required],
+      discapacidades: this.fb.group({}) 
+    });
   }
 
-  ngOnInit(): void {
-
-    this.myFormFields = [
-      { type: 'text', label: 'N_IDENTIFICACION del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
-    ];
-
-    this.myColumns = [
-      {
-        header: 'Nombre del Centro Trabajo',
-        col: 'nombre_centro_trabajo',
-        isEditable: true,
-        validationRules: [Validators.required, Validators.minLength(3)]
-      },
-      {
-        header: 'Número Acuerdo',
-        col: 'numero_acuerdo',
-        isEditable: true
-      },
-      {
-        header: 'Salario Base',
-        col: 'salario_base',
-        isEditable: true
-      },
-      {
-        header: 'Fecha Ingreso',
-        col: 'fecha_ingreso',
-        isEditable: true
-      },
-      {
-        header: 'Actividad Económica',
-        col: 'nacionalidad',
-        isEditable: true
+  setDisabledFieldsByRole(): void {
+    setTimeout(() => {
+      const puedeEditar = this.permisosService.userHasPermission(
+        'AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos']
+      );
+  
+      const puedeAdministrar = this.permisosService.userHasPermission(
+        'AFILIACIONES', 'afiliacion/buscar-persona', ['administrar']
+      );
+  
+      // 🔹 Si el usuario NO tiene permisos de edición NI administración, deshabilitar todo
+      if (!puedeEditar && !puedeAdministrar) {
+        Object.keys(this.datosGeneralesForm.controls).forEach(field => {
+          this.datosGeneralesForm.get(field)?.disable({ emitEvent: false });
+        });
+  
+        this.disableNestedControls(this.datosGeneralesForm);
+        this.disableNestedControls(this.formDatosGenerales);
+        this.disableNestedControls(this.form1);
+      } else {
+        // 🔹 Habilitar los campos generales si el usuario tiene permisos (excepto fallecimiento)
+        Object.keys(this.datosGeneralesForm.controls).forEach(field => {
+          this.datosGeneralesForm.get(field)?.enable({ emitEvent: false });
+        });
+  
+        this.enableNestedControls(this.datosGeneralesForm);
+        this.enableNestedControls(this.formDatosGenerales);
+        this.enableNestedControls(this.form1);
       }
-    ];
+  
+      // 🔴 Deshabilitar SIEMPRE los campos de fallecimiento si el usuario NO es "administrador"
+      if (!puedeAdministrar) {
+        const camposFallecimiento = [
+          'fallecido', 'causa_fallecimiento', 'fecha_defuncion', 
+          'id_departamento_defuncion', 'id_municipio_defuncion', 
+          'fecha_reporte_fallecido', 'numero_certificado_defuncion'
+        ];
+        camposFallecimiento.forEach(field => {
+          this.form1.get(field)?.disable({ emitEvent: false });
+        });
+  
+        // Deshabilitar también la carga del certificado de defunción
+        this.formDatosGenerales.get('archivoCertDef')?.disable({ emitEvent: false });
+      }
+  
+      this.cdr.detectChanges();
+    }, 0);
+  }
+  
+  disableNestedControls(formGroup: FormGroup | FormArray): void {
+    Object.keys(formGroup.controls).forEach(field => {
+      const control = formGroup.get(field);
+      if (control instanceof FormGroup || control instanceof FormArray) {
+        this.disableNestedControls(control);
+      } else {
+        control?.disable({ emitEvent: false });
+      }
+    });
+  }
+  
+  enableNestedControls(formGroup: FormGroup | FormArray): void {
+    Object.keys(formGroup.controls).forEach(field => {
+      const control = formGroup.get(field);
+      if (control instanceof FormGroup || control instanceof FormArray) {
+        this.enableNestedControls(control);
+      } else {
+        control?.enable({ emitEvent: false });
+      }
+    });
+  }
 
+  toggleCamposFallecimiento(value: string): void {
+    const campos = [
+      'causa_fallecimiento', 'fecha_defuncion', 'id_departamento_defuncion',
+      'id_municipio_defuncion', 'fecha_reporte_fallecido', 'numero_certificado_defuncion'
+    ];
+  
+    if (value === 'NO') {
+      this.form1.patchValue({
+        causa_fallecimiento: '', fecha_defuncion: '',
+        id_departamento_defuncion: '', id_municipio_defuncion: '',
+        fecha_reporte_fallecido: '', numero_certificado_defuncion: ''
+      });
+  
+      campos.forEach(field => this.form1.get(field)?.disable());
+      this.formDatosGenerales.get('archivoCertDef')?.disable();
+      this.formDatosGenerales.get('archivoCertDef')?.clearValidators();
+    } else {
+      campos.forEach(field => this.form1.get(field)?.enable());
+      this.formDatosGenerales.get('archivoCertDef')?.enable();
+  
+      if (!this.Afiliado?.certificado_defuncion) {
+        this.formDatosGenerales.get('archivoCertDef')?.setValidators([Validators.required]);
+      }
+    }
+  
+    this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
+  }
+  
+  ngOnInit(): void {
+    this.obtenerDatosDesdeToken();
+    
+    setTimeout(() => {
+      const puedeEditar = this.permisosService.userHasPermission(
+        'AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos']
+      );
+  
+      this.puedeAdministrar = this.permisosService.userHasPermission(
+        'AFILIACIONES', 'afiliacion/buscar-persona', ['administrar']
+      );
+  
+      this.mostrarBotonGuardar = this.puedeAdministrar || (!this.Afiliado || this.Afiliado.fallecido !== "SI" && puedeEditar);
+      this.puedeEditarTabla = this.puedeAdministrar;
+  
+      this.setDisabledFieldsByRole();
+      this.cdr.detectChanges();
+    });
+  
+    this.form1.get('fallecido')?.valueChanges.subscribe((value) => {
+      this.toggleCamposFallecimiento(value);
+    });
     this.cargarCausasFallecimiento();
     this.cargarEstadosAfiliado();
     this.previsualizarInfoAfil();
     this.cargarDepartamentos();
+
+    if (this.form1.get('fallecido')?.value === 'NO') {
+      this.toggleCamposFallecimiento('NO');
+    }
+
+    this.svcAfiliado.buscarDetPersona(this.Afiliado.n_identificacion).subscribe(
+      (detalles: any[]) => {
+        
+        this.tableData = detalles;
+
+        // Llamar a cargarEstadosAfiliado después de cargar los datos
+        this.cargarEstadosAfiliado();
+      },
+      (error) => {
+        console.error('Error al cargar movimientos:', error);
+      }
+    );
+
+
+    // --------------------------------
+    // Escucha cambios en fallecido
+    // --------------------------------
+    this.form1.get('fallecido')?.valueChanges.subscribe((value) => {
+      if (!this.mostrarBotonGuardar) {
+        ['causa_fallecimiento', 'fecha_defuncion', 'id_departamento_defuncion',
+         'id_municipio_defuncion', 'fecha_reporte_fallecido', 'numero_certificado_defuncion']
+        .forEach(field => this.form1.get(field)?.disable({ emitEvent: false }));
+        
+        this.formDatosGenerales.get('archivoCertDef')?.disable();
+        return;
+      }
+    
+      if (value === 'NO') {
+        this.form1.patchValue({
+          causa_fallecimiento: '', fecha_defuncion: '',
+          id_departamento_defuncion: '', id_municipio_defuncion: '',
+          fecha_reporte_fallecido: '', numero_certificado_defuncion: ''
+        });
+    
+        ['causa_fallecimiento', 'fecha_defuncion', 'id_departamento_defuncion',
+         'id_municipio_defuncion', 'fecha_reporte_fallecido', 'numero_certificado_defuncion']
+        .forEach(field => this.form1.get(field)?.disable());
+    
+        this.formDatosGenerales.get('archivoCertDef')?.disable();
+        this.formDatosGenerales.get('archivoCertDef')?.clearValidators();
+      } else {
+        ['causa_fallecimiento', 'fecha_defuncion', 'id_departamento_defuncion',
+         'id_municipio_defuncion', 'fecha_reporte_fallecido', 'numero_certificado_defuncion']
+        .forEach(field => this.form1.get(field)?.enable());
+    
+        this.formDatosGenerales.get('archivoCertDef')?.enable();
+        if (!this.Afiliado?.certificado_defuncion) {
+          this.formDatosGenerales.get('archivoCertDef')?.setValidators([Validators.required]);
+        }
+      }
+      this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
+    });
+    
+    if (this.form1.get('fallecido')?.value === 'NO') {
+      this.form1.get('causa_fallecimiento')?.disable();
+      this.form1.get('fecha_defuncion')?.disable();
+      this.form1.get('id_departamento_defuncion')?.disable();
+      this.form1.get('id_municipio_defuncion')?.disable();
+      this.form1.get('fecha_reporte_fallecido')?.disable();
+      this.form1.get('numero_certificado_defuncion')?.disable();
+    }
+  }
+
+  conditionalValidator(predicate: () => boolean, validator: any): any {
+    return (control: FormControl) => {
+      if (!control.parent) {
+        return null;
+      }
+      return predicate() ? validator(control) : null;
+    };
+  }
+
+  onImageCaptured(image: string): void {
+    if (image) {
+      const imageBlob = this.dataURItoBlob(image);
+      if (imageBlob) {
+        this.image = new File([imageBlob], 'perfil.jpg', { type: 'image/jpeg' });
+      }
+    }
   }
 
   cargarCausasFallecimiento() {
@@ -131,22 +450,57 @@ export class EditDatosGeneralesComponent implements OnInit {
     });
   }
 
-  async cargarEstadosAfiliado() {
-    const response = await this.svcAfiliado.getAllEstados().toPromise();
-    this.estado = response.map((estado: { codigo: any; nombre_estado: any; }) => ({
-      label: estado.nombre_estado,
-      value: estado.codigo
-    }));
+  compararEstados(option: any, selected: any): boolean {
+    return option == selected;
+  }
 
-    // Suscribirse a los cambios del formulario
-    this.form1.valueChanges.subscribe((value) => {
-      this.updateDatosGenerales(value);
-    });
+  async cargarEstadosAfiliado() {
+    try {
+      const response = await this.svcAfiliado.getAllEstados().toPromise();
+
+      if (!this.tableData || this.tableData.length === 0) {
+        console.warn("No hay datos en la tabla.");
+        return;
+      }
+
+      this.tableData.forEach((element: any) => {
+        let tiposPersona: string[] = [];
+
+        if (Array.isArray(element.tipoPersona)) {
+          tiposPersona = element.tipoPersona.map((tp: any) => tp.tipo_persona);
+        } else if (element.tipoPersona) {
+          tiposPersona = [element.tipoPersona];
+        }
+
+        // Obtener los estados permitidos
+        const estadosPermitidos = new Set<number>();
+        tiposPersona.forEach(tipo => {
+          const estados = this.estadosPermitidosPorTipoPersona[tipo] || [];
+          estados.forEach((estado: any) => estadosPermitidos.add(estado));
+        });
+
+        // Filtrar los estados obtenidos desde el backend según los estados permitidos
+        element.estadosDisponibles = response
+          .filter((estado: { codigo: number }) => estadosPermitidos.has(estado.codigo))
+          .map((estado: { codigo: number; nombre_estado: string }) => ({
+            label: estado.nombre_estado,
+            value: estado.codigo
+          }));
+        if (element.ID_ESTADO_AFILIACION) {
+          element.estadoAfiliacion = element.estadosDisponibles.find(
+            (estado: any) => estado.value === element.ID_ESTADO_AFILIACION
+          )?.value || null;
+        } else {
+          element.estadoAfiliacion = null;
+        }
+      });
+    } catch (error) {
+      console.error("Error al cargar estados de afiliación:", error);
+    }
   }
 
   updateDatosGenerales(value: any) {
-    // Aquí puedes procesar los datos y actualizarlos en `initialData`
-    this.initialData = { ...this.initialData, ...value }; // O ajusta según sea necesario
+    this.initialData = { ...this.initialData, ...value };
   }
 
   cargarDepartamentos() {
@@ -181,38 +535,54 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.cargarMunicipios(departamentoId);
   }
 
-  async obtenerDatos(event: any): Promise<any> {
-    this.form = event;
-  }
-
   setDatosGenerales(datosGenerales: any) {
-    // Verifica que `datosGenerales` es un objeto válido
+
     if (!datosGenerales || typeof datosGenerales !== 'object') {
-      console.error('datosGenerales no es un objeto válido:', datosGenerales);
-      return;
+        return;
     }
 
     if (!this.formDatosGenerales) {
-      this.formDatosGenerales = this.fb.group({
-        refpers: this.fb.array([])
-      });
+        this.formDatosGenerales = this.fb.group({
+            refpers: this.fb.array([], [Validators.required]),
+            archivoCertDef: [null], 
+            archivo_carnet_discapacidad: [null] // Campo de carnet de discapacidad
+        });
+    }
+
+    if (!this.formDatosGenerales.get('archivo_carnet_discapacidad')) {
+        this.formDatosGenerales.addControl('archivo_carnet_discapacidad', new FormControl(null));
+    }
+
+    // 🔹 Verificar si la persona tiene discapacidad
+    const tieneDiscapacidad = datosGenerales.discapacidad === true;
+    const carnetControl = this.formDatosGenerales.get('archivo_carnet_discapacidad');
+
+    if (tieneDiscapacidad) {
+        carnetControl?.setValidators([Validators.required]);
+    } else {
+        carnetControl?.clearValidators();
+    }
+    carnetControl?.updateValueAndValidity();
+
+    if (datosGenerales.carnet_discapacidad instanceof File) {
+        carnetControl?.setValue(datosGenerales.carnet_discapacidad);
+    } else if (tieneDiscapacidad) {
     }
 
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
     refpersArray.clear();
 
-    // Supongamos que `datosGenerales` es un objeto, no un arreglo
-    const dato = datosGenerales;
-
     const newGroup = this.fb.group({
-      dato,
+        dato: datosGenerales
     });
 
     refpersArray.push(newGroup);
-  }
+    this.cdr.detectChanges();
+}
 
   createRefpersGroup(dato: any): FormGroup {
     return this.fb.group({
+      id_tipo_identificacion: [dato?.ID_IDENTIFICACION],
       n_identificacion: [dato?.N_IDENTIFICACION, Validators.required],
       rtn: [dato?.RTN, Validators.required],
       primer_nombre: [dato?.PRIMER_NOMBRE, Validators.required],
@@ -221,7 +591,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       primer_apellido: [dato?.PRIMER_APELLIDO, Validators.required],
       segundo_apellido: [dato?.SEGUNDO_APELLIDO],
       fecha_nacimiento: [dato?.FECHA_NACIMIENTO, Validators.required],
-      fecha_vencimiento_ident: [dato?.fecha_vencimiento_ident],
+      fecha_afiliacion: [dato?.FECHA_AFILIACION, Validators.required],
       cantidad_dependientes: [dato?.CANTIDAD_DEPENDIENTES],
       cantidad_hijos: [dato?.CANTIDAD_HIJOS],
       telefono_1: [dato?.TELEFONO_1],
@@ -235,7 +605,6 @@ export class EditDatosGeneralesComponent implements OnInit {
       representacion: [dato?.REPRESENTACION],
       sexo: [dato?.SEXO],
       id_pais: [dato?.ID_PAIS],
-      id_tipo_identificacion: [dato?.ID_IDENTIFICACION],
       id_profesion: [dato?.ID_PROFESION],
       id_departamento_residencia: [dato?.id_departamento_residencia],
       id_municipio_residencia: [dato?.ID_MUNICIPIO_RESIDENCIA],
@@ -244,42 +613,118 @@ export class EditDatosGeneralesComponent implements OnInit {
       fallecido: [dato?.fallecido],
       grupo_etnico: [dato?.GRUPO_ETNICO],
       grado_academico: [dato?.GRADO_ACADEMICO],
-      discapacidad: [dato?.TIPO_DISCAPACIDAD ? "SI" : "NO", Validators.required],
-      discapacidades: this.fb.array(dato.discapacidades ? dato.discapacidades.map((d: any) => new FormControl(d?.id_discapacidad)) : [])
+      discapacidad: [dato?.TIPO_DISCAPACIDAD ? 'SI' : 'NO', Validators.required],
+      discapacidades: this.fb.array(
+        dato.discapacidades
+          ? dato.discapacidades.map((d: any) => new FormControl(d?.id_discapacidad))
+          : []
+      )
     });
   }
-
+  
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
       this.loading = true;
-      await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
+
+      this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
         (result) => {
-          this.datos = result;
           this.Afiliado = result;
+          
+          this.mostrarBotonGenerar = this.tieneTipoAfiliado();
+
+          if (result?.ID_DEPARTAMENTO_DEFUNCION) {
+            this.cargarMunicipiosDefuncion(result.ID_DEPARTAMENTO_DEFUNCION);
+          }
+
+          this.certificadoDefuncionUrl = result?.certificado_defuncion
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${result.certificado_defuncion}`)
+            : null;
+
+            this.carnetDiscapacidadUrl = result?.carnet_discapacidad
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${result.carnet_discapacidad}`)
+            : null;
+
+          const carnetDiscapacidadControl = this.formDatosGenerales.get('archivo_carnet_discapacidad');
+
+          if (result?.carnet_discapacidad) {
+            carnetDiscapacidadControl?.clearValidators();
+            carnetDiscapacidadControl?.updateValueAndValidity();
+            this.formDatosGenerales.patchValue({ archivo_carnet_discapacidad: result.carnet_discapacidad });
+          } else {
+            carnetDiscapacidadControl?.setValidators([Validators.required]);
+            carnetDiscapacidadControl?.updateValueAndValidity();
+          }
+
+          const archivoCertDefControl = this.formDatosGenerales.get('archivoCertDef');
+
+          if (result?.certificado_defuncion) {
+            this.certificadoDefuncionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+              `data:application/pdf;base64,${result.certificado_defuncion}`
+            );
+
+            // Establecer el archivo en el formulario
+            archivoCertDefControl?.setValue(result.certificado_defuncion);
+            archivoCertDefControl?.clearValidators();
+            archivoCertDefControl?.updateValueAndValidity();
+          } else {
+            archivoCertDefControl?.setValidators([Validators.required]);
+            archivoCertDefControl?.updateValueAndValidity();
+          }
+
+          // Otras propiedades globales
           this.estadoAfiliacion = result.estadoAfiliacion;
           this.fallecido = result.fallecido;
 
-          const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
-          //refpersArray.clear();
+          // Imagen de perfil
+          if (result.FOTO_PERFIL) {
+            this.image = this.dataURItoBlob(
+              `data:image/jpeg;base64,${result.FOTO_PERFIL}`
+            );
+          }
 
-          const jsonObj: any = result.DIRECCION_RESIDENCIA
-            ? result.DIRECCION_RESIDENCIA.split(',').reduce((acc: any, curr: any) => {
-              const [key, value] = curr.split(':').map((s: string) => s.trim());
-              acc[key] = value;
-              return acc;
-            }, {} as { [key: string]: string })
-            : {}; // Si no existe DIRECCION_RESIDENCIA, asigna un objeto vacío
+          if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
+            const jsonObj = result.DIRECCION_RESIDENCIA_ESTRUCTURADA
+              .split('/')
+              .reduce((acc: any, curr: any) => {
+                const [key, value] = curr.split(':').map((s: string) => s.trim());
+                acc[key] = value;
+                return acc;
+              }, {});
 
-            console.log(result);
+            this.initialData = {
+              ...this.initialData,
+              avenida: jsonObj.AVENIDA || '',
+              calle: jsonObj.CALLE || '',
+              sector: jsonObj.SECTOR || '',
+              bloque: jsonObj.BLOQUE || '',
+              aldea: jsonObj.ALDEA || '',
+              caserio: jsonObj.CASERIO || '',
+              barrio_colonia: jsonObj['BARRIO_COLONIA'] || '',
+              numero_casa: jsonObj['N° DE CASA'] || '',
+              color_casa: jsonObj['COLOR CASA'] || ''
+            };
+          }
 
+          this.formDatosGenerales.markAllAsTouched();
+          this.form1.markAllAsTouched();
+
+          // Llenar initialData con datos globales
           this.initialData = {
+            ...this.initialData,
+            id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION,
             n_identificacion: result?.N_IDENTIFICACION,
             primer_nombre: result?.PRIMER_NOMBRE,
             segundo_nombre: result?.SEGUNDO_NOMBRE,
             tercer_nombre: result?.TERCER_NOMBRE,
             primer_apellido: result?.PRIMER_APELLIDO,
             segundo_apellido: result?.SEGUNDO_APELLIDO,
-            fecha_nacimiento: result?.FECHA_NACIMIENTO,
+            fecha_nacimiento: result?.FECHA_NACIMIENTO
+              ? new Date(new Date(result.FECHA_NACIMIENTO + 'T00:00:00').setDate(new Date(result.FECHA_NACIMIENTO + 'T00:00:00').getDate()))
+              : null,
+
+            fecha_afiliacion: result?.FECHA_AFILIACION
+              ? new Date(new Date(result.FECHA_AFILIACION + 'T00:00:00').setDate(new Date(result.FECHA_AFILIACION + 'T00:00:00').getDate()))
+              : null,
             fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
             cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
             representacion: result?.REPRESENTACION,
@@ -294,61 +739,93 @@ export class EditDatosGeneralesComponent implements OnInit {
             estado_civil: result?.ESTADO_CIVIL,
             cantidad_hijos: result?.CANTIDAD_HIJOS,
             id_profesion: result?.ID_PROFESION,
-
             id_pais: result?.ID_PAIS,
             id_departamento_residencia: result?.id_departamento_residencia,
             id_municipio_residencia: result?.ID_MUNICIPIO,
-
             id_departamento_nacimiento: result?.id_departamento_nacimiento,
             id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
-
-            discapacidad: result?.discapacidades.length > 0 ? true : false,
-            id_tipo_identificacion: result?.ID_PROFESION,
-
-            avenida: jsonObj?.AVENIDA || "",
-            calle: jsonObj?.CALLE || "",
-            sector: jsonObj?.SECTOR || "",
-            bloque: jsonObj?.BLOQUE || "",
-            aldea: jsonObj?.ALDEA || "",
-            caserio: jsonObj?.CASERIO || "",
-
-            barrio_colonia: jsonObj?.["BARRIO_COLONIA"] || "",
-            numero_casa: jsonObj?.["N° DE CASA"] || "",
-            color_casa: jsonObj?.["COLOR CASA"] || ""
+            discapacidad: result?.discapacidades?.length > 0 ? true : false,
+            direccion_residencia: result.DIRECCION_RESIDENCIA,
+            fallecido: result?.fallecido,
+            carnet_discapacidad: result?.carnet_discapacidad ? `data:application/pdf;base64,${result.carnet_discapacidad}` : null
           };
 
-          if (result?.discapacidades.length > 0) {
-            this.discapacidadSeleccionada = true
-            this.indicesSeleccionados = result?.discapacidades
+          // Discapacidades
+          if (result?.discapacidades?.length > 0) {
+            this.discapacidadSeleccionada = true;
+            this.indicesSeleccionados = result?.discapacidades;
           }
 
-          this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion)
-          this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
-          this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
-          this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
-          this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA)
-          //this.form1.controls.estado.setValue('ACTIVO');
+          // Rellenar valores de form1
+          this.form1.patchValue({
+            fallecido: result?.fallecido,
+            fecha_defuncion: result?.fecha_defuncion
+            ? new Date(new Date(result?.fecha_defuncion + 'T00:00:00').setDate(new Date(result?.fecha_defuncion + 'T00:00:00').getDate()))
+              : null,
+            causa_fallecimiento: result?.ID_CAUSA_FALLECIMIENTO,
+            id_departamento_defuncion: result?.ID_DEPARTAMENTO_DEFUNCION,
+            id_municipio_defuncion: result?.ID_MUNICIPIO_DEFUNCION,
+            tipo_persona: result?.ID_TIPO_PERSONA,
+            estado: result?.estadoAfiliacion?.codigo,
+            voluntario: result?.VOLUNTARIO || 'NO',
+            numero_certificado_defuncion: result?.NUMERO_CERTIFICADO_DEFUNCION,
+            fecha_reporte_fallecido: result?.FECHA_REPORTE_FALLECIDO
+            ? new Date(new Date(result?.FECHA_REPORTE_FALLECIDO + 'T00:00:00').setDate(new Date(result?.FECHA_REPORTE_FALLECIDO + 'T00:00:00').getDate()))
+              : null,
+          });
 
-          //this.form1.controls.certificado_defuncion.setValue(result?.certificado_defuncion)
-          //this.form1.controls.observaciones.setValue("Ninguna")
+          // Parchar el FormGroup con los datos recibidos
+          this.datosGeneralesForm.patchValue({
+            FotoPerfil: result?.FOTO_PERFIL ? `data:image/jpeg;base64,${result.FOTO_PERFIL}` : null,
+            id_tipo_identificacion: result?.ID_TIPO_IDENTIFICACION,
+            n_identificacion: result?.N_IDENTIFICACION,
+            primer_nombre: result?.PRIMER_NOMBRE,
+            segundo_nombre: result?.SEGUNDO_NOMBRE,
+            tercer_nombre: result?.TERCER_NOMBRE,
+            primer_apellido: result?.PRIMER_APELLIDO,
+            segundo_apellido: result?.SEGUNDO_APELLIDO,
+            fecha_nacimiento: result?.FECHA_NACIMIENTO
+              ? new Date(new Date(result.FECHA_NACIMIENTO + 'T00:00:00').setDate(new Date(result.FECHA_NACIMIENTO + 'T00:00:00').getDate()))
+              : null,
 
-          this.cargada = true
+            fecha_afiliacion: result?.FECHA_AFILIACION
+              ? new Date(new Date(result.FECHA_AFILIACION + 'T00:00:00').setDate(new Date(result.FECHA_AFILIACION + 'T00:00:00').getDate()))
+              : null,
+            fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
+            cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
+            representacion: result?.REPRESENTACION,
+            telefono_1: result?.TELEFONO_1,
+            telefono_2: result?.TELEFONO_2,
+            correo_1: result?.CORREO_1,
+            correo_2: result?.CORREO_2,
+            rtn: result?.RTN,
+            genero: result?.GENERO,
+            grupo_etnico: result?.GRUPO_ETNICO,
+            grado_academico: result?.GRADO_ACADEMICO,
+            estado_civil: result?.ESTADO_CIVIL,
+            cantidad_hijos: result?.CANTIDAD_HIJOS,
+            id_profesion: result?.ID_PROFESION,
+            id_pais: result?.ID_PAIS,
+            id_departamento_residencia: result?.id_departamento_residencia,
+            id_municipio_residencia: result?.ID_MUNICIPIO,
+            id_departamento_nacimiento: result?.id_departamento_nacimiento,
+            id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
+            discapacidad: result?.discapacidades?.length > 0 ? true : false,
+            direccion_residencia: result.DIRECCION_RESIDENCIA,
+            archivo_carnet_discapacidad: result?.carnet_discapacidad
+            ? `data:application/pdf;base64,${result.carnet_discapacidad}`
+            : null
+          });
 
-          //this.form1.controls.id_departamento_defuncion.setValue("COLON")
-          //console.log(this.form1.controls.id_departamento_defuncion )
-          /* this.form1.setValue({
-            estado: 'ACTIVO',
-            causa_fallecimiento: '1',
-            id_departamento_defuncion: '1',
-            id_municipio_defuncion: '860'
-          }); */
+          // Marcar todos los controles como tocados para mostrar errores
+          this.datosGeneralesForm.markAllAsTouched();
+          this.form1.markAllAsTouched();
 
+          const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
+          refpersArray.clear();
+          refpersArray.push(this.createRefpersGroup(result));
 
-          //refpersArray.push(newGroup);
-
-          //this.updateDiscapacidades();
-
-          this.Afiliado.nameAfil = this.unirNombres(result?.PRIMER_NOMBRE, result?.SEGUNDO_NOMBRE, result?.TERCER_NOMBRE, result?.PRIMER_APELLIDO, result?.SEGUNDO_APELLIDO);
+          this.cdr.detectChanges(); // <-- Añadir esta línea
           this.loading = false;
         },
         (error) => {
@@ -359,86 +836,470 @@ export class EditDatosGeneralesComponent implements OnInit {
     }
   }
 
-  updateDiscapacidades() {
+  updateDiscapacidades(discapacidadesSeleccionadas: any[]) {
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
     if (refpersArray.length > 0) {
       const firstRefpersGroup = refpersArray.controls[0] as FormGroup;
       const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
-
-      if (discapacidadesArray) {
-        const selectedDiscapacidades = discapacidadesArray.value;
-        discapacidadesArray.clear();
-        selectedDiscapacidades.forEach((id: number) => {
-          discapacidadesArray.push(new FormControl(id));
-        });
-      }
+      discapacidadesArray.clear();
+      discapacidadesSeleccionadas.forEach((id: number) => {
+        discapacidadesArray.push(new FormControl(id));
+      });
     }
   }
 
   resetDatos() {
-    if (this.form) {
-      this.form.reset();
+    if (this.form1) {
+      this.form1.reset();
     }
     this.Afiliado = {};
   }
 
-  GuardarInformacion() {
-    //this.formDatosGenerales.value.refpers[0].fecha_nacimiento = convertirFechaInputs(this.formDatosGenerales.value.refpers[0].fecha_nacimiento);
-    let a: any
-    if (this.formDatosGenerales.value.refpers[0]) {
-      a = {
-        ...this.formDatosGenerales.value.refpers[0],
-        estado: this.form1.value.estado,
-        causa_fallecimiento: this.form1.value.causa_fallecimiento,
-        fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
-        id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
-        id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
-        certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
-        tipo_persona: this.form1.value.tipo_persona,
-        //certificado_defuncion: this.form1.value.certificado_defuncion
-        //observaciones: this.form1.value.observaciones,
-      };
-    } else {
-      a = {
-        dato: {
-          ...this.initialData
-        },
-        ...this.formDatosGenerales.value.refpers[0],
-        estado: this.form1.value.estado,
-        causa_fallecimiento: this.form1.value.causa_fallecimiento,
-        fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
-        id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
-        id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
-        certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
-        tipo_persona: this.form1.value.tipo_persona
-        //certificado_defuncion: this.form1.value.certificado_defuncion
-        //observaciones: this.form1.value.observaciones,
-      };
+  GuardarInformacion(): void {
+    this.datosGeneralesForm.markAllAsTouched();
+    this.form1.markAllAsTouched();
+    this.formDatosGenerales.markAllAsTouched();
+
+    /* if (this.formDatosGenerales.invalid || this.form1.invalid) {
+      this.checkFormErrors();
+      this.toastr.error('Por favor complete los campos requeridos');
+      return;
+    } */
+
+    const refpersData = this.formDatosGenerales.get('refpers')?.value?.[0] || {};
+
+    const formValues = this.form1.value;
+
+    const carnetDiscapacidad = this.formDatosGenerales.get('archivo_carnet_discapacidad')?.value;
+
+    if (formValues.discapacidad === true && !(carnetDiscapacidad instanceof File)) {
+      this.toastr.warning("Debes seleccionar un archivo válido para el carnet de discapacidad.", "Advertencia");
+      return;
+  }
+  
+  const formData = new FormData();
+  if (carnetDiscapacidad instanceof File) {
+      formData.append('carnet_discapacidad', carnetDiscapacidad);
+  }
+
+    let certificadoDefuncion = this.formDatosGenerales.get('archivoCertDef')?.value;
+
+    if (!certificadoDefuncion && this.Afiliado?.certificado_defuncion) {
+      const base64Data = this.Afiliado.certificado_defuncion;
+      const blob: any = this.dataURItoBlob(`data:application/pdf;base64,${base64Data}`);
+      certificadoDefuncion = new File([blob], 'certificado_defuncion_existente.pdf', { type: 'application/pdf' });
     }
-    this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, a).subscribe(
-      async (result) => {
-        this.toastr.success(`Datos generales modificados correctamente`);
+
+    // Construcción del objeto a enviar
+    const datosActualizados: any = {
+      ...refpersData,
+      fallecido: formValues.fallecido,
+      causa_fallecimiento: formValues.causa_fallecimiento,
+      fecha_defuncion: convertirFechaInputs(formValues.fecha_defuncion),
+      id_departamento_defuncion: formValues.id_departamento_defuncion,
+      id_municipio_defuncion: formValues.id_municipio_defuncion,
+      estado: formValues.estado,
+      tipo_persona: formValues.tipo_persona,
+      voluntario: formValues.voluntario,
+      numero_certificado_defuncion: formValues.numero_certificado_defuncion,
+      fecha_reporte_fallecido: convertirFechaInputs(formValues.fecha_reporte_fallecido),
+      fecha_afiliacion: convertirFechaInputs(refpersData.fecha_afiliacion),
+      certificado_defuncion: certificadoDefuncion,
+      carnet_discapacidad: carnetDiscapacidad,
+      FotoPerfil: this.image ? this.image : undefined,
+      detalles: this.tableData
+    };
+
+    this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, datosActualizados)
+    .subscribe({
+        next: () => {
+            this.toastr.success('Datos generales modificados correctamente');
+            this.onDatoAgregado.emit();
+            this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error("❌ Error recibido del backend:", error);
+      
+          let mensajeError = 'Ocurrió un error al actualizar los datos.';
+          let erroresDetalle: string[] = [];
+      
+          if (error.error?.errors && Array.isArray(error.error.errors)) {
+              erroresDetalle = error.error.errors;
+          }
+          if (erroresDetalle.length > 0) {
+              mensajeError += "<br><br><strong>Errores detectados:</strong><br>";
+              mensajeError += erroresDetalle.map((err, index) => `${index + 1}. ${err}`).join("<br>");
+          } else {
+              mensajeError += "<br><br>No se recibieron detalles de errores.";
+          }
+      
+          // ✅ Mostramos el mensaje de error con formato HTML en el Toastr
+          this.toastr.error(mensajeError, 'Errores en el formulario', { enableHtml: true, timeOut: 7000 });
+      }
+      
+      
+    });
+  }
+
+  guardarEstadoAfiliacion(element: any) {
+    const estadoAfiliacion = typeof element.estadoAfiliacion === 'string'
+      ? element.estadoAfiliacion.trim()
+      : String(element.estadoAfiliacion);
+
+    const payload = {
+      idPersona: element.ID_PERSONA,
+      idCausante: element.ID_CAUSANTE,
+      idCausantePadre: element.ID_CAUSANTE_PADRE,
+      idDetallePersona: element.ID_DETALLE_PERSONA,
+      idEstadoAfiliacion: element.estadoAfiliacion,
+      dniCausante: element.dniCausante,
+      estadoAfiliacion: estadoAfiliacion, 
+      observacion: element.observacion || ''
+    };
+
+    this.svcAfiliado.updateEstadoAfiliacionPorDni(payload).subscribe(
+      (response) => {
+        this.toastr.success('Estado actualizado correctamente');
       },
       (error) => {
-        this.toastr.error(`Error: ${error.error.message}`);
+        this.toastr.error(
+          `Error: ${error.error.message || 'No se pudo actualizar el estado'}`
+        );
       }
     );
   }
 
-  getErrors(fieldName: string): any {
-    // Implementar lógica para manejar errores de validación
+  getErrors(fieldName: string): string[] {
+    const control = this.form1.get(fieldName);
+    if (control && control.errors && (control.dirty || control.touched)) {
+      const errors: string[] = [];
+      if (control.hasError('required')) {
+        errors.push('Este campo es obligatorio.');
+      }
+      if (control.hasError('maxlength')) {
+        errors.push('El campo excede el máximo de caracteres permitidos.');
+      }
+      if (control.hasError('pattern')) {
+        errors.push('Formato inválido.');
+      }
+      return errors;
+    }
+    return [];
   }
 
-  mostrarCamposFallecido(e: any) {
-    //this.estadoAfiliacion = e.value;
+  getCarnetDiscapacidad(event: File): void {
+    if (!this.formDatosGenerales.get('archivo_carnet_discapacidad')) {
+      this.formDatosGenerales.addControl('archivo_carnet_discapacidad', new FormControl(null, [Validators.required]));
+    }
+    this.formDatosGenerales.get('archivo_carnet_discapacidad')?.setValue(event);
   }
 
   getArchivoDef(event: File): any {
-    // Si no lo has agregado aún, puedes agregar el control aquí
-    if (!this.formDatosGenerales?.contains('archivoCertDef')) {
+    if (!this.formDatosGenerales.contains('archivoCertDef')) {
       this.formDatosGenerales.addControl('archivoCertDef', new FormControl('', []));
     }
-    // Asignar el archivo al control del formulario
     this.formDatosGenerales.get('archivoCertDef')?.setValue(event);
   }
+
+  getArchivoFoto(event: File): void {
+    if (!this.formDatosGenerales.contains('foto_empleado')) {
+      this.formDatosGenerales.addControl('foto_empleado', new FormControl('', []));
+    }
+    this.formDatosGenerales.get('foto_empleado')?.setValue(event);
+  }
+
+  dataURItoBlob(dataURI: string | null): Blob | null {
+    if (!dataURI) {
+      console.error('dataURI is null or undefined');
+      return null;
+    }
+    const byteString = atob(dataURI.split(',')[1] || '');
+    const mimeString = dataURI.split(',')[0]
+      ?.split(':')[1]
+      ?.split(';')[0] || 'image/jpeg';
+    const buffer = new ArrayBuffer(byteString.length);
+    const data = new DataView(buffer);
+    for (let i = 0; i < byteString.length; i++) {
+      data.setUint8(i, byteString.charCodeAt(i));
+    }
+    return new Blob([buffer], { type: mimeString });
+  }
+
+  getErrorsDatosGenerales(fieldName: string): string[] {
+    const control = this.formDatosGenerales.get(fieldName);
+    if (control && control.errors && (control.dirty || control.touched)) {
+      const errors: string[] = [];
+      if (control.hasError('required')) {
+        errors.push('Este archivo es obligatorio.');
+      }
+      return errors;
+    }
+    return [];
+  }
+
+  checkFormErrors(): void {
+    console.log('Validando form1...');
+    Object.keys(this.form1.controls).forEach(field => {
+      const control = this.form1.get(field);
+      if (control && control.invalid) {
+        console.log(`Campo '${field}' tiene errores:`, control.errors);
+      }
+    });
+
+    console.log('Validando formDatosGenerales...');
+    Object.keys(this.formDatosGenerales.controls).forEach(field => {
+      const control = this.formDatosGenerales.get(field);
+      if (control && control.invalid) {
+        console.log(`Campo '${field}' tiene errores:`, control.errors);
+      }
+    });
+
+    const archivoCertDef = this.formDatosGenerales.get('archivoCertDef');
+
+    if (archivoCertDef?.invalid) {
+      console.log('El archivo "Certificado de Defunción" es inválido:', archivoCertDef.errors);
+    }
+  }
+
+  eliminarCertificadoDefuncion(): void {
+    this.certificadoDefuncionFile = null;
+    this.formDatosGenerales.get('archivoCertDef')?.setValue(null);
+    this.formDatosGenerales.get('archivoCertDef')?.markAsTouched();
+    this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity(); 
+    this.certificadoDefuncionUrl = null;
+  }
+
+  onCertificadoDefuncionChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.certificadoDefuncionFile = file;
+      this.formDatosGenerales.get('archivoCertDef')?.setValue(file);
+      this.formDatosGenerales.get('archivoCertDef')?.markAsTouched();
+      this.formDatosGenerales.get('archivoCertDef')?.updateValueAndValidity();
+      this.certificadoDefuncionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(file));
+    }
+  }
+
+  tieneTipoPersona(): boolean {
+    return !!(this.Afiliado?.TIPO_PERSONA || this.tableData.length > 0);
+  }
+  
+  esAfiliado(): boolean {
+    return !!(this.Afiliado?.TIPO_PERSONA && 
+              ["AFILIADO", "JUBILADO", "PENSIONADO"].includes(this.Afiliado.TIPO_PERSONA)) || 
+           this.tableData.some(item => 
+              ["AFILIADO", "JUBILADO", "PENSIONADO"].includes(item.tipoPersona));
+  }
+  
+  obtenerNombreTipoPersona(): string {
+    const tipo = this.tiposPersona.find(tp => tp.ID_TIPO_PERSONA === this.tipoPersonaSeleccionada);
+    return tipo ? tipo.TIPO_PERSONA : 'AFILIADO';
+  }
+
+  convertirEnAfiliado() {
+    if (!this.tipoPersonaSeleccionada || !this.Afiliado?.ID_PERSONA) {
+      this.toastr.warning('Debe seleccionar un tipo de persona antes de continuar.');
+      return;
+    }
+  
+    const payload = {
+      idPersona: this.Afiliado.ID_PERSONA,
+      idTipoPersona: this.tipoPersonaSeleccionada
+    };
+  
+    this.cargandoTabla = true;
+  
+    this.afiliacionService.convertirEnAfiliado(payload).subscribe({
+      next: (response) => {
+        this.toastr.success(response.message || 'Persona convertida exitosamente.');
+        this.Afiliado.TIPO_PERSONA = 'AFILIADO';
+        setTimeout(() => {
+          this.cargarEstadosAfiliado();
+          this.cargandoTabla = false;
+        }, 2000);
+      },
+      error: (error) => {
+        this.toastr.error(error.message || 'Error al convertir en afiliado.');
+        this.cargandoTabla = false;
+      }
+    });
+  }
+  
+  cargarMunicipiosDefuncion(departamentoId: number) {
+    this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
+      next: (data) => {
+        this.municipios = data;
+
+        // Si ya hay un municipio de defunción, asignarlo después de cargar los municipios
+        if (this.form1.get('id_municipio_defuncion')?.value) {
+          this.form1.patchValue({
+            id_municipio_defuncion: this.form1.get('id_municipio_defuncion')?.value
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios de defunción:', error);
+      }
+    });
+  }
+
+  onDepartamentoDefuncionChange(event: any) {
+    const departamentoId = event.value;
+    this.cargarMunicipiosDefuncion(departamentoId);
+  }
+
+  private obtenerDatosDesdeToken(): void {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      const dataToken = this.authService.decodeToken(token);
+      this.usuarioToken = {
+        correo: dataToken.correo,
+        numero_empleado: dataToken.numero_empleado,
+        departamento: dataToken.departamento,
+        municipio: dataToken.municipio,
+        nombrePuesto: dataToken.nombrePuesto,
+        nombreEmpleado: dataToken.nombreEmpleado,
+      };
+    } else {
+      console.warn('No se encontró un token en sessionStorage.');
+    }
+  }
+
+  async generarConstanciaAfiliacion(): Promise<void> {
+    try {
+      const validacionExitosa = await this.validarDatosAfiliado();
+      if (!validacionExitosa) {
+        return;
+      }
+      
+  
+      this.personaService.getPersonaByDni(this.Afiliado.N_IDENTIFICACION).subscribe(
+        (personaActualizada: any) => {
+          if (!personaActualizada) {
+            console.error("No se encontró la persona luego de crear la afiliación.");
+            return;
+          }
+          personaActualizada.tipoFormulario = "ACTUALIZACION";
+  
+          this.svcAfiliado
+            .generarConstanciaQR(personaActualizada, this.usuarioToken, "afiliacion2")
+            .subscribe((blob: Blob) => {
+              const downloadURL = window.URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = downloadURL;
+              link.download = this.generarNombreArchivo(personaActualizada, "afiliacion2");
+              link.click();
+              window.URL.revokeObjectURL(downloadURL);
+            });
+        },
+        (err) => {
+          console.error("Error al consultar persona por DNI:", err);
+        }
+      );
+    } catch (error) {
+      console.error("Error en la validación antes de generar la constancia:", error);
+    }
+  }
+  
+
+  generarNombreArchivo(persona: any, tipo: string): string {
+    const nombreCompleto = `${persona.primer_nombre}_${persona.primer_apellido}`;
+    const fechaActual = new Date().toISOString().split('T')[0];
+    return `${nombreCompleto}_${fechaActual}_constancia_${tipo}.pdf`;
+  }
+
+  tieneTipoAfiliado(): boolean {
+
+    if (!this.Afiliado) {
+      return false;
+    }
+
+    const tiposPermitidos = ["AFILIADO", "PENSIONADO", "JUBILADO"];
+
+    if (this.Afiliado.TIPO_PERSONA && tiposPermitidos.includes(this.Afiliado.TIPO_PERSONA)) {
+      return true;
+    }
+
+    if (Array.isArray(this.Afiliado.TIPOS_PERSONA) && this.Afiliado.TIPOS_PERSONA.some((tipo: any) => tiposPermitidos.includes(tipo))) {
+      return true;
+    }
+    return false;
+  }
+
+  
+  
+  validarDatosAfiliado(): Promise<boolean> {
+    
+    return new Promise((resolve) => {
+      if (!this.Afiliado?.ID_PERSONA) {
+        console.warn("No se ha definido el ID_PERSONA para validar.");
+        this.toastr.error("No se ha definido el ID_PERSONA para validar.");
+        resolve(false);
+        return;
+      }
+  
+      this.afiliacionService.tieneBancoActivo(this.Afiliado.ID_PERSONA).subscribe(
+        (res) => {
+          this.tieneBancoActivo = res.tieneBancoActivo;
+          this.beneficiariosValidos = res.beneficiariosValidos;
+          this.tieneReferencias = res.tieneReferencias;
+          this.tieneCentroTrabajo = res.tieneCentroTrabajo;
+          this.datosCompletos = res.datosCompletos;
+          this.ultimaActualizacionValida = res.ultimaActualizacionValida;
+          this.estaEnPeps = res.estaEnPeps;
+  
+          this.validacionesCompletas =
+            this.tieneBancoActivo &&
+            this.beneficiariosValidos &&
+            this.tieneReferencias &&
+            this.tieneCentroTrabajo &&
+            this.datosCompletos &&
+            this.ultimaActualizacionValida;
+  
+          if (!this.validacionesCompletas) {
+            const errores: string[] = [];
+  
+            if (!this.tieneBancoActivo) {
+              errores.push("La persona no tiene un banco activo asociado.");
+            }
+            if (!this.beneficiariosValidos) {
+              errores.push("Los beneficiarios no tienen sus datos completos o la suma de porcentajes no es 100%.");
+            }
+            if (!this.tieneReferencias) {
+              errores.push("Faltan referencias registradas.");
+            }
+            if (!this.tieneCentroTrabajo) {
+              errores.push("No tiene un centro de trabajo registrado.");
+            }
+            if (!this.datosCompletos) {
+              errores.push("Faltan datos personales obligatorios.");
+            }
+            if (!this.ultimaActualizacionValida) {
+              errores.push(
+                this.estaEnPeps
+                  ? "Los datos no han sido actualizados en los últimos 6 meses."
+                  : "Los datos no han sido actualizados en los últimos 2 años."
+              );
+            }
+  
+            this.toastr.warning(
+              `No puedes generar la constancia debido a los siguientes problemas:\n- ${errores.join("\n- ")}`
+            );
+  
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        },
+        (error) => {
+          console.error("Error al validar datos de afiliado:", error);
+          this.toastr.error("Error al validar los datos del afiliado.");
+          resolve(false);
+        }
+      );
+    });
+  }
+  
+
 }

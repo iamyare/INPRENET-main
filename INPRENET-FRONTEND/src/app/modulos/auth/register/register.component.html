@@ -13,11 +13,14 @@
           <mat-form-field appearance="fill" class="form-field col-12">
             <mat-label>Correo Electrónico</mat-label>
             <input matInput type="email" formControlName="correo" readonly>
-            <mat-error *ngIf="form.controls['correo'].invalid && form.controls['correo'].touched">
-              Correo es requerido y debe ser válido
-            </mat-error>
           </mat-form-field>
         </div>
+        <!-- <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field col-12">
+            <mat-label>Número de Identificación</mat-label>
+            <input matInput type="text" formControlName="numero_identificacion">
+          </mat-form-field>
+        </div> -->
         <div class="form-row">
           <mat-form-field appearance="fill" class="form-field col-6">
             <mat-label>Teléfono</mat-label>
@@ -28,92 +31,46 @@
             <input matInput type="text" formControlName="telefonoEmpleado2">
           </mat-form-field>
         </div>
-
         <div class="form-row">
           <mat-form-field appearance="fill" class="form-field col-6">
             <mat-label>Contraseña</mat-label>
-            <input matInput type="password" formControlName="contrasena">
+            <input matInput [type]="passwordVisible ? 'text' : 'password'" formControlName="contrasena">
+            <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()" tabindex="-1">
+              <mat-icon>{{ passwordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="form.controls['contrasena'].hasError('required')">
+              La contraseña es obligatoria.
+            </mat-error>
+            <mat-error *ngIf="form.controls['contrasena'].hasError('pattern')">
+              La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
+            </mat-error>
           </mat-form-field>
+
           <mat-form-field appearance="fill" class="form-field col-6">
             <mat-label>Confirmar Contraseña</mat-label>
-            <input matInput type="password" formControlName="confirmarContrasenia">
+            <input matInput [type]="confirmPasswordVisible ? 'text' : 'password'" formControlName="confirmarContrasenia">
+            <button mat-icon-button matSuffix type="button" (click)="toggleConfirmPasswordVisibility()" tabindex="-1">
+              <mat-icon>{{ confirmPasswordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
             <mat-error *ngIf="form.controls['confirmarContrasenia'].hasError('confirmarContrasena')">
               Las contraseñas no coinciden
             </mat-error>
           </mat-form-field>
         </div>
-
         <div class="form-row">
-          <mat-form-field appearance="fill" class="form-field col-12">
-            <mat-label>Número de Identificación</mat-label>
-            <input matInput type="text" formControlName="numero_identificacion">
-          </mat-form-field>
-        </div>
-
-        <div class="form-row">
-          <mat-form-field appearance="fill" class="form-field col-6">
-            <mat-label>Pregunta de Seguridad 1</mat-label>
-            <mat-select formControlName="preguntaseguridad1">
-              <mat-option *ngFor="let opcion of getAvailableQuestions(0)" [value]="opcion">
-                {{ opcion }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="fill" class="form-field col-6">
-            <mat-label>Respuesta</mat-label>
-            <input matInput formControlName="respuestaSeguridad1" type="text">
-          </mat-form-field>
-        </div>
-
-        <div class="form-row">
-          <mat-form-field appearance="fill" class="form-field col-6">
-            <mat-label>Pregunta de Seguridad 2</mat-label>
-            <mat-select formControlName="preguntaseguridad2">
-              <mat-option *ngFor="let opcion of getAvailableQuestions(1)" [value]="opcion">
-                {{ opcion }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="fill" class="form-field col-6">
-            <mat-label>Respuesta</mat-label>
-            <input matInput formControlName="respuestaSeguridad2" type="text">
-          </mat-form-field>
-        </div>
-
-        <div class="form-row">
-          <mat-form-field appearance="fill" class="form-field col-6">
-            <mat-label>Pregunta de Seguridad 3</mat-label>
-            <mat-select formControlName="preguntaseguridad3">
-              <mat-option *ngFor="let opcion of getAvailableQuestions(2)" [value]="opcion">
-                {{ opcion }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="fill" class="form-field col-6">
-            <mat-label>Respuesta</mat-label>
-            <input matInput formControlName="respuestaSeguridad3" type="text">
-          </mat-form-field>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group col-6">
+          <!-- <div class="form-group col-6">
             <label for="archivo">Sube tu identificación</label>
-            <input id="archivo" type="file" (change)="onFileChange($event, 'archivo')" accept="image/*"
-              class="form-control-file" />
-          </div>
-
+            <input id="archivo" type="file" (change)="onFileChange($event, 'archivo')" accept="image/*" />
+          </div> -->
           <div class="form-group col-6">
-            <label for="fotografia">Sube tu fotografía</label>
-            <input id="fotografia" type="file" (change)="onFileChange($event, 'fotografia')" accept="image/*"
-              class="form-control-file" />
+            <label for="fotografia">Sube tu fotografía para tu perfil</label>
+            <input id="fotografia" type="file" (change)="onFileChange($event, 'fotografia')" accept="image/*" />
           </div>
         </div>
-
         <div class="form-row">
-          <div class="button-container col-12">
-            <button mat-raised-button color="primary" type="submit" [disabled]="!isFormComplete()">Completar
-              Registro</button>
-          </div>
+          <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="!isFormComplete()">
+            Completar Registro
+          </button>
         </div>
       </div>
     </form>

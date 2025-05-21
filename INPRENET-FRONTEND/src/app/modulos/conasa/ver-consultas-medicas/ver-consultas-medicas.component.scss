@@ -1,0 +1,177 @@
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+/* Contenedor de la tabla */
+.table-container {
+    width: 100%;
+    max-width: 95%;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    overflow: hidden;
+}
+
+/* Contenedor interno para aplicar bordes redondeados */
+.table-wrapper {
+  border-radius: 12px;
+  overflow: hidden; /* Para que no haya esquinas blancas */
+}
+
+/* Tabla */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: white;
+}
+
+/* Encabezados de la tabla */
+th {
+  background-color: #1c9588 !important; /* Verde oscuro */
+  color: white !important;
+  font-weight: bold;
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+  border-bottom: 2px solid #1c9588;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-radius: 0; /* Evita redondear cada celda */
+}
+
+/* Aplica el redondeo solo a las esquinas reales */
+th:first-child {
+  border-top-left-radius: 12px;
+}
+
+th:last-child {
+  border-top-right-radius: 12px;
+}
+
+/* Celdas */
+td {
+  font-size: 14px;
+  text-align: left;
+  padding: 10px;
+  vertical-align: top;
+  word-break: break-word;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Bordes redondeados en las primeras y últimas celdas de la última fila */
+tr:last-child td:first-child {
+  border-bottom-left-radius: 12px;
+}
+
+tr:last-child td:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+/* Columnas con tamaño específico */
+.fecha-col {
+  min-width: 80px;
+  max-width: 110px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.dni-col {
+  min-width: 110px;
+  max-width: 150px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.diagnostico-col {
+  min-width: 350px;
+  max-width: 450px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Alternar colores en filas */
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #e0f7fa;
+}
+
+/* Hacer la tabla responsiva */
+@media (max-width: 1024px) {
+  .table-container {
+    max-width: 100%;
+    padding: 8px;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  th, td {
+    font-size: 12px;
+    padding: 8px;
+  }
+}
+
+/* Estilo del paginador */
+.mat-paginator {
+  background: #1c9588;
+  color: white;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Título de la tabla */
+.table-title {
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 16px;
+  color: #1c9588; /* Verde oscuro */
+}
+
+.search-field {
+    flex: 1;
+    max-width: 400px;
+}
+
+.export-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.month-picker, .year-picker {
+    width: 150px;
+}
+  
+  .filters-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+button {
+    height: 40px;
+    white-space: nowrap;
+}
+
+.excel-button {
+  background-color: #1c9588 !important;
+  color: white !important;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: background 0.3s ease-in-out;
+}
+
+.excel-button:hover {
+  background-color: #157f72 !important; /* Un poco más oscuro al pasar el mouse */
+}

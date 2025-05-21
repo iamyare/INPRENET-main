@@ -1,10 +1,10 @@
 .card-container {
-  max-width: 900px; /* Aumenta el ancho máximo */
+  max-width: 900px;
+  /* Aumenta el ancho máximo */
   margin: 20px auto;
-  padding: 30px; /* Aumenta el padding para más espacio interno */
+  padding: 30px;
+  /* Aumenta el padding para más espacio interno */
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: #ffffff;
 }
 
 .table-container {
@@ -15,7 +15,8 @@ table {
   width: 100%;
 }
 
-.mat-header-cell, .mat-cell {
+.mat-header-cell,
+.mat-cell {
   padding: 10px;
   text-align: left;
 }

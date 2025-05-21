@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
@@ -14,8 +14,25 @@ import { ComponentsModule } from './components/components.module';
 import { AdminModule } from './modulos/admin/admin.module';
 import { SidenavService } from './services/sidenav.service';
 import { TokenInterceptor } from './interceptors/token.interceptor';
-import { MovimientosInpremaModule } from './modulos/movimientos-inprema/movimientos-inprema.module';
 import { EscalafonModule } from './modulos/escalafon/escalafon.module';
+import { ConasaModule } from './modulos/conasa/conasa.module';
+import { DocumentosModule } from './modulos/documentos/documentos.module';
+
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+import { RnpModule } from './modulos/rnp/rnp.module';
+
+const hondurasLocale = { ...localeEs } as any;
+
+// Ajusta el formato de números (índice 3)
+hondurasLocale[3] = [
+  ',',  // Separador de miles
+  '.',  // Separador decimal
+  ';',  // Separador de listas (opcional, puedes dejarlo igual)
+];
+
+// Registra la configuración personalizada
+registerLocaleData(hondurasLocale, 'es-HN');
 @NgModule({
   declarations: [
     AppComponent,
@@ -27,7 +44,6 @@ import { EscalafonModule } from './modulos/escalafon/escalafon.module';
     BrowserAnimationsModule,
     MaterialAngularModule,
     AfiliacionModule,
-    MovimientosInpremaModule,
     PlanillaModule,
     AuthModule,
     EscalafonModule,
@@ -35,6 +51,9 @@ import { EscalafonModule } from './modulos/escalafon/escalafon.module';
     ReactiveFormsModule,
     AdminModule,
     FormsModule,
+    ConasaModule,
+    RnpModule,
+    DocumentosModule,
     ToastrModule.forRoot({
       timeOut: 10000,
       positionClass: 'toast-bottom-right',
@@ -42,7 +61,8 @@ import { EscalafonModule } from './modulos/escalafon/escalafon.module';
     }),
   ],
   providers: [SidenavService,
-    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
+    { provide: LOCALE_ID, useValue: 'es-HN' }
   ],
   bootstrap: [AppComponent]
 })

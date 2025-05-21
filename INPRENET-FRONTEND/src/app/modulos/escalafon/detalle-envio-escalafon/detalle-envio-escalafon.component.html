@@ -4,12 +4,16 @@
   <div *ngIf="persona" class="table-container" style="background-color: white; border-radius: 10px; padding: 20px">
     <app-dynamic-table
       style="width: 100%"
-      titulo="Listado de Préstamos"
+      titulo="Listado de Préstamos Por Planilla"
       subtitulo="Detalles de los préstamos asignados"
-      [columns]="columns"
+      [columns]="myColumns"
       [data]="prestamos"
-      [getData]="getData"
+      [getData]="getFilas"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)">
     </app-dynamic-table>
+
+    <div class="total-cuotas">
+      <strong>Total de Cuotas:</strong> {{ totalCuotas | currency:'L' }}
+    </div>
   </div>
 </div>

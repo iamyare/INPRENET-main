@@ -10,6 +10,88 @@ export class AfiliacionService {
 
   constructor(private http: HttpClient) { }
 
+  tieneBancoActivo(idPersona: string): Observable<{ 
+    tieneBancoActivo: boolean; 
+    beneficiariosValidos: boolean; 
+    tieneReferencias: boolean; 
+    tieneCentroTrabajo: boolean; 
+    datosCompletos: boolean;
+    ultimaActualizacionValida: boolean;
+    estaEnPeps: boolean; // 🔹 Nueva propiedad para validar si está en PEPs
+}> {
+    const url = `${environment.API_URL}/api/afiliacion/tiene-banco-activo/${idPersona}`;
+    return this.http.get<{ 
+      tieneBancoActivo: boolean; 
+      beneficiariosValidos: boolean; 
+      tieneReferencias: boolean; 
+      tieneCentroTrabajo: boolean; 
+      datosCompletos: boolean;
+      ultimaActualizacionValida: boolean;
+      estaEnPeps: boolean; // 🔹 Se agrega aquí también en la respuesta
+    }>(url);
+}
+
+
+  descargarConstanciaBeneficiarios(idPersona: string, empleadoDto: any): Observable<Blob> {
+    const url = `${environment.API_URL}/api/documents/constancia-beneficiarios/${idPersona}`;
+    return this.http.post(url, empleadoDto, { responseType: 'blob' }).pipe(
+        catchError((error) => {
+            console.error('Error al descargar la constancia:', error);
+            return throwError(() => new Error('Error al descargar la constancia. Intente nuevamente.'));
+        })
+    );
+}
+  
+  obtenerPersonaConPerfilYBeneficiarios(n_identificacion: string): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/persona-con-perfil-y-beneficiarios/${n_identificacion}`;
+    return this.http.get<any>(url).pipe(
+      catchError((error) => {
+        console.error('Error al obtener la persona con perfil y beneficiarios:', error);
+        return throwError(() => new Error('Error al obtener la persona con perfil y beneficiarios. Intente nuevamente.'));
+      })
+    );
+  }
+
+  convertirEnAfiliado(payload: { idPersona: number, idTipoPersona: number }): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/convertir-afiliado`;
+    return this.http.post<any>(url, payload).pipe(
+      catchError((error) => {
+        console.error('Error al convertir a afiliado:', error);
+        return throwError(() => new Error('No se pudo convertir a afiliado. Intente de nuevo.'));
+      })
+    );
+  }
+
+  obtenerFallecidosPorMes(mes: number, anio: number): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/fallecidos-reportados`;
+    return this.http.get<any>(url, { params: { mes: mes.toString(), anio: anio.toString() } }).pipe(
+      catchError((error) => {
+        console.error('Error al obtener fallecidos por mes', error);
+        return throwError(() => new Error('Error al obtener fallecidos. Por favor, intente nuevamente.'));
+      })
+    );
+  }
+
+  buscarPersonaPorNombresYApellidos(terminos: string): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/buscar-por-nombres-apellidos`;
+    return this.http.get<any>(url, { params: { terminos } }).pipe(
+      catchError((error) => {
+        console.error('Error al buscar personas por nombres y apellidos', error);
+        return throwError(error);
+      })
+    );
+  }
+
+  eliminarCargoPublico(idCargoPublico: number): Observable<void> {
+    const url = `${environment.API_URL}/api/afiliacion/cargos-publicos/${idCargoPublico}`;
+    return this.http.delete<void>(url).pipe(
+      catchError((error) => {
+        console.error('Error al eliminar el cargo público', error);
+        return throwError(error);
+      })
+    );
+  }
+
   crearDiscapacidades(idPersona: number, discapacidades: any): Observable<void> {
     const url = `${environment.API_URL}/api/afiliacion/${idPersona}/discapacidades`;
     return this.http.post<void>(url, discapacidades).pipe(
@@ -30,9 +112,9 @@ export class AfiliacionService {
     );
   }
 
-  actualizarPeps(idPersona: number, pepsDto: any[]): Observable<any> {
-    const url = `${environment.API_URL}/api/afiliacion/actualizar-peps/${idPersona}`;
-    return this.http.put<any>(url, pepsDto).pipe(
+  actualizarPeps(pepsData: any[]): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/actualizar-peps`;
+    return this.http.put<any>(url, pepsData).pipe(
       catchError((error) => {
         console.error('Error al actualizar los PEPs', error);
         return throwError(error);
@@ -120,26 +202,20 @@ export class AfiliacionService {
     );
   }
 
-  crearAfiliacion(datos: any, fotoPerfil: File, fileIden?: File): Observable<any> {
+  crearAfiliacion(datos: any, fotoPerfil: File, carnetDiscapacidad?: File): Observable<any> {
     const url = `${environment.API_URL}/api/afiliacion/crear`;
     const formData: FormData = new FormData();
 
     formData.append('datos', JSON.stringify(datos));
     formData.append('foto_perfil', fotoPerfil);
 
-    if (fileIden) {
-      formData.append('file_ident', fileIden);
+    if (carnetDiscapacidad) {
+      formData.append('carnet_discapacidad', carnetDiscapacidad);
     }
 
-    if (datos.beneficiarios) {
-      datos.beneficiarios.forEach((persona: any, index: Number) => {
-        formData.append(`file_identB[${persona.persona.n_identificacion}]`, persona.persona.archivo_identificacion);
-      });
-    }
-
-    //return this.http.get<any[]>(url);
     return this.http.post<any>(url, formData);
-  }
+}
+
 
   getAllDiscapacidades(): Observable<any[]> {
     const url = `${environment.API_URL}/api/afiliacion/discapacidades`;

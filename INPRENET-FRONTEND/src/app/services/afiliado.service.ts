@@ -1,54 +1,27 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { EventEmitter, Injectable, Output } from '@angular/core';
-import { Router } from '@angular/router';
 import { Observable, catchError, map, throwError } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AfiliadoService {
   @Output() PersonasEdit: EventEmitter<any> = new EventEmitter();
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient) { }
 
-  generarConstanciaAfiliacion(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-afiliacion`;
-    return this.http.post<any>(url, data);
+  generarConstanciaQR(data: any, dto: any, type: string): Observable<Blob> {
+    const url = `${environment.API_URL}/api/documents/constancia-qr`;
+    return this.http.post(
+      url,
+      { ...data, dto, type },
+      { responseType: 'blob' }
+    );
   }
 
   generarConstanciaAfiliacion2(data: any): Observable<any> {
     const url = `${environment.API_URL}/api/documents/constancia-afiliacion2`;
     return this.http.post<any>(url, data);
-  }
-
-  generarConstanciaQR(data: any, type: string): Observable<Blob> {
-    const url = `${environment.API_URL}/api/documents/constancia-qr`;
-    return this.http.post(url, { ...data, type }, { responseType: 'blob' });
-  }
-
-  generarConstanciaRenunciaCap(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-renuncia-cap`;
-    return this.http.post<any>(url, data);
-  }
-
-  generarConstanciaNoCotizar(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-no-cotizar`;
-    return this.http.post<any>(url, data);
-  }
-
-  generarConstanciaDebitos(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-debitos`;
-    return this.http.post<any>(url, data);
-  }
-
-  generarConstanciaTiempoCotizarConMonto(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/documents/constancia-tiempo-cotizar-con-monto`;
-    return this.http.post<any>(url, data);
-  }
-
-  createPersonaWithDetailsAndWorkCenters(formData: FormData): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/afiliacion`;
-    return this.http.post<any>(url, formData);
   }
 
   createBeneficiarioConDetalle(personaData: any): Observable<any> {
@@ -71,18 +44,28 @@ export class AfiliadoService {
     return this.http.put(url, updatedData);
   }
 
-  buscarMovimientosPorDNI(dni: string): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/movimientos/${dni}`;
-    return this.http.get<any>(url);
+  buscarDetPersona(dni: string): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/causantes/${dni}`;
+    return this.http.get<any[]>(url).pipe(
+      map((res: any) => {
+        let data = res?.data;
+        return data.map((item: any) => ({
+          ID_PERSONA: item.ID_PERSONA,
+          ID_CAUSANTE: item.ID_CAUSANTE,
+          ID_CAUSANTE_PADRE: item.ID_CAUSANTE_PADRE,
+          ID_DETALLE_PERSONA: item.ID_DETALLE_PERSONA,
+          ID_ESTADO_AFILIACION: item.ID_ESTADO_AFILIACION,
+          dniCausante: item.DNI_CAUSANTE,
+          tipoPersona: item.NOMBRE_TIPO_PERSONA || 'No disponible',
+          estadoAfiliacion: item.ESTADO_AFILIACION || 'Sin estado',
+          observacion: item.OBSERVACION || 'Sin observación'
+        }));
+      })
+    );
   }
 
   buscarCuentasPorDNI(dni: string): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/cuentas/${dni}`;
-    return this.http.get<any>(url);
-  }
-
-  obtenerTiposCuentas(): Observable<any> {
-    const url = `${environment.API_URL}/api/Transacciones/tipos-de-cuenta/`;
     return this.http.get<any>(url);
   }
 
@@ -124,12 +107,23 @@ export class AfiliadoService {
   updateDatosGenerales(idPersona: string, datosGenerales: any): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('datosGenerales', JSON.stringify(datosGenerales));
-    formData.append('arch_cert_def', datosGenerales.certificado_defuncion
-    );
-    formData.append('file_ident', datosGenerales.dato.archivo_identificacion);
-
+    if (datosGenerales.certificado_defuncion) {
+        formData.append('arch_cert_def', datosGenerales.certificado_defuncion);
+    }
+    if (datosGenerales.dato && datosGenerales.archivo_identificacion) {
+        formData.append('archivo_identificacion', datosGenerales.archivo_identificacion);
+    }
+    if (datosGenerales.FotoPerfil) {
+        formData.append('FotoPerfil', datosGenerales.FotoPerfil);
+    }
+    if (datosGenerales.carnet_discapacidad instanceof File) {
+        formData.append('carnet_discapacidad', datosGenerales.carnet_discapacidad);
+    } else {
+        console.warn("⚠️ El carnet de discapacidad NO es un archivo válido:", datosGenerales.carnet_discapacidad);
+    }
     return this.http.put(`${environment.API_URL}/api/Persona/updateDatosGenerales/${idPersona}`, formData);
-  }
+}
+
 
   updateReferenciaPersonal(id: string, updateDto: any): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/afiliacion/referencia/actualizar/${id}`, updateDto);
@@ -242,6 +236,16 @@ export class AfiliadoService {
     return this.http.get<any>(`${environment.API_URL}/api/planilla/generar-voucher`, { params });
   }
 
+  generar_voucher_by_mes(dni: string, mes: number, anio: number): Observable<any> {
+    // Definir los parámetros de la consulta
+    const params = new HttpParams()
+      .set('dni', dni)
+      .set('mes', mes)
+      .set('anio', anio);
+
+    return this.http.get<any>(`${environment.API_URL}/api/planilla/generar-voucher-by-mes`, { params });
+  }
+
   getAfilByParam(param: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/Afiliado/${param}`;
     return this.http.get<any>(
@@ -331,5 +335,14 @@ export class AfiliadoService {
         return res;
       })
     );
+  }
+
+  getDesignadosOBeneficiariosPorCausante(dniCausante: string): Observable<any> {
+    return this.http.get(`${environment.API_URL}/api/persona/causantes/${dniCausante}`);
+  }
+
+  updateEstadoAfiliacionPorDni(payload: { idPersona: number, idCausante: number, idCausantePadre: number, idDetallePersona: number, idEstadoAfiliacion: number, dniCausante: string; estadoAfiliacion: string; observacion: string }): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/updateEstadoAfiliacion`; // Asegúrate de que esta sea la URL correcta
+    return this.http.put<any>(url, payload);
   }
 }

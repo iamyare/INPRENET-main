@@ -3,6 +3,8 @@ import { Net_Departamento } from '../../provincia/entities/net_departamento.enti
 import { net_persona } from '../../../Persona/entities/net_persona.entity';
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
 import { Net_Socio } from 'src/modules/Empresarial/entities/net_socio.entity';
+import { Net_Aldea } from '../../provincia/entities/net_aldea.entity';
+import { Net_Colonia } from '../../provincia/entities/net_colonia.entity';
 
 @Entity({ name: 'NET_MUNICIPIO' })
 export class Net_Municipio {
@@ -24,4 +26,10 @@ export class Net_Municipio {
 
     @OneToMany(() => Net_Socio, socio => socio.municipio)
     socios: Net_Socio[];
+
+    @OneToMany(() => Net_Aldea, aldea => aldea.municipio)
+    aldeas: Net_Aldea[];
+
+    @OneToMany(() => Net_Colonia, colonia => colonia.municipio)
+    colonias: Net_Colonia[];
 }

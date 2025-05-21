@@ -1,5 +1,5 @@
 <div class="basic-container">
-  <div class="card">
+  <div class="card" style="background-color: white; margin: 1% 0% 1% 0%; padding: 0% 0% 1% 0%; text-align: center;">
     <app-dynamic-form
       [fields]="myFormFields"
       titulo="Detalles de nueva planilla"
@@ -8,7 +8,7 @@
       (selectChange)="onSelectChange($event)">
     </app-dynamic-form>
 
-    <div style="text-align: center">
+    <div style="padding: 20px; text-align: center">
       <button
         color="primary"
         [disabled]="datosForm.invalid"
@@ -34,17 +34,17 @@
 
       <ng-container matColumnDef="fecha_apertura">
         <th mat-header-cell *matHeaderCellDef> Fecha Apertura </th>
-        <td mat-cell *matCellDef="let element"> {{element.fecha_apertura}} </td>
+        <td mat-cell *matCellDef="let element"> {{convertirFecha(element.fecha_apertura, false)}} </td>
       </ng-container>
 
       <ng-container matColumnDef="periodoInicio">
-        <th mat-header-cell *matHeaderCellDef> Periodo Inicio </th>
-        <td mat-cell *matCellDef="let element"> {{element.periodoInicio}} </td>
+        <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+        <td mat-cell *matCellDef="let element"> {{convertirFecha(element.periodoInicio, false)}} </td>
       </ng-container>
 
       <ng-container matColumnDef="periodoFinalizacion">
-        <th mat-header-cell *matHeaderCellDef> Periodo Finalización </th>
-        <td mat-cell *matCellDef="let element"> {{element.periodoFinalizacion}} </td>
+        <th mat-header-cell *matHeaderCellDef> Fecha Finalización </th>
+        <td mat-cell *matCellDef="let element"> {{convertirFecha(element.periodoFinalizacion,false)}} </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="['codigo_planilla', 'nombre_planilla', 'fecha_apertura', 'periodoInicio', 'periodoFinalizacion']"></tr>

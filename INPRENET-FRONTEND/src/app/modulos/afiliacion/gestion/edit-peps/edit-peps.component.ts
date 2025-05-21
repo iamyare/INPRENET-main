@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -48,17 +48,17 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     private toastr: ToastrService,
     private dialog: MatDialog,
     private datePipe: DatePipe,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregarFamiliar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonAgregarPEP = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregarFamiliar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos',  'administrar']);
+    this.mostrarBotonAgregarPEP = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos',  'administrar']);
+    this.mostrarBotonEditar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos',  'administrar']);
+    this.mostrarBotonEliminar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos',  'administrar']);
   }
-
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Afiliado'] && this.Afiliado) {
       this.initializeComponent();
@@ -69,6 +69,18 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     this.subscriptions.unsubscribe();
   }
 
+  listaCargos = [
+    { value: 'ALCALDE', label: 'ALCALDE' },
+    { value: 'ASAMBLEA APA', label: 'ASAMBLEA APA' },
+    { value: 'DIPUTADO', label: 'DIPUTADO' },
+    { value: 'DIRECTOR DEPARTAMENTAL', label: 'DIRECTOR DEPARTAMENTAL' },
+    { value: 'FUNCIONARIO', label: 'FUNCIONARIO' },
+    { value: 'MILITAR', label: 'MILITAR' },
+    { value: 'MINISTRO', label: 'MINISTRO' },
+    { value: 'REGIDOR', label: 'REGIDOR' },
+    { value: 'VICE ALCALDE', label: 'VICE ALCALDE' }
+];
+  
   initializeComponent(): void {
     if (!this.Afiliado) {
       return;
@@ -127,9 +139,11 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
           peps.cargo_publico.map((item: any) => ({
             cargo: item.cargo,
             fecha_inicio: this.datePipe.transform(item.fecha_inicio, 'dd/MM/yyyy'),
-            fecha_fin: this.datePipe.transform(item.fecha_fin, 'dd/MM/yyyy')
+            fecha_fin: this.datePipe.transform(item.fecha_fin, 'dd/MM/yyyy'),
+            id_cargo_publico: item.id_cargo_publico
           }))
         );
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los puestos públicos');
         console.error('Error al obtener datos de los puestos públicos', error);
@@ -147,6 +161,7 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
           id_persona: familiar.referenciada.id_persona,
           id_familia: familiar.id_familia
         }));
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los familiares');
         console.error('Error al obtener familiares:', error);
@@ -157,6 +172,12 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   cargar() {
     if (this.ejecFPEPs) {
       this.ejecFPEPs(this.filas).then(() => { });
+    }
+  }
+
+  eliminarTodosLosFamiliares(): void {
+    for (const familiar of this.familiares) {
+      this.eliminarFamiliar(familiar);
     }
   }
 
@@ -175,24 +196,36 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   desactivarPep(row: any) {
+    console.log(row);
+    
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
-        title: 'Confirmar Desactivación',
-        message: '¿Está seguro de que desea desactivar este perfil?',
-        idPersona: this.Afiliado.ID_PERSONA
+        title: 'Confirmar Eliminación',
+        message: '¿Está seguro de que desea eliminar este cargo público?',
       }
     });
-
+  
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        this.svcAfiliado.desactivarPerfCentroTrabajo(row.id).subscribe({
-          next: () => {
-            this.toastr.success('Perfil Desactivado');
-            this.getFilas().then(() => this.cargar());
+        this.afiliacionService.eliminarCargoPublico(row.id_cargo_publico).subscribe({
+          next: async () => {
+            this.toastr.success('Cargo público eliminado correctamente');
+  
+            // Recargar la lista de cargos públicos
+            await this.getFilas();
+  
+            // Si no quedan más cargos, eliminar todos los familiares
+            if (this.filas.length === 0) {
+              this.eliminarTodosLosFamiliares();
+            }
+  
+            // Actualizar la tabla
+            this.cargar();
           },
-          error: () => {
-            this.toastr.error('Ocurrió un error al desactivar el perfil.');
+          error: (error) => {
+            this.toastr.error('Error al eliminar el cargo público');
+            console.error('Error al eliminar cargo público:', error);
           }
         });
       }
@@ -220,11 +253,12 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
         idPersona: this.Afiliado.id_persona
       }
     });
+  
     dialogRef.afterClosed().subscribe(() => {
-      this.ngOnInit();
+      this.getFilas().then(() => this.cargar());
     });
   }
-
+  
   eliminarFamiliar(familiar: any): void {
     const idFamiliar = familiar.id_familia;
     this.afiliacionService.eliminarFamiliar(this.Afiliado.id_persona, idFamiliar).subscribe({
@@ -242,64 +276,84 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   editarFila(row: any) {
+
     const campos = [
       {
         nombre: 'cargo',
-        tipo: 'text',
+        tipo: 'list',
         requerido: true,
         etiqueta: 'Cargo',
         editable: true,
-        icono: 'person',
+        opciones: this.listaCargos,
         validadores: [Validators.required, Validators.maxLength(40)]
       },
       {
-        nombre: 'fecha_inicio',
-        tipo: 'date',
+        nombre: 'fecha_rango',
+        tipo: 'daterange',
         requerido: true,
-        etiqueta: 'Fecha Inicio',
+        etiqueta: 'Rango de Fecha',
         editable: true,
-        icono: 'event',
-        validadores: [Validators.required]
-      },
-      {
-        nombre: 'fecha_fin',
-        tipo: 'date',
-        requerido: true,
-        etiqueta: 'Fecha Fin',
-        editable: true,
-        icono: 'event',
         validadores: [Validators.required]
       }
     ];
-    this.openDialog(campos, row);
+
+    console.log(row.fecha_inicio);
+    console.log(row.fecha_fin);
+
+
+    const fechaInicio = this.convertirCadenaAFecha(row.fecha_inicio);
+    const fechaFin = this.convertirCadenaAFecha(row.fecha_fin);
+
+
+    const valoresIniciales = {
+      cargo: row.cargo,
+      fecha_rango: {
+        start: fechaInicio,
+        end: fechaFin
+      }
+    };
+
+    this.openDialog(campos, valoresIniciales, row);
   }
-  openDialog(campos: any, row: any): void {
+
+  openDialog(campos: any, valoresIniciales: any, row: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
-      data: { campos: campos, valoresIniciales: row }
+      data: { campos: campos, valoresIniciales: valoresIniciales }
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        const pepsData = [{
-          cargosPublicos: [
-            {
-              cargo: result.cargo,
-              fecha_inicio: this.datePipe.transform(result.fecha_inicio, 'yyyy-MM-dd'),
-              fecha_fin: this.datePipe.transform(result.fecha_fin, 'yyyy-MM-dd')
-            }
-          ]
-        }];
-        //console.log(pepsData);
+        // Asegurarnos de que las fechas no sean nulas o indefinidas
+        if (!result.fecha_rango.start || !result.fecha_rango.end) {
+          console.error("Las fechas no están definidas correctamente", result.fecha_rango);
+          this.toastr.error('Las fechas no pueden estar vacías.');
+          return;
+        }
 
-        this.afiliacionService.actualizarPeps(this.Afiliado.id_persona, pepsData).subscribe({
+        const fechaInicio = `${result.fecha_rango.start.getFullYear()}-${(result.fecha_rango.start.getMonth() + 1)
+          .toString().padStart(2, '0')}-${result.fecha_rango.start.getDate().toString().padStart(2, '0')}`;
+        const fechaFin = `${result.fecha_rango.end.getFullYear()}-${(result.fecha_rango.end.getMonth() + 1)
+          .toString().padStart(2, '0')}-${result.fecha_rango.end.getDate().toString().padStart(2, '0')}`;
+
+        // Solo enviamos los datos necesarios, incluyendo id_cargo_publico para identificar el registro
+        const pepsData = {
+          id_cargo_publico: row.id_cargo_publico,
+          cargo: result.cargo,
+          fecha_inicio: fechaInicio,  // Asegúrate de que estas fechas estén en formato válido
+          fecha_fin: fechaFin
+      };
+
+        this.afiliacionService.actualizarPeps([pepsData]).subscribe({
           next: () => {
             const index = this.filas.findIndex(item => item === row);
             if (index !== -1) {
-              this.filas[index] = { ...this.filas[index], ...result };
+              this.filas[index].cargo = result.cargo;
+              this.filas[index].fecha_inicio = this.datePipe.transform(result.fecha_rango.start, 'dd/MM/yyyy');
+              this.filas[index].fecha_fin = this.datePipe.transform(result.fecha_rango.end, 'dd/MM/yyyy');
             }
+
             this.toastr.success('Se actualizó correctamente');
-            this.cargar();
           },
           error: () => {
             this.toastr.error('Error al actualizar');
@@ -309,8 +363,14 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-
-
-
+  convertirCadenaAFecha(fecha: string | null | undefined): Date | null {
+    if (!fecha || !fecha.includes('/')) {
+      return null;
+    }
+  
+    const [day, month, year] = fecha.split('/').map(Number);
+    return new Date(year, month - 1, day); 
+  }
+  
 
 }

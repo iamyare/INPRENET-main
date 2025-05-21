@@ -29,17 +29,24 @@ import { MantenimientoAfiliacionController } from './afiliacion/mantenimiento-af
 import { Net_Jornada } from '../Empresarial/entities/net_jornada.entity';
 import { Net_Nivel_Educativo } from '../Empresarial/entities/net_nivel_educativo.entity';
 import { Net_Referencias } from './entities/net_referencias.entity';
+import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
+import { Net_Colegios_Magisteriales } from '../transacciones/entities/net_colegios_magisteriales.entity';
+import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
+import { Net_Aldea } from '../Regional/provincia/entities/net_aldea.entity';
+import { Net_Colonia } from '../Regional/provincia/entities/net_colonia.entity';
+/* import { BitacoraService } from '../bitacora/bitacora.afiliaciones.service'; */
 
 @Module({
   controllers: [AfiliadoController, AfiliacionController, MantenimientoAfiliacionController],
   providers: [AfiliadoService, AfiliacionService, MantenimientoAfiliacionService],
   imports: [RegionalModule, TransaccionesModule,
-    TypeOrmModule.forFeature([net_otra_fuente_ingreso, net_persona, Net_Discapacidad, net_estado_afiliacion, net_detalle_persona, Net_perf_pers_cent_trab,
+    TypeOrmModule.forFeature([Net_Empleado_Centro_Trabajo, net_otra_fuente_ingreso, net_persona, Net_Discapacidad, net_estado_afiliacion, net_detalle_persona, Net_perf_pers_cent_trab,
       Net_Ref_Per_Pers, Net_Persona_Discapacidad,
       Net_Persona_Por_Banco, Net_Departamento, Net_Familia,
       Net_Pais, Net_Tipo_Identificacion, net_causas_fallecimientos,
       Net_Centro_Trabajo, Net_Banco, Net_Tipo_Persona, Net_Municipio,
-      Net_Jornada, Net_Nivel_Educativo, Net_Referencias])
+      Net_Jornada, Net_Nivel_Educativo, Net_Referencias, NET_PROFESIONES,
+      Net_Colegios_Magisteriales, Net_Aldea, Net_Colonia])
   ],
   exports: [TypeOrmModule, AfiliadoService],
 })

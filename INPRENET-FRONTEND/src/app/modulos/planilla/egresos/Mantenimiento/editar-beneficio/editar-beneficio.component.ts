@@ -85,7 +85,7 @@ export class EditarBeneficioComponent implements OnInit {
   }
 
   hacerAlgo(row: any) {
-    console.log('Acción del botón en la fila:', row);
+
   }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
@@ -119,7 +119,7 @@ export class EditarBeneficioComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        console.log('Datos editados:', result);
+
       }
     });
   }

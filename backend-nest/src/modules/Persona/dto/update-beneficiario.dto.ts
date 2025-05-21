@@ -69,6 +69,10 @@ export class UpdateBeneficiarioDto {
 
   @IsInt()
   @IsNotEmpty()
+  id_municipio_nacimiento: number;
+
+  @IsInt()
+  @IsNotEmpty()
   id_estado_persona: number;
 
   @IsString()
@@ -100,4 +104,13 @@ export class UpdateBeneficiarioDto {
   @IsOptional()
   @MaxLength(200)
   direccion_residencia?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(100)
+  parentesco?: string;
+
+  @IsInt()
+  @IsOptional()
+  id_detalle_persona?: number;
 }

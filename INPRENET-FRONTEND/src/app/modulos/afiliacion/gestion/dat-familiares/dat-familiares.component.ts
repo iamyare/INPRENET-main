@@ -8,7 +8,7 @@ export function generateFamiliaresFormGroup(datos?: any): FormGroup {
     segundo_nombre: new FormControl(datos?.segundo_nombre),
     tercer_nombre: new FormControl(datos?.tercer_nombre),
     primer_apellido: new FormControl(datos?.primer_apellido, [Validators.required]),
-    segundo_apellido: new FormControl(datos?.segundo_apellido, [Validators.required]),
+    segundo_apellido: new FormControl(datos?.segundo_apellido, []),
     n_identificacion: new FormControl(datos?.n_identificacion, [Validators.required]),
     parentesco: new FormControl(datos?.parentesco, [Validators.required]),
   });

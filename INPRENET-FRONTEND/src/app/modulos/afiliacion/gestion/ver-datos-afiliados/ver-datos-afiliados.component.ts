@@ -51,7 +51,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
         isEditable: true
       },
       {
-        header: 'Genero',
+        header: 'Género',
         col: 'genero',
         isEditable: true
       },

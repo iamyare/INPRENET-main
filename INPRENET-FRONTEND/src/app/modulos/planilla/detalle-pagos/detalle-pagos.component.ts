@@ -12,7 +12,8 @@ export class DetallePagosComponent implements OnInit {
   @Input() datos: any;
   planillas: any[] = [];
 
-  constructor(private planillaService: PlanillaService, private dialog: MatDialog) {}
+  constructor(private planillaService: PlanillaService, private dialog: MatDialog) {
+  }
 
   ngOnInit(): void {
     if (this.datos && this.datos.n_identificacion) {

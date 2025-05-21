@@ -108,3 +108,33 @@
 .mat-tab-body {
   padding: 20px;
 }
+
+/* perfil.component.scss */
+.campo-null {
+  color: red;
+  font-weight: bold;
+  
+}
+.alerta-actualizacion {
+  color: #d32f2f;  /* un tono rojo, por ejemplo */
+  font-weight: bold;
+  background-color: #ffebee;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+
+.alerta-fallecido {
+  color: #d32f2f;  /* Rojo intenso */
+  font-weight: bold;
+  background-color: #ffebee; /* Fondo rojo claro */
+  padding: 6px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.tab-error-text {
+  color: red !important;
+  font-weight: bold;
+  text-transform: uppercase;
+}

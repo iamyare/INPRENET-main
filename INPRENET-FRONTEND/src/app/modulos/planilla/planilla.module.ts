@@ -4,7 +4,6 @@ import { ComponentsModule } from 'src/app/components/components.module';
 import { MaterialAngularModule } from 'src/app/material-angular/material-angular.module';
 import { PlanillaRoutingModule } from './planilla-routing.module';
 import { NuevaDeduccionAfilComponent } from './egresos/nueva-deduccion-afil/nueva-deduccion-afil.component';
-import { NuevaPlanillaComponentP } from './egresos/nueva-planilla/nueva-planilla.component';
 import { ProgressplanillComponent } from './egresos/progressplanill/progressplanill.component';
 import { NuevaplanillaComponent } from './egresos/nuevaplanilla/nuevaplanilla.component';
 import { VerplanprelcompComponent } from './egresos/verplanprelcomp/verplanprelcomp.component';
@@ -34,15 +33,18 @@ import { CargarbefDedComponent } from './egresos/cargarbef-ded/cargarbef-ded.com
 import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-planilla.component';
 import { DialogDesgloseComponent } from './egresos/dialog-desglose/dialog-desglose.component';
 import { VerPlanillasActivasComponent } from './egresos/ver-planillas-activas/ver-planillas-activas.component';
-import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
+import { VerPlanillasCerradasComponent } from './egresos/ver-planillas-cerradas/ver-planillas-cerradas.component';
+import { CambioEstadoTipoPerComponent } from '../afiliacion/gestion/cambio-estado-tipo-per/cambio-estado-tipo-per.component';
 import { AfiliacionModule } from '../afiliacion/afiliacion.module';
 import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
 import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
+import { P60RentasComponent } from './p-60-rentas/p-60-rentas.component';
+import { VoucherGeneralMensComponent } from './voucher-general-mens/voucher-general-mens.component';
+import { AportacionCotizacionComponent } from './ingresos/aportacion-cotizacion/aportacion-cotizacion.component';
 
 @NgModule({
   declarations: [
     NuevaDeduccionAfilComponent,
-    NuevaPlanillaComponentP,
     ProgressplanillComponent,
     NuevaplanillaComponent,
     VerplanprelcompComponent,
@@ -71,10 +73,14 @@ import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
     CargarbefDedComponent,
     ProcesoPlanillaComponent,
     DialogDesgloseComponent,
-    GestionBancoComponent,
     ActualizarFallecidosComponent,
     VerPlanillasActivasComponent,
-    MontoDialogComponent
+    VerPlanillasCerradasComponent,
+    MontoDialogComponent,
+    CambioEstadoTipoPerComponent,
+    P60RentasComponent,
+    VoucherGeneralMensComponent,
+    AportacionCotizacionComponent,
   ],
   imports: [
     CommonModule,

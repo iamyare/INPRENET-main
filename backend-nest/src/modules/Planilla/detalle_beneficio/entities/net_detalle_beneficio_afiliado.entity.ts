@@ -3,9 +3,11 @@ import { Check, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMa
 import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
 import { Net_Detalle_Pago_Beneficio } from "./net_detalle_pago_beneficio.entity";
 import { net_detalle_persona } from "src/modules/Persona/entities/net_detalle_persona.entity";
+import { Net_Usuario_Empresa } from "src/modules/usuario/entities/net_usuario_empresa.entity";
 
 @Entity({ name: 'NET_DETALLE_BENEFICIO_AFILIADO' })
 @Check("CK_PRESTAMO_NET_DET_BEN_AFIL", `prestamo IN ('SI', 'NO')`)
+@Check("CK_LISTO_COMP_NET_DE_BN_AFIL", `listo_complementaria IN ('COMPLEMENTARIA', 'EXTRAORDINARIA', 'NO')`)
 export class Net_Detalle_Beneficio_Afiliado {
     @PrimaryColumn({ name: 'ID_DETALLE_PERSONA', primaryKeyConstraintName: 'PK_ID_DET_BEN_AFIL' })
     ID_DETALLE_PERSONA: number;
@@ -19,11 +21,20 @@ export class Net_Detalle_Beneficio_Afiliado {
     @PrimaryColumn({ name: 'ID_BENEFICIO', primaryKeyConstraintName: 'PK_ID_DET_BEN_AFIL' })
     ID_BENEFICIO: number;
 
+    @Column({ nullable: true, name: 'N_EXPEDIENTE' })
+    n_expediente: string;
+
+    @Column({ type: 'date', nullable: true, name: 'FECHA_PRESENTACION' })
+    fecha_presentacion: Date;
+
     @Column({ nullable: true, name: 'ESTADO_SOLICITUD' })
     estado_solicitud: string;
 
-    @Column({ type: 'date', nullable: true, name: 'FECHA_CALCULO' })
-    fecha_calculo: Date;
+    @Column({ nullable: true, default: 'COMPLEMENTARIA', name: 'LISTO_COMPLEMENTARIA' })
+    listo_complementaria: string;
+
+    @Column({ type: 'date', nullable: true, name: 'FECHA_EFECTIVIDAD' })
+    fecha_efectividad: Date;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_TOTAL' })
     monto_total: number;
@@ -33,6 +44,9 @@ export class Net_Detalle_Beneficio_Afiliado {
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_POR_PERIODO' })
     monto_por_periodo: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_RETROACTIVO' })
+    monto_retroactivo: number;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_PRIMERA_CUOTA' })
     monto_primera_cuota: number;
@@ -55,8 +69,18 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, name: 'PRESTAMO' })
     prestamo: string;
 
-    @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })
-    num_rentas_aplicadas: number;
+    @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APROBADAS' })
+    num_rentas_aprobadas: number;
+
+    @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_PAGAR_PRIMER_PAGO' })
+    num_rentas_pagar_primer_pago: number;
+
+    @Column({ nullable: true, name: 'ULTIMO_DIA_ULTIMA_RENTA' })
+    ultimo_dia_ultima_renta: number;
+
+    @Column({ type: 'date', nullable: true, name: 'FECHA_INGRESO', default: () => 'CURRENT_DATE' })
+    fecha_ingreso: Date;
+
 
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'ID_BENEFICIO', foreignKeyConstraintName: "FK_ID_BENEFICIO_DETBENAFIL" })
@@ -70,4 +94,11 @@ export class Net_Detalle_Beneficio_Afiliado {
     @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_CAUSANTE', foreignKeyConstraintName: "FK_ID_DET_BEN_DET_PERS" })
     @JoinColumn({ name: 'ID_DETALLE_PERSONA', referencedColumnName: 'ID_DETALLE_PERSONA', foreignKeyConstraintName: "FK_ID_DET_BEN_DET_PERS" })
     persona: net_detalle_persona[];
+
+    @ManyToOne(() => Net_Usuario_Empresa, { nullable: true })
+    @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_DET_BEN_AFILIADO' })
+    usuarioEmpresa: Net_Usuario_Empresa;
+
+    @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
+    ID_USUARIO_EMPRESA: number;
 }

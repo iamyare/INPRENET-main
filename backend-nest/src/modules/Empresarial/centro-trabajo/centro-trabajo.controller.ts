@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, Put, UseInterceptors, UploadedFiles, ParseIntPipe, UploadedFile, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, Put, UseInterceptors, UploadedFiles, ParseIntPipe, UploadedFile, BadRequestException, NotFoundException, Query } from '@nestjs/common';
 import { CentroTrabajoService } from './centro-trabajo.service';
 import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
@@ -9,14 +9,30 @@ import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestj
 import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
 import { Net_Jornada } from '../entities/net_jornada.entity';
 import { Net_Nivel_Educativo } from '../entities/net_nivel_educativo.entity';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { Net_Empleado } from '../entities/net_empleado.entity';
 
 @ApiTags('centro-trabajo')
 @Controller('centro-trabajo')
 export class CentroTrabajoController {
   constructor(private readonly centroTrabajoService: CentroTrabajoService) { }
+
+  @Get('buscar')
+async buscarCentroTrabajo(
+  @Query('termino') termino: string,
+  @Query('idMunicipio') idMunicipio?: number
+) {
+  if (!termino || termino.trim().length === 0) {
+    throw new NotFoundException('Debe proporcionar un término de búsqueda.');
+  }
+  const centros = await this.centroTrabajoService.buscarCentroTrabajo(termino, idMunicipio);
+
+  if (centros.length === 0) {
+    throw new NotFoundException(`No se encontraron coincidencias para: ${termino}`);
+  }
+
+  return centros;
+}
+
 
   @Patch('empleado/:id/archivo-identificacion')
   @UseInterceptors(FileInterceptor('archivo_identificacion'))

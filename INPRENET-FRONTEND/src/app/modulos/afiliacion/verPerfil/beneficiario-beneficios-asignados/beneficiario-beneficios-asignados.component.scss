@@ -62,10 +62,53 @@
 }
 
 .modal-header {
-  background-color: #26a69a;
-  color: white;
+  background-color: #f1f5f4;
+  color: #333;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #dee2e6;
+
+  .modal-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+
+  .btn-close {
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #333;
+    }
+  }
 }
 
 .modal-footer {
-  background-color: #e5f4f3;
+  background-color: #f9f9f9;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid #dee2e6;
+
+  .btn-outline-secondary {
+    border-color: #ccc;
+    color: #333;
+
+    &:hover {
+      background-color: #eaeaea;
+    }
+  }
+}
+
+.table {
+  th {
+    background-color: #e0f2f1;
+    color: #0d7b6c;
+    font-weight: 600;
+  }
+
+  td {
+    font-size: 0.95rem;
+  }
 }

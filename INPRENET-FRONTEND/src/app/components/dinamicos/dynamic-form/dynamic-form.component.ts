@@ -18,6 +18,7 @@ export class DynamicFormComponent implements OnInit {
 
   @Output() newDatBenChange = new EventEmitter<any>()
   @Output() selectChange = new EventEmitter<{ fieldName: string, value: any }>();
+  @Output() formChange = new EventEmitter<any>();
 
   selectedOption: string | null = null;
 
@@ -27,17 +28,24 @@ export class DynamicFormComponent implements OnInit {
 
   ngOnInit() {
     // Si tienes un formulario que llega a través del Input, lo usas para inicializar
-  if (this.incomingForm) {
-    this.form = this.mergeForms(this.incomingForm);
-  } else {
-    this.form = this.createControl();
-  }
+    if (this.incomingForm) {
+      this.form = this.mergeForms(this.incomingForm);
+    } else {
+      this.form = this.createControl();
+    }
 
-  this.newDatBenChange.emit(this.form);
+    this.newDatBenChange.emit(this.form);
   }
 
   onDatosBenChange() {
     this.newDatBenChange.emit(this.form);
+  }
+
+  onDatosBenChangeAdmin() {
+    this.formChange.emit(this.form.value);
+  }
+  onSelectChangeAdmin(fieldName: string, event: any) {
+    this.formChange.emit({ ...this.form.value, [fieldName]: event.value });
   }
 
   onDatosBenChange1(e: any) {
@@ -57,24 +65,19 @@ export class DynamicFormComponent implements OnInit {
         });
         group.addControl(field.name, dateRangeGroup);
       } else if (field.type === 'checkboxGroup') {
-        const checkboxArray = this.fb.array(field.options ? field.options.map(() => this.fb.control(false)) : []);
+        const checkboxArray = this.fb.array(
+          field.options ? field.options.map((option: { selected: any; }) => this.fb.control(option.selected || false)) : []
+        );
         group.addControl(field.name, checkboxArray);
-      } else if (field.type === 'radio') {
-        const radioGroup = this.fb.control(field.value || '', field.validations);
-        group.addControl(field.name, radioGroup);
-      } else if (field.type === 'conditionalRadio') {
-        const radioGroup = this.fb.control(field.value || '', field.validations);
-        group.addControl(field.name, radioGroup);
       } else {
-        const control = field.type === 'number'
-          ? this.fb.control(
-            +field.value || null,
-            field.validations
-          )
-          : this.fb.control(
-            field.type === 'checkbox' ? field.value || false : field.value || '',
-            field.validations
-          );
+        const control = this.fb.control(
+          field.type === 'number'
+            ? +field.value || null
+            : field.type === 'checkbox'
+              ? field.value || false
+              : field.value || '', // Ensure the value is passed correctly here
+          field.validations
+        );
         group.addControl(field.name, control);
       }
     });
@@ -217,8 +220,6 @@ export class DynamicFormComponent implements OnInit {
     });
   }
 
-
-
   updateDependentFields() {
     const selectedField = this.fields.find(field => field.name === 'showCheckboxes');
     if (selectedField && selectedField.dependentFields) {
@@ -255,11 +256,9 @@ export class DynamicFormComponent implements OnInit {
     }
   }
 
-
   recreateForm() {
     this.form = this.createControl();
     this.newDatBenChange.emit(this.form);
   }
-
 
 }

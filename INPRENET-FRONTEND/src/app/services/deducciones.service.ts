@@ -25,11 +25,11 @@ export class DeduccionesService {
     );
   }
 
-  obtenerDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number): Observable<any[]> {
+  obtenerDetallesDeduccionPorCentro(id_planilla: number, idCentroTrabajo: number, codigoDeduccion: number): Observable<any[]> {
     return this.http.get<any[]>(
       `${environment.API_URL}/api/deduccion/${idCentroTrabajo}/detalles-deduccion`,
       {
-        params: { codigoDeduccion: codigoDeduccion.toString() },
+        params: { codigoDeduccion: codigoDeduccion.toString(), id_planilla: id_planilla },
       }
     ).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -67,16 +67,22 @@ export class DeduccionesService {
   }
 
   descargarExcelDeduccionPorCodigo(
+    idsPlanilla: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
     codDeduccion: number
   ): Observable<Blob> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('periodoInicio', periodoInicio)
       .set('periodoFinalizacion', periodoFinalizacion)
       .set('idTiposPlanilla', idTiposPlanilla.join(','))
       .set('codDeduccion', codDeduccion.toString());
+
+    // Agregar múltiples valores de `idsPlanilla` al FormData
+    idsPlanilla.forEach(id => {
+      params = params.append('idsPlanilla', id);
+    });
 
     return this.http.get(`${environment.API_URL}/api/detalle-deduccion/detallePorCodDeduccion`, {
       params,
@@ -95,8 +101,9 @@ export class DeduccionesService {
     );
   }
 
-  subirArchivoDeducciones(id_planilla: number, archivo: File): Observable<HttpEvent<any>> {
+  subirArchivoDeducciones(idTipoPlanilla: number, id_planilla: number, archivo: File): Observable<HttpEvent<any>> {
     const formData = new FormData();
+    formData.append('idTipoPlanilla', String(idTipoPlanilla));
     formData.append('id_planilla', String(id_planilla));
     formData.append('file', archivo, archivo.name);
 

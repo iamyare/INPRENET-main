@@ -1,0 +1,31 @@
+<app-custom-container></app-custom-container>
+<br><br>
+<div class="home-page">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>¡Bienvenido a INPRENET!</h1>
+      <p>La plataforma integral para la gestión de pensiones y beneficios de los maestros de Honduras.</p>
+      <button mat-raised-button color="primary" (click)="login()">Iniciar Sesión</button>
+    </div>
+    <div class="hero-image">
+      <!-- <img src="../../../assets/images/Conference-rafiki.svg" alt="" srcset=""> -->
+      <img src="../../../assets/images/Conference-rafiki.svg" alt="Hero Image">
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <h2>Características Principales</h2>
+    <mat-card class="feature" *ngFor="let feature of features">
+      <img mat-card-image [src]="feature.image" alt="{{ feature.title }}">
+      <mat-card-header>
+        <mat-card-title>{{ feature.title }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ feature.description }}</p>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</div>
+

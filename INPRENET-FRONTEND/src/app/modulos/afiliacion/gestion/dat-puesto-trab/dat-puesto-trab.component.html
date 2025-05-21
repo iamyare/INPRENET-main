@@ -1,158 +1,251 @@
 <div class="card">
-  <div class="card-header card-header-danger tittle">
+  <div class="card-header">
     <h4 class="card-title">Centros De Trabajo</h4>
     <p class="card-category">Completa la información correspondiente</p>
   </div>
-  <div class="card-body">
-    <form [formGroup]="formGroup" style="margin: 1%;">
-      <div formArrayName="trabajo">
-        <div *ngFor="let trabajo of trabajosArray.controls; let i = index" [formGroupName]="i" class="row">
-          <h4 class="card-title">Centro De Trabajo Número: {{i + 1}}</h4>
 
-          <div class="col-lg-6 col-md-12">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
-              <mat-label>Código del Centro de Trabajo</mat-label>
-              <mat-icon matPrefix>business</mat-icon>
-              <mat-select formControlName="id_centro_trabajo">
-                <mat-option *ngFor="let centro of centrosTrabajo" [value]="centro.value">
-                  {{ centro.label }}
+  <div class="card-body">
+    <form [formGroup]="formGroup" class="form-container">
+      <div formArrayName="trabajo">
+        <div *ngFor="let trabajo of trabajosArray.controls; let i = index" [formGroupName]="i" class="reference-group">
+          <h4 class="reference-title">Centro De Trabajo Número: {{ i + 1 }}</h4>
+          <div class="form-row">
+            <!-- Departamento -->
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Departamento</mat-label>
+              <mat-icon matPrefix>location_on</mat-icon>
+              <mat-select 
+                formControlName="id_departamento" 
+                (selectionChange)="onDepartamentoChange($event, i)">
+                <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+                  {{ departamento.label }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'id_centro_trabajo')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
-          </div>
-
-          <div class="col-lg-6 col-md-12">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
-              <mat-label>Nombre del Centro</mat-label>
-              <mat-icon matPrefix>business</mat-icon>
-              <input matInput formControlName="nombreCentro" readonly>
+          
+            <!-- Municipio -->
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Municipio</mat-label>
+              <mat-icon matPrefix>location_city</mat-icon>
+              <mat-select formControlName="id_municipio" required>
+                <mat-option *ngFor="let municipio of trabajosArray.at(i).get('municipiosDisponibles')?.value" [value]="municipio.value">
+                  {{ municipio.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="!trabajo.get('id_municipio')?.value">
+                <mat-icon>error</mat-icon> Debes seleccionar un municipio antes de buscar.
+              </mat-error>
             </mat-form-field>
           </div>
+          
+          <!-- Input de búsqueda -->
+          <div class="form-row">
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Buscar Centro de Trabajo</mat-label>
+              <mat-icon matPrefix>search</mat-icon>
+              <input matInput formControlName="buscarCentro" placeholder="Ingrese nombre o código del centro">
+            </mat-form-field>
+          
+            <!-- Botón para ejecutar la búsqueda -->
+            <button 
+              mat-button 
+              color="primary" 
+              (click)="buscarCentroTrabajoAPI(i)" 
+              [disabled]="!trabajo.get('id_municipio')?.value">
+              <mat-icon>search</mat-icon> Buscar
+            </button>
+          </div>
+          
+          <p *ngIf="trabajo.get('centroSeleccionado')?.invalid && trabajo.get('centroSeleccionado')?.touched" class="text-danger">
+            <mat-icon>error_outline</mat-icon> Debe seleccionar un Centro de Trabajo.
+          </p>
+          
+          <!-- Listado de centros encontrados -->
+          <div *ngIf="trabajo.get('centrosFiltrados')?.value?.length; else noResultsTemplate">
+            <p>Centros encontrados:</p>
+            <mat-list>
+              <mat-list-item *ngFor="let centro of trabajo.get('centrosFiltrados')?.value">
+                <button mat-button (click)="seleccionarCentro(i, centro)">
+                  {{ centro.codigo }} - {{ centro.nombre_centro_trabajo }} - {{ centro.direccion_1 || centro.direccion_2 }}
+                </button>
+              </mat-list-item>
+            </mat-list>
+          </div>
+          
+          <!-- Template para mensaje de "No se encontraron resultados" -->
+          <ng-template #noResultsTemplate>
+            <p *ngIf="trabajo.get('noResults')?.value" class="text-danger">
+              <mat-icon>error_outline</mat-icon> No se encontraron centros de trabajo con el criterio ingresado.
+            </p>
+          </ng-template>
+          <!-- Información del Centro de Trabajo -->
+          <div class="info-container">
+            <div class="info-field">
+              <mat-icon class="info-icon">business</mat-icon>
+              <p><strong class="info-label">Código del Centro de Trabajo:</strong> {{ trabajo.get('codigo')?.value || 'No asignado' }}</p>
+            </div>
 
-          <div class="col-lg-6 col-md-12">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
+            <div class="info-field">
+              <mat-icon class="info-icon">business</mat-icon>
+              <p><strong class="info-label">Nombre del Centro de Trabajo:</strong> {{ trabajo.get('nombre_centro_trabajo')?.value || 'No asignado' }}</p>
+            </div>
+          </div>
+          <br>
+
+          <div class="form-row">
+            <!-- Departamento -->
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Departamento</mat-label>
+              <mat-icon matPrefix>location_on</mat-icon>
+              <mat-select formControlName="id_departamento" disableRipple>
+                <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value" [disabled]="true">
+                  {{ departamento.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Municipio</mat-label>
+              <mat-icon matPrefix>location_city</mat-icon>
+              <mat-select formControlName="id_municipio" disableRipple>
+                <mat-option *ngFor="let municipio of trabajosArray.at(i).get('municipiosDisponibles')?.value" [value]="municipio.value" [disabled]="true">
+                  {{ municipio.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            
+          </div>
+
+          <div class="form-row">
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Teléfono</mat-label>
+              <mat-icon matPrefix>phone</mat-icon>
+              <input matInput formControlName="telefono_1">
+            </mat-form-field>
+            <!-- Dirección del Centro -->
+            <mat-form-field class="half-width" appearance="outline">
               <mat-label>Dirección del Centro</mat-label>
               <mat-icon matPrefix>home</mat-icon>
-              <input matInput formControlName="direccionCentro" readonly>
+              <input matInput formControlName="direccionCentro">
             </mat-form-field>
-          </div>
-
-          <div class="col-lg-6 col-md-12">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
+            <mat-form-field class="half-width" appearance="outline">
               <mat-label>Sector Económico</mat-label>
               <mat-icon matPrefix>domain</mat-icon>
               <input matInput formControlName="sectorEconomico" readonly>
             </mat-form-field>
           </div>
 
-          <div class="col-lg-4 col-md-12">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
+          <div class="form-row">
+            <mat-form-field class="half-width" appearance="outline">
               <mat-label>Salario</mat-label>
-              <mat-icon matPrefix>attach_money</mat-icon>
+              <mat-icon matPrefix>money</mat-icon>
               <input matInput formControlName="salario_base">
+              <mat-error *ngFor="let error of getErrors(i, 'salario_base')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'salario_base')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
-          </div>
-
-          <div class="col-lg-4 col-md-12">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Día de Pago</mat-label>
+              <mat-icon matPrefix>calendar_today</mat-icon>
+              <mat-select formControlName="fecha_pago">
+                <mat-option *ngFor="let dia of [].constructor(31); let i = index" [value]="i + 1">
+                  {{ i + 1 }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngFor="let error of getErrors(i, 'fecha_pago')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field>            
+            <mat-form-field class="half-width" appearance="outline">
               <mat-label>Fecha de Ingreso</mat-label>
               <mat-icon matPrefix>calendar_today</mat-icon>
-              <input matInput formControlName="fecha_ingreso" [matDatepicker]="pickerIngreso" placeholder="d/m/aaaa">
+              <input 
+                matInput 
+                formControlName="fecha_ingreso" 
+                [matDatepicker]="pickerIngreso" 
+                placeholder="d/m/aaaa" 
+                readonly
+              >
               <mat-datepicker-toggle matSuffix [for]="pickerIngreso"></mat-datepicker-toggle>
               <mat-datepicker #pickerIngreso></mat-datepicker>
+              <mat-error *ngFor="let error of getErrors(i, 'fecha_ingreso')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'fecha_ingreso')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
-          </div>
-
-          <div class="col-lg-4 col-md-12">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
+            <!-- <mat-form-field class="half-width" appearance="outline">
               <mat-label>Fecha de Egreso</mat-label>
               <mat-icon matPrefix>calendar_today</mat-icon>
-              <input matInput formControlName="fecha_egreso" [matDatepicker]="pickerEgreso" placeholder="d/m/aaaa">
+              <input 
+                matInput 
+                formControlName="fecha_egreso" 
+                [matDatepicker]="pickerEgreso" 
+                placeholder="d/m/aaaa" 
+                readonly
+              >
               <mat-datepicker-toggle matSuffix [for]="pickerEgreso"></mat-datepicker-toggle>
               <mat-datepicker #pickerEgreso></mat-datepicker>
-            </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'fecha_egreso')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
+              <mat-error *ngFor="let error of getErrors(i, 'fecha_egreso')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field> -->
           </div>
 
-          <div class="col-lg-4 col-md-12">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
+          <div class="form-row">
+            <mat-form-field class="half-width" appearance="outline">
               <mat-label>Cargo</mat-label>
               <mat-icon matPrefix>work</mat-icon>
               <input matInput formControlName="cargo">
+              <mat-error *ngFor="let error of getErrors(i, 'cargo')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'cargo')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
-          </div>
-
-          <div class="col-lg-4 col-md-12" *ngIf="trabajo.get('showNumeroAcuerdo')?.value">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
+            <mat-form-field class="half-width" appearance="outline" *ngIf="trabajo.get('showNumeroAcuerdo')?.value">
               <mat-label>Número De Acuerdo</mat-label>
               <mat-icon matPrefix>assignment</mat-icon>
               <input matInput formControlName="numero_acuerdo">
+              <mat-error *ngFor="let error of getErrors(i, 'numero_acuerdo')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'numero_acuerdo')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
-          </div>
-
-          <div class="col-lg-4 col-md-12">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
+                      
+            <mat-form-field class="half-width" appearance="outline">
               <mat-label>Jornada</mat-label>
               <mat-icon matPrefix>schedule</mat-icon>
               <mat-select formControlName="jornada">
                 <mat-option *ngFor="let option of jornadas" [value]="option.value">{{ option.label }}</mat-option>
               </mat-select>
+              <mat-error *ngFor="let error of getErrors(i, 'jornada')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'jornada')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
           </div>
 
-          <div class="col-lg-4 col-md-12">
-            <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
+          <div class="form-row">
+            <mat-form-field class="half-width" appearance="outline">
               <mat-label>Tipo de Jornada</mat-label>
               <mat-icon matPrefix>assignment_turned_in</mat-icon>
-              <mat-select formControlName="tipoJornada">
+              <mat-select formControlName="tipo_jornada">
                 <mat-option *ngFor="let option of tiposJornada" [value]="option.value">{{ option.label }}</mat-option>
               </mat-select>
+              <mat-error *ngFor="let error of getErrors(i, 'tipo_jornada')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'tipoJornada')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
+          </div>
+
+          <div class="action-buttons">
+            <button mat-button color="warn" (click)="eliminarTrabajo(i)">
+              <mat-icon>remove</mat-icon> Eliminar Centro De Trabajo
+            </button>
           </div>
         </div>
       </div>
-      <div class="row" style="text-align: center; margin: 1%;">
-        <div class="col-md-6">
-          <button mat-button color="primary" (click)="agregarTrabajo()">
-            <mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar Centro De Trabajo
-          </button>
-        </div>
-        <div class="col-md-6">
-          <button mat-button color="warn" (click)="eliminarTrabajo(trabajosArray.length - 1)" [disabled]="trabajosArray.length === 0">
-            <mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar Centro De Trabajo
-          </button>
-        </div>
+
+      <div class="action-buttons">
+        <button mat-button color="primary" (click)="agregarTrabajo()">
+          <mat-icon>add</mat-icon> Agregar Centro De Trabajo
+        </button>
       </div>
     </form>
   </div>

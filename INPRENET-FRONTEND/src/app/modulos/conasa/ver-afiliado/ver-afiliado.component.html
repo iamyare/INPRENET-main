@@ -1,0 +1,25 @@
+<div class="card-container">
+  <!-- Componente buscador -->
+  <div class="search-card">
+    <app-perfil-header (personaEncontrada)="handlePersonaEncontrada($event)"></app-perfil-header>
+  </div>
+
+  <!-- Información adicional -->
+  <div *ngIf="tipoAfiliado" class="additional-info">
+    <mat-card class="custom-card">
+      <mat-card-content>
+        <div class="info-section">
+          <h3 class="title">Información Adicional</h3>
+          <p class="info-item"><strong>Dirección:</strong> {{ tipoAfiliado.DIRECCION_RESIDENCIA }}</p>
+          <p class="info-item"><strong>Departamento de Residencia:</strong> {{ tipoAfiliado.departamentoResidencia }}</p>
+          <p class="info-item"><strong>Municipio de Residencia:</strong> {{ tipoAfiliado.municipioResidencia }}</p>
+          <p class="info-item"><strong>Tipos de Afiliado:</strong></p>
+          <ul class="tipo-list">
+            <li *ngFor="let tipo of tipoAfiliado.tiposPersona">{{ tipo }}</li>
+          </ul>
+          <p class="info-item"><strong>Estado de Afiliado:</strong> {{ tipoAfiliado.estadoFallecido }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

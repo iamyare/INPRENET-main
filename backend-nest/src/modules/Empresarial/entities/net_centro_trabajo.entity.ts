@@ -10,6 +10,7 @@ import { Net_Centro_Trabajo_Nivel } from './net_centro_trabajo_nivel.entity';
 import { net_modulo } from 'src/modules/usuario/entities/net_modulo.entity';
 import { Net_Estado_Centro_Trabajo } from './net_estado_centro_trabajo.entity';
 import { Net_Empleado_Centro_Trabajo } from './net_empleado_centro_trabajo.entity';
+import { Net_Detalle_Prestamo } from 'src/modules/prestamos/entities/net_detalle_prestamo.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
 @Check('CK_TIPO_CENTRO_TRAB', `TIPO IN ('EDUCACION', 'INSTITUCION')`)
@@ -18,8 +19,8 @@ export class Net_Centro_Trabajo {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_CENTRO_TRABAJO', primaryKeyConstraintName: 'PK_id_centro_trabajo' })
     id_centro_trabajo: number;
 
-    @Column('nvarchar2', { length: 14, nullable: true, name: 'RTN' })
-    @Index("UQ_rtn_netCenTrab", { unique: true })
+    @Column('nvarchar2', { length: 20, nullable: true, name: 'RTN' })
+    @Index("UQ_rtn_netCenTrab")
     rtn: string;
 
     @Column('varchar2', { length: 100, nullable: true, name: 'NOMBRE_CENTRO_TRABAJO' })
@@ -89,6 +90,18 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 20, nullable: true, name: 'CODIGO' })
     codigo: string;
 
+    @Column('number', { precision: 2, scale: 0, nullable: true, name: 'DEPARTAMENTO' })
+    departamento: number;
+
+    @Column('varchar2', { length: 100, nullable: true, name: 'CIUDAD' })
+    ciudad: string;
+
+    @Column('number', { precision: 2, scale: 0, nullable: true, name: 'PAIS' })
+    pais: number;
+
+    @Column('nvarchar2', { length: 200, nullable: true, name: 'DIRECCION_3' })
+    direccion_3: string;
+
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)
     @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_ID_MUNICIPIO_CENT_TRAB' })
     municipio: Net_Municipio;
@@ -99,6 +112,9 @@ export class Net_Centro_Trabajo {
 
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanIngreso => detallePlanIngreso.centroTrabajo)
     detalle_plani_ingr: Net_Detalle_planilla_ingreso[];
+
+    @OneToMany(() => Net_Detalle_Prestamo, detallePrestamo => detallePrestamo.centroTrabajo)
+    detallePrestamo: Net_Detalle_Prestamo[];
 
     @OneToMany(() => Net_Deduccion, deduccion => deduccion.centroTrabajo)
     deduccion: Net_Deduccion[];

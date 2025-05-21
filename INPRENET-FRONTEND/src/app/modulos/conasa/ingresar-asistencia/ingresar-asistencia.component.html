@@ -1,0 +1,166 @@
+<div class="back-button-container">
+  <button mat-raised-button color="primary" class="back-button" routerLink="/home/conasa/menu-conasa">
+    <mat-icon>arrow_back</mat-icon> Regresar al Menú
+  </button>
+</div>
+
+<div class="container">
+  <div class="menu-title">
+    <h1>{{ menuTitle }}</h1>
+  </div>
+  <!-- Componente de búsqueda -->
+  <app-perfil-header (personaEncontrada)="handlePersonaEncontrada($event)"></app-perfil-header>
+
+  <!-- Formulario principal -->
+  <form [formGroup]="asistenciaForm" (ngSubmit)="onSubmit()">
+    <!-- Información del contrato -->
+    <mat-card *ngIf="persona" class="form-card">
+      <div class="card-header">
+        <h4 class="card-title">Información del Contrato</h4>
+        <p class="card-category">Complete los datos del contrato</p>
+      </div>
+      <div formGroupName="contratoData" class="card-body">
+
+        <!-- Datos básicos del contrato -->
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Fecha de Contrato</mat-label>
+            <input matInput type="date" formControlName="fechaContrato" readonly />
+            <mat-error *ngIf="contratoData.get('fechaContrato')?.hasError('required')">
+              La fecha de contrato es obligatoria.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Lugar de Cobro</mat-label>
+            <input matInput type="text" formControlName="lugarCobro" />
+            <mat-error *ngIf="contratoData.get('lugarCobro')?.hasError('required')">
+              El lugar de cobro es obligatorio.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Datos de la empresa -->
+        <div class="form-row">
+          <!-- <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Empresa</mat-label>
+            <input matInput type="text" formControlName="empresa" />
+            <mat-error *ngIf="contratoData.get('empresa')?.hasError('required')">
+              El nombre de la empresa es obligatorio.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="full-width" appearance="outline">
+            <mat-label>Dirección de Trabajo</mat-label>
+            <textarea matInput rows="2" formControlName="direccionTrabajo"></textarea>
+            <mat-error *ngIf="contratoData.get('direccionTrabajo')?.hasError('required')">
+              La dirección de trabajo es obligatoria.
+            </mat-error>
+          </mat-form-field> -->
+        </div>
+
+        <!-- Datos de contacto -->
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Teléfono Celular</mat-label>
+            <input matInput type="text" formControlName="telefono_1" />
+            <mat-error *ngIf="contratoData.get('telefono_1')?.hasError('required')">
+              El teléfono celular es obligatorio.
+            </mat-error>
+            <mat-error *ngIf="contratoData.get('telefono_1')?.hasError('pattern')">
+              El número debe tener entre 8 y 12 dígitos.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Teléfono de Casa</mat-label>
+            <input matInput type="text" formControlName="telefono_2" />
+            <mat-error *ngIf="contratoData.get('telefono_2')?.hasError('pattern')">
+              El número de teléfono debe tener entre 8 y 12 dígitos.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Teléfono de Trabajo</mat-label>
+            <input matInput type="text" formControlName="telefono_3" />
+            <mat-error *ngIf="contratoData.get('telefono_3')?.hasError('pattern')">
+              El número de teléfono debe tener entre 8 y 12 dígitos.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Correo Electrónico</mat-label>
+            <input matInput type="email" formControlName="correo_1" />
+            <mat-error *ngIf="contratoData.get('correo_1')?.hasError('required')">
+              El correo electrónico es obligatorio.
+            </mat-error>
+            <mat-error *ngIf="contratoData.get('correo_1')?.hasError('email')">
+              El formato del correo no es válido.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Categoría y Plan -->
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Categoría</mat-label>
+            <mat-select formControlName="categoria" (selectionChange)="onCategoriaChange()">
+              <mat-option *ngFor="let categoria of categorias" [value]="categoria.id_categoria">
+                {{ categoria.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="contratoData.get('categoria')?.hasError('required')">
+              La categoría es obligatoria.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Plan</mat-label>
+            <mat-select formControlName="plan" (selectionChange)="onPlanChange()">
+              <mat-option *ngFor="let plan of planesFiltrados" [value]="plan.id_plan">
+                {{ plan.nombre_plan }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="contratoData.get('plan')?.hasError('required')">
+              El plan es obligatorio.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <!-- Campo de Monto Calculado -->
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Monto Calculado</mat-label>
+            <input matInput type="text" [value]="'L ' + (montoCalculado !== null ? montoCalculado : '-')" readonly />
+          </mat-form-field>
+
+          <mat-form-field class="full-width" appearance="outline">
+            <mat-label>Observación</mat-label>
+            <textarea matInput rows="2" formControlName="observacion"></textarea>
+            <mat-error *ngIf="contratoData.get('observacion')?.hasError('maxlength')">
+              La observación no puede exceder los 500 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+      </div>
+    </mat-card>
+
+    <!-- Componente de Beneficiarios -->
+    <ng-container *ngIf="beneficiariosForm.length > 0">
+      <app-agregar-beneficiarios 
+        *ngIf="persona" 
+        [beneficiariosForm]="beneficiariosForm">
+      </app-agregar-beneficiarios>
+    </ng-container>
+
+    <!-- Botón de registro -->
+    <div *ngIf="persona" class="actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="asistenciaForm.invalid">
+        Registrar Asistencia
+      </button>
+    </div>
+  </form>
+</div>

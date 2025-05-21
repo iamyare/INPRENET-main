@@ -22,6 +22,7 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
   @Output() ejecutarFuncionAsincronaEvent: EventEmitter<(param: any) => Promise<boolean>> = new EventEmitter<(param: any) => Promise<boolean>>();
 
   @Input() columns: TableColumn[] = [];
+  @Input() itemsPerPages: any;
   @Input() editarFunc: any;
 
   @Input() nombreEncabezadoUno: string = '';
@@ -59,9 +60,8 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
   formsearch = new FormControl('');
   searchResults: any = [];
 
-  itemsPerPage = 20;
   desde = 0;
-  hasta: number = this.itemsPerPage;
+
   currentPage = 0;
 
   editingRow: any | null = null;
@@ -71,20 +71,11 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
   columnDefs: string[] = [];
 
   selectedItem: any; // Agregamos selectedItem
+  itemsPerPage!: number;
+  hasta!: number;
 
   constructor(private selectionService: SelectionserviceService) {
-    this.formsearch.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap(query => this.filtrarUsuarios(query)),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(results => {
-        this.searchResults = results;
-        this.currentPage = 0;
-        this.paginator?.firstPage();
-      });
+
   }
 
   ngOnDestroy(): void {
@@ -106,10 +97,31 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.formsearch.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(query => this.filtrarUsuarios(query)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(results => {
+        this.searchResults = results;
+        this.currentPage = 0;
+        this.paginator?.firstPage();
+      });
+
+    if (this.itemsPerPages) {
+      this.itemsPerPage = parseInt(this.itemsPerPages);
+    } else {
+      this.itemsPerPage = 20;
+    }
+
+    this.hasta = this.itemsPerPage;
+
     this.ejecutarFuncionAsincronaEvent.emit(this.ejecutarFuncionAsincrona.bind(this));
     this.columnDefs = [
-      ...this.columns.map(col => col.col),
       ...(this.verOpcEditar ? ['opcionesEditar'] : []),
+      ...this.columns.map(col => col.col),
       ...(this.verBotEditar ? ['acciones'] : []),
       ...(this.mostrarBotonUno ? ['botonUno'] : []),
       ...(this.mostrarBotonDos ? ['botonDos'] : []),
@@ -165,6 +177,11 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
       return column.customRender(row);
     }
     return row[column.col];
+  }
+
+  isNegativeNumber(value: any): boolean {
+    const num = parseFloat(value);
+    return !isNaN(num) && num < 0;
   }
 
   getFormControl(row: any, column: TableColumn): FormControl {
@@ -252,18 +269,41 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
     });
   }
 
-  onSelectionChange(user: any) {
-    if (user.isSelected) {
-      this.selectionService.addSelectedItem(user);
+  onSelectionChange(event: Event, row: any): void {
+    const inputElement = event.target as HTMLInputElement;
+    const checked = inputElement.checked;
+
+    if (checked) {
+      this.selectionService.addSelectedItem(row);
     } else {
-      this.selectionService.removeSelectedItem(user);
+      this.selectionService.removeSelectedItem(row);
     }
-    this.obtenerFilasSeleccionadas();
+
+    this.obtenerFilasSeleccionadas(); // Asegúrate de que esta función actualiza correctamente
+    console.log('Filas seleccionadas:', this.selectionService.getSelectedItems()); // Mejor usar un método que retorne los seleccionados
   }
 
   obtenerFilasSeleccionadas() {
     const filasSeleccionadas = this.selectionService.getSelectedItems();
-    this.getElemSeleccionados.emit(filasSeleccionadas);
+
+    // Suponiendo que las filas actuales están disponibles en 'this.filas' (o la fuente actual de datos de la tabla)
+    const filasActuales = this.filas; // Asegúrate de que 'this.filas' sea el arreglo de las filas actuales de la tabla
+
+    // Filtrar las filas seleccionadas para asegurarse de que solo las filas existentes sean seleccionadas
+    const filasValidasSeleccionadas = filasSeleccionadas.filter(fila =>
+      filasActuales.some((filaActual: any) => filaActual === fila)
+    );
+
+    // Limpiar la selección
+    this.selectionService.clearSelection();
+
+    // Volver a agregar solo las filas válidas
+    filasValidasSeleccionadas.forEach(fila => this.selectionService.addSelectedItem(fila));
+
+    // Emitir las filas seleccionadas
+    this.getElemSeleccionados.emit(filasValidasSeleccionadas);
+
+    console.log('Filas seleccionadas después de la actualización:', filasValidasSeleccionadas);
   }
 
   ejecutarAccionUno(row: any) {

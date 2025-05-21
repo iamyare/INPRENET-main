@@ -116,3 +116,7 @@ a.mat-list-item:focus {
   display: flex;
   align-items: center; /* Asegura que los iconos estén alineados verticalmente */
 }
+.side-menu-container {
+  max-height: 100vh;      // O la altura deseada
+  overflow-y: auto;       // Fuerza el scroll cuando excede la altura
+}

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
@@ -27,15 +27,15 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private cdr: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos', 'administrar']);
+    this.mostrarBotonEliminar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos', 'administrar']);
   }
-
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Afiliado'] && this.Afiliado) {
@@ -61,7 +61,6 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
         validationRules: [Validators.required]
       }
     ];
-
     this.getFilas().then(() => this.cargar());
   }
 
@@ -78,6 +77,7 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
           id_per_cole_mag: item.id,
           colegio_magisterial: item.colegio.descripcion
         }));
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los colegios magisteriales');
         console.error('Error al obtener datos de los colegios magisteriales', error);
@@ -132,7 +132,9 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+      // Llamar a getFilas para actualizar los datos de la tabla
+      this.getFilas().then(() => this.cargar());
     });
   }
+
 }

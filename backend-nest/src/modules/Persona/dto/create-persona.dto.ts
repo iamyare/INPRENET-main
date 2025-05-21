@@ -25,7 +25,6 @@ export interface PersonaResponse {
     direccion_residencia: string;
     estado: string;
     fecha_nacimiento: string;
-    fecha_vencimiento_ident: string;
     archivo_identificacion: string;
     tipoIdentificacion: string;
     porcentaje: string;
@@ -156,7 +155,5 @@ export class NetPersonaDTO {
 
     @IsOptional()
     porcentaje?: number;
-
-    fecha_vencimiento_ident
 
 }

@@ -5,10 +5,8 @@ import { BancosService } from './bancos.service';
 import { TipoIdentificacionService } from './tipo-identificacion.service';
 import { ColegiosMagisterialesService } from './colegios-magisteriales.service';
 import { CentroTrabajoService } from './centro-trabajo.service';
-import { HttpClient } from '@angular/common/http';
 import { TransaccionesService } from './transacciones.service';
-import { AuthService } from './auth.service';
-import { map, Observable } from 'rxjs';
+import { firstValueFrom, map, Observable } from 'rxjs';
 import { AfiliacionService } from './afiliacion.service';
 import { MantenimientoAfiliacionService } from './mantenimiento-afiliacion.service';
 
@@ -21,7 +19,6 @@ export class DatosEstaticosService {
   DatosBancBen: any = [];
   Bancos: any = [];
   tipoIdent: any = [];
-  tipoCuenta: any = [];
   profesiones: any = [];
   colegiosMagisteriales: any = [];
   centrosTrabajo: any = [];
@@ -50,7 +47,6 @@ export class DatosEstaticosService {
     this.getCausasFallecimiento();
     this.getNacionalidad();
     this.gettipoIdent();
-    this.getTipoCuenta();
     this.getTipoMovimientos();
     this.getBancos();
     this.getColegiosMagisteriales();
@@ -94,6 +90,8 @@ export class DatosEstaticosService {
       label: estado.Descripcion,
       value: estado.codigo
     }));
+
+    console.log(this.estados);
 
     return this.estados;
   }
@@ -158,7 +156,20 @@ export class DatosEstaticosService {
     }
   }
 
-
+  async getDepartamentosPropietario(): Promise<any[]> {
+    try {
+      const response = await firstValueFrom(this.direccionSer.getAllDepartments());
+      this.departamentos = response.map((item: { id_departamento: any; nombre_departamento: any }) => ({
+        label: item.nombre_departamento,
+        value: item.id_departamento,
+      }));
+      return this.departamentos;
+    } catch (error) {
+      console.error('Error al obtener los departamentos:', error);
+      this.departamentos = [];
+      return this.departamentos;
+    }
+  }
 
   gettipoIdent = async () => {
     const response = await this.tipoIdentificacionService.obtenerTiposIdentificacion().toPromise();
@@ -169,17 +180,6 @@ export class DatosEstaticosService {
 
     this.tipoIdent = mappedResponse;
     return this.tipoIdent;
-  }
-
-  async getTipoCuenta() {
-    const response = await this.afiliadoService.obtenerTiposCuentas().toPromise();
-    const mappedResponse = response.data.map((item: { NUMERO_CUENTA: any; DESCRIPCION: any; }) => ({
-      label: item.DESCRIPCION,
-      value: item.NUMERO_CUENTA
-    }));
-
-    this.tipoCuenta = mappedResponse;
-    return this.tipoCuenta;
   }
 
   async getTipoMovimientos() {
@@ -198,6 +198,7 @@ export class DatosEstaticosService {
     try {
       const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
       if (response) {
+
         const mappedResponse = response.map((item) => ({
           label: item.nombre_centro_trabajo,
           value: String(item.id_centro_trabajo),
@@ -257,11 +258,15 @@ export class DatosEstaticosService {
   getBancos(): Observable<any[]> {
     return this.bancosService.getAllBancos().pipe(
       map(response => {
-        this.Bancos = response.data.map((item: { nombre_banco: any; id_banco: any; }) => ({
-          label: item.nombre_banco,
-          value: String(item.id_banco)
-        }));
+        this.Bancos = response.data
+          .filter((item: { codigo_ach: any }) => item.codigo_ach !== null) // Filtrar registros con cod_ach !== null
+          .map((item: { nombre_banco: any; id_banco: any }) => ({
+            label: item.nombre_banco,
+            value: String(item.id_banco)
+          }));
+
         return this.Bancos;
+
       })
     );
   }
@@ -269,8 +274,9 @@ export class DatosEstaticosService {
   getColegiosMagisteriales(): Observable<any[]> {
     return this.colegiosMagSVC.getAllColegiosMagisteriales().pipe(
       map(response => {
-        this.colegiosMagisteriales = response.data.map((item: { id_colegio: any; descripcion: any; }) => ({
-          label: String(item.descripcion),
+        this.colegiosMagisteriales = response.data.map((item: { id_colegio: any; descripcion: any; abreviatura: any }) => ({
+          label: String(item.abreviatura),
+          abreviatura: String(item.descripcion),
           value: item.id_colegio,
         }));
         return this.colegiosMagisteriales;
@@ -280,91 +286,54 @@ export class DatosEstaticosService {
 
   tipoPersona = [
     {
-      "value": 1,
-      "label": "AFILIADO"
+      "value": 1, "label": "AFILIADO"
     },
     {
-      "value": 2,
-      "label": "BENEFICIARIO"
+      "value": 2, "label": "BENEFICIARIO"
     }
   ]
-
   estadoCivil = [
-    {
-      "label": "CASADO/A",
-      "value": "CASADO/A"
-    },
-    {
-      "label": "DIVORCIADO/A",
-      "value": "DIVORCIADO/A"
-    },
-    {
-      "label": "SEPARADO/A",
-      "value": "SEPARADO/A"
-    },
-    {
-      "label": "SOLTERO/A",
-      "value": "SOLTERO/A"
-    },
-    {
-      "label": "UNION LIBRE",
-      "value": "UNION LIBRE"
-    },
-    {
-      "label": "VIUDO/A",
-      "value": "VIUDO/A"
-    }
+    { label: "SOLTERO(A)", value: "SOLTERO(A)" },
+    { label: "CASADO(A)", value: "CASADO(A)" },
+    { label: "DIVORCIADO(A)", value: "DIVORCIADO(A)" },
+    { label: "UNION LIBRE", value: "UNION LIBRE" },
+    { label: "VIUDO(A)", value: "VIUDO(A)" },
+    { label: "SEPARADO(A)", value: "SEPARADO(A)" }
   ];
-
+  
   tiposPlanilla = [
     {
-      "idTipoPlanilla": 1,
-      "value": "EGRESO"
+      "idTipoPlanilla": 1, "value": "EGRESO"
     },
     {
-      "idTipoPlanilla": 2,
-      "value": "INGRESO"
+      "idTipoPlanilla": 2, "value": "INGRESO"
     },
   ];
 
   representacion = [
     {
-      "value": 'POR CUENTA PROPIA',
-      "label": "POR CUENTA PROPIA"
+      "value": 'POR CUENTA PROPIA', "label": "POR CUENTA PROPIA"
     },
     {
-      "value": "POR TERCEROS",
-      "label": "POR TERCEROS"
+      "value": "POR TERCEROS", "label": "POR TERCEROS"
     }
   ];
 
   genero = [
     {
-      "value": "MASCULINO",
-      "label": "MASCULINO"
+      "value": "FEMENINO", "label": "FEMENINO"
     },
     {
-      "value": "FEMENINO",
-      "label": "FEMENINO"
-    },
-    {
-      "value": "OTRO",
-      "label": "OTRO"
-    },
+      "value": "MASCULINO", "label": "MASCULINO"
+    }
   ];
 
   sexo = [
     {
-      "value": "M",
-      "label": "MASCULINO"
+      "value": "F", "label": "FEMENINO"
     },
     {
-      "value": "F",
-      "label": "FEMENINO"
-    },
-    {
-      "value": "OTRO",
-      "label": "OTRO"
+      "value": "M", "label": "MASCULINO"
     }
   ];
 
@@ -430,10 +399,9 @@ export class DatosEstaticosService {
     { value: "ABUELA PATERNA", label: "ABUELA PATERNA" },
     { value: "ABUELO MATERNO", label: "ABUELO MATERNO" },
     { value: "ABUELO PATERNO", label: "ABUELO PATERNO" },
+    { value: "CÓNYUGE", label: "CÓNYUGE" },
     { value: "CUÑADA", label: "CUÑADA" },
     { value: "CUÑADO", label: "CUÑADO" },
-    { value: "ESPOSA", label: "ESPOSA" },
-    { value: "ESPOSO", label: "ESPOSO" },
     { value: "HERMANA", label: "HERMANA" },
     { value: "HERMANO", label: "HERMANO" },
     { value: "HIJA", label: "HIJA" },
@@ -449,10 +417,34 @@ export class DatosEstaticosService {
     { value: "SOBRINO", label: "SOBRINO" },
     { value: "SUEGRA", label: "SUEGRA" },
     { value: "SUEGRO", label: "SUEGRO" },
-    { value: "TÍA MATERNA", label: "TÍA MATERNA" },
-    { value: "TÍA PATERNA", label: "TÍA PATERNA" },
-    { value: "TÍO MATERNO", label: "TÍO MATERNO" },
-    { value: "TÍO PATERNO", label: "TÍO PATERNO" },
+    { value: "YERNO", label: "YERNO" }
+  ];
+
+  parentescoReferenciasPersonales = [
+    { value: "AMIGO", label: "AMIGO" },
+    { value: "COMPAÑERO DE TRABAJO", label: "COMPAÑERO DE TRABAJO" },
+    { value: "VECINO", label: "VECINO" },
+    { value: "OTRO", label: "OTRO" },
+  ];
+
+  parentescoPEPS = [
+    { value: "ABUELA", label: "ABUELA" },
+    { value: "ABUELO", label: "ABUELO" },
+    { value: "CÓNYUGE", label: "CÓNYUGE" },
+    { value: "CUÑADA", label: "CUÑADA" },
+    { value: "CUÑADO", label: "CUÑADO" },
+    { value: "HERMANA", label: "HERMANA" },
+    { value: "HERMANO", label: "HERMANO" },
+    { value: "HIJA", label: "HIJA" },
+    { value: "HIJO", label: "HIJO" },
+    { value: "MADRE", label: "MADRE" },
+    { value: "PADRE", label: "PADRE" },
+    { value: "NIETA", label: "NIETA" },
+    { value: "NIETO", label: "NIETO" },
+    { value: "NUERA", label: "NUERA" },
+    { value: "SUEGRA", label: "SUEGRA" },
+    { value: "SUEGRO", label: "SUEGRO" },
+    { value: "YERNA", label: "YERNA" },
     { value: "YERNO", label: "YERNO" }
   ];
 }

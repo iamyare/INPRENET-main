@@ -1,8 +1,7 @@
 import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
-import { Check, Column, Entity, Index, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, Index, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
-import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
@@ -17,6 +16,10 @@ import { Net_Persona_Discapacidad } from "./net_persona_discapacidad.entity";
 import { Net_Familia } from "./net_familia.entity";
 import { Net_Deducciones_Asignadas } from "src/modules/Planilla/detalle-deduccion/entities/net-deducciones-asignadas.entity";
 import { Net_Referencias } from "./net_referencias.entity";
+import { Net_Usuario_Empresa } from "src/modules/usuario/entities/net_usuario_empresa.entity";
+import { Net_Detalle_Prestamo } from "src/modules/prestamos/entities/net_detalle_prestamo.entity";
+import { Net_Aldea } from "src/modules/Regional/provincia/entities/net_aldea.entity";
+import { Net_Colonia } from "src/modules/Regional/provincia/entities/net_colonia.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -35,12 +38,9 @@ export class net_persona {
     @JoinColumn({ name: 'ID_PAIS_NACIONALIDAD', foreignKeyConstraintName: "FK_ID_PAIS_NET_PERSONA" })
     pais: Net_Pais;
 
-    @Column('varchar2', { length: 15, nullable: true, name: 'N_IDENTIFICACION' })
+    @Column('varchar2', { length: 20, nullable: true, name: 'N_IDENTIFICACION' })
     @Index("UQ_N_IDENTIFICACION_NET_PERSONA", { unique: true })
     n_identificacion: string;
-
-    @Column('date', { nullable: true, name: 'FECHA_VENCIMIENTO_IDENT' })
-    fecha_vencimiento_ident: string;
 
     @Column('varchar2', { length: 14, nullable: true, name: 'RTN' })
     rtn: string;
@@ -111,10 +111,10 @@ export class net_persona {
     @Column('varchar2', { length: 12, nullable: true, name: 'TELEFONO_3' })
     telefono_3: string;
 
-    @Column('varchar2', { length: 40, nullable: true, name: 'CORREO_1' })
+    @Column('varchar2', { length: 60, nullable: true, name: 'CORREO_1' })
     correo_1: string;
 
-    @Column('varchar2', { length: 40, nullable: true, name: 'CORREO_2' })
+    @Column('varchar2', { length: 60, nullable: true, name: 'CORREO_2' })
     correo_2: string;
 
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })
@@ -124,7 +124,10 @@ export class net_persona {
     certificado_defuncion: any;
 
     @Column('date', { nullable: true, name: 'FECHA_DEFUNCION' })
-    fecha_defuncion: string;
+    fecha_defuncion: Date;
+
+    @Column('date', { nullable: true, name: 'FECHA_REPORTE_FALLECIDO' })
+    fechaReporteFallecido: Date;
 
     @Column('blob', { nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
     archivo_identificacion: any;
@@ -132,8 +135,20 @@ export class net_persona {
     @Column('varchar2', { length: 500, nullable: true, name: 'DIRECCION_RESIDENCIA' })
     direccion_residencia: string;
 
+    @Column('varchar2', { length: 500, nullable: true, name: 'DIRECCION_RESIDENCIA_ESTRUCTURADA' })
+    direccion_residencia_estructurada: string;
+
+    @Column('varchar2', { length: 500, nullable: true, name: 'OBSERVACION' })
+    observacion: string;
+
+    @UpdateDateColumn({ type: 'timestamp', name: 'ULTIMA_FECHA_ACTUALIZACION' })
+    ultima_fecha_actualizacion: Date;
+
     @Column('blob', { nullable: true, name: 'FOTO_PERFIL' })
     foto_perfil: any;
+
+    @Column('blob', { nullable: true, name: 'CARNET_DISCAPACIDAD' })
+    carnet_discapacidad: any;
 
     @OneToMany(() => net_detalle_persona, detallePersona => detallePersona.persona)
     detallePersona: net_detalle_persona[];
@@ -161,9 +176,6 @@ export class net_persona {
         (perfPersCentTrab) => perfPersCentTrab.persona,
         { cascade: true })
     perfPersCentTrabs: Net_perf_pers_cent_trab[];
-
-    @OneToMany(() => NET_CUENTA_PERSONA, cuentaPersona => cuentaPersona.persona)
-    cuentas: NET_CUENTA_PERSONA[];
 
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanIngreso => detallePlanIngreso.persona)
     detallePlanIngreso: Net_Detalle_planilla_ingreso[];
@@ -199,4 +211,28 @@ export class net_persona {
 
     @OneToMany(() => Net_Referencias, referencia => referencia.persona)
     referencias: Net_Referencias[];
+
+    @ManyToOne(() => Net_Usuario_Empresa, { nullable: true })
+    @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_PERSONA' })
+    usuarioEmpresa: Net_Usuario_Empresa;
+
+    @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
+    ID_USUARIO_EMPRESA: number;
+
+    @Column('date', { nullable: true, name: 'FECHA_AFILIACION' })
+    fecha_afiliacion: string;
+
+    @Column('number', { nullable: true, name: 'NUMERO_CERTIFICADO_DEFUNCION' })
+    numero_certificado_defuncion: number;
+
+    @OneToMany(() => Net_Detalle_Prestamo, prestamo => prestamo.persona)
+    detallePrestamos: Net_Detalle_Prestamo[];
+
+    @ManyToOne(() => Net_Aldea, aldea => aldea.personas, { cascade: true })
+    @JoinColumn({ name: 'ID_ALDEA', foreignKeyConstraintName: "FK_ID_ALDEA_NET_PERSONA" })
+    aldea: Net_Aldea;
+
+    @ManyToOne(() => Net_Colonia, colonia => colonia.personas, { cascade: true })
+    @JoinColumn({ name: 'ID_COLONIA', foreignKeyConstraintName: "FK_ID_COLONIA_NET_PERSONA" })
+    colonia: Net_Colonia;
 }

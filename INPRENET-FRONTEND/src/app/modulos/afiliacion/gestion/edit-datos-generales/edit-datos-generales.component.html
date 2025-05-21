@@ -3,135 +3,369 @@
     <mat-spinner class="spinner" diameter="50"></mat-spinner>
   </div>
 
-  <div *ngIf="datos && !loading">
-    <!-- <app-dat-generales-afiliado [datos]="formDatosGenerales"
-      (newDatosGenerales)="setDatosGenerales($event)"></app-dat-generales-afiliado> -->
+  <div *ngIf="Afiliado && !loading">
 
+    <mat-card class="tabla-datos-persona" *ngIf="tieneTipoPersona()">
+      <mat-card-title>Estado y Tipo De Persona</mat-card-title>
+      <mat-card-content>
+
+        <div *ngIf="cargandoTabla" class="spinner-container">
+          <mat-spinner class="spinner" diameter="50"></mat-spinner>
+        </div>
+        
+        <div *ngIf="!cargandoTabla" class="responsive-table-container">
+          <table
+            mat-table
+            [dataSource]="tableData"
+            class="mat-elevation-z8 tabla-con-estilo"
+          >
+
+          <ng-container matColumnDef="ID_PERSONA">
+            <mat-header-cell *matHeaderCellDef style="display: none;"
+              >ID PERSONA</mat-header-cell
+            >
+            <mat-cell *matCellDef="let element" style="display: none;">
+              {{ element.ID_PERSONA }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="ID_CAUSANTE">
+            <mat-header-cell *matHeaderCellDef style="display: none;"
+              >ID CAUSANTE</mat-header-cell
+            >
+            <mat-cell *matCellDef="let element" style="display: none;">
+              {{ element.ID_CAUSANTE }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="ID_CAUSANTE_PADRE">
+            <mat-header-cell *matHeaderCellDef style="display: none;"
+              >ID CAUSANTE PADRE</mat-header-cell
+            >
+            <mat-cell *matCellDef="let element" style="display: none;">
+              {{ element.ID_CAUSANTE_PADRE }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="ID_DETALLE_PERSONA">
+            <mat-header-cell *matHeaderCellDef style="display: none;"
+              >ID DETALLE PERSONA</mat-header-cell
+            >
+            <mat-cell *matCellDef="let element" style="display: none;">
+              {{ element.ID_DETALLE_PERSONA }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="ID_ESTADO_AFILIACION">
+            <mat-header-cell *matHeaderCellDef style="display: none;"
+              >ID ESTADO AFILIACION</mat-header-cell
+            >
+            <mat-cell *matCellDef="let element" style="display: none;">
+              {{ element.ID_ESTADO_AFILIACION }}
+            </mat-cell>
+          </ng-container>
+
+          <!-- DNICausante -->
+          <ng-container matColumnDef="DNICausante">
+            <mat-header-cell *matHeaderCellDef>DNI del Causante</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              {{ element.dniCausante }}
+            </mat-cell>
+          </ng-container>
+
+          <!-- TipoPersona -->
+          <ng-container matColumnDef="TipoPersona">
+            <mat-header-cell *matHeaderCellDef>Tipo de Persona</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              <span>{{ element.tipoPersona || 'No disponible' }}</span>
+            </mat-cell>
+          </ng-container>
+
+          <!-- EstadoAfiliacion -->
+          <!-- EstadoAfiliacion -->
+          <ng-container matColumnDef="EstadoAfiliacion">
+            <mat-header-cell *matHeaderCellDef>Estado de Afiliación</mat-header-cell>
+            <mat-cell *matCellDef="let element; let i = index">
+              <mat-form-field appearance="outline">
+                <mat-select
+                  [(ngModel)]="element.estadoAfiliacion"
+                  [compareWith]="compararEstados"
+                  [ngModelOptions]="{ standalone: true }"
+                  name="estadoSelect_{{ i }}"
+                  [disabled]="!puedeEditarTabla"  
+                >
+                  <mat-option *ngFor="let e of element.estadosDisponibles" [value]="e.value">
+                    {{ e.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Observacion -->
+          <ng-container matColumnDef="Observacion">
+            <mat-header-cell *matHeaderCellDef>Observación</mat-header-cell>
+            <mat-cell *matCellDef="let element; let i = index">
+              <mat-form-field appearance="outline">
+                <textarea
+                  matInput
+                  [(ngModel)]="element.observacion"
+                  [ngModelOptions]="{ standalone: true }"
+                  name="observacion_{{ i }}"
+                  rows="1"
+                  [disabled]="!puedeEditarTabla" 
+                ></textarea>
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Nueva columna Acción -->
+          <ng-container matColumnDef="Acciones">
+            <mat-header-cell *matHeaderCellDef>Acción</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              <button
+                mat-icon-button
+                color="primary"
+                aria-label="Guardar"
+                (click)="guardarEstadoAfiliacion(element)"
+                [disabled]="!puedeEditarTabla"  
+              >
+                <mat-icon>save</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+            <mat-header-row
+              *matHeaderRowDef="displayedColumns.concat(['Acciones'])"
+            ></mat-header-row>
+            <mat-row
+              *matRowDef="
+                let row;
+                columns: displayedColumns.concat(['Acciones']);
+              "
+            ></mat-row>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Mostrar mensaje alternativo si no hay datos -->
+   <!-- SOLO SE MUESTRA SI NO ES AFILIADO -->
+      <div *ngIf="!esAfiliado()" class="tipo-persona-container">
+        <mat-form-field class="custom-select" appearance="outline">
+          <mat-label>Seleccionar Tipo de Persona</mat-label>
+          <mat-select [(ngModel)]="tipoPersonaSeleccionada" name="tipoPersona">
+            <mat-option *ngFor="let tipo of tiposPersona" [value]="tipo.ID_TIPO_PERSONA">
+              {{ tipo.TIPO_PERSONA }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button 
+          mat-raised-button 
+          class="custom-button"
+          color="primary" 
+          (click)="convertirEnAfiliado()" 
+          [disabled]="!tipoPersonaSeleccionada">
+          Convertir a {{ obtenerNombreTipoPersona() }}
+        </button>
+      </div>
+
+
+    
+    <!-- Componente Datos Generales (datos personales, etc.) -->
     <app-datos-generales
+      [formGroup]="datosGeneralesForm"
       [initialData]="initialData"
       [indicesSeleccionados]="indicesSeleccionados"
       [discapacidadSeleccionada]="true"
-      (newDatosGenerales)="setDatosGenerales($event)">
+      (newDatosGenerales)="setDatosGenerales($event)"
+      (imageCaptured)="onImageCaptured($event)"
+      [puedeEditar]="mostrarBotonGuardar"
+    >
     </app-datos-generales>
 
+    <!-- FORMULARIO DE FALLECIMIENTO (formGroup="form1") -->
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
-      <div class="row" style="margin: 0px 20px 0 20px;">
-        <div class="col-md-4">
-          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
-            <mat-label>Tipo de Persona</mat-label>
-            <mat-select formControlName="tipo_persona">
-              <mat-option *ngFor="let tipo of tiposPersona" [value]="tipo.ID_TIPO_PERSONA">
-                {{ tipo.TIPO_PERSONA }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-error *ngFor="let error of getErrors('tipo_persona')">
-            {{ error }}
-          </mat-error>
-        </div>
+      <mat-card>
+        <mat-card-title class="custom-title">Datos de Fallecimiento</mat-card-title>
+        <mat-card-content>
+          <div class="row" style="margin: 0px 20px 0 20px;">
 
-        <div class="col-md-4" >
-          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-            appearance="outline">
-            <mat-label>Estado de Afiliación de la Persona</mat-label>
-            <mat-select matNativeControl formControlName="estado" (selectionChange)="mostrarCamposFallecido($event)">
-              <mat-option *ngFor="let p of estado" [value]="p.label">
-                {{ p.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-error *ngFor="let error of getErrors('estado')">
-            {{ error }}
-          </mat-error>
-        </div>
+            <!-- Fallecido -->
+            <div class="col-lg-4 col-md-12">
+              <mat-form-field class="example-full-width inputs" appearance="outline">
+                <mat-label>Fallecido</mat-label>
+                <mat-select formControlName="fallecido">
+                  <mat-option value="NO">NO</mat-option>
+                  <mat-option value="SI">SI</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <!-- Mensajes de error para 'fallecido' -->
+              <mat-error *ngFor="let error of getErrors('fallecido')">
+                {{ error }}
+              </mat-error>
+            </div>
 
-        <!-- <div class="col-md-4">
-          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-            appearance="outline">
-            <mat-label>Certificado Defunción</mat-label>
-            <input matInput formControlName="certificado_defuncion">
-          </mat-form-field>
-          <mat-error *ngFor="let error of getErrors('certificado_defuncion')">
-            {{ error }}
-          </mat-error>
-        </div> -->
+            <!-- Causa de Fallecimiento -->
+            <div class="col-lg-4 col-md-12">
+              <mat-form-field class="example-full-width inputs" appearance="outline">
+                <mat-label>Causa de Fallecimiento</mat-label>
+                <mat-select formControlName="causa_fallecimiento">
+                  <mat-option
+                    *ngFor="let p of CausaFallecimiento"
+                    [value]="p.value"
+                  >
+                    {{ p.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-error *ngFor="let error of getErrors('causa_fallecimiento')">
+                {{ error }}
+              </mat-error>
+            </div>
 
-        <div class="col-md-4">
-          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-            appearance="outline">
-            <mat-label>Causa de Fallecimiento</mat-label>
-            <mat-select matNativeControl formControlName="causa_fallecimiento">
-              <mat-option *ngFor="let p of CausaFallecimiento" [value]="p.value">
-                {{ p.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-error *ngFor="let error of getErrors('causa_fallecimiento')">
-            {{ error }}
-          </mat-error>
-        </div>
-        <!-- <div class="col-md-4">
-          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-            appearance="outline">
-            <mat-label>Observaciones</mat-label>
-            <input matInput formControlName="observaciones">
-          </mat-form-field>
-          <mat-error *ngFor="let error of getErrors('observaciones')">
-            {{ error }}
-          </mat-error>
-        </div> -->
-        <div class="col-md-4">
-          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-            appearance="outline">
-            <mat-label>Fecha Defunción</mat-label>
-            <mat-datepicker-toggle matSuffix [for]="fechaDef"></mat-datepicker-toggle>
-            <mat-datepicker #fechaDef></mat-datepicker>
-            <input matInput formControlName="fecha_defuncion" [matDatepicker]="fechaDef" [max]="minDate">
-          </mat-form-field>
-          <mat-error *ngFor="let error of getErrors('fecha_defuncion')">
-            {{ error }}
-          </mat-error>
-        </div>
-        <div class="col-lg-4 col-md-12">
-          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-            appearance="outline">
-            <mat-label>Departamento De Defunción</mat-label>
-            <mat-icon matPrefix>location_city</mat-icon>
-            <mat-select formControlName="id_departamento_defuncion" (selectionChange)="onDepartamentoChange($event)">
-              <mat-option *ngFor="let departamento of departamentos"  [value]="departamento.value">
-                {{ departamento.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-error *ngFor="let error of getErrors('id_departamento_defuncion')">
-            {{ error }}
-          </mat-error>
-        </div>
-        <div class="col-lg-4 col-md-12">
-          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-            appearance="outline">
-            <mat-label>Municipio De Defunción</mat-label>
-            <mat-icon matPrefix>location_city</mat-icon>
-            <mat-select formControlName="id_municipio_defuncion">
-              <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
-                {{ municipio.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-error *ngFor="let error of getErrors('id_municipio_defuncion')">
-            {{ error }}
-          </mat-error>
-        </div>
+            <!-- Fecha Defunción -->
+            <div class="col-lg-4 col-md-12">
+              <mat-form-field class="example-full-width inputs" appearance="outline">
+                <mat-label>Fecha Defunción</mat-label>
+                <mat-datepicker-toggle matSuffix [for]="fechaDef"></mat-datepicker-toggle>
+                <mat-datepicker #fechaDef></mat-datepicker>
+                <input
+                  matInput
+                  formControlName="fecha_defuncion"
+                  [matDatepicker]="fechaDef"
+                  [max]="minDate"
+                />
+              </mat-form-field>
+              <mat-error *ngFor="let error of getErrors('fecha_defuncion')">
+                {{ error }}
+              </mat-error>
+            </div>
 
-      </div>
+            <!-- Departamento Defunción -->
+            <div class="col-lg-6 col-md-12">
+              <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+                <mat-label>Departamento de Defunción</mat-label>
+                <mat-icon matPrefix>location_on</mat-icon>
+                <mat-select formControlName="id_departamento_defuncion" (selectionChange)="onDepartamentoDefuncionChange($event)">
+                  <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+                    {{ departamento.label }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="form1.get('id_departamento_defuncion')?.hasError('required')">
+                  Departamento de Defunción es requerido.
+                </mat-error>
+              </mat-form-field>
+            </div>
+            
+            <div class="col-lg-6 col-md-12">
+              <mat-form-field appearance="outline" class="example-full-width inputs w-100">
+                <mat-label>Municipio de Defunción</mat-label>
+                <mat-icon matPrefix>location_city</mat-icon>
+                <mat-select formControlName="id_municipio_defuncion">
+                  <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
+                    {{ municipio.label }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="form1.get('id_municipio_defuncion')?.hasError('required')">
+                  Municipio de Defunción es requerido.
+                </mat-error>
+              </mat-form-field>
+            </div>
+            
 
-      <app-botonarchivos labelBoton="Certificado de Defuncion"  (setArchivo)="getArchivoDef($event)"></app-botonarchivos>
+            <!-- Fecha Reporte Fallecido (Solo requerido si fallecido='SI') -->
+            <div class="col-lg-6 col-md-12">
+              <mat-form-field class="example-full-width inputs" appearance="outline">
+                <mat-label>Fecha Reporte Fallecido</mat-label>
+                <mat-datepicker-toggle matSuffix [for]="fechaRepFall"></mat-datepicker-toggle>
+                <mat-datepicker #fechaRepFall></mat-datepicker>
+                <input
+                  matInput
+                  formControlName="fecha_reporte_fallecido"
+                  [matDatepicker]="fechaRepFall"
+                  [max]="minDate"
+                />
+              </mat-form-field>
+              <mat-error *ngFor="let error of getErrors('fecha_reporte_fallecido')">
+                {{ error }}
+              </mat-error>
+            </div>
+
+            <!-- Número Certificado Defunción (Solo requerido si fallecido='SI') -->
+            <div class="col-lg-6 col-md-12">
+              <mat-form-field class="example-full-width inputs" appearance="outline">
+                <mat-label>Número Certificado Defunción</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  formControlName="numero_certificado_defuncion"
+                  min="0"
+                />
+              </mat-form-field>
+              <mat-error
+                *ngFor="let error of getErrors('numero_certificado_defuncion')"
+              >
+                {{ error }}
+              </mat-error>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <!-- CERTIFICADO DE DEFUNCIÓN -->
+        <div class="pdf-container">
+          <div class="pdf-preview">
+            <h4>Certificado de Defunción</h4>
+            <iframe *ngIf="certificadoDefuncionUrl" [src]="certificadoDefuncionUrl" width="100%" height="500px"></iframe>
+            
+            <app-botonarchivos
+              *ngIf="mostrarBotonGuardar"
+              labelBoton="Certificado de Defunción"
+              (setArchivo)="getArchivoDef($event)"
+              [disabled]="form1.get('fallecido')?.value === 'NO'"
+            ></app-botonarchivos>
+          
+            <!-- Botón para eliminar el archivo adjunto -->
+            <button
+              *ngIf="form1.get('fallecido')?.value === 'SI' && certificadoDefuncionUrl && mostrarBotonGuardar"
+              mat-raised-button
+              color="warn"
+              (click)="eliminarCertificadoDefuncion()"
+              style="margin-top: 10px;"
+            >
+              Eliminar Certificado
+            </button>
+          
+            <!-- Mensaje de error solo si NO hay un certificado existente -->
+            <div *ngIf="!certificadoDefuncionUrl && formDatosGenerales.get('archivoCertDef')?.invalid && formDatosGenerales.get('archivoCertDef')?.touched">
+              <span class="error-message">El certificado de defunción es obligatorio.</span>
+            </div>
+          </div>
+          
+        </div>
+      </mat-card>
     </form>
 
-    <!-- <app-maps></app-maps> -->
+    <!-- BOTÓN GUARDAR -->
+    <button
+  mat-raised-button
+  color="primary"
+  style="color: white; margin: 1% 20px 1% 0"
+  (click)="GuardarInformacion()"
+  *ngIf="mostrarBotonGuardar"
+>
+  Guardar
+</button>
+<button 
+  *ngIf="mostrarBotonGenerar && mostrarBotonGuardar" 
+  mat-raised-button color="primary"
+  style="color: white; margin: 1% 0 1% 20px"
+  (click)="generarConstanciaAfiliacion()">
+  Generar Formulario
+</button>
 
-    <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="GuardarInformacion()">
-      Guardar
-    </button>
+
+
   </div>
 </div>

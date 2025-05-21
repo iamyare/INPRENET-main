@@ -1,0 +1,112 @@
+// Contenedor principal centrado
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+// Botón de regresar
+.back-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+.back-button {
+  font-size: 14px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// Card para formulario
+mat-card {
+  width: 800px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+// Estilo del título
+.card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  color: #1c9588;
+  margin-bottom: 8px;
+}
+
+// Contenedor para el formulario y la previsualización
+.form-preview-container {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+// Sección del formulario (izquierda)
+.form-section {
+  flex: 2;
+}
+
+// Previsualización del PDF (derecha)
+.pdf-preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: 8px;
+  }
+
+  iframe {
+    border: 1px solid rgba(0, 0, 0, 0.23);
+    border-radius: 4px;
+  }
+}
+
+// Hacer que los inputs ocupen el ancho completo
+.full-width {
+  width: 100%;
+}
+
+// Botones de acción
+.action-buttons {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+// Campo personalizado para archivo
+.custom-file-input {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: 8px;
+  }
+
+  input[type='file'] {
+    border: 1px solid rgba(0, 0, 0, 0.23);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      border-color: #1c9588;
+      box-shadow: 0 0 0 1px #1c9588;
+    }
+  }
+}

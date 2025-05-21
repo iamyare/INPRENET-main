@@ -42,10 +42,10 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
   @Input() mostrarBotonEliminar: boolean = false;
   @Input() mostrarBotonEditar: boolean = false;
-  @Input() mostrarBotonInhabilitar: boolean = false; // Nuevo @Input para visibilidad del botón
+  @Input() mostrarBotonInhabilitar: boolean = false;
   @Output() eliminar: EventEmitter<any> = new EventEmitter<any>();
   @Output() editar: EventEmitter<any> = new EventEmitter<any>();
-  @Output() inhabilitar: EventEmitter<any> = new EventEmitter<any>(); // Nuevo @Output para la acción de inhabilitar
+  @Output() inhabilitar: EventEmitter<any> = new EventEmitter<any>();
 
   @Input() titulo = "";
   @Input() subtitulo = "";
@@ -59,7 +59,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   formsearch = new FormControl('');
   searchResults: any = [];
 
-  itemsPerPage = 20;  // Número de resultados por página
+  itemsPerPage = 20;
   desde = 0; hasta: number = this.itemsPerPage;
   currentPage = 0;
 
@@ -89,18 +89,22 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  public async ejecutarFuncionAsincrona(data: any): Promise<boolean> {
-    if (data) {
+  public async ejecutarFuncionAsincrona(data: Array<any> = []): Promise<boolean> {
+    if (data && data.length > 0) {
       this.filas = data;
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
       this.filtrarUsuarios().subscribe();
-      this.mostrar = true
-      return true
-    } else {
+      this.mostrar = true;
+      return true;
+    } else if (this.getData) {
       this.filas = await this.getData();
-      this.mostrar = false
+      this.mostrar = false;
       this.filtrarUsuarios().subscribe();
-      return false
+      return false;
+    } else {
+      this.filas = [];
+      this.mostrar = false;
+      return false;
     }
   }
 
@@ -118,7 +122,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       this.searchResults = temp.slice(startIndex, this.hasta);
       return of(this.searchResults.slice(startIndex, this.hasta));
     } else {
-      // Realizar la búsqueda y devolver resultados filtrados
       temp.filter((value: { [x: string]: { toString: () => string; }; }) => {
         for (const key in value) {
           if (value[key]) {
@@ -136,12 +139,10 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   updateSearchResults(): void {
     const query = this.formsearch.value?.trim();
     if (query) {
-      // Si hay un valor en el buscador, realizar la búsqueda y actualizar resultados
       this.filtrarUsuarios(query).subscribe(results => {
         this.searchResults = results;
       });
     } else {
-      // Si el buscador está vacío, cargar todos los resultados sin filtrar
       this.ejecutarFuncionAsincrona(this.filas);
     }
   }
@@ -156,6 +157,11 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       return column.customRender(row);
     }
     return row[column.col];
+  }
+
+  isNegativeNumber(value: any): boolean {
+    const num = parseFloat(value);
+    return !isNaN(num) && num < 0;
   }
 
   getFormControl(row: any, column: TableColumn): FormControl {
@@ -208,7 +214,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     });
 
     if (isValid) {
-      // Lógica para guardar los cambios
       this.columns.forEach(column => {
         if (column.isEditable) {
           row[column.col] = row[`${column.col}_control`].value;
@@ -217,7 +222,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       row.isEditing = false;
       this.editarFunc(row);
     } else {
-      // Manejar caso de datos no válidos
       console.log('Datos no válidos');
     }
   }
@@ -280,7 +284,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   inhabilitarFila(row: any) {
-    this.inhabilitar.emit(row); // Emitir el evento de inhabilitación
+    this.inhabilitar.emit(row);
   }
 
   onRowClick(row: any): void {

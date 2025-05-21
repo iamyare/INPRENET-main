@@ -1,59 +1,123 @@
-<div class="container mat-elevation-z4">
-  <h2 class="title">Generar Reportes de Planilla</h2>
-  <form [formGroup]="planillaForm">
-    <div class="button-group">
-      <!-- Botones de selección de tipo de planilla -->
-      <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === '60 RENTAS'}" (click)="seleccionarTipoPlanilla('60 RENTAS')">60 RENTAS</button>
-      <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'ordinaria'}" (click)="seleccionarTipoPlanilla('ordinaria')">ORDINARIA</button>
-      <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'complementaria'}" (click)="seleccionarTipoPlanilla('complementaria')">COMPLEMENTARIA</button>
-      <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'extraordinaria'}" (click)="seleccionarTipoPlanilla('extraordinaria')">EXTRAORDINARIA</button>
-    </div>
-    <div class="form-fields">
-      <!-- Campo de rango de fechas -->
-      <mat-form-field appearance="outline" class="field">
-        <mat-label>Rango de Fechas</mat-label>
-        <mat-date-range-input [rangePicker]="picker" formGroupName="rangoFechas">
-          <input matStartDate formControlName="fechaInicio" placeholder="Fecha de inicio">
-          <input matEndDate formControlName="fechaFin" placeholder="Fecha de fin">
-        </mat-date-range-input>
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-date-range-picker #picker></mat-date-range-picker>
+<div class="center-container">
+  <div class="container mat-elevation-z4">
+    <h2 class="title">Generar Reportes de Planilla</h2>
+    <label style="font-weight: bold; margin-bottom: 20px;"> Seleccione un tipo de planilla y el rango de fecha </label>
+    <br>
+    <form [formGroup]="planillaForm">
+      <div class="button-group">
+        <!-- Botones de selección de tipo de planilla -->
+        <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === '60 RENTAS'}" (click)="seleccionarTipoPlanilla('60 RENTAS')">60 RENTAS</button>
+        <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'ordinaria'}" (click)="seleccionarTipoPlanilla('ordinaria')">ORDINARIA</button>
+        <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'complementaria'}" (click)="seleccionarTipoPlanilla('complementaria')">COMPLEMENTARIA</button>
+        <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'extraordinaria'}" (click)="seleccionarTipoPlanilla('extraordinaria')" *ngIf="tieneRol('OFICIAL DE PLANILLA')">EXTRAORDINARIA</button>
+      </div>
 
-        <!-- Mensajes de error -->
-        <mat-error *ngIf="planillaForm.get('rangoFechas')?.hasError('differentMonths')">
-          Las fechas deben pertenecer al mismo mes y año.
-        </mat-error>
-        <mat-error *ngIf="planillaForm.get('rangoFechas')?.hasError('invalidRange')">
-          La fecha de inicio no puede ser posterior a la fecha de fin.
-        </mat-error>
-      </mat-form-field>
-    </div>
+      <div class="form-fields">
 
-    <!-- <div  *ngIf="fechaInicioFormateada && fechaFinFormateada">
-      <app-dynamic-table-prueba
-        titulo="Planillas Cerradas"
-        subtitulo="Haga click sobre un un item de la tabla para ver el detalle de la planilla"
-        [columns]="myColumns"
-        [data]="filas"
-        [getData]="getFilas"
-        (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-        (rowClicked)="manejarRowClick($event)"
-        [enableRowClick]="true"
-      ></app-dynamic-table-prueba>
-    </div> -->
+        <!-- Campo de rango de fechas -->
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Rango de Fechas</mat-label>
+          <mat-date-range-input [rangePicker]="picker" formGroupName="rangoFechas">
+            <input matStartDate formControlName="fechaInicio" placeholder="Fecha de inicio">
+            <input matEndDate formControlName="fechaFin" placeholder="Fecha de fin">
+          </mat-date-range-input>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
 
-    <div class="button-group-reportes" *ngIf="fechaInicioFormateada && fechaFinFormateada">
+          <!-- Mensajes de error -->
+          <mat-error *ngIf="planillaForm.get('rangoFechas')?.hasError('differentMonths')">
+            Las fechas deben pertenecer al mismo mes y año.
+          </mat-error>
+          <mat-error *ngIf="planillaForm.get('rangoFechas')?.hasError('invalidRange')">
+            La fecha de inicio no puede ser posterior a la fecha de fin.
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <!-- <button class="button" mat-raised-button color="primary" (click)="generarReportePensionadosActivos()">Generar Reporte de Planilla (Con y Sin Cuenta Bancaria)</button> -->
 
-      <!-- Botones de generación de reportes -->
-      <button mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarDocumento()">Generar Reporte de Planilla</button>
-      <button mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="generarDocumentoSinCuenta()">Generar Reporte Sin Cuenta</button>
-      <button mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="generarPDFMontosPorBancoPeriodo()">Generar Reporte de Montos por Banco</button>
-      <button mat-raised-button color="warn" (click)="openDynamicDialog([{ name: 'codDeduccion', label: 'Código de Deducción', type: 'number' }])">
-        Descargar Excel de Deducciones
-      </button>
-      <button mat-raised-button color="warn" [disabled]="!planillaForm.valid " (click)="descargarReporte()">Descargar Archivos De Pago</button>
-      <button mat-raised-button color="accent" [disabled]="!planillaForm.valid" (click)="descargarExcelInv()">Generar Excel Para Inversiones</button>
-      <!-- Puedes añadir más botones aquí -->
-    </div>
-  </form>
+<!--
+      <button mat-raised-button color="primary" (click)="obtenerInformacionPlanillasbyFechas()">Obtener información de planillas cerradas</button> -->
+
+
+      <div *ngIf="filas.length > 0 && isLoading">
+        <div >
+          <div class="basic-container" style="margin: 5% 0% 5% 0%" >
+            <div class="card">
+              <div class="card-body">
+                <app-dynamic-table-prueba
+                  titulo="Planillas Cerradas"
+                  subtitulo="Haga click sobre la casilla que aparece en la primera columna para seleccionar una o más filas."
+                  [verOpcEditar]="true"
+                  [columns]="myColumns"
+                  [data]="filas"
+                  [getData]="getFilas"
+                  (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+                  (getElemSeleccionados)="rowSelected($event)"
+                ></app-dynamic-table-prueba>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!--
+          <button class="button" mat-raised-button color="primary" (click)="generarReporteJubiladosYPensionadosActivos()">Generar Reporte de Planilla (Con y Sin Cuenta Bancaria)</button>
+        -->
+
+        <div class="button-group-reportes" *ngIf="fechaInicioFormateada && fechaFinFormateada">
+          <!-- Botones de generación de reportes -->
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarDocumento()"  *ngIf="tieneRol('OFICIAL DE PLANILLA')">Generar Reporte de Planilla (Con Y Sin Cuenta Bancaria)</button>
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarDocumentoSinCuenta()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">Generar Reporte (Sin Cuenta)</button>
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarPDFMontosPorBancoPeriodo()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">Generar Reporte De Montos Por Banco</button>
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="generarReporteTotalesDeducciones()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">
+            Generar Reporte de Totales de Deducciones por institución
+          </button>
+          <button class="button" mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="descargarReporte()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">Descargar Archivo De Pago (Con Cuenta Bancaria)</button>
+          <button class="button" mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="descargarReporteBSC()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">Descargar Desglose De Planilla (Sin Cuenta Bancaria)</button>
+          <!-- <button mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="generarReporteTotalesDeduccionesSinCuentBanc()">
+            Generar Reporte de Totales de Deducciones Sin Cuenta Banco
+          </button> -->
+          <button class="button" mat-raised-button color="accent" [disabled]="!planillaForm.valid" (click)="generarReportePartidaDiario()" *ngIf="tieneRol('OFICIAL DE PLANILLA')">
+            Generar Reporte De Partida De Diario
+          </button>
+
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="openDynamicDialog([{ name: 'codDeduccion', label: 'Código de Deducción', type: 'number' }])" *ngIf="tieneRol('OFICIAL DE PLANILLA')">
+            Descargar Excel De Deducciones Por Código De Deducción
+          </button>
+
+          <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="exportarExcelDetallePorPeriodo()"  *ngIf="tieneRol('OFICIAL DE PLANILLA') || tieneRol('REPORTES DETALLE A EXCEL')">
+            Exportar Detalle a Excel (Con Y Sin Cuenta Bancaria)
+          </button>
+
+          <button class="button new-badge" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="exportarExcelDetalleCompletoPorPeriodo()" *ngIf="tieneRol('OFICIAL DE PLANILLA') || tieneRol('REPORTE A EXCEL COMPLETO')">
+            Exportar Detalle A Excel Completo (Con Y Sin Cuenta Bancaria)
+          </button>
+
+          <!-- <button class="button" mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="descargarExcelInv()">Generar Excel Para Inversiones</button> -->
+          <!-- Puedes añadir más botones aquí -->
+
+          <!-- Botón Descargar Altas Excel -->
+            <button *ngIf="tipoPlanilla === 'ordinaria' && (tieneRol('OFICIAL DE PLANILLA') || tieneRol('VER ALTAS'))"
+            class="button"
+            mat-raised-button color="primary"
+            [disabled]="!planillaForm.valid"
+            (click)="descargarAltasExcel()"
+            >
+            Descargar Altas Excel
+            </button>
+
+            <!-- Botón Descargar Bajas Excel -->
+            <button *ngIf="tipoPlanilla === 'ordinaria' && (tieneRol('OFICIAL DE PLANILLA') || tieneRol('VER BAJAS'))"
+            class="button"
+            mat-raised-button color="warn"
+            [disabled]="!planillaForm.valid"
+            (click)="descargarBajasExcel()">
+            Descargar Bajas Excel
+            </button>
+
+
+        </div>
+      </div>
+
+    </form>
+  </div>
 </div>

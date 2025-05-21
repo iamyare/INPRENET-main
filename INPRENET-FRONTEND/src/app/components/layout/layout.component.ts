@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Section } from './menu-config';
+import { Section, MenuItem } from './menu-config';
 import { SidenavService } from 'src/app/services/sidenav.service';
 import { PermisosService } from 'src/app/services/permisos.service';
+import { PersonaService } from 'src/app/services/persona.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-layout',
@@ -14,44 +16,39 @@ export class LayoutComponent implements OnInit {
 
   constructor(
     private sidenavService: SidenavService,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private router: Router,
+    private personaService: PersonaService 
   ) { }
 
   ngOnInit(): void {
-    this.menuConfig = this.sidenavService.getMenuConfig().filter(section => {
-      let isSectionVisible = false;
-      switch (section.name.toLowerCase()) {
-        case 'afiliación':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoLimitadoAfiliacion();
-          break;
-        case 'planilla':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para PLANILLA
-          /* if (isSectionVisible) {
-            section.items.forEach(item => {
-              item.children = item.children?.filter(child => {
-                return this.permisosService.tieneAccesoAChilPlanilla(child.title)
-              });
-            });
-          } */
-          break;
-        case 'gestión de personal':
-          isSectionVisible = true; // Actualizar si hay método específico para este módulo
-          break;
-        case 'beneficios':
-          isSectionVisible = true; // Actualizar si hay método específico para BENEFICIOS
-          break;
-        case 'cuentas inprema':
-          isSectionVisible = true; // Actualizar si hay método específico para BENEFICIOS
-          break;
-        case 'escalafón':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para BENEFICIOS
-          break;
-        default:
-          isSectionVisible = false;
-      }
+    this.menuConfig = this.getAccessibleMenuConfig();
+  }
 
-      return isSectionVisible;
-    });
+  getAccessibleMenuConfig(): Section[] {
+    const originalMenuConfig = this.sidenavService.getMenuConfig();
+    const accessibleMenu: Section[] = [];
+    for (const section of originalMenuConfig) {
+      const accessibleItems: MenuItem[] = [];
+      for (const item of section.items) {
+        const accessibleChildren: MenuItem[] = [];
+        if (item.children) {
+          for (const child of item.children) {
+            const hasAccess = this.permisosService.userHasAccess(section.name, child.route!);
+            if (hasAccess) {
+              accessibleChildren.push(child);
+            }
+          }
+        }
+        if (accessibleChildren.length > 0 || !item.children) {
+          accessibleItems.push({ ...item, children: accessibleChildren });
+        }
+      }
+      if (accessibleItems.length > 0) {
+        accessibleMenu.push({ ...section, items: accessibleItems });
+      }
+    }
+    return accessibleMenu;
   }
 
   setExpandedPanel(panel: any): void {
@@ -65,4 +62,13 @@ export class LayoutComponent implements OnInit {
   selectChild(panel: any): void {
     this.expandedPanel = panel;
   }
+  onMenuBuscarPersona() {
+    this.personaService.changePersona(null);
+  
+    this.router.navigateByUrl('/dummy', { skipLocationChange: true })
+      .then(() => {
+        this.router.navigateByUrl('/home/afiliacion/buscar-persona');
+      });
+  }
+  
 }

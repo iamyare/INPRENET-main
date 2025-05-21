@@ -1,10 +1,29 @@
-import { Body, Controller, HttpException, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Param, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { PdfService } from './pdf/pdf.service';
+import { EmpleadoDto } from './pdf/empleado.dto';
 
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly pdfService: PdfService) { }
+
+  @Post('constancia-beneficiarios/:id')
+async generarConstanciaBeneficiarios(
+  @Param('id') idPersona: string,
+  @Body() dto: EmpleadoDto,
+  @Res() res: Response
+) {
+  try {
+    const pdfBuffer = await this.pdfService.generarConstanciaBeneficiarios(idPersona, dto);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Constancia_Beneficiarios_${idPersona}.pdf`);
+    res.setHeader('Content-Length', pdfBuffer.length.toString());
+    res.end(pdfBuffer);
+  } catch (error) {
+    console.error('Error al generar la constancia de beneficiarios:', error);
+    res.status(500).json({ message: 'Error al generar el documento PDF.' });
+  }
+}
 
   @Post('movimientos-pdf')
   async postMovimientosPdf(@Body() data: any, @Res() res: Response) {
@@ -21,60 +40,28 @@ export class DocumentsController {
     }
   }
 
-  @Post('constancia-afiliacion')
-  async postConstanciaAfiliacion(@Body() data: any, @Res() res: Response) {
-
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'afiliacion');
-    res.json({ fileId });
-  }
-
-  @Post('constancia-afiliacion2')
-  async postConstanciaAfiliacion2(@Body() data: any, @Res() res: Response) {
-
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'afiliacion2');
-    res.json({ fileId });
-  }
-
-  @Post('constancia-renuncia-cap')
-  async postConstanciaRenunciaCap(@Body() data: any, @Res() res: Response) {
-
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'renuncia-cap');
-    res.json({ fileId });
-  }
-
-  @Post('constancia-no-cotizar')
-  async postConstanciaNoCotizar(@Body() data: any, @Res() res: Response) {
-
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'no-cotizar');
-    res.json({ fileId });
-  }
-
-  @Post('constancia-debitos')
-  async postConstanciaDebitos(@Body() data: any, @Res() res: Response) {
-
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'debitos');
-    res.json({ fileId });
-  }
-
-  @Post('constancia-tiempo-cotizar-con-monto')
-  async postConstanciaTiempoCotizarConMonto(@Body() data: any, @Res() res: Response) {
-
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'tiempo-cotizar-con-monto');
-    res.json({ fileId });
-  }
-
-
   @Post('constancia-qr')
-  async postConstanciaQR(@Body() data: any, @Res() res: Response) {
+    async postConstanciaQR(
+      @Body('dto') dto: EmpleadoDto, 
+      @Body('type') type: string,
+      @Body() data: any,         
+      @Res() res: Response
+    ) {
+      try {
+        const pdfBuffer = await this.pdfService.generateConstanciaWithQR(data, type, dto);
+        res.set({
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename=constancia_${type}_qr.pdf`,
+          'Content-Length': pdfBuffer.length,
+        });
+        res.end(pdfBuffer);
+      } catch (error) {
+        console.error('Error al generar la constancia con QR:', error.message);
+        res.status(500).json({
+          message: 'Error interno al generar la constancia',
+          error: error.message,
+        });
+      }
+    }
 
-    const { type, ...payload } = data;
-
-    const pdfBuffer = await this.pdfService.generateConstanciaWithQR(payload, type);
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename=constancia_${type}_qr.pdf`,
-      'Content-Length': pdfBuffer.length,
-    });
-    res.end(pdfBuffer);
-  }
 }

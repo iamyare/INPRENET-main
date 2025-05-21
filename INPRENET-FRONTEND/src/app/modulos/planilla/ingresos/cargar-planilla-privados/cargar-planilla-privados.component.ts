@@ -1,7 +1,9 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
+import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
+import { AuthService } from 'src/app/services/auth.service';
 
 export interface Item {
   id: number;
@@ -43,7 +45,7 @@ const ELEMENT_DATA: PlanillaData[] = [
   templateUrl: './cargar-planilla-privados.component.html',
   styleUrls: ['./cargar-planilla-privados.component.scss']
 })
-export class CargarPlanillaPrivadosComponent implements AfterViewInit {
+export class CargarPlanillaPrivadosComponent implements AfterViewInit, OnInit{
   isLinear = true;
   firstFormGroup: FormGroup;
   dataSource: MatTableDataSource<Item>;
@@ -64,17 +66,43 @@ export class CargarPlanillaPrivadosComponent implements AfterViewInit {
   numeroColegio: number = 12345;
   nombreColegio: string = 'Colegio ABC';
 
+  centroTrabajoData: any = null;
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private _formBuilder: FormBuilder) {
+  ngOnInit(): void {
+    this.fetchCentroTrabajoData();
+  }
+
+  fetchCentroTrabajoData(): void {
+    const idCentroTrabajo = this.authService.getIdEmpresaFromToken();
+    if (idCentroTrabajo) {
+      this.centroTrabajoService.getCentroTrabajoById(idCentroTrabajo).subscribe({
+        next: (data) => {
+          this.centroTrabajoData = data;
+          console.log('Centro de Trabajo:', this.centroTrabajoData);
+        },
+        error: (err) => {
+          console.error('Error al obtener datos del centro de trabajo:', err);
+        }
+      });
+    } else {
+      console.error('ID de Centro de Trabajo no encontrado en el token');
+    }
+  }
+
+  constructor(private _formBuilder: FormBuilder,
+    private authService: AuthService,
+    private centroTrabajoService: CentroTrabajoService
+  ) {
     this.firstFormGroup = this._formBuilder.group({
       firstCtrl: ['', Validators.required],
     });
 
     const ITEMS: Item[] = [
-      {id: 1, nombre: 'Item 1'},
-      {id: 2, nombre: 'Item 2'},
-      {id: 3, nombre: 'Item 3'},
+      {id: 1, nombre: 'Colegio 1'},
+      {id: 2, nombre: 'Colegio 2'},
+      {id: 3, nombre: 'Colegio 3'},
     ];
     this.dataSource = new MatTableDataSource(ITEMS);
   }

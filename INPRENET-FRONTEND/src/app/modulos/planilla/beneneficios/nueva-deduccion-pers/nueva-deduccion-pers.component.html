@@ -1,4 +1,4 @@
-<div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+<div class="full-width-container" style="text-align: center; background-color: white">
   <app-dynamic-form
     [fields]="myFormFields"
     titulo="Buscar Afiliado/Jubilado/Pensionado/Voluntario"
@@ -6,23 +6,25 @@
     (newDatBenChange)="obtenerDatos($event)">
   </app-dynamic-form>
 
-  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0"
-    [disabled]="form.invalid"
-    (click)="previsualizarInfoAfil()">
-    Mostrar información del afiliado
-  </button>
+  <div class="button-container">
+    <button mat-raised-button color="primary" style="padding: 5px;" [disabled]="form.invalid" (click)="previsualizarInfoAfil()">
+      Mostrar información del afiliado
+    </button>
+  </div>
 </div>
 
-<div *ngIf="Afiliado.nombreCompleto" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
+<div *ngIf="Afiliado.nombreCompleto" class="full-width-container" style="background-color: white; padding: 1% 0;">
   <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
-  <div style="background-color: white">
+  <div>
     <table>
-      <tr style="background-color: #f2f2f2">
+      <tr>
         <th>DNI</th>
         <td>{{ Afiliado.dni }}</td>
+        <th>Fallecido</th>
+        <td>{{ Afiliado.fallecido }}</td>
         <th>Nombre de afiliado</th>
         <td>{{ Afiliado.nombreCompleto }}</td>
-        <th>Genero</th>
+        <th>Género</th>
         <td>{{ Afiliado.genero }}</td>
       </tr>
       <tr>
@@ -39,7 +41,7 @@
   </div>
 </div>
 
-<div *ngIf="Afiliado.dni">
+<div *ngIf="Afiliado.dni" class="full-width-container">
   <form [formGroup]="formDeduccion" (ngSubmit)="guardarDeduccion()">
     <app-dynamic-form
       [fields]="myFormFieldsDeduccion"

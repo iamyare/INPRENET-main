@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { FieldArrays } from 'src/app/shared/Interfaces/field-arrays';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
@@ -10,7 +10,7 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 })
 export class PepsComponent implements OnInit {
   @Input() parentForm!: FormGroup;
-  @Input() field: any; // Recibiendo la propiedad `field` del componente padre
+  @Input() field: any;
   @Output() pepsChange = new EventEmitter<any>();
 
   departamentos: any = [];
@@ -22,10 +22,21 @@ export class PepsComponent implements OnInit {
   fields: FieldArrays[] = [
     {
       name: 'pep_cargo_desempenado',
-      label: 'Cargo Desempeñado',
-      type: 'text',
-      icon: 'work', // Icono para el campo 'Cargo Desempeñado'
-      value: '',
+      label: 'Cargo Público Desempeñado',
+      type: 'select',
+      icon: 'work',
+      options: [
+        { value: 'VICE ALCALDE', label: 'VICE ALCALDE' },
+        { value: 'REGIDOR', label: 'REGIDOR' },
+        { value: 'ASAMBLEA APA', label: 'ASAMBLEA APA' },
+        { value: 'MILITAR', label: 'MILITAR' },
+        { value: 'ALCALDE', label: 'ALCALDE' },
+        { value: 'REGIDOR', label: 'REGIDOR' },
+        { value: 'FUNCIONARIO', label: 'FUNCIONARIO' },
+        { value: 'DIPUTADO', label: 'DIPUTADO' },
+        { value: 'MINISTRO', label: 'MINISTRO' },
+        { value: 'DIRECTOR DEPARTAMENTAL', label: 'DIRECTOR DEPARTAMENTAL' },
+      ],
       validations: [Validators.required],
       layout: { row: 1, col: 6 }
     },
@@ -33,7 +44,7 @@ export class PepsComponent implements OnInit {
       name: 'dateRange',
       label: 'Periodo',
       type: 'dateRange',
-      icon: 'date_range', // Icono para el campo 'Periodo'
+      icon: 'date_range',
       startDateControlName: 'startDate',
       endDateControlName: 'endDate',
       layout: { row: 1, col: 6 }
@@ -53,7 +64,7 @@ export class PepsComponent implements OnInit {
         name: 'primer_nombre',
         label: 'Primer Nombre',
         type: 'text',
-        icon: 'person', // Icono para el campo 'Primer Nombre'
+        icon: 'person',
         validations: [Validators.required],
         layout: { row: 1, col: 6 }
       },
@@ -61,14 +72,14 @@ export class PepsComponent implements OnInit {
         name: 'segundo_nombre',
         label: 'Segundo Nombre',
         type: 'text',
-        icon: 'person', // Icono para el campo 'Segundo Nombre'
+        icon: 'person',
         layout: { row: 1, col: 6 }
       },
       {
         name: 'primer_apellido',
         label: 'Primer Apellido',
         type: 'text',
-        icon: 'person', // Icono para el campo 'Primer Apellido'
+        icon: 'person',
         validations: [Validators.required],
         layout: { row: 1, col: 6 }
       },
@@ -76,24 +87,29 @@ export class PepsComponent implements OnInit {
         name: 'segundo_apellido',
         label: 'Segundo Apellido',
         type: 'text',
-        icon: 'person', // Icono para el campo 'Segundo Apellido'
-        validations: [Validators.required],
+        icon: 'person',
+        validations: [],
         layout: { row: 1, col: 6 }
       },
       {
         name: 'n_identificacion',
         label: 'Número de Identificación',
         type: 'text',
-        icon: 'badge', // Icono para el campo 'Número de Identificación'
-        validations: [Validators.required],
+        icon: 'badge',
+        validations: [
+          Validators.required,
+          Validators.maxLength(15),
+          Validators.pattern(/^[0-9]+$/),
+          this.uniqueIdentificacionValidator()
+        ],
         layout: { row: 1, col: 6 }
       },
       {
         name: 'parentesco',
         label: 'Parentesco',
         type: 'select',
-        icon: 'family_restroom', // Icono para el campo 'Parentesco'
-        options: this.datosEstaticosService.parentesco,
+        icon: 'family_restroom',
+        options: this.datosEstaticosService.parentescoPEPS,
         validations: [Validators.required],
         layout: { row: 1, col: 6 }
       }
@@ -109,7 +125,7 @@ export class PepsComponent implements OnInit {
         this.parentForm.addControl('peps', this.fb.array([]));
       }
       if (!this.parentForm.contains('familiares')) {
-        this.parentForm.addControl('familiares', this.fb.array([]));
+        this.parentForm.addControl('familiares', this.fb.array([], this.atLeastOneFamiliarValidator()));
       }
     }
 
@@ -136,28 +152,54 @@ export class PepsComponent implements OnInit {
       endDate: new FormControl(null, Validators.required),
       pep_cargo_desempenado: new FormControl('', Validators.required),
     });
-
+  
     this.peps.push(referenciaGroup);
-
+  
+    // Si no hay familiares, agregar uno automáticamente
+    if (this.familiares.length === 0) {
+      this.addFamiliar();
+    }
+  
+    // Forzar la validación
+    this.familiares.updateValueAndValidity();
   }
+
+  atLeastOneFamiliarValidator(): ValidatorFn {
+    return (formArray: AbstractControl): ValidationErrors | null => {
+      const familiares = formArray as FormArray;
+      if (this.peps.length > 0 && familiares.length === 0) {
+        return { atLeastOneFamiliarRequired: true };
+      }
+      return null;
+    };
+  }
+  
+  
 
   removeReferencia(index: number): void {
     this.peps.removeAt(index);
-
+    if (this.peps.length === 0) {
+      this.familiares.clear();
+    }
   }
-
+  
   addFamiliar(): void {
     const familiarGroup = this.fb.group({
       primer_nombre: new FormControl('', Validators.required),
       segundo_nombre: new FormControl(''),
       primer_apellido: new FormControl('', Validators.required),
-      segundo_apellido: new FormControl('', Validators.required),
-      n_identificacion: new FormControl('', Validators.required),
+      segundo_apellido: new FormControl('',),
+      n_identificacion: new FormControl('', [
+        Validators.required,
+        Validators.minLength(13),
+        Validators.maxLength(13),
+        Validators.pattern(/^[0-9]+$/),
+        this.uniqueIdentificacionValidator()
+      ]),
       parentesco: new FormControl('', Validators.required),
     });
 
     this.familiares.push(familiarGroup);
-
   }
 
   removeFamiliar(index: number): void {
@@ -167,4 +209,46 @@ export class PepsComponent implements OnInit {
   asFormGroup(control: AbstractControl): FormGroup {
     return control as FormGroup;
   }
+
+  uniqueIdentificacionValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+  
+      const afiliadoIdentificacion = this.parentForm?.root?.get('datosGenerales')?.get('n_identificacion')?.value;
+      let count = 0;
+  
+      this.familiares.controls.forEach((familiar) => {
+        if (familiar.get('n_identificacion')?.value === control.value) {
+          count++;
+        }
+      });
+      if (afiliadoIdentificacion && control.value === afiliadoIdentificacion) {
+        return { identificacionDuplicada: true };
+      }
+      return count > 1 ? { fieldNotUnique: true } : null;
+    };
+  }
+  
+  reset(): void {
+    // Limpiar el array de PEPS
+    const pepsArray = this.peps;
+    while (pepsArray.length > 0) {
+      pepsArray.removeAt(0);
+    }
+  
+    // Limpiar el array de Familiares
+    const familiaresArray = this.familiares;
+    while (familiaresArray.length > 0) {
+      familiaresArray.removeAt(0);
+    }
+  
+    // Reiniciar el formulario padre si es necesario
+    if (this.parentForm) {
+      this.parentForm.reset();
+    }
+  
+    // Emitir evento de cambio si es necesario
+    this.pepsChange.emit({ peps: [], familiares: [] });
+  }
+  
 }

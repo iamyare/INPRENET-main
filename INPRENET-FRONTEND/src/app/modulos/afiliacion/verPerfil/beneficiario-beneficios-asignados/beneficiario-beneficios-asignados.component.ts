@@ -31,7 +31,7 @@ export class BeneficiarioBeneficiosAsignadosComponent implements OnInit {
       next: (res) => {
         this.beneficiosPorCausante = res || [];
       },
-      error: (err) => {
+      error: () => {
         this.beneficiosPorCausante = [];
         this.toastr.error('Error al cargar los beneficios', 'Error');
       }
@@ -41,7 +41,8 @@ export class BeneficiarioBeneficiosAsignadosComponent implements OnInit {
   verHistorial(beneficio: any, causante: any) {
     const { n_identificacion } = this.datos;
     const causanteIdentificacion = causante.n_identificacion;
-    const idBeneficio = beneficio.beneficio.id_beneficio;
+    const idBeneficio = beneficio.id_beneficio;
+
     this.beneficiosService.obtenerDetallePagoConPlanilla(n_identificacion, causanteIdentificacion, idBeneficio).subscribe({
       next: (res) => {
         if (res.length > 0) {
@@ -51,8 +52,8 @@ export class BeneficiarioBeneficiosAsignadosComponent implements OnInit {
           this.toastr.warning('No se encontraron detalles de pago para este beneficio.');
         }
       },
-      error: (err) => {
-        this.toastr.error(err || 'Error al cargar el historial de pagos', 'Error');
+      error: () => {
+        this.toastr.error('Error al cargar el historial de pagos', 'Error');
       }
     });
   }

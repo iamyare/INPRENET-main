@@ -8,7 +8,6 @@ import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
-import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
 import * as ExcelJS from 'exceljs';
 
 @Injectable()
@@ -23,8 +22,6 @@ export class DetalleDeduccionService {
     private personaRepository: Repository<net_persona>,
     @InjectRepository(Net_Deduccion)
     private deduccionRepository: Repository<Net_Deduccion>,
-    @InjectRepository(Net_Centro_Trabajo)
-    private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
     @InjectEntityManager() private readonly entityManager: EntityManager,
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
@@ -33,11 +30,13 @@ export class DetalleDeduccionService {
   ) { }
 
   async obtenerDetallePorDeduccionPorCodigoYGenerarExcel(
+    idsPlanillaArray: number[],
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
     codDeduccion: number
   ): Promise<Buffer> {
+    const idsPlanillaArrayNumeros = (Array.isArray(idsPlanillaArray) ? idsPlanillaArray : [idsPlanillaArray]).map((id: any) => parseInt(id, 10));
     const detallesQuery = `
       SELECT 
           dd."ANIO" AS "anio",
@@ -55,11 +54,12 @@ export class DetalleDeduccionService {
       LEFT JOIN 
           "NET_PERSONA" persona ON dd."ID_PERSONA" = persona."ID_PERSONA"
       WHERE 
-          TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:1, 'DD/MM/YYYY')
-          AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:2, 'DD/MM/YYYY')
+          planilla."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
+          AND planilla."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
           AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+          AND planilla."ID_PLANILLA" IN (${idsPlanillaArrayNumeros})
           AND dd."ESTADO_APLICACION" = 'COBRADA'
-          AND ded."COD_DEDUCCION" = :3
+          AND ded."COD_DEDUCCION" = :codDeduccion
       GROUP BY 
           dd."ANIO",
           dd."MES",
@@ -77,9 +77,9 @@ export class DetalleDeduccionService {
           persona."PRIMER_NOMBRE",
           persona."SEGUNDO_NOMBRE"
     `;
-
     try {
       const detalles = await this.dataSource.query(detallesQuery, [periodoInicio, periodoFinalizacion, codDeduccion]);
+
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Deducciones');
       worksheet.columns = [
@@ -230,6 +230,7 @@ export class DetalleDeduccionService {
     }
   }
 
+  /* --perdienteparamtro */
   async getDeduccionesByPersonaAndBenef(idPersona: number, idPlanilla: number): Promise<any> {
     const query = `
       SELECT
@@ -243,7 +244,6 @@ export class DetalleDeduccionService {
       INNER JOIN "NET_PLANILLA" plan ON plan.ID_PLANILLA = dedd."ID_PLANILLA"
       INNER JOIN "NET_CENTRO_TRABAJO" inst ON inst."ID_CENTRO_TRABAJO" = dd."ID_CENTRO_TRABAJO"
       WHERE
-        dedd.ESTADO_APLICACION != 'NO COBRADA' AND
         dedd."ID_PERSONA" = ${idPersona} AND
         plan."ID_PLANILLA" = ${idPlanilla}
       ORDER BY dedd."MONTO_APLICADO" DESC

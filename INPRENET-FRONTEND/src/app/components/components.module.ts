@@ -28,10 +28,13 @@ import { MainLayoutComponent } from './main-layout/main-layout.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import { DynamicInputDialogComponent } from './dinamicos/dynamic-input-dialog/dynamic-input-dialog.component';
 import { DynamicStepsComponent } from './dinamicos/dynamic-steps/dynamic-steps.component';
+import { CustomTableComponent } from './dinamicos/custom-table/custom-table.component';
 import { PerfilHeaderComponent } from './perfil-header/perfil-header.component';
 import { GestionarDiscapacidadDialogComponent } from './dinamicos/gestionar-discapacidad-dialog/gestionar-discapacidad-dialog.component';
+import { HomePageComponent } from './home-page/home-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
-
+import { SharedModule } from 'src/app/shared/shared.module';
+import { DynamicConstanciasComponent } from './dinamicos/dynamic-constancias/dynamic-constancias.component';
 
 
 @NgModule({
@@ -40,6 +43,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     DynamicDialogComponent,
     DynamicFormComponent,
     DynamicFormDialogComponent,
+    CustomTableComponent,
     DynamicMenuConstanciasComponent,
     DynamicTableComponent,
     DynamicTablePruebaComponent,
@@ -63,18 +67,24 @@ import { ReactiveFormsModule } from '@angular/forms';
     DynamicInputDialogComponent,
     DynamicStepsComponent,
     PerfilHeaderComponent,
-    GestionarDiscapacidadDialogComponent
+    GestionarDiscapacidadDialogComponent,
+    HomePageComponent,
+    CustomTableComponent,
+    DynamicConstanciasComponent
   ],
   imports: [
     CommonModule,
     MaterialAngularModule,
-    GoogleMapsModule
+    GoogleMapsModule,
+    SharedModule
   ],
   exports:[
+    PerfilHeaderComponent,
     ConfirmDialogComponent,
     DynamicDialogComponent,
     DynamicFormComponent,
     DynamicFormDialogComponent,
+    CustomTableComponent,
     DynamicMenuConstanciasComponent,
     DynamicTableComponent,
     DynamicTablePruebaComponent,
@@ -97,8 +107,8 @@ import { ReactiveFormsModule } from '@angular/forms';
     LandingPageComponent,
     DynamicInputDialogComponent,
     DynamicStepsComponent,
-    PerfilHeaderComponent,
-    GestionarDiscapacidadDialogComponent
+    GestionarDiscapacidadDialogComponent,
+    DynamicConstanciasComponent
   ]
 })
 export class ComponentsModule { }

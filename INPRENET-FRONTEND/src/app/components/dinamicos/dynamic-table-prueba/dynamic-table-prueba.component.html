@@ -24,16 +24,20 @@
   <!-- DATOS -->
   <div style="overflow-x: auto">
     <table mat-table [dataSource]="searchResults && searchResults.slice(desde, hasta)" matSort class="mat-elevation-z8">
+
+
       <!-- Opciones de edición -->
       <ng-container *ngIf="verOpcEditar" matColumnDef="opcionesEditar">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
-          <input type="checkbox" (change)="onSelectionChange(row)" />
+          <input type="checkbox" (change)="onSelectionChange($event,row)" />
         </td>
       </ng-container>
 
       <!-- Columnas dinámicas -->
       <ng-container *ngFor="let col of columns" [matColumnDef]="col.col">
+
+
         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ col.header }}</th>
         <td mat-cell *matCellDef="let row">
           <div [ngStyle]="{ 'text-align': col.moneda ? 'end' : 'left', 'padding': '1rem' }">
@@ -42,8 +46,15 @@
             </ng-container>
 
             <ng-container *ngIf="!row.isEditing && col.moneda">
-              {{ getCellValue(row, col) | currency : "L" : "symbol" : "1.2-2" }}
+              <span class="moneda-left"
+                    [ngClass]="{'text-red': isNegativeNumber(getCellValue(row, col))}">
+                <span class="moneda-simbolo">L</span>
+                <span class="moneda-valor">
+                  {{ getCellValue(row, col) | number: '1.2-2':'en-HN' }}
+                </span>
+              </span>
             </ng-container>
+
 
             <ng-container *ngIf="row.isEditing">
               <ng-container *ngIf="col.isEditable">

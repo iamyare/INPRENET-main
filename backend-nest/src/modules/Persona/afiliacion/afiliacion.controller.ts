@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, Query, Res, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { net_persona } from '../entities/net_persona.entity';
-import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
 import { Connection, EntityManager } from 'typeorm';
@@ -26,41 +26,116 @@ export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
 
-    @Delete(':idPersona/discapacidades/:tipoDiscapacidad')
-    async eliminarDiscapacidad(
-      @Param('idPersona', ParseIntPipe) idPersona: number,
-      @Param('tipoDiscapacidad') tipoDiscapacidad: string,
-    ): Promise<void> {
-      await this.afiliacionService.eliminarDiscapacidad(idPersona, tipoDiscapacidad);
+  @Get('detalle/:idCausante')
+  async obtenerAfiliacion(@Param('idCausante', ParseIntPipe) idCausante: number) {
+    try {
+      const afiliacion = await this.afiliacionService.obtenerAfiliacion(idCausante);
+      if (!afiliacion || afiliacion.length === 0) {
+        throw new NotFoundException(`No se encontraron datos de afiliación para el ID: ${idCausante}`);
+      }
+      return afiliacion;
+    } catch (error) {
+      console.error('Error al obtener la afiliación:', error.message);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Ocurrió un error al obtener la afiliación',
+          message: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('tiene-banco-activo/:idPersona')
+  async tieneBancoActivo(@Param('idPersona', ParseIntPipe) idPersona: number) {
+    return await this.afiliacionService.tieneBancoActivo(idPersona);
+  }
+ 
+  @Post('convertir-afiliado')
+  async convertirEnAfiliado(
+    @Body() body: { idPersona: number; idTipoPersona: number }
+  ) {
+    const { idPersona, idTipoPersona } = body;
+    return this.afiliacionService.convertirEnAfiliado(idPersona, idTipoPersona);
+  }
+
+  @Get('fallecidos-reportados')
+async obtenerFallecidos(@Query('mes') mes: number, @Query('anio') anio: number) {
+  try {
+    const fallecidos = await this.afiliacionService.obtenerFallecidosPorMes(mes, anio);
+    return { message: 'Personas fallecidas encontradas', data: fallecidos };
+  } catch (error) {
+    throw new HttpException(
+      'Ocurrió un error inesperado. Inténtelo de nuevo más tarde o contacte con soporte si el problema persiste.',
+      HttpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
+
+  @Get('buscar-por-nombres-apellidos')
+  async buscarPersona(@Query('terminos') terminos: string) {
+    const personas = await this.afiliacionService.buscarPersonaPorNombresYApellidos(terminos);
+    return {
+      message: 'Personas encontradas',
+      personas,
+    };
+  }
+
+  @Patch('persona/:id/foto')
+  @UseInterceptors(FileInterceptor('foto'))
+  async actualizarFotoPersona(
+    @Param('id', ParseIntPipe) idPersona: number,
+    @UploadedFile() foto: Express.Multer.File,
+  ) {
+    if (!foto) {
+      throw new HttpException('No se ha proporcionado un archivo válido.', HttpStatus.BAD_REQUEST);
     }
 
-    @Post(':idPersona/discapacidades')
-    async crearDiscapacidades(
-      @Param('idPersona', ParseIntPipe) idPersona: number,
-      @Body() discapacidadesDto: CrearDiscapacidadDto[],
-    ): Promise<void> {
-      const persona = await this.entityManager.findOne('net_persona', { where: { id_persona: idPersona } });
-      if (!persona) {
-        throw new NotFoundException(`Persona con ID ${idPersona} no encontrada`);
-      }
-      await this.connection.transaction(async (entityManager) => {
-        await this.afiliacionService.crearDiscapacidades(discapacidadesDto, idPersona, entityManager);
-      });
-    }
+    const persona = await this.afiliacionService.actualizarFotoPersona(idPersona, foto.buffer);
 
-    @Put('actualizar-peps/:idPersona')
-    async actualizarPeps(
-      @Param('idPersona', ParseIntPipe) idPersona: number,
-      @Body() pepsDto: CrearPepsDto[],
-    ) {
-      const persona = await this.entityManager.findOne('net_persona', { where: { id_persona: idPersona } });
-      if (!persona) {
-        throw new HttpException('Persona no encontrada', HttpStatus.NOT_FOUND);
-      }
-      return this.entityManager.transaction(async (transactionalEntityManager) => {
-        return this.afiliacionService.actualizarPeps(pepsDto, idPersona, transactionalEntityManager);
-      });
+    return {
+      message: 'Foto actualizada exitosamente',
+      persona,
+    };
+  }
+
+  @Delete('cargos-publicos/:idCargoPublico')
+  async eliminarCargoPublico(
+    @Param('idCargoPublico', ParseIntPipe) idCargoPublico: number
+  ): Promise<void> {
+    await this.afiliacionService.eliminarCargoPublico(idCargoPublico);
+  }
+
+  @Delete(':idPersona/discapacidades/:tipoDiscapacidad')
+  async eliminarDiscapacidad(
+    @Param('idPersona', ParseIntPipe) idPersona: number,
+    @Param('tipoDiscapacidad') tipoDiscapacidad: string,
+  ): Promise<void> {
+    await this.afiliacionService.eliminarDiscapacidad(idPersona, tipoDiscapacidad);
+  }
+
+  @Post(':idPersona/discapacidades')
+  async crearDiscapacidades(
+    @Param('idPersona', ParseIntPipe) idPersona: number,
+    @Body() discapacidadesDto: CrearDiscapacidadDto[],
+  ): Promise<void> {
+    const persona = await this.entityManager.findOne('net_persona', { where: { id_persona: idPersona } });
+    if (!persona) {
+      throw new NotFoundException(`Persona con ID ${idPersona} no encontrada`);
     }
+    await this.connection.transaction(async (entityManager) => {
+      await this.afiliacionService.crearDiscapacidades(discapacidadesDto, idPersona, entityManager);
+    });
+  }
+
+  @Put('actualizar-peps')
+  async actualizarPeps(@Body() pepsData: any) {
+    return this.entityManager.transaction(async (transactionalEntityManager) => {
+      return this.afiliacionService.actualizarPeps(pepsData, transactionalEntityManager);
+    });
+  }
 
   @Delete(':idPersona/familiares/:idFamiliar')
   async eliminarFamiliar(
@@ -107,7 +182,7 @@ export class AfiliacionController {
   async obtenerConyuge(@Param('n_identificacion') n_identificacion: string): Promise<Net_Familia> {
     return this.afiliacionService.obtenerConyugePorIdentificacion(n_identificacion);
   }
-
+ 
   @Delete('otra-fuente-ingreso/:id')
   async eliminarOtraFuenteIngreso(@Param('id', ParseIntPipe) id: number) {
     return this.afiliacionService.eliminarOtraFuenteIngreso(id);
@@ -177,7 +252,6 @@ export class AfiliacionController {
     return await this.afiliacionService.obtenerReferenciasPorIdentificacion(nIdentificacion);
   }
 
-
   @Patch('referencia/inactivar/:id')
   async inactivarReferencia(@Param('id') idRefPersonal: number): Promise<void> {
     return this.afiliacionService.eliminarReferencia(idRefPersonal);
@@ -235,34 +309,33 @@ export class AfiliacionController {
   }
 
   @Post('/crear')
-  @UseInterceptors(AnyFilesInterceptor())  // Para manejar múltiples archivos de varios campos
+  @UseInterceptors(AnyFilesInterceptor()) 
   async crear(
     @Body('datos') datos: any,
-    @UploadedFiles() files?: Express.Multer.File[],  // Todos los archivos serán capturados aquí
+    @UploadedFiles() files?: Express.Multer.File[],
   ): Promise<any> {
     try {
-      console.log(files);
-
       const crearDatosDto: CrearDatosDto = JSON.parse(datos);
-
-      // Filtrar cada archivo por su campo de entrada (fieldname)
       const fotoPerfil = files?.find(file => file.fieldname === 'foto_perfil');
-      const fileIdent = files?.find(file => file.fieldname === 'file_ident');
+      const carnetDiscapacidad = files?.find(file => file.fieldname === 'carnet_discapacidad');
 
-      // Aquí puedes enviar todos los archivos y datos a tu servicio
-      return await this.afiliacionService.crearDatos(crearDatosDto, fotoPerfil, fileIdent, files);
+      return await this.afiliacionService.crearDatos(
+        crearDatosDto,
+        fotoPerfil,
+        carnetDiscapacidad,
+        files
+      );
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
+
 
   @Patch('referencia/actualizar/:idReferencia')
   async actualizarReferencia(
     @Param('idReferencia') idReferencia: number,
     @Body() datosActualizados: CrearReferenciaDto
   ): Promise<void> {
-    console.log(datosActualizados);
-
     return this.afiliacionService.actualizarReferencia(idReferencia, datosActualizados);
   }
 
@@ -270,4 +343,10 @@ export class AfiliacionController {
   async obtenerFamiliaresDePersona(@Param('idPersona', ParseIntPipe) idPersona: number): Promise<Net_Familia[]> {
     return this.afiliacionService.obtenerFamiliaresPorPersona(idPersona);
   }
+
+  @Get('/persona-con-perfil-y-beneficiarios/:n_identificacion')
+async obtenerPersonaConPerfilYBeneficiarios(@Param('n_identificacion') n_identificacion: string) {
+    return await this.afiliacionService.getPersonaConPerfilYBeneficiarios(n_identificacion);
+}
+
 }

@@ -1,11 +1,42 @@
 <div class="buscar-persona-container" *ngIf="!persona">
-  <h1>Buscar Persona</h1>
+  <h1>Buscar Afiliado</h1>
   <mat-form-field appearance="outline">
-    <mat-label>Número De Identificación</mat-label>
-    <input matInput type="text" [(ngModel)]="n_identificacion" placeholder="Ingrese El Número De Identificación">
+    <mat-label>Número de Identificación</mat-label>
+    <input matInput type="text" [(ngModel)]="n_identificacion" placeholder="Ingrese el Número de Identificación" (input)="terminosBusqueda = ''">
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Nombre o Apellido</mat-label>
+    <input matInput type="text" [(ngModel)]="terminosBusqueda" placeholder="Ingrese Nombre o Apellido" (input)="n_identificacion = ''">
   </mat-form-field>
   <button style="color: white;" mat-raised-button color="primary" (click)="buscarPersona()">Buscar</button>
   <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+  <table *ngIf="personasPaginadas.length > 0" class="resultados-busqueda">
+    <thead>
+      <tr>
+        <th>Nombre Completo</th>
+        <th>DNI</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let persona of personasPaginadas">
+        <td>{{ persona.nombre_completo }}</td>
+        <td>{{ persona.dni }}</td>
+        <td>
+          <button mat-button color="primary" (click)="seleccionarPersona(persona)">Seleccionar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <mat-paginator
+    *ngIf="personas.length > 0"
+    [length]="personas.length"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="cambiarPagina($event)">
+  </mat-paginator>
 </div>
 
 <div *ngIf="persona" class="perfil-container">
@@ -13,7 +44,7 @@
     <button mat-icon-button (click)="resetBusqueda()" class="search-again">
       <mat-icon>search</mat-icon>
     </button>
-    <span class="search-text">Buscar otra persona</span>
+    <span class="search-text">Buscar otro Afiliado</span>
   </div>
   <div class="perfil-header">
     <div class="perfil-foto">
@@ -27,6 +58,9 @@
       <p><strong>Correo Principal:</strong> {{ persona?.CORREO_1 }}</p>
       <p><strong>Género:</strong> {{ persona?.GENERO || 'No especificado' }}</p>
       <p><strong>Fecha de Nacimiento:</strong> {{ persona?.FECHA_NACIMIENTO | date: 'dd MMMM yyyy' }}</p>
+      <p *ngIf="persona.fallecido === 'SI'" class="alerta-fallecido">
+        <strong>ESTADO:</strong> FALLECIDO
+      </p>
     </div>
   </div>
 </div>

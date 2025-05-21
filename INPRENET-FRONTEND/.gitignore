@@ -6,8 +6,11 @@
 /out-tsc
 /bazel-out
 
+src/ssl
+
 # Node
 /node_modules
+/secrets
 npm-debug.log
 yarn-error.log
 

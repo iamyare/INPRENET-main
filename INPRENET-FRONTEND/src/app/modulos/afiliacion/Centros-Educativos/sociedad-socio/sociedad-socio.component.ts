@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl } from '@angular/forms';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { FieldArrays } from 'src/app/shared/Interfaces/field-arrays';
+import { ValidationService } from 'src/app/shared/services/validation.service';
 
 @Component({
   selector: 'app-sociedad-socio',
@@ -13,17 +14,19 @@ export class SociedadSocioComponent implements OnInit {
   departamentos: any = [];
   municipios: any = [];
 
+  constructor(private fb: FormBuilder, private direccionService: DireccionService, private validationService: ValidationService) { }
+
   fields: FieldArrays[] = [
-    { name: 'nombreSocio', label: 'Nombre', icon: 'person', layout: { row: 2, col: 4 }, type: 'text', value: '', validations: [Validators.required] },
-    { name: 'apellido', label: 'Apellido', icon: 'person', layout: { row: 2, col: 4 }, type: 'text', value: '', validations: [Validators.required] },
+    { name: 'nombreSocio', label: 'Nombre', icon: 'person', layout: { row: 2, col: 4 }, type: 'text', value: '', validations: [Validators.required, this.validationService.namesValidator()] },
+    { name: 'apellido', label: 'Apellido', icon: 'person', layout: { row: 2, col: 4 }, type: 'text', value: '', validations: [Validators.required, this.validationService.namesValidator()] },
     { name: 'porcentajeParticipacion', label: 'Porcentaje de Participación', icon: 'percent', layout: { row: 2, col: 4 }, type: 'number', value: '', validations: [Validators.required, Validators.min(0), Validators.max(100)] },
-    { name: 'dni', label: 'DNI', icon: 'badge', layout: { row: 3, col: 6 }, type: 'text', value: '', validations: [Validators.required, Validators.pattern('^[0-9]*$')] },
-    { name: 'otroPuntoReferencia', label: 'Otro Punto de Referencia', icon: 'location_on', layout: { row: 3, col: 6 }, type: 'text', value: '', validations: [] },
-    { name: 'barrioAvenida', label: 'Barrio / Avenida', icon: 'location_city', layout: { row: 4, col: 6 }, type: 'text', value: '', validations: [] },
-    { name: 'grupoCalle', label: 'Grupo / Calle', icon: 'streetview', layout: { row: 4, col: 6 }, type: 'text', value: '', validations: [] },
-    { name: 'numeroCasa', label: 'N° de Casa', icon: 'home', layout: { row: 5, col: 6 }, type: 'number', value: '', validations: [] },
-    { name: 'telefonoSocio', label: 'Teléfono', icon: 'phone', layout: { row: 5, col: 6 }, type: 'text', value: '', validations: [] },
-    { name: 'emailSocio', label: 'Correo', icon: 'email', layout: { row: 6, col: 12 }, type: 'text', value: '', validations: [Validators.email] },
+    { name: 'dni', label: 'DNI', icon: 'badge', layout: { row: 3, col: 6 }, type: 'text', value: '', validations: [Validators.required, Validators.pattern('^[0-9]*$'), this.validationService.dniValidator()] },
+    { name: 'otroPuntoReferencia', label: 'Otro Punto de Referencia', icon: 'location_on', layout: { row: 3, col: 6 }, type: 'text', value: '', validations: [this.validationService.noSpecialCharactersOrSequencesValidator()] },
+    { name: 'barrioAvenida', label: 'Barrio / Avenida', icon: 'location_city', layout: { row: 4, col: 6 }, type: 'text', value: '', validations: [this.validationService.noSpecialCharactersOrSequencesValidator()] },
+    { name: 'grupoCalle', label: 'Grupo / Calle', icon: 'streetview', layout: { row: 4, col: 6 }, type: 'text', value: '', validations: [this.validationService.noSpecialCharactersOrSequencesValidator()] },
+    { name: 'numeroCasa', label: 'N° de Casa', icon: 'home', layout: { row: 5, col: 6 }, type: 'number', value: '', validations: [this.validationService.houseNumberValidator()] },
+    { name: 'telefonoSocio', label: 'Teléfono', icon: 'phone', layout: { row: 5, col: 6 }, type: 'text', value: '', validations: [this.validationService.phoneValidator()] },
+    { name: 'emailSocio', label: 'Correo', icon: 'email', layout: { row: 6, col: 12 }, type: 'text', value: '', validations: [Validators.email, this.validationService.emailOptionalValidator()] },
     { name: 'departamento', label: 'Departamento', icon: 'location_city', layout: { row: 6, col: 6 }, type: 'select', value: '', options: [], validations: [Validators.required] },
     { name: 'municipio', label: 'Municipio', icon: 'location_city', layout: { row: 6, col: 6 }, type: 'select', value: '', options: [], validations: [Validators.required] },
     { name: 'fechaIngreso', label: 'Fecha de Ingreso', icon: 'calendar_today', layout: { row: 7, col: 6 }, type: 'date', value: '', validations: [Validators.required] },
@@ -40,46 +43,7 @@ export class SociedadSocioComponent implements OnInit {
       validations: [],
       layout: { row: 8, col: 12 }
     },
-    /*
-    {
-      name: 'pep_cargo_desempenado',
-      label: 'Cargo Desempeñado',
-      type: 'text',
-      value: '',
-      validations: [],
-      layout: { row: 9, col: 6 }
-    },
-    {
-      name: 'pep_periodo',
-      label: 'Periodo',
-      type: 'text',
-      value: '',
-      validations: [],
-      layout: { row: 9, col: 6 }
-    },
-    {
-      name: 'pep_otras_referencias',
-      label: 'Otras Referencias',
-      type: 'text',
-      value: '',
-      validations: [],
-      layout: { row: 10, col: 12 }
-    },
-    {
-      name: 'docente_deducciones',
-      label: '¿Ha realizado deducciones de cotizaciones a los docentes que trabajan en la institución?',
-      type: 'radio',
-      options: [
-        { label: 'Sí', value: 'si' },
-        { label: 'No', value: 'no' }
-      ],
-      value: '',
-      validations: [],
-      layout: { row: 11, col: 12 }
-    } */
   ];
-
-  constructor(private fb: FormBuilder, private direccionService: DireccionService) { }
 
   ngOnInit(): void {
     if (!this.parentForm) {
@@ -89,9 +53,13 @@ export class SociedadSocioComponent implements OnInit {
     } else if (!this.parentForm.get('sociedadSocios')) {
       this.parentForm.addControl('sociedadSocios', this.fb.array([]));
     }
+    console.log('parentForm:', this.parentForm);
+    console.log('Control Nombre:', this.parentForm.get('nombreSocio'));
+    console.log('Control Apellido:', this.parentForm.get('apellido'));
+
     this.loadDepartamentos();
   }
-
+  
   get sociedadSocios(): FormArray {
     return this.parentForm.get('sociedadSocios') as FormArray;
   }
@@ -122,40 +90,33 @@ export class SociedadSocioComponent implements OnInit {
       }));
 
     }
-
     event.formGroup.get('municipio')?.setValue(null);
   }
 
   addSociedadSocio(): void {
     const sociedadSocioGroup = this.fb.group({
-      nombreSociedad: ['', Validators.required],
-      pep_declaration: ['', Validators.required],
-      rtn: ['', [Validators.required, Validators.maxLength(14), Validators.minLength(14), Validators.pattern('^[0-9]{14}$')]],
-      telefonoSociedad: [''],
-      correoSociedad: ['', Validators.email],
-      nombreSocio: ['', Validators.required],
-      apellido: ['', Validators.required],
-      dni: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
-      otroPuntoReferencia: [''],
-      barrioAvenida: [''],
-      grupoCalle: [''],
-      numeroCasa: [''],
-      telefonoSocio: [''],
-      emailSocio: ['', Validators.email],
-      departamento: ['', Validators.required],
-      municipio: ['', Validators.required],
+      nombreSocio: ['', [Validators.required, this.validationService.namesValidator()]],
+      pep_declaration: ['', [Validators.required]],
+      apellido: ['',[Validators.required, this.validationService.namesValidator()]],
+      dni: ['', [Validators.required, Validators.pattern('^[0-9]*$'), this.validationService.dniValidator()]],
+      otroPuntoReferencia: ['', [this.validationService.noSpecialCharactersOrSequencesValidator()]],
+      barrioAvenida: ['', [this.validationService.noSpecialCharactersOrSequencesValidator()]],
+      grupoCalle: ['', [this.validationService.noSpecialCharactersOrSequencesValidator()]],
+      numeroCasa: ['', [this.validationService.numberValidator()]],
+      telefonoSocio: ['', [this.validationService.phoneValidatorOptional()]],
+      emailSocio: ['', [Validators.email, this.validationService.emailOptionalValidator()]],
+      departamento: ['', [Validators.required]],
+      municipio: ['', [Validators.required]],
       porcentajeParticipacion: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
-      fechaIngreso: ['', Validators.required],
+      fechaIngreso: ['', [Validators.required]],
       fechaSalida: [''],
-      /* pep_declaration: ['', Validators.required],
-      pep_nombre_apellidos: [{ value: '', disabled: true }],
-      pep_cargo_desempenado: [{ value: '', disabled: true }],
-      pep_periodo: [{ value: '', disabled: true }],
-      pep_otras_referencias: [{ value: '', disabled: true }],
-      docente_deducciones: ['', Validators.required] */
     });
 
     this.sociedadSocios.push(sociedadSocioGroup);
+
+    sociedadSocioGroup.get('pep_declaration')?.valueChanges.subscribe((value: any) => {
+      this.updateFieldVisibility(sociedadSocioGroup, value);
+    });
 
     sociedadSocioGroup.get('pep_declaration')?.valueChanges.subscribe((value: any) => {
       this.updateFieldVisibility(sociedadSocioGroup, value);

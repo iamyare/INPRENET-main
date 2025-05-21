@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -50,13 +50,26 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
     private toastr: ToastrService,
     private dialog: MatDialog,
     private centrosTrabSVC: CentroTrabajoService,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private cdr: ChangeDetectorRef
   ) { }
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonFuente = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonFuente = this.permisosService.userHasPermission(
+      'AFILIACIONES', 
+      'afiliacion/nueva-afiliacion', 
+      ['editar', 'editarDos','administrar']
+    );
+    this.mostrarBotonEditar = this.permisosService.userHasPermission(
+      'AFILIACIONES', 
+      'afiliacion/nueva-afiliacion', 
+      ['editar', 'editarDos','administrar']
+    );
+    this.mostrarBotonEliminar = this.permisosService.userHasPermission(
+      'AFILIACIONES', 
+      'afiliacion/nueva-afiliacion', 
+      ['editar', 'editarDos','administrar']
+    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -138,6 +151,7 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
           monto_ingreso: item.monto_ingreso,
           observacion: item.observacion
         }));
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
@@ -149,8 +163,6 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
-
-
   }
 
   cargar() {
@@ -168,7 +180,7 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
         etiqueta: 'Actividad Económica',
         editable: true,
         icono: 'work',
-        validaciones: [Validators.required, Validators.min(0)]
+        validaciones: [Validators.required, Validators.min(5), Validators.max(100)]
       },
       {
         nombre: 'monto_ingreso',
@@ -176,7 +188,7 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
         requerido: false,
         etiqueta: 'Monto Ingreso',
         editable: true,
-        icono: 'attach_money',
+        icono: 'money',
         validaciones: [Validators.required]
       },
       {
@@ -221,7 +233,6 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
           }
         });
       } else {
-        console.log('No se realizaron cambios.');
       }
     });
   }
@@ -261,9 +272,8 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
         idPersona: this.Afiliado.id_persona
       }
     });
-
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+      this.getFilas().then(() => this.cargar());
     });
   }
 

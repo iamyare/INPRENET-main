@@ -1,0 +1,35 @@
+.dialog-title {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .dialog-content {
+    min-width: 450px;
+    padding: 20px;
+  }
+  
+  .form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; // Espaciado entre inputs
+  }
+  
+  .form-field {
+    width: 100%;
+  }
+  
+  .full-width {
+    width: 100%;
+  }
+  
+  .dialog-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px;
+  }
+  
+  button {
+    font-weight: bold;
+  }
+  

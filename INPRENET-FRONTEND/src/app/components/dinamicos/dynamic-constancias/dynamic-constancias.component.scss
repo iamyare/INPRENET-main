@@ -1,0 +1,81 @@
+.constancias-container {
+  text-align: center;
+  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  max-width: 800px;
+  min-height: 250px;
+  width: 90%;
+  margin: auto;
+  font-family: 'Arial', sans-serif;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 1.2rem;
+  }
+
+  .buttons-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); // 🔹 Distribución automática
+    gap: 0.8rem; // 🔹 Espaciado uniforme
+    justify-items: center;
+    padding: 1rem;
+    width: 100%;
+  }
+
+  .button {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.6rem 1rem;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #26a69a 0%, #1e8e86 100%);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    text-align: center;
+
+    &.selected {
+      background: #1e8e86;
+      border-color: #157a72;
+      transform: scale(1.03);
+    }
+
+    &:hover {
+      background: #1e8e86;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &:disabled {
+      background: #ccc;
+      color: #666;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+
+  // 🔹 Estilo cuando solo hay un botón
+  .buttons-container:has(.button:only-child) {
+    justify-content: center;
+
+    .button {
+      width: 60%;
+      max-width: 250px;
+      padding: 0.5rem 1.2rem;
+    }
+  }
+}

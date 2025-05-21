@@ -1,7 +1,8 @@
-import { Component, OnInit, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
 import { PersonaService } from 'src/app/services/persona.service';
 import { DatePipe } from '@angular/common';
 import { convertirFechaInputs, convertirFecha } from 'src/app/shared/functions/formatoFecha';
+import { AfiliacionService } from '../../../../services/afiliacion.service';
 
 @Component({
   selector: 'app-perfil',
@@ -14,23 +15,37 @@ export class PerfilComponent implements OnInit {
   @Output() resetBusqueda = new EventEmitter<void>();
   detallePersonaUnico: any[] = [];
   defaultFotoUrl = '../../../../../assets/images/AvatarDefecto.png';
+  datosCompletos: boolean = true;
+  tieneBancoActivo: boolean = true;
+  ultimaActualizacionValida: boolean = true;
+  beneficiariosValidos: boolean = true;
+  tieneCentroTrabajo: boolean = true;
+  tieneReferencias: boolean = true;
 
-  constructor(private personaService: PersonaService, private datePipe: DatePipe) { }
+  // Variable para el mensaje cuando supera 2 años sin actualizar
+  mensajeSinActualizacion: string = '';
+
+  constructor(private personaService: PersonaService,
+      private datePipe: DatePipe,
+      private afiliacionService: AfiliacionService,
+      private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.personaService.currentPersona.subscribe(persona => {
+      if (!persona) return;
 
       this.persona = persona;
-      if (persona.persona && persona.persona.detallePersona) {
-        this.detallePersonaUnico = this.filtrarDetallePersona(persona.persona.detallePersona);
-      }
+      this.detallePersonaUnico = this.filtrarDetallePersona(persona.detallePersona || []);
+
+      this.verificarTiempoSinActualizacion(this.persona.ultima_fecha_actualizacion || null);
+      this.verificarValidaciones();
     });
   }
 
   filtrarDetallePersona(detallePersona: any[]): any[] {
     const tiposUnicos = new Set();
     return detallePersona.filter(detalle => {
-      if (!tiposUnicos.has(detalle.tipoPersona.tipo_persona)) {
+      if (detalle.tipoPersona && !tiposUnicos.has(detalle.tipoPersona.tipo_persona)) {
         tiposUnicos.add(detalle.tipoPersona.tipo_persona);
         return true;
       }
@@ -41,6 +56,11 @@ export class PerfilComponent implements OnInit {
   trackByPerfil(index: number, perfil: any): any {
     return perfil.tipoPersona.tipo_persona;
   }
+
+  onDatoAgregado(): void {
+    this.verificarValidaciones();
+    this.cdr.detectChanges();
+  }  
 
   getFotoUrl(foto: any): string {
     if (foto && foto.data) {
@@ -69,4 +89,46 @@ export class PerfilComponent implements OnInit {
   resetBusqueda2() {
     this.resetBusqueda.emit();
   }
+
+  isVoluntario(): boolean {
+    return this.persona?.persona?.detallePersona?.some((detalle: any) => detalle.voluntario === 'SI');
+  }
+
+  private verificarTiempoSinActualizacion(fechaUltima: string | null): void {
+    if (!fechaUltima) {
+      this.ultimaActualizacionValida = false;
+      return;
+    }
+
+    const hoy = new Date();
+    const ultima = new Date(fechaUltima);
+    const diffYears = (hoy.getTime() - ultima.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+
+    this.ultimaActualizacionValida = diffYears <= 2;
+    this.mensajeSinActualizacion = diffYears > 2
+      ? `Tiene ${Math.floor(diffYears)} año(s) y ${Math.floor((diffYears - Math.floor(diffYears)) * 12)} mes(es) sin actualizar.`
+      : '';
+  }
+
+  private verificarValidaciones(): void {
+    if (!this.persona?.id_persona) return;
+
+    this.afiliacionService.tieneBancoActivo(this.persona.id_persona).subscribe(
+      (response) => {
+        this.datosCompletos = response.datosCompletos;
+        this.tieneBancoActivo = response.tieneBancoActivo;
+        this.beneficiariosValidos = response.beneficiariosValidos;
+        this.tieneCentroTrabajo = response.tieneCentroTrabajo;
+        this.tieneReferencias = response.tieneReferencias;
+        this.ultimaActualizacionValida = response.ultimaActualizacionValida;
+
+        this.cdr.detectChanges();
+      },
+      (error) => {
+        console.error('Error obteniendo validaciones:', error);
+      }
+    );
+  }
+
+  
 }

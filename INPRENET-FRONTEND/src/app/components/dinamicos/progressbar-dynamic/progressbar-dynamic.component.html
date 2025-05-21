@@ -1,10 +1,10 @@
 <div class="container-fluid" style="position: sticky;">
-  <h3 class="progressbar-title">{{ title }}</h3> <!-- Título dinámico con clase -->
+  <h3 style="padding: 1% 0 0 0" class="progressbar-title">{{ title }}</h3>
   <ul class="multi-steps pointer-cursor">
     <li *ngFor="let step of steps; let i = index"
         (click)="activateStep(i)"
-        [ngClass]="step.isActive ? 'is-active' : ''"
-        id="estado">{{ step.label }}
+        [ngClass]="{'is-active': step.isActive, 'is-error': step.isError === true}">
+      {{ step.label }}
     </li>
   </ul>
 </div>

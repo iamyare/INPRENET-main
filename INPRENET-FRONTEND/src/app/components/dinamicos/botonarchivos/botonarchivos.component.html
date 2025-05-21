@@ -1,8 +1,9 @@
 
   <div class="d-grid" style="width: 100%; position: relative;">
     <div>
-      <input type="file" name="Archivos"  #myFile2 [id]="uniqueId + '_input'"
-        (change)="onFileSelected($event)" class="inputfile inputfile-1" multiple />
+      <input type="file" name="Archivos" #myFile2 [id]="uniqueId + '_input'"
+      (change)="onFileSelected($event)" class="inputfile inputfile-1" accept=".pdf" />
+
 
       <label [for]="uniqueId + '_input'" style="border-radius: 0.3rem;">
         <svg xmlns="http://www.w3.org/2000/svg" class="iborrainputfile" width="20" height="17" viewBox="0 0 20 17">

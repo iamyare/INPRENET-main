@@ -1,19 +1,11 @@
-<h1 style="text-align: center;
-font-size: 24px;
-font-weight: bold;
-margin-bottom: 20px;
-color: #178b7e">Datos Generales De Las Planillas (CON CUENTA BANCARIA)</h1>
-<div
-  style="background-color: white; border-radius: 10px; padding: 20px"
-  class="editar-beneficio-container"
->
+<br>
+<div class="editar-beneficio-container">
   <app-dynamic-table
     [columns]="myColumns"
     [data]="filas"
     [getData]="getFilas"
-    (ejecutarFuncionAsincronaEvent)="
-      ejecutarFuncionAsincronaDesdeOtroComponente($event)
-    "
-  >
+    [titulo]="'Datos Generales De Las Planillas (CON CUENTA BANCARIA)'"
+    [subtitulo]="'Estatus de Planillas'"
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)">
   </app-dynamic-table>
 </div>

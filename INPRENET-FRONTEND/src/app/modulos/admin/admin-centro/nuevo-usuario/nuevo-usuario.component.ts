@@ -69,10 +69,12 @@ export class NuevoUsuarioComponent implements OnInit {
   cargarRolesPorModulo(modulo: string) {
     this.authSvc.obtenerRolesPorModulo(modulo).subscribe({
       next: (roles) => {
-        this.tipoRol = roles.map((rol: any) => ({
-          label: rol.nombre,
-          value: rol.id_rol_modulo
-        }));
+        this.tipoRol = roles
+          .filter((rol: any) => rol.nombre !== 'ADMINISTRADOR')
+          .map((rol: any) => ({
+            label: rol.nombre,
+            value: rol.id_rol_modulo
+          }));
       },
       error: (err) => {
         console.error('Error al obtener roles:', err);

@@ -1,0 +1,21 @@
+<form [formGroup]="cuentaForm" (ngSubmit)="onSubmit()" class="form-container">
+  <!-- Tipo de Cuenta -->
+  <div class="form-group">
+    <label for="tipoCuenta">Tipo de Cuenta*</label>
+    <select id="tipoCuenta" class="form-control rounded-input" formControlName="tipoCuenta">
+      <option value="" disabled selected>Seleccione un tipo</option>
+      <option value="CAP">CAP</option>
+      <option value="APORTACIÓN">APORTACIÓN</option>
+      <option value="COTIZACION">COTIZACION</option>
+    </select>
+    <div *ngIf="cuentaForm.controls['tipoCuenta'].invalid && cuentaForm.controls['tipoCuenta'].touched" class="text-danger">
+      Tipo de cuenta es requerido.
+    </div>
+  </div>
+
+  <div class="text-center">
+    <button type="submit" class="btn btn-primary custom-button" [disabled]="!cuentaForm.valid">
+      Guardar Cuenta
+    </button>
+  </div>
+</form>

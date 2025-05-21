@@ -21,17 +21,41 @@ export class CentroTrabajoDTO {
     @Matches(/^\d{1,2}\/\d{1,2}\/\d{4}$/, {
         message: "Fecha de ingreso debe estar en el formato d/m/aaaa.",
     })
-    fechaIngreso: string;
+    fecha_ingreso: string;
     
     @IsOptional()
     @IsString()
     @Matches(/^\d{1,2}\/\d{1,2}\/\d{4}$/, {
         message: "Fecha de egreso debe estar en el formato d/m/aaaa.",
     })
-    fechaEgreso?: string;
+    fecha_egreso?: string;
 
     @IsString()
     @MaxLength(40)
     @IsOptional()
     estado?:string
+
+    @IsString()
+    @MaxLength(50)
+    @IsOptional()
+    tipo_jornada?: string;
+
+    @IsString()
+    @MaxLength(50)
+    @IsOptional()
+    jornada?: string;
+
+    @IsString()
+    @MaxLength(200)
+    direccion_1: string;
+
+    @IsString()
+    @MaxLength(200)
+    @IsOptional()
+    direccion_2: string;
+
+    @IsString()
+    @MaxLength(15)
+    @IsOptional()
+    telefono_1: string;
 }

@@ -91,11 +91,6 @@ export class MantenimientoAfiliacionController {
     return this.mantenimientoAfiliacionService.findAllBancos();
   }
 
-  @Get('bancos/detalle/:id')
-  findOneBanco(@Param('id') id: number) {
-    return this.mantenimientoAfiliacionService.findOneBanco(id);
-  }
-
   @Post('bancos/crear')
   createBanco(@Body() createBancoDto: CreateBancoDto) {
     return this.mantenimientoAfiliacionService.createBanco(createBancoDto);

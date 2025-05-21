@@ -1,46 +1,45 @@
 <ng-template #datosGeneralesTemplate>
-  <app-datos-generales
+  <app-datos-generales-temporal
+    #datosGeneralesComponent
     [formGroup]="steps[0].formGroup"
     (imageCaptured)="handleImageCaptured($event)">
-  </app-datos-generales>
-  <app-peps [parentForm]="steps[0].formGroup"></app-peps>
+  </app-datos-generales-temporal>
+
+  <app-col-magisteriales #colMagisterialesComponent [formGroup]="steps[0].formGroup"></app-col-magisteriales>
+  <app-peps #pepsComponent [parentForm]="steps[0].formGroup"></app-peps>
 </ng-template>
 
 <ng-template #referenciasPersonalesTemplate>
-  <app-ref-pers [formGroup]="steps[1].formGroup"></app-ref-pers>
-</ng-template>
-
-<ng-template #colegiosMagisterialesTemplate>
-  <app-col-magisteriales [formGroup]="steps[2].formGroup"></app-col-magisteriales>
+  <app-ref-pers #refPersComponent [formGroup]="steps[1].formGroup"></app-ref-pers>
 </ng-template>
 
 <ng-template #bancosTemplate>
-  <app-bancos [formGroup]="steps[3].formGroup"></app-bancos>
+  <app-bancos #bancosComponent [formGroup]="steps[2].formGroup"></app-bancos>
 </ng-template>
 
 <ng-template #centrosTrabajoTemplate>
   <mat-tab-group>
     <mat-tab label="Puestos de Trabajo">
-      <app-dat-puesto-trab [formGroup]="steps[4].formGroup"></app-dat-puesto-trab>
+      <app-dat-puesto-trab #datPuestoTrabComponent [formGroup]="steps[3].formGroup"></app-dat-puesto-trab>
     </mat-tab>
     <mat-tab label="Otras Fuentes de Ingreso">
-      <app-otras-fuentes-ingreso [formGroup]="steps[4].formGroup"></app-otras-fuentes-ingreso>
+      <app-otras-fuentes-ingreso #otrasFuentesIngresoComponent [formGroup]="steps[3].formGroup"></app-otras-fuentes-ingreso>
     </mat-tab>
   </mat-tab-group>
 </ng-template>
 
 <ng-template #beneficiariosTemplate>
-  <app-benef [formGroup]="steps[5].formGroup"></app-benef>
+  <app-benef #benefComponent [formGroup]="steps[4].formGroup"></app-benef>
 </ng-template>
 
-<mat-horizontal-stepper [linear]="true" #stepper>
+<mat-horizontal-stepper style="background: transparent;" [linear]="true" #stepper>
   <mat-step>
     <ng-template matStepLabel>
       <div class="step-label">
         <ng-container *ngIf="isStepInvalid(steps[0].formGroup); else validLabel1">
           <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
           <div class="error-text">
-            <strong>Información inválida</strong>
+            <strong>Datos Generales</strong>
           </div>
         </ng-container>
         <ng-template #validLabel1>Datos Generales</ng-template>
@@ -48,7 +47,7 @@
     </ng-template>
     <ng-container *ngTemplateOutlet="datosGeneralesTemplate"></ng-container>
     <div>
-      <button mat-button (click)="markAllAsTouched(steps[0].formGroup); stepper.next()">Siguiente</button>
+      <button mat-raised-button  color="primary" (click)="markAllAsTouched(steps[0].formGroup); stepper.next()">Siguiente</button>
     </div>
   </mat-step>
 
@@ -58,45 +57,26 @@
         <ng-container *ngIf="isStepInvalid(steps[1].formGroup); else validLabel2">
           <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
           <div class="error-text">
-            <strong>Información inválida</strong>
+            <strong>Referencias</strong>
           </div>
         </ng-container>
-        <ng-template #validLabel2>Referencias Personales</ng-template>
+        <ng-template #validLabel2>Referencias</ng-template>
       </div>
     </ng-template>
     <ng-container *ngTemplateOutlet="referenciasPersonalesTemplate"></ng-container>
     <div>
-      <button mat-button (click)="stepper.previous()">Anterior</button>
-      <button mat-button (click)="markAllAsTouched(steps[1].formGroup); stepper.next()">Siguiente</button>
+      <button  mat-raised-button  color="primary" (click)="stepper.previous()">Anterior</button>
+      <button  mat-raised-button  color="primary" (click)="markAllAsTouched(steps[1].formGroup); stepper.next()">Siguiente</button>
     </div>
   </mat-step>
 
   <mat-step>
     <ng-template matStepLabel>
       <div class="step-label">
-        <ng-container *ngIf="isStepInvalid(steps[2].formGroup); else validLabel3">
+        <ng-container *ngIf="isStepInvalid(steps[2].formGroup); else validLabel4">
           <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
           <div class="error-text">
-            <strong>Información inválida</strong>
-          </div>
-        </ng-container>
-        <ng-template #validLabel3>Colegios Magisteriales</ng-template>
-      </div>
-    </ng-template>
-    <ng-container *ngTemplateOutlet="colegiosMagisterialesTemplate"></ng-container>
-    <div>
-      <button mat-button (click)="stepper.previous()">Anterior</button>
-      <button mat-button (click)="markAllAsTouched(steps[2].formGroup); stepper.next()">Siguiente</button>
-    </div>
-  </mat-step>
-
-  <mat-step>
-    <ng-template matStepLabel>
-      <div class="step-label">
-        <ng-container *ngIf="isStepInvalid(steps[3].formGroup); else validLabel4">
-          <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
-          <div class="error-text">
-            <strong>Información inválida</strong>
+            <strong>Cuentas Bancarias</strong>
           </div>
         </ng-container>
         <ng-template #validLabel4>Cuentas Bancarias</ng-template>
@@ -104,37 +84,37 @@
     </ng-template>
     <ng-container *ngTemplateOutlet="bancosTemplate"></ng-container>
     <div>
-      <button mat-button (click)="stepper.previous()">Anterior</button>
-      <button mat-button (click)="markAllAsTouched(steps[3].formGroup); stepper.next()">Siguiente</button>
+      <button mat-raised-button  color="primary" (click)="stepper.previous()">Anterior</button>
+      <button mat-raised-button  color="primary" (click)="markAllAsTouched(steps[2].formGroup); stepper.next()">Siguiente</button>
     </div>
   </mat-step>
 
   <mat-step>
     <ng-template matStepLabel>
       <div class="step-label">
-        <ng-container *ngIf="isStepInvalid(steps[4].formGroup); else validLabel5">
+        <ng-container *ngIf="isStepInvalid(steps[3].formGroup); else validLabel5">
           <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
           <div class="error-text">
-            <strong>Información inválida</strong>
+            <strong>Centros de Trabajo</strong>
           </div>
         </ng-container>
-        <ng-template #validLabel5>Centros de Trabajo y Otras Fuentes de Ingreso</ng-template>
+        <ng-template #validLabel5>Centros de Trabajo</ng-template>
       </div>
     </ng-template>
     <ng-container *ngTemplateOutlet="centrosTrabajoTemplate"></ng-container>
     <div>
-      <button mat-button (click)="stepper.previous()">Anterior</button>
-      <button mat-button (click)="markAllAsTouched(steps[4].formGroup); stepper.next()">Siguiente</button>
+      <button mat-raised-button  color="primary" (click)="stepper.previous()">Anterior</button>
+      <button mat-raised-button  color="primary" (click)="markAllAsTouched(steps[3].formGroup); stepper.next()">Siguiente</button>
     </div>
   </mat-step>
 
   <mat-step>
     <ng-template matStepLabel>
       <div class="step-label">
-        <ng-container *ngIf="isStepInvalid(steps[5].formGroup); else validLabel6">
+        <ng-container *ngIf="isStepInvalid(steps[4].formGroup); else validLabel6">
           <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
           <div class="error-text">
-            <strong>Información inválida</strong>
+            <strong>Beneficiarios</strong>
           </div>
         </ng-container>
         <ng-template #validLabel6>Beneficiarios</ng-template>
@@ -142,8 +122,10 @@
     </ng-template>
     <ng-container *ngTemplateOutlet="beneficiariosTemplate"></ng-container>
     <div>
-      <button mat-button (click)="stepper.previous()">Anterior</button>
-      <button mat-button color="primary" (click)="onSubmit()">Enviar</button>
+      <button mat-raised-button  color="primary" (click)="stepper.previous()">Anterior</button>
+      <button mat-raised-button  color="primary"  (click)="onSubmit()">Enviar</button>
     </div>
   </mat-step>
 </mat-horizontal-stepper>
+
+<!-- <pre *ngIf="formErrors" class="error-display">{{ formErrors | json }}</pre> -->

@@ -1,104 +1,172 @@
-<app-ver-planillas-activas (getElemSeleccionados)="getElemSeleccionados($event)"></app-ver-planillas-activas>
+  <app-ver-planillas-activas (planActivas)="getPlanillasActivas($event)" (getElemSeleccionados)="getElemSeleccionados($event) "></app-ver-planillas-activas>
 
-<!-- <div style="background-color: white; margin-bottom: 1%">
-  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla Preliminar"
-    subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)">
-  </app-dynamic-form>
-  <div style="text-align: center">
-    <button mat-raised-button color="primary" (click)="getPlanilla()" [disabled]="datosFormateados?.invalid"
-      style="margin: 2% 0; color: white; border-radius: 5px; padding: 10px 20px">
-      Ver Planilla preliminar
-    </button>
-  </div>
-</div> -->
+  <!-- <mat-grid-list cols="2" rowHeight="50px">
+    <mat-grid-tile>
+      <button color="primary" (click)="bajas()" mat-raised-button>Bajas</button>
+    </mat-grid-tile>
+    <mat-grid-tile>
+      <button color="primary" (click)="altas()" mat-raised-button>Altas</button>
+    </mat-grid-tile>
+  </mat-grid-list> -->
 
-<div class="card-header card-header-danger title" *ngIf="detallePlanilla">
-  <div class="card-body" style="padding: 1%">
-    <h4 class="card-title">Datos Generales De La Planilla {{detallePlanilla?.tipoPlanilla?.nombre_planilla}} (CON Y SIN CUENTA BANCARIA)
-    </h4>
-    <table>
-      <tr style="background-color: #f2f2f2">
-        <th>Nombre Planilla</th>
-        <td>{{ detallePlanilla?.tipoPlanilla?.nombre_planilla }}</td>
-        <th>Fecha Apertura</th>
-        <td>{{ convertirFecha(detallePlanilla?.fecha_apertura, true) }}</td>
-      </tr>
-      <tr>
-        <th>Secuencia</th>
-        <td>{{ detallePlanilla?.secuencia }}</td>
-        <th>Estado</th>
-        <td>{{ detallePlanilla?.estado }}</td>
-      </tr>
-      <tr style="background-color: #f2f2f2">
-        <th>Período Inicio</th>
-        <td>{{ detallePlanilla?.periodoInicio }}</td>
-        <th>Período Finalización</th>
-        <td>{{ detallePlanilla?.periodoFinalizacion }}</td>
-      </tr>
-      <tr>
-        <th>Total Beneficios</th>
-        <td>{{ detallePlanilla?.totalBeneficios | currency: "L" }}</td>
-        <th>Deducciones INPREMA</th>
-        <td>{{ detallePlanilla?.deduccionesI | currency: "L" }}</td>
+<div class="basic-container">
+  <div class=" card " *ngIf="detallePlanilla">
+    <div class="card-body" >
+      <h4 class="custom-header card-title">Datos Generales De La Planilla {{detallePlanilla?.tipoPlanilla?.nombre_planilla}} (CON Y SIN CUENTA BANCARIA)
+      </h4>
+      <table>
+        <tr style="background-color: #f2f2f2">
+          <th>Nombre Planilla</th>
+          <td>{{ detallePlanilla?.tipoPlanilla?.nombre_planilla }}</td>
+          <th>Fecha Apertura</th>
+          <td>{{ convertirFecha(detallePlanilla?.fecha_apertura, true) }}</td>
+        </tr>
+        <tr>
+          <th>Secuencia</th>
+          <td>{{ detallePlanilla?.secuencia }}</td>
+          <th>Estado</th>
+          <td>{{ detallePlanilla?.estado }}</td>
+        </tr>
+        <tr style="background-color: #f2f2f2">
+          <th>Fecha Inicio</th>
+          <td>{{ convertirFecha(detallePlanilla?.periodoInicio,false) }}</td>
+          <th>Fecha Finalización</th>
+          <td>{{ convertirFecha(detallePlanilla?.periodoFinalizacion,false) }}</td>
+        </tr>
+        <tr>
+          <th>Total Beneficios</th>
+          <td>L {{ detallePlanilla?.totalBeneficios  | number: '1.2-2':'en-HN'}}</td>
+          <th>Deducciones INPREMA</th>
+          <td>L {{ detallePlanilla?.deduccionesI  | number: '1.2-2':'en-HN' }}</td>
 
-      </tr>
-      <tr style="background-color: #f2f2f2">
-        <th>Total Neto</th>
-        <td>{{ detallePlanilla?.totalNeto | currency: "L" }}</td>
-        <th>Deducciones Terceros</th>
-        <td>{{ detallePlanilla?.deduccionesT | currency: "L" }}</td>
-        <td></td>
-      </tr>
-    </table>
-  </div>
-</div>
+        </tr>
+        <tr style="background-color: #f2f2f2">
+          <th>Total Neto</th>
+          <td>L {{ detallePlanilla?.totalNeto  | number: '1.2-2':'en-HN'}}</td>
+          <th>Deducciones Terceros</th>
+          <td>L {{ detallePlanilla?.deduccionesT  | number: '1.2-2':'en-HN'}}</td>
+        </tr>
 
-<div style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%; " *ngIf="verDat">
-  <h4 class="card-title" style="text-align: center">
-    Personas en la Planilla
-  </h4>
+        <tr >
+          <th>Total Neto</th>
+          <td>L {{ detallePlanilla?.totalNeto  | number: '1.2-2':'en-HN'}}</td>
+          <th>Deducciones Terceros</th>
+          <td>L {{ detallePlanilla?.deduccionesT  | number: '1.2-2':'en-HN'}}</td>
+        </tr>
 
-  <div style="padding: 1% 1% 1% 1%">
-    <app-dynamic-table
-      titulo="Datos de personas en planilla"
-      subtitulo="Completa la información correspondiente"
-      style="width: 100%"
-      [nombreEncabezadoUno]="'Desglose'"
-      [verOpcEditar]="false"
+        <tr style="background-color: #f2f2f2">
+          <th>Cantidad Personas</th>
+          <td>{{ datosTabl.length }}</td>
+          <th></th>
+          <td></td>
+        </tr>
 
-      [mostrarBotonUno]="true"
-      [etiquetaBotonUno]="'Ingresos'"
-      [nombreEncabezadoUno]="'Detalle Ingresos'"
-      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      (accionBotonUno)="manejarAccionUno($event)"
-
-      [nombreEncabezadoDos]="'Detalle Deducciones'"
-      [etiquetaBotonDos]="'Deducciones'"
-      [mostrarBotonDos]="true"
-      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      (accionBotonDos)="manejarAccionDos($event)"
-
-      [columns]="myColumnsDed"
-      [data]="datosTabl"
-      [getData]="getFilas">
-
-    </app-dynamic-table>
-
-    <div style="background-color: white; margin-bottom: 1%; text-align: center">
-      <button  mat-raised-button color="primary"
-      [disabled]="detallePlanilla.beneficios_cargados == 'NO' " (click)="actualizarFechaCierrePlanilla()"
-      style="
-        margin: 2% 2%;
-        padding: 2% 1% 1% 1%;
-        color: #ffffff;
-        border-radius: 5px;
-        padding: 10px 20px;"
-        >
-        Cerrar planilla
-      </button>
+      </table>
     </div>
+
   </div>
+
+  <div *ngIf="datosTabl.length > 0" class="card" style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%;">
+    <h4 class="custom-header card-title" style="text-align: center">
+      Personas en la Planilla
+    </h4>
+    <div style="display: flex; justify-content: space-between; gap: 10px; align-items: start;">
+      <!-- Descargar detalles en Excel -->
+      <div style="flex: 1; text-align: center;">
+        <button mat-raised-button color="accent" (click)="descargarExcelCompleto()">
+          Descargar detalles en Excel
+        </button>
+      </div>
+
+      <!-- Descargar Reporte de Pago Preliminar -->
+      <div style="flex: 1; text-align: center;">
+        <button mat-raised-button color="accent" (click)="descargarExcelPorPlanilla()">
+          Descargar Reporte de Pago Preliminar
+        </button>
+      </div>
+
+      <div style="flex: 1; text-align: center;">
+        <button  class="button new-badge" mat-raised-button color="accent" (click)="descargarReporteCompleto()">
+          Descargar Reporte completo
+        </button>
+      </div>
+
+      <div style="flex: 1; text-align: center;">
+        <button  class="button new-badge" mat-raised-button color="accent" (click)="descargarReporteBeneficioAfiliado()">
+          Descargar Reporte Beneficios
+        </button>
+      </div>
+
+      <!-- Eliminar toda la planilla preliminar -->
+      <div style="flex: 1; text-align: center;">
+        <button mat-raised-button color="warn" (click)="confirmarEliminarPlanilla()">
+          Eliminar toda la planilla preliminar
+        </button>
+
+        <!-- Modal de confirmación -->
+        <ng-template #confirmacionEliminarPlanillaModal>
+          <h2 mat-dialog-title>Confirmar Eliminar beneficios de planilla</h2>
+          <mat-dialog-content>
+            <p>¿Estás seguro de eliminar beneficios de la planilla?</p>
+          </mat-dialog-content>
+          <mat-dialog-actions align="end">
+            <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+            <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+          </mat-dialog-actions>
+        </ng-template>
+
+        <div class="spinner-container" *ngIf="isLoading" style="text-align: center; margin-top: 10px;">
+          <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          <p>Eliminando beneficios de la planilla {{this.planillaSelected.id_planilla}}, por favor espere ... </p>
+        </div>
+      </div>
+
+      <!-- Cerrar Planilla -->
+      <div style="flex: 1; text-align: center;">
+        <button mat-raised-button color="primary"
+          [disabled]="hayTotalNegativo"
+          (click)="actualizarFechaCierrePlanilla()"
+          style="padding: 10px 20px; color: #ffffff; border-radius: 5px;">
+          Cerrar planilla
+        </button>
+        <div  class="anaranjado desapareciendo" *ngIf="hayTotalNegativo">No se puede cerrar la planilla debido a que hay al menos un valor negativo, ó valor 0.00.</div>
+        <div  class="anaranjado desapareciendo" *ngIf="hayCodigoACHNull">No se puede cerrar la planilla debido a que hay al menos un registro que tiene Codigo ACH Vacio.</div>
+
+        <!-- Modal de confirmación -->
+        <ng-template #confirmacionModal>
+          <h2 mat-dialog-title>Confirmar cierre de planilla</h2>
+          <mat-dialog-content>
+            <p>¿Estás seguro de cerrar la planilla?</p>
+          </mat-dialog-content>
+          <mat-dialog-actions align="end">
+            <button mat-button mat-dialog-close="cancelar">Cancelar</button>
+            <button mat-button color="primary" [mat-dialog-close]="'confirmar'">Confirmar</button>
+          </mat-dialog-actions>
+        </ng-template>
+      </div>
+    </div>
+
+
+
+
+    <div style="padding: 1% 1% 1% 1%">
+      <app-dynamic-table
+        [titulo]="'Datos de personas en planilla'"
+        [subtitulo]="'Completa la información correspondiente'"
+        [data]="datosTabl"
+        [columns]="myColumnsDed"
+        [nombreEncabezadoUno]="'Desglose'"
+        [mostrarBotonUno]="true"
+        [etiquetaBotonUno]="'Ingresos'"
+        (accionBotonUno)="manejarAccionUno($event)"
+        [nombreEncabezadoDos]="'Detalle Deducciones'"
+        [mostrarBotonDos]="true"
+        [etiquetaBotonDos]="'Deducciones'"
+        (accionBotonDos)="manejarAccionDos($event)"
+        (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)">
+      </app-dynamic-table>
+
+  </div>
+
+  <!-- || detallePlanilla.deducc_inprema_cargadas == 'NO' || detallePlanilla.deducc_terceros_cargadas == 'NO' -->
 </div>
-
-
-<!-- || detallePlanilla.deducc_inprema_cargadas == 'NO' || detallePlanilla.deducc_terceros_cargadas == 'NO' -->

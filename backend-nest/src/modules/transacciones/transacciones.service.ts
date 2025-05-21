@@ -4,13 +4,15 @@ import { NET_MOVIMIENTO_CUENTA } from './entities/net_movimiento_cuenta.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { net_persona } from '../Persona/entities/net_persona.entity';
-import { NET_TIPO_CUENTA } from './entities/net_tipo_cuenta.entity';
-import { NET_CUENTA_PERSONA } from './entities/net_cuenta_persona.entity';
 import { NET_TIPO_MOVIMIENTO } from './entities/net_tipo_movimiento.entity';
 import { CrearMovimientoDTO } from './dto/voucher.dto';
 import { NET_PROFESIONES } from './entities/net_profesiones.entity';
 import { Net_Colegios_Magisteriales } from './entities/net_colegios_magisteriales.entity';
 import { crearCuentaDTO } from './dto/cuenta-transaccioens.dto';
+import path from 'path';
+import * as fs from 'fs';
+import { Net_Tipo_Cuenta } from './entities/net_tipo_cuenta.entity';
+import { Net_Cuenta_Persona } from './entities/net_cuenta_persona.entity';
 
 @Injectable()
 export class TransaccionesService {
@@ -20,10 +22,10 @@ export class TransaccionesService {
     private personaRepository: Repository<net_persona>,
     @InjectRepository(NET_MOVIMIENTO_CUENTA)
     private movimientoCuentaRepository: Repository<NET_MOVIMIENTO_CUENTA>,
-    @InjectRepository(NET_TIPO_CUENTA)
-    private tipoCuentaRepository: Repository<NET_TIPO_CUENTA>,
-    @InjectRepository(NET_CUENTA_PERSONA)
-    private cuentaPersonaRepository: Repository<NET_CUENTA_PERSONA>,
+    @InjectRepository(Net_Tipo_Cuenta)
+    private tipoCuentaRepository: Repository<Net_Tipo_Cuenta>,
+    @InjectRepository(Net_Cuenta_Persona)
+    private cuentaPersonaRepository: Repository<Net_Cuenta_Persona>,
     @InjectRepository(NET_TIPO_MOVIMIENTO)
     private tipoMovimientoRepository: Repository<NET_TIPO_MOVIMIENTO>,
     @InjectRepository(NET_PROFESIONES)
@@ -31,6 +33,116 @@ export class TransaccionesService {
     @InjectRepository(Net_Colegios_Magisteriales)
     private colegiosMRepository: Repository<Net_Colegios_Magisteriales>,
   ) {
+  }
+
+  async obtenerReporteAfiliados() {
+    const query = `
+      SELECT 
+          DOCENTE AS "Número de Identificación del Afiliado",
+          NOMBRE AS "Nombre del Afiliado",
+          FECHA_NACIMIENTO AS "Fecha de Nacimiento del Afiliado",
+          ULTIMO_SUELDO AS "Último Salario de Cotización",
+          ULTIMO_APORTA AS "Monto de la Aportación mensual",
+          TOTAL_COTIZACIONES AS "Cotizaciones acumuladas nominales sin Intereses",
+          FECHA_AFILIACION AS "Fecha de ingreso al sistema del Afiliado",
+          CASE
+              WHEN AÑO_PRI_SALARIO IS NOT NULL AND MES_PRI_SALARIO IS NOT NULL AND 
+                   AÑO_ULT_SALARIO IS NOT NULL AND MES_ULT_SALARIO IS NOT NULL THEN
+                   ((AÑO_ULT_SALARIO - AÑO_PRI_SALARIO) * 12) + (MES_ULT_SALARIO - MES_PRI_SALARIO)
+              ELSE
+                  NULL
+          END AS "Número de meses cotizados",
+          CASE 
+              WHEN MES_ULT_SALARIO BETWEEN 1 AND 12 THEN 
+                  TO_DATE(AÑO_ULT_SALARIO || '-' || LPAD(MES_ULT_SALARIO, 2, '0') || '-01', 'YYYY-MM-DD')
+              ELSE 
+                  NULL
+          END AS "Fecha de última cotización del Afiliado",
+          ESTADO_CIVIL AS "Código de Tipo de Estado Civil",
+          NUMERO_DE_HIJOS AS "Número de Hijos",
+          SECTOR AS "Código de Tipo del Sector del Afiliado"
+      FROM 
+          A_AFILIADOS_INGRESAR_2025
+    `;
+    const data = await this.personaRepository.query(query);
+
+    if (!data || data.length === 0) {
+      throw new NotFoundException('No se encontraron datos para el reporte.');
+    }
+
+    return data;
+  }
+
+  async obtenerCuentasPorIdentificacion(n_identificacion: string){
+    const persona = await this.personaRepository.findOne({
+      where: { n_identificacion },
+      relations: ['cuentas', 'cuentas.tipoCuenta'],
+    });
+  
+    if (!persona) {
+      throw new NotFoundException(`Persona con identificación ${n_identificacion} no encontrada.`);
+    }
+  
+    /* if (!persona.cuentas || persona.cuentas.length === 0) {
+      throw new NotFoundException(`La persona con identificación ${n_identificacion} no tiene cuentas asociadas.`);
+    }
+  
+    // Mapear los datos para incluir información del tipo de cuenta
+    return persona.cuentas.map(cuenta => ({
+      //numeroCuenta: cuenta.NUMERO_CUENTA,
+      activa: cuenta.ACTIVA_B,
+      fechaCreacion: cuenta.FECHA_CREACION,
+      creadaPor: cuenta.CREADA_POR,
+      tipoCuenta: {
+        id: cuenta.tipoCuenta?.ID_TIPO_CUENTA,
+        descripcion: cuenta.tipoCuenta?.DESCRIPCION,
+      },
+    })); */
+  }
+  
+  private generarNumeroCuenta(idPersona: number): string {
+    const timestamp = Date.now().toString();
+    const randomDigits = Math.floor(1000 + Math.random() * 9000).toString(); 
+    return `${idPersona}${timestamp.substring(timestamp.length - 6)}${randomDigits}`;
+  }
+
+  async crearCuenta(idPersona: number, dto: crearCuentaDTO): Promise<any> {
+    const persona = await this.personaRepository.findOne({
+        where: { id_persona: idPersona },
+    });
+
+    if (!persona) {
+        throw new NotFoundException(`No se encontró la persona con ID: ${idPersona}`);
+    }
+
+    /* const tipoCuenta = await this.tipoCuentaRepository.findOne({
+        where: { DESCRIPCION: dto.tipo_cuenta },
+    });
+
+    if (!tipoCuenta) {
+        throw new NotFoundException(
+            `No se encontró un tipo de cuenta con la descripción: ${dto.tipo_cuenta}`
+        );
+    }
+ */
+    const numeroCuenta = this.generarNumeroCuenta(persona.id_persona);
+
+    const nuevaCuenta = this.cuentaPersonaRepository.create({
+        /* persona: persona,
+        tipoCuenta: tipoCuenta,
+        CREADA_POR: dto.creado_por,
+        NUMERO_CUENTA: numeroCuenta, */
+    });
+
+    const cuentaGuardada = await this.cuentaPersonaRepository.save(nuevaCuenta);
+
+    // Retorna un objeto con el formato esperado por el frontend
+    return {
+        //numero_cuenta: cuentaGuardada.NUMERO_CUENTA,
+        tipo_cuenta: {
+            //descripcion: cuentaGuardada.tipoCuenta.DESCRIPCION,
+        },
+    };
   }
 
   async eliminarMovimiento(id: number): Promise<boolean> {
@@ -143,7 +255,7 @@ export class TransaccionesService {
 
   async crearMovimiento(dto: CrearMovimientoDTO): Promise<NET_MOVIMIENTO_CUENTA> {
     const cuentaExistente = await this.cuentaPersonaRepository.findOne({
-      where: { NUMERO_CUENTA: dto.numeroCuenta }
+    /*   where: { NUMERO_CUENTA: dto.numeroCuenta }, */
     });
   
     if (!cuentaExistente) {
@@ -151,7 +263,7 @@ export class TransaccionesService {
     }
   
     const tipoMovimiento = await this.tipoMovimientoRepository.findOne({
-      where: { DESCRIPCION: dto.tipoMovimientoDescripcion }
+      where: { DESCRIPCION: dto.tipoMovimientoDescripcion },
     });
   
     if (!tipoMovimiento) {
@@ -159,76 +271,17 @@ export class TransaccionesService {
     }
   
     const nuevoMovimiento = this.movimientoCuentaRepository.create({
-      cuentaPersona: cuentaExistente,
+      //cuentaPersona: cuentaExistente,
       tipoMovimiento: tipoMovimiento,
       MONTO: dto.monto,
       DESCRIPCION: dto.descripcion,
       FECHA_MOVIMIENTO: new Date(),
-      CREADA_POR: "OFICIAL",
+      CREADA_POR: 'INPRENET',
       ANO: dto.ANO,
-      MES: dto.MES
+      MES: dto.MES,
     });
   
     return this.movimientoCuentaRepository.save(nuevoMovimiento);
-  }
-  
-
-  async crearCuenta(idPersona: number, dto: [crearCuentaDTO]): Promise<any> {
-    const persona = await this.personaRepository.findOne({
-      where: { id_persona: idPersona }
-    });
-    if (!persona) {
-      throw new NotFoundException(`No se encontró la persona: ${idPersona}`);
-    }
-
-    const nuevasCuentas = await Promise.all(dto.map(async (element) => {
-      const tipoCuenta = await this.tipoCuentaRepository.findOne({
-        where: { DESCRIPCION: element.tipo_cuenta }
-      });
-
-      if (!tipoCuenta) {
-        throw new NotFoundException(`No se encontró una cuenta con el número`);
-      }
-
-      return this.cuentaPersonaRepository.create({
-        persona: persona,
-        tipoCuenta: tipoCuenta,
-        CREADA_POR: element.creado_por,
-        NUMERO_CUENTA: element.numero_cuenta
-      });
-    }));
-
-    return this.cuentaPersonaRepository.save(nuevasCuentas);
-  }
-
-
-
-  async obtenerTiposDeCuentaPorDNI(n_identificacion: string): Promise<any[]> {
-    const persona = await this.personaRepository.findOne({
-      where: { n_identificacion }
-    });
-
-    if (!persona) {
-      throw new Error('Persona no encontrada');
-    }
-    const cuentasPersona = await this.cuentaPersonaRepository.find({
-      where: { persona: { id_persona: persona.id_persona } },
-      relations: ['tipoCuenta']
-    });
-
-    // Verifica si la persona tiene cuentas
-    if (cuentasPersona.length === 0) {
-      throw new Error('La persona no tiene cuentas asociadas');
-    }
-
-    // Extrae y devuelve los números de cuenta y las descripciones de los tipos de cuenta
-    const cuentasConDescripcion = cuentasPersona.map(cuenta => ({
-      NUMERO_CUENTA: cuenta.NUMERO_CUENTA,
-      DESCRIPCION: cuenta.tipoCuenta.DESCRIPCION
-    }));
-
-    return cuentasConDescripcion;
-
   }
 
   async obtenerTiposDeCuenta(): Promise<any[]> {
@@ -286,18 +339,18 @@ export class TransaccionesService {
   }
 
   async ActivarCuenta(numCuenta: string): Promise<void> {
-    const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
+    /* const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
 
     cuenta.ACTIVA_B = 'A';
 
-    await this.cuentaPersonaRepository.save(cuenta);
+    await this.cuentaPersonaRepository.save(cuenta); */
   }
 
   async desactivarCuenta(numCuenta: string): Promise<void> {
-    const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
+   /*  const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
 
     cuenta.ACTIVA_B = 'I';
 
-    await this.cuentaPersonaRepository.save(cuenta);
+    await this.cuentaPersonaRepository.save(cuenta); */
   }
 }

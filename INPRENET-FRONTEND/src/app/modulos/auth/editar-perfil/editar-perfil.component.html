@@ -2,7 +2,9 @@
   <h2>Editar Perfil</h2>
 
   <div class="perfil-imagenes">
+    <!-- Foto de perfil -->
     <div class="image-container foto-empleado">
+      <label for="fotoEmpleado" class="image-label">Foto de Perfil</label>
       <img *ngIf="fotoEmpleadoUrl" [src]="fotoEmpleadoUrl" alt="Foto del Empleado">
       <button class="edit-button" (click)="editarArchivo('fotoEmpleado')">
         <mat-icon>edit</mat-icon>
@@ -15,7 +17,10 @@
         style="display: none;"
       />
     </div>
+
+    <!-- Archivo de identificación -->
     <div class="image-container archivo-identificacion">
+      <label for="archivoIdentificacion" class="image-label">Archivo de Identificación</label>
       <img *ngIf="archivoIdentificacionUrl" [src]="archivoIdentificacionUrl" alt="Archivo de Identificación">
       <button class="edit-button" (click)="editarArchivo('archivoIdentificacion')">
         <mat-icon>edit</mat-icon>
@@ -30,6 +35,7 @@
     </div>
   </div>
 
+  <!-- Información del perfil -->
   <mat-card class="info-card">
     <div class="info-section">
       <h3>Puesto</h3>
@@ -41,15 +47,14 @@
     </div>
   </mat-card>
 
+  <!-- Formulario de perfil -->
   <form [formGroup]="perfilForm" class="form-container">
+    <input type="hidden" formControlName="idEmpleado">
+
     <mat-card class="perfil-card">
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Nombre</mat-label>
         <input matInput formControlName="nombre">
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Correo</mat-label>
-        <input matInput formControlName="correo">
       </mat-form-field>
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Teléfono 1</mat-label>
@@ -64,8 +69,11 @@
         <input matInput formControlName="numeroIdentificacion">
       </mat-form-field>
     </mat-card>
+
+    <button mat-raised-button color="primary" (click)="guardar()">Guardar Cambios</button>
   </form>
 
+  <!-- Sección de módulos -->
   <div class="modules-container">
     <h2>Módulos</h2>
     <mat-card *ngFor="let modulo of modulos" class="module-card">
@@ -74,6 +82,7 @@
     </mat-card>
   </div>
 
+  <!-- Cambio de contraseña -->
   <h2>Cambiar Contraseña</h2>
   <form [formGroup]="contrasenaForm" (ngSubmit)="cambiarContrasena()" class="form-container">
     <mat-card class="contrasena-card">

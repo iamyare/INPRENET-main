@@ -13,7 +13,7 @@ import { ControlContainer } from '@angular/forms';
   viewProviders: [
     {
       provide: ControlContainer,
-      useFactory: () =>
+       useFactory: () =>
         inject(ControlContainer, { skipSelf: true, host: true }),
     },
   ]
@@ -96,7 +96,6 @@ export class VerReferenciasComponent {
           this.Afiliado.estado = ""
           this.toastr.error(`Error: ${error.error.message}`);
       }) */
-
     }
   }
 
@@ -114,8 +113,8 @@ export class VerReferenciasComponent {
   manejarAccionUno(row: any) {
     const campos = [
       { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable: false },
-      { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Período de inicio' },
-      { nombre: 'periodoFinalizacion', tipo: 'number', requerido: true, etiqueta: 'Período de finalización' },
+      { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Fecha de inicio' },
+      { nombre: 'periodoFinalizacion', tipo: 'number', requerido: true, etiqueta: 'Fecha de finalización' },
       { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por período' },
       { nombre: 'Monto_total', tipo: 'number', requerido: true, etiqueta: 'Monto Total' },
 
@@ -132,7 +131,7 @@ export class VerReferenciasComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        console.log('Datos editados:', result);
+
       }
     });
   }

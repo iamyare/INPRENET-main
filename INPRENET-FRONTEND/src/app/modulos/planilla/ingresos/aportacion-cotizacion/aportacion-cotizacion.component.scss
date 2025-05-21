@@ -1,0 +1,141 @@
+$color-primary: #178b7e;
+$color-secondary: #52616B;
+$color-light: #F8F9FA;
+$color-dark: #1C2833;
+$color-border: #bee4e1;
+$color-hover: darken($color-primary, 10%);
+
+.container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background: $color-light;
+  border-radius: 12px;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+
+  .title {
+    text-align: center;
+    font-size: 2rem;
+    color: $color-dark;
+    margin-bottom: 20px;
+  }
+
+  /* 📌 Estilos del formulario */
+  .form-container {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+
+    h2 {
+      text-align: center;
+      color: $color-primary;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+
+      input, select {
+        padding: 10px;
+        border: 1px solid $color-border;
+        border-radius: 5px;
+        font-size: 1rem;
+        width: 200px;
+        transition: border-color 0.3s ease-in-out;
+
+        &:focus {
+          border-color: $color-primary;
+          outline: none;
+        }
+      }
+
+      .btn {
+        background: $color-primary;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 15px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s ease-in-out, transform 0.2s;
+
+        &:hover {
+          background: $color-hover;
+          transform: scale(1.05);
+        }
+      }
+    }
+  }
+
+  /* 📌 Estilos de la tabla */
+  .table-container {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+
+    h2 {
+      text-align: center;
+      color: $color-primary;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 20px;
+      box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+
+      thead {
+        background: $color-primary;
+        color: white;
+
+        th {
+          padding: 12px;
+          text-align: center;
+          border: 1px solid white;
+        }
+      }
+
+      tbody {
+        tr {
+          &:nth-child(even) {
+            background: #eef9f7;
+          }
+
+          &:hover {
+            background: rgba($color-primary, 0.1);
+          }
+
+          td {
+            padding: 12px;
+            border: 1px solid $color-border;
+            text-align: center;
+            font-size: 1rem;
+          }
+
+          .year-column {
+            font-weight: bold;
+            background: rgba($color-primary, 0.2);
+            text-align: center;
+          }
+        }
+      }
+    }
+  }
+}

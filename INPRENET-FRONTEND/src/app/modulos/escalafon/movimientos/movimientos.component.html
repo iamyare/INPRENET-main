@@ -1,0 +1,63 @@
+<div>
+  <app-perfil-header (personaEncontrada)="onPersonaEncontrada($event)" [persona]="persona"></app-perfil-header>
+</div>
+
+<div class="container mt-4" *ngIf="persona">
+  <mat-card class="card-container">
+    <mat-card-header class="custom-card-header">
+      <mat-card-title class="title">Gestión de Movimientos y Cuentas</mat-card-title>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="toggleFormularioMovimiento()"
+      >
+        {{ mostrarFormularioMovimiento ? 'Cerrar Movimiento' : 'Crear Movimiento' }}
+      </button>
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="toggleFormularioCuenta()"
+      >
+        {{ mostrarFormularioCuenta ? 'Cerrar Cuenta' : 'Crear Cuenta' }}
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+
+      <app-crear-movimiento
+      *ngIf="mostrarFormularioMovimiento"
+      [cuentasDisponibles]="cuentasDisponibles"
+      [meses]="meses"
+      [tipoCuentaSeleccionada]="tipoCuentaSeleccionada"
+      (movimientoCreado)="onMovimientoCreado($event)"
+      (cerrarFormulario)="toggleFormularioMovimiento()"
+    ></app-crear-movimiento>
+    
+
+      <app-crear-cuenta-escalafon
+      *ngIf="mostrarFormularioCuenta"
+      [idPersona]="persona?.ID_PERSONA"
+      (cuentaCreada)="onCuentaCreada($event)"
+    ></app-crear-cuenta-escalafon>
+    
+      
+      <app-custom-table
+      [columns]="columns"
+      [data]="movimientosData"
+      [isLoading]="isLoading"
+      [titulo]="'Listado de Movimientos'"
+      [subtitulo]="'Detalles de los movimientos registrados'"
+    ></app-custom-table>
+  
+
+      <div class="text-end mt-3" *ngIf="movimientosData.length > 0">
+        <button
+          mat-raised-button
+          color="accent"
+          (click)="descargarMovimientosPdf()"
+        >
+          Descargar PDF
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

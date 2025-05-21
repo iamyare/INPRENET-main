@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, EventEmitter, Output } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -18,6 +18,7 @@ import { PermisosService } from 'src/app/services/permisos.service';
 export class EditDatosBancariosComponent implements OnInit, OnChanges {
   public myFormFields: FieldConfig[] = [];
   @Input() Afiliado: any;
+  @Output() bancoAgregado = new EventEmitter<void>();
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   private ejecF: any;
@@ -31,14 +32,15 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregar = this.permisosService.tieneAccesoAChildAfiliacion("Cambiar Cuenta Bancaria");
-    this.mostrarBotonActivar = this.permisosService.tieneAccesoAChildAfiliacion("Cambiar Cuenta Bancaria");
-    this.mostrarBotonDesactivar = this.permisosService.tieneAccesoAChildAfiliacion("Cambiar Cuenta Bancaria");
+    this.mostrarBotonAgregar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos', 'administrar']);
+    this.mostrarBotonActivar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos', 'administrar']);
+    this.mostrarBotonDesactivar = this.permisosService.userHasPermission('AFILIACIONES', 'afiliacion/buscar-persona', ['editar', 'editarDos', 'administrar']);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -105,6 +107,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
           fecha_activacion: item.fecha_activacion ? this.formatDate(item.fecha_activacion) : 'N/A',
           fecha_inactivacion: item.fecha_inactivacion ? this.formatDate(item.fecha_inactivacion) : 'N/A'
         }));
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos bancarios');
       }
@@ -142,6 +145,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
             if (index > -1) {
               this.filas[index].estado = 'INACTIVO';
             }
+            this.bancoAgregado.emit();
           },
           error: (error) => {
             this.toastr.error('Ocurrió un error al desactivar la Cuenta Bancaria.');
@@ -162,9 +166,9 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
           idPersona: this.Afiliado.id_persona
         }
       });
-
       dialogRef.afterClosed().subscribe((result: any) => {
-        this.ngOnInit();
+        this.getFilas().then(() => this.cargar());
+        this.bancoAgregado.emit();
       });
     }
   }
@@ -213,6 +217,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
             if (index > -1) {
               this.filas[index].estado = 'ACTIVO';
             }
+            this.bancoAgregado.emit();
           },
           error: (error) => {
             console.error('Error al activar la Cuenta Bancaria:', error);
@@ -240,4 +245,6 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
       second: '2-digit'
     });
   }
+
+  
 }

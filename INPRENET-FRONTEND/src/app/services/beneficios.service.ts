@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -13,6 +13,35 @@ export class BeneficiosService {
   constructor(private toastr: ToastrService, private http: HttpClient) {
   }
 
+  verificarPagosBeneficiarios(n_identificacion: string): Observable<boolean> {
+    return this.http.get<boolean>(`${environment.API_URL}/api/beneficio-planilla/verificar-pagos`, {
+      params: new HttpParams().set('n_identificacion', n_identificacion),
+    })
+    .pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al verificar pagos de beneficiarios', error);
+        this.toastr.error('Error al verificar pagos de beneficiarios', 'Error');
+        return throwError(() => new Error('Error al verificar pagos de beneficiarios'));
+      })
+    );
+  }
+
+  obtenerBeneficiosPorPersona(dni: string, incluirCostoVida: boolean = false): Observable<any> {
+    return this.http.get<any>(`${environment.API_URL}/api/beneficio-planilla/beneficios`, {
+      params: new HttpParams()
+        .set('dni', dni)
+        .set('incluirCostoVida', incluirCostoVida.toString()),
+    })
+    .pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al obtener beneficios:', error);
+        this.toastr.error('No se pudieron obtener los beneficios', 'Error');
+        return throwError(() => new Error('Error al obtener beneficios'));
+      })
+    );
+  }
+  
+  
   verificarSiEsAfiliado(dni: string): Observable<boolean> {
     return this.http.get<boolean>(`${environment.API_URL}/api/beneficio-planilla/verificar-afiliado/${dni}`)
       .pipe(
@@ -192,10 +221,12 @@ export class BeneficiosService {
   }
 
   asigBeneficioAfil(datos: TipoBeneficio, itemSeleccionado: any, idAfiliadoPadre?: string): Observable<any> {
+    const accessToken = sessionStorage.getItem('token');
+
     if (idAfiliadoPadre) {
-      var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${idAfiliadoPadre}`;
+      var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${idAfiliadoPadre}/${accessToken}`;
     } else {
-      var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle`;
+      var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${accessToken}`;
     }
 
     return this.http.post<TipoBeneficio>(
@@ -224,8 +255,10 @@ export class BeneficiosService {
   }
 
   eliminarBenPlan(data: any): Observable<TipoBeneficio | void> {
+    const accessToken = sessionStorage.getItem('token');
+
     return this.http.patch<any>(
-      `${environment.API_URL}/api/beneficio-planilla/eliminar-ben-plan`,
+      `${environment.API_URL}/api/beneficio-planilla/eliminar-ben-plan/${accessToken}`,
       { data }
     ).pipe(
       map((res: any) => {
@@ -235,7 +268,9 @@ export class BeneficiosService {
   }
 
   updateBeneficioPersona(data: any): Observable<any> {
-    return this.http.put(`${environment.API_URL}/api/beneficio-planilla/updateBeneficioPersona`, { data: data });
+    const accessToken = sessionStorage.getItem('token');
+
+    return this.http.put(`${environment.API_URL}/api/beneficio-planilla/updateBeneficioPersona/${accessToken}`, { data: data });
   }
 
   private handleError(error: HttpErrorResponse) {

@@ -3,7 +3,7 @@ import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { EntityManager } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -12,11 +12,26 @@ import { GeneratePlanillaDto } from './dto/generate-planilla.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as path from 'path';
 import * as fs from 'fs';
+import { parse } from 'date-fns';
 
 @ApiTags('planilla')
 @Controller('planilla')
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
+
+  @Get('exportar-detalles-completos-excel/:idPlanilla/:estado')
+  async exportarExcelDetalles(
+    @Param('idPlanilla') idPlanilla: number,
+    @Param('estado') estado: number,
+    @Res() res,
+  ): Promise<void> {
+    if (isNaN(idPlanilla) || isNaN(estado)) {
+      throw new BadRequestException('Los parámetros idPlanilla y estado deben ser números válidos');
+    }
+
+    await this.planillaService.generarExcelDetallesCompletos(idPlanilla, estado, res);
+  }
+
 
   @Post('pago-beneficio')
   @HttpCode(HttpStatus.OK)
@@ -28,6 +43,49 @@ export class PlanillaController {
   async realizarPagoEstatico() {
     await this.planillaService.realizarPagoBeneficiosEstatico();
     return { message: 'Pago realizado y correo de confirmación enviado' };
+  }
+
+  @Get('obtenerBajasPorPeriodoExcel')
+  async obtenerBajasPorPeriodoExcel(
+    @Res() res,
+    @Query('mes_inicio') mes_inicio: string,
+    @Query('anio_inicio') anio_inicio: string,
+    @Query('mes_finalizacion') mes_finalizacion: string,
+    @Query('anio_finalizacion') anio_finalizacion: string
+  ) {
+    await this.planillaService.obtenerBajasPorPeriodoExcel(res, {
+      mes_inicio,
+      anio_inicio,
+      mes_finalizacion,
+      anio_finalizacion,
+    });
+  }
+
+  @Get('obtenerAltaPorPeriodoExcel')
+  async obtenerAltaPorPeriodoExcel(
+    @Res() res,
+    @Query('mes_inicio') mes_inicio: string,
+    @Query('anio_inicio') anio_inicio: string,
+    @Query('mes_finalizacion') mes_finalizacion: string,
+    @Query('anio_finalizacion') anio_finalizacion: string
+  ) {
+    await this.planillaService.obtenerAltaPorPeriodoExcel(res, {
+      mes_inicio,
+      anio_inicio,
+      mes_finalizacion,
+      anio_finalizacion,
+    });
+  }
+
+  @Get('deduccionesExcel')
+  async deduccionesExcel(
+    @Res() res,
+    @Query('mes_inicio') mes_inicio: string,
+    @Query('anio_inicio') anio_inicio: string,
+    @Query('mes_finalizacion') mes_finalizacion: string,
+    @Query('anio_finalizacion') anio_finalizacion: string
+  ) {
+    await this.planillaService.deduccMontosAplVsMontoTotalByInstitucion(res);
   }
 
   @Get('pagos-persona/:dni')
@@ -73,6 +131,7 @@ export class PlanillaController {
 
   @Get('generar-reporte-detalle-pago')
   async generarReporte(
+    @Query('idsPlanilla') idsPlanilla: number[],
     @Query('periodoInicio') periodoInicio: string,
     @Query('periodoFinalizacion') periodoFinalizacion: string,
     @Query('idTiposPlanilla') idTiposPlanilla: string,
@@ -80,6 +139,7 @@ export class PlanillaController {
   ) {
     const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
     const data = await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPrueba(
+      idsPlanilla,
       periodoInicio,
       periodoFinalizacion,
       idTiposPlanillaArray
@@ -87,8 +147,128 @@ export class PlanillaController {
     await this.planillaService.generarReporteDetallePago(data, res);
   }
 
+
+  @Get('obtenerInformacionPlanillasbyFechas')
+  async obtenerInformacionPlanillasbyFechas(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string | string[],
+    @Res() res
+  ) {
+    try {
+      // Convertir fechas de DD/MM/YYYY a Date
+      const fechaInicio = parse(periodoInicio, 'dd/MM/yyyy', new Date());
+      const fechaFinalizacion = parse(periodoFinalizacion, 'dd/MM/yyyy', new Date());
+
+      if (isNaN(fechaInicio.getTime()) || isNaN(fechaFinalizacion.getTime())) {
+        return res.status(400).json({ message: 'Formato de fecha inválido' });
+      }
+
+      // Manejo de idTiposPlanilla si viene como string o string[]
+      let idTiposPlanillaArray: number[] = [];
+      if (typeof idTiposPlanilla === 'string') {
+        idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+      } else if (Array.isArray(idTiposPlanilla)) {
+        idTiposPlanillaArray = idTiposPlanilla.map(Number);
+      }
+
+      const data = await this.planillaService.obtenerInformacionPlanillasbyFechas(
+        fechaInicio,
+        fechaFinalizacion,
+        idTiposPlanillaArray
+      );
+
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ message: 'Error procesando la solicitud', error: error.message });
+    }
+  }
+
+
+  @Get('generar-reporte-detalle-pago-sin-cuenta')
+  async generarReporteSinCuenta(
+    @Query('idsPlanilla') idsPlanilla: number[],
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+    @Res() res,
+  ) {
+    const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+    const data = await this.planillaService.generarReporteSinCuenta(
+      idsPlanilla,
+      periodoInicio,
+      periodoFinalizacion,
+      idTiposPlanillaArray
+    );
+    await this.planillaService.generarReporteDetallePago(data, res);
+  }
+
+  @Get('generar-reporte-detalle-pago-preliminar')
+  async generarReportePreliminar(
+    @Query('idPlanilla') idPlanilla: number,
+    @Res() res,
+  ) {
+    const data = await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPreliminar(idPlanilla);
+    await this.planillaService.generarReporteDetallePago(data, res);
+  }
+
+  @Get('generar-reporte-completo-pago-cerrada')
+  async descargarReporteCompleto(
+    @Query('idsPlanilla') idsPlanilla: number[],
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: number[],
+    @Query('estadoBen') estadoBen: string,
+    @Query('estadoDed') estadoDed: string,
+    @Res() res,
+  ) {
+    try {
+
+      // Llamar al servicio para obtener los datos
+      const data = await this.planillaService.descargarReporteCompleto(
+        idsPlanilla,
+        idTiposPlanilla,
+        periodoInicio,
+        periodoFinalizacion,
+        estadoBen,
+        estadoDed
+      );
+
+      // Generar y enviar el reporte
+      await this.planillaService.generarReporteTotalDetallePago(data, res);
+    } catch (error) {
+      console.error('Error al generar el reporte:', error);
+      throw new InternalServerErrorException('Error al generar el reporte de pago');
+    }
+  }
+
+  @Get('generar-reporte-completo-pago-preliminar')
+  async exportarExcelDetalleCompletoPorPeriodo(
+    @Query('idPlanilla') idPlanilla: number,
+    @Query('idTipoPlanilla') idTipoPlanilla: number,
+    @Query('estadoBen') estadoBen: string,
+    @Query('estadoDed') estadoDed: string,
+    @Res() res,
+  ) {
+    const data = await this.planillaService.exportarExcelDetalleCompletoPorPeriodo(idPlanilla, idTipoPlanilla, estadoBen, estadoDed);
+    await this.planillaService.generarReporteTotalDetallePago(data, res);
+  }
+
+  @Get('generar-reporte-beneficio-afiliado')
+  async exportarExcelBeneficioAfiliado(
+    @Query('idPlanilla') idPlanilla: number,
+    @Query('idTipoPlanilla') idTipoPlanilla: number,
+    @Query('estadoBen') estadoBen: string,
+    @Query('estadoDed') estadoDed: string,
+    @Res() res,
+  ) {
+    const data = await this.planillaService.exportarExcelBeneficioAfiliado(idPlanilla, idTipoPlanilla, estadoBen, estadoDed);
+    await this.planillaService.generarReporteBeneficioAfiliado(data, res);
+  }
+
   @Get('detalle-pago-beneficio')
   async obtenerDetallePagoBeneficioPorPlanilla(
+    idsPlanillaArray: number[],
     @Query('periodoInicio') periodoInicio: string,
     @Query('periodoFinalizacion') periodoFinalizacion: string,
     @Query('idTiposPlanilla') idTiposPlanilla: string,
@@ -100,9 +280,11 @@ export class PlanillaController {
 
     // Convertir la cadena `idTiposPlanilla` a un array de números
     const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+    const idsPlanillaArrayNumeros = (Array.isArray(idsPlanillaArray) ? idsPlanillaArray : [idsPlanillaArray]).map((id: any) => parseInt(id, 10));
 
     try {
       return await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPrueba(
+        idsPlanillaArrayNumeros,
         periodoInicio,
         periodoFinalizacion,
         idTiposPlanillaArray,
@@ -141,9 +323,10 @@ export class PlanillaController {
 
   @Patch('actualizar-planilla-a-cerrada')
   async updatePlanillaACerrada(
-    @Query('codigo_planilla') codigo_planilla: string
+    @Query('codigo_planilla') codigo_planilla: string,
+    @Body() benefPrelim: any[]
   ): Promise<void> {
-    return this.planillaService.updatePlanillaACerrada(codigo_planilla);
+    return this.planillaService.updatePlanillaACerrada(codigo_planilla, benefPrelim);
   }
 
   @Get('desglose-persona-planilla')
@@ -162,30 +345,93 @@ export class PlanillaController {
 
   @Get('montos-banco-periodo')
   async getMontosPorBancoYPeriodo(
+    @Query('idsPlanilla') idsPlanilla: number[],
     @Query('periodoInicio') periodoInicio: string,
     @Query('periodoFinalizacion') periodoFinalizacion: string,
     @Query('idTiposPlanilla') idTiposPlanilla: string,
   ): Promise<any> {
     const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
     return this.planillaService.getTotalPorBancoYPeriodo(
+      idsPlanilla,
       periodoInicio,
       periodoFinalizacion,
       tiposPlanillaArray,
     );
   }
 
+  @Get('cerradas')
+  //@Roles({ rol: 'ADMINISTRADOR DE PLANILLA', modulo: 'PLANILLA' })
+  async getCerradasPlanillas(@Query('clasePlanilla') clasePlanilla?: string) {
+    return this.planillaService.getCerradasPlanillas(clasePlanilla);
+  }
+
+  @Get('obtener-totales-deduccion-por-periodo')
+  async obtenerTotalesDeduccionesPorPeriodo(
+    @Query('idsPlanilla') idsPlanilla: number[],
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string
+  ) {
+    if (!periodoInicio || !periodoFinalizacion || !idTiposPlanilla) {
+      throw new BadRequestException(
+        'Debe proporcionar los parámetros periodoInicio, periodoFinalizacion e idTiposPlanilla.'
+      );
+    }
+    try {
+      const idTiposPlanillaArray = idTiposPlanilla.split(',').map((id) => parseInt(id.trim(), 10));
+      const deduccionesTotales = await this.planillaService.getDeduccionesTotalesPorPeriodo(
+        idsPlanilla,
+        periodoInicio,
+        periodoFinalizacion,
+        idTiposPlanillaArray
+      );
+      return {
+        message: 'Totales de deducciones obtenidos con éxito',
+        data: deduccionesTotales,
+      };
+    } catch (error) {
+      console.error('Error al obtener los totales de deducciones por periodo:', error);
+      throw new BadRequestException('Error al obtener los totales de deducciones por periodo');
+    }
+  }
+
   @Get('beneficios-deducciones-periodo')
   async getBeneficiosDeducciones(
+    @Query('idsPlanilla') idsPlanilla: number[],
     @Query('periodoInicio') periodoInicio: string,
     @Query('periodoFinalizacion') periodoFinalizacion: string,
     @Query('idTiposPlanilla') idTiposPlanilla: string,
   ): Promise<any> {
     const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
     return this.planillaService.getTotalPorBeneficiosYDeduccionesPorPeriodo(
+      idsPlanilla,
       periodoInicio,
       periodoFinalizacion,
       tiposPlanillaArray,
     );
+  }
+
+
+  @Get('detalle-beneficios-deducciones-periodo')
+  async getDetalleBeneficiosDeducciones(
+    @Query('idsPlanilla') idsPlanilla: number[],
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+  ): Promise<any> {
+    try {
+      const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+
+      return await this.planillaService.getDetallePorBeneficiosYDeduccionesPorPeriodo(
+        idsPlanilla,
+        periodoInicio,
+        periodoFinalizacion,
+        tiposPlanillaArray,
+      );
+    } catch (error) {
+      console.error('Error al obtener el detalle de beneficios y deducciones:', error);
+      throw new InternalServerErrorException('Error al obtener el detalle de beneficios y deducciones');
+    }
   }
 
   @Get('totales-beneficios-deducciones/:idPlanilla')
@@ -206,8 +452,6 @@ export class PlanillaController {
     @Query('fechaInicio') fechaInicio: string,
     @Query('fechaFinalizacion') fechaFinalizacion: string,
   ): Promise<any> {
-    console.log(fechaInicio);  // La fecha se recibirá como parte de los query params
-
     return this.planillaService.getcerradas_fecha(fechaInicio, fechaFinalizacion);
   }
 
@@ -269,6 +513,33 @@ export class PlanillaController {
     }
   }
 
+  @Get('generar-voucher-by-mes')
+  async generarVoucherByMes(
+    @Query('dni') dni: string,
+    @Query('mes') mes: number,
+    @Query('anio') anio: number
+  ) {
+
+    // Verifica si los parámetros de consulta están presentes
+    if (!mes) {
+      throw new BadRequestException('El mes es obligatorio.');
+    }
+    if (!anio) {
+      throw new BadRequestException('El año es obligatorio.');
+    }
+    if (!dni) {
+      throw new BadRequestException('El DNI del afiliado es obligatorio.');
+    }
+
+    try {
+      const resultados = await this.planillaService.generarVoucherByMes(dni, mes, anio);
+      return resultados;
+    } catch (error) {
+      // Aquí deberías manejar diferentes tipos de errores de acuerdo a lo que tu lógica de negocio requiera
+      throw new InternalServerErrorException('Ocurrió un error al generar el voucher.');
+    }
+  }
+
 
 
   @Get('Definitiva/:term')
@@ -291,15 +562,36 @@ export class PlanillaController {
     @Query('page') page?: number,
     @Query('limit') limit?: number
   ) {
-    if (!term) {
-      throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
+    if (!term || term.trim() === '') {
+      console.error('Error: El parámetro term está vacío.');
+      throw new BadRequestException('Debe proporcionar un código de planilla válido');
     }
     try {
       return await this.planillaService.ObtenerPlanDefinPersonas(term, page, limit);
     } catch (error) {
+      console.error('Error en ObtenerPlanDefinPersonas:', error);
       throw new InternalServerErrorException('Error al obtener planilla preliminar');
     }
   }
+
+  @Get('Definitiva/personas/contabilidad/:term')
+  async ObtenerPlanDefinPersonasCONTA(
+    @Param('term') term: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number
+  ) {
+    if (!term || term.trim() === '') {
+      console.error('Error: El parámetro term está vacío.');
+      throw new BadRequestException('Debe proporcionar un código de planilla válido');
+    }
+    try {
+      return await this.planillaService.ObtenerPlanDefinPersonasCONTA(term, page, limit);
+    } catch (error) {
+      console.error('Error en ObtenerPlanDefinPersonas:', error);
+      throw new InternalServerErrorException('Error al obtener planilla preliminar');
+    }
+  }
+
 
   @Get('Definitiva/personas/ord/:perI/:perF')
   async ObtenerPlanDefinPersonasOrd(
@@ -396,20 +688,55 @@ export class PlanillaController {
     return this.planillaService.remove(+id);
   }
 
-  @Post('generar-complementaria')
-  async generarComplementaria(@Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
-    await this.planillaService.generarPlanillaComplementaria(generatePlanillaDto.tipos_persona);
+  @Post('generar-complementaria/:token')
+  async generarComplementaria(@Param('token') token: string, @Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
+    await this.planillaService.generarPlanillaComplementaria(token, generatePlanillaDto.tipos_persona, generatePlanillaDto.v_id_planilla, generatePlanillaDto.secuencia);
   }
 
-  @Post('generar-ordinaria')
-  async generarOrdinaria(@Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
-    await this.planillaService.generarPlanillaOrdinaria(generatePlanillaDto.tipos_persona);
+  @Post('generar-60Rentas/:token')
+  async generar_60Rentas(@Param('token') token: string, @Body() data: any): Promise<void> {
+    await this.planillaService.generar_60Rentas(token, data.tipos_persona, data.id_planilla);
+  }
+
+  @Post('generar-ordinaria/:token')
+  async generarOrdinaria(@Param('token') token: string, @Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
+    await this.planillaService.generarPlanillaOrdinaria(token, generatePlanillaDto.tipos_persona);
+  }
+
+  @Post('calculo-planilla/:id_planilla')
+  async calculoPrioridadMontoAplicado(@Param('id_planilla') id_planilla: number): Promise<void> {
+    try {
+      return await this.planillaService.calculoPrioridadMontoAplicado(id_planilla);
+
+    } catch (error) {
+      console.error('Error en calcularPrioridad:', error);
+      //return res.status(500).json({ message: 'Error al quitar valores negativos', error: error.message });
+    }
+
+  }
+
+  @Post('eliminarPlanillaPrelByIdPlanilla')
+  async eliminarPlanillaPrelByIdPlanilla(@Body('id_planilla') id_planilla: any): Promise<void> {
+    try {
+      return await this.planillaService.eliminarPlanillaPrelByIdPlanilla(id_planilla);
+
+    } catch (error) {
+      console.error(`Error al eliminar la planilla preliminar: ${id_planilla}`, error);
+      //return res.status(500).json({ message: 'Error al procesar la solicitud', error: error.message });
+    }
+
   }
 
   @Post('get-preliminares')
   async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<any[]> {
-    return this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.codigo_planilla);
+    try {
+      return await this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.codigo_planilla);
+    } catch (error) {
+      throw new BadRequestException('Error en la solicitud: ' + error.message);
+    }
   }
+
+
 
 
 }

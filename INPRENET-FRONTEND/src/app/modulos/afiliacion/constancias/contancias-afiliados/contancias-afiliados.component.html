@@ -1,0 +1,16 @@
+<div class="container mt-4">
+  <!-- Componente de búsqueda -->
+  <app-perfil-header
+    (personaEncontrada)="onPersonaEncontrada($event)"
+    (resetBusqueda)="onResetBusqueda()"
+    [personaInput]="persona"
+  ></app-perfil-header>
+
+  <!-- Mostrar constancias si hay una persona -->
+  <div *ngIf="persona" class="constancias-container mt-4">
+    <app-dynamic-constancias
+      [buttons]="filteredConstanciaButtons"
+      (buttonClick)="onConstanciaClick($event)"
+    ></app-dynamic-constancias>
+  </div>
+</div>

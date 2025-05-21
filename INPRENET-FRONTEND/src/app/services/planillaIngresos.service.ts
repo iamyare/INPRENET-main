@@ -18,7 +18,7 @@ export class PlanillaIngresosService {
   actualizarDetallesPlanillaPrivada(dni: string, idDetallePlanIngreso: number, sueldo: number, prestamos?: number): Observable<{ message: string }> {
     const url = `${environment.API_URL}/api/detalle-plan-ingr/actualizar-detalles-planilla-privada`;
     return this.http.put<{ message: string }>(url, { dni, idDetallePlanIngreso, sueldo, prestamos });
-}
+  }
 
   actualizarSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/actualizar-salario`;

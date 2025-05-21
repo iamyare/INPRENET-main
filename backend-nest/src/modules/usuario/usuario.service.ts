@@ -6,16 +6,13 @@ import { LessThan, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
-import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
-import { Net_Seguridad } from './entities/net_seguridad.entity';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
 import { net_rol_modulo } from './entities/net_rol_modulo.entity';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { net_usuario_modulo } from './entities/net_usuario_modulo.entity';
 import { net_modulo } from './entities/net_modulo.entity';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { Cron } from '@nestjs/schedule';
 import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
@@ -27,15 +24,10 @@ export class UsuarioService {
   private readonly logger = new Logger(UsuarioService.name)
 
   constructor(
-
-    @InjectRepository(NET_USUARIO_PRIVADA)
-    private readonly usuarioPrivadaRepository: Repository<NET_USUARIO_PRIVADA>,
     @InjectRepository(Net_Empleado)
     private readonly empleadoRepository: Repository<Net_Empleado>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
-    @InjectRepository(Net_Seguridad)
-    private readonly seguridadRepository: Repository<Net_Seguridad>,
     @InjectRepository(Net_Empleado_Centro_Trabajo)
     private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
     @InjectRepository(Net_Usuario_Empresa)
@@ -56,10 +48,22 @@ export class UsuarioService {
           correo_1: correo,
         },
       },
-      relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.centroTrabajo', 'usuarioModulos', 'usuarioModulos.rolModulo', 'usuarioModulos.rolModulo.modulo'],
+      relations: [
+        'empleadoCentroTrabajo',
+        'empleadoCentroTrabajo.empleado',
+        'empleadoCentroTrabajo.centroTrabajo',
+        'usuarioModulos',
+        'usuarioModulos.rolModulo',
+        'usuarioModulos.rolModulo.modulo',
+      ],
     });
+  
     if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');
+    }
+  
+    if (usuario.usuarioModulos.length === 0) {
+      throw new UnauthorizedException('No tiene roles asignados a ese usuario.');
     }
   
     const isPasswordValid = await bcrypt.compare(contrasena, usuario.contrasena);
@@ -67,18 +71,26 @@ export class UsuarioService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
   
-    const rolesModulos = usuario.usuarioModulos.map(um => ({
+    const rolesModulos = usuario.usuarioModulos.map((um) => ({
       rol: um.rolModulo.nombre,
-      modulo: um.rolModulo.modulo.nombre
+      modulo: um.rolModulo.modulo.nombre,
     }));
+  
+    const nombreEmpleado = usuario.empleadoCentroTrabajo.empleado?.nombreEmpleado || 'No disponible';
   
     const payload = {
       correo,
       sub: usuario.id_usuario_empresa,
       rolesModulos,
       idCentroTrabajo: usuario.empleadoCentroTrabajo.centroTrabajo.id_centro_trabajo,
+      departamento: usuario.empleadoCentroTrabajo.departamento,
+      numero_empleado: usuario.empleadoCentroTrabajo.numeroEmpleado,
+      municipio: usuario.empleadoCentroTrabajo.municipio,
+      nombrePuesto: usuario.empleadoCentroTrabajo.nombrePuesto,
+      nombreEmpleado,
     };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+  
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '100d' });
   
     return { accessToken };
   }
@@ -86,7 +98,7 @@ export class UsuarioService {
   async logout(req, res) {
     return res.json({ message: 'Sesión cerrada' });
   }
-  
+
   async obtenerPerfilPorCorreo(correo: string) {
     const usuario = await this.usuarioEmpresaRepository.findOne({
       where: { empleadoCentroTrabajo: { correo_1: correo } },
@@ -251,7 +263,7 @@ export class UsuarioService {
 
     // Enviar correo electrónico de verificación
     const verificationUrl = `${process.env.HOST_FRONTEND}/register?token=${token}`;
-    const imageUrl="https://inprema.gob.hn/servicios-electronicos/"
+    const imageUrl = "https://inprema.gob.hn/servicios-electronicos/"
     const htmlContent = `
    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
      <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
@@ -272,7 +284,9 @@ export class UsuarioService {
   }
 
   async preRegistro(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
-    const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole } = createPreRegistroDto;
+    const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole, municipio, departamento } = createPreRegistroDto;
+
+    // Verificar si el usuario ya existe
     const usuarioExistente = await this.usuarioEmpresaRepository.findOne({
       relations: ['empleadoCentroTrabajo'],
       where: {
@@ -281,46 +295,66 @@ export class UsuarioService {
         },
       },
     });
+
     if (usuarioExistente) {
       throw new BadRequestException('El correo ya está registrado');
     }
+
+    // Buscar el rol asociado
     const rol = await this.rolModuloRepository.findOne({
       where: { id_rol_modulo: idRole },
       relations: ['modulo', 'modulo.centroTrabajo'],
     });
+
     if (!rol) {
       throw new BadRequestException('El rol especificado no existe');
     }
-    const nuevoEmpleado = this.empleadoRepository.create({
-      nombreEmpleado,
-    });
+
+    // Crear y guardar el nuevo empleado
+    const nuevoEmpleado = this.empleadoRepository.create({ nombreEmpleado });
     const empleado = await this.empleadoRepository.save(nuevoEmpleado);
+
+    // Crear y guardar la relación empleado-centro de trabajo con municipio y departamento
     const nuevoEmpleadoCentroTrabajo = this.empleadoCentroTrabajoRepository.create({
       empleado,
       correo_1: correo,
       numeroEmpleado,
       nombrePuesto,
       centroTrabajo: rol.modulo.centroTrabajo,
+      municipio,   // Agregado
+      departamento // Agregado
     });
+
     const empleadoCentroTrabajo = await this.empleadoCentroTrabajoRepository.save(nuevoEmpleadoCentroTrabajo);
+
+    // Crear y guardar el usuario
     const nuevoUsuario = this.usuarioEmpresaRepository.create({
       estado: 'PENDIENTE',
       contrasena: await bcrypt.hash('temporal', 10),
-      empleadoCentroTrabajo: empleadoCentroTrabajo,
+      empleadoCentroTrabajo,
     });
+
     const usuarioGuardado = await this.usuarioEmpresaRepository.save(nuevoUsuario);
+
+    // Crear y guardar la relación usuario-módulo
     const usuarioModulo = this.usuarioModuloRepository.create({
       usuarioEmpresa: usuarioGuardado,
       rolModulo: rol,
     });
+
     await this.usuarioModuloRepository.save(usuarioModulo);
+
+    // Generar token y enviar correo
     const token = this.jwtService.sign({ correo });
+
     const logoPath = path.join(process.cwd(), 'assets', 'images', 'LOGO-INPRENET.png');
     if (!fs.existsSync(logoPath)) {
       this.logger.error('El archivo LOGO-INPRENET.png no se encontró en la ruta: ' + logoPath);
       throw new InternalServerErrorException('Error: El archivo LOGO-INPRENET.png no se encuentra en la ruta especificada.');
     }
+
     const verificationUrl = `${process.env.HOST_FRONTEND}/register?token=${token}`;
+
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2 style="color: #13776B;">¡Bienvenido a 
@@ -340,7 +374,7 @@ export class UsuarioService {
           <p>El equipo de INPRENET</p>
         </div>
       </div>`;
-    
+
     await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent, [
       {
         filename: 'LOGO-INPRENET.png',
@@ -348,21 +382,149 @@ export class UsuarioService {
         cid: 'logoInprema'
       }
     ]);
+}
 
+async preRegistroMasivo(createPreRegistroDtos: CreatePreRegistroDto[]): Promise<void> {
+  const usuariosAGuardar = [];
+  const usuariosModuloAGuardar = [];
+  const correosRegistrados: string[] = [];
 
+  for (const createPreRegistroDto of createPreRegistroDtos) {
+      const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole, municipio, departamento } = createPreRegistroDto;
 
+      // Verificar si el usuario ya existe
+      const usuarioExistente = await this.usuarioEmpresaRepository.findOne({
+          relations: ['empleadoCentroTrabajo'],
+          where: {
+              empleadoCentroTrabajo: {
+                  correo_1: correo,
+              },
+          },
+      });
+
+      if (usuarioExistente) {
+          correosRegistrados.push(correo);
+          continue; // Saltar este registro
+      }
+
+      // Buscar el rol asociado
+      const rol = await this.rolModuloRepository.findOne({
+          where: { id_rol_modulo: idRole },
+          relations: ['modulo', 'modulo.centroTrabajo'],
+      });
+
+      if (!rol) {
+          throw new BadRequestException(`El rol especificado (${idRole}) no existe`);
+      }
+
+      // Crear y guardar el nuevo empleado
+      const nuevoEmpleado = this.empleadoRepository.create({ nombreEmpleado });
+      const empleado = await this.empleadoRepository.save(nuevoEmpleado);
+
+      // Crear y guardar la relación empleado-centro de trabajo con municipio y departamento
+      const nuevoEmpleadoCentroTrabajo = this.empleadoCentroTrabajoRepository.create({
+          empleado,
+          correo_1: correo,
+          numeroEmpleado,
+          nombrePuesto,
+          centroTrabajo: rol.modulo.centroTrabajo,
+          municipio,
+          departamento,
+      });
+
+      const empleadoCentroTrabajo = await this.empleadoCentroTrabajoRepository.save(nuevoEmpleadoCentroTrabajo);
+
+      // Crear usuario pero no guardarlo aún
+      const nuevoUsuario = this.usuarioEmpresaRepository.create({
+          estado: 'PENDIENTE',
+          contrasena: await bcrypt.hash('temporal', 10),
+          empleadoCentroTrabajo,
+      });
+
+      usuariosAGuardar.push(nuevoUsuario);
+
+      // Crear la relación usuario-módulo
+      const usuarioModulo = this.usuarioModuloRepository.create({
+          usuarioEmpresa: nuevoUsuario,
+          rolModulo: rol,
+      });
+
+      usuariosModuloAGuardar.push(usuarioModulo);
   }
 
-  async completarRegistro(token: string, completeRegistrationDto: CompleteRegistrationDto, archivoIdentificacionBuffer: Buffer | null, fotoEmpleadoBuffer: Buffer | null): Promise<void> {
-    const { correo, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3, telefonoEmpleado, telefonoEmpleado2, numero_identificacion } = completeRegistrationDto;
+  // Guardar todos los usuarios en una sola transacción para mejorar rendimiento
+  const usuariosGuardados = await this.usuarioEmpresaRepository.save(usuariosAGuardar);
+
+  // Asociar cada usuario guardado con su respectivo módulo
+  for (let i = 0; i < usuariosGuardados.length; i++) {
+      usuariosModuloAGuardar[i].usuarioEmpresa = usuariosGuardados[i];
+  }
+
+  await this.usuarioModuloRepository.save(usuariosModuloAGuardar);
+
+  // Enviar correos solo a los usuarios nuevos
+  for (const usuario of usuariosGuardados) {
+      const token = this.jwtService.sign({ correo: usuario.empleadoCentroTrabajo.correo_1 });
+      const verificationUrl = `${process.env.HOST_FRONTEND}/register?token=${token}`;
+
+      const htmlContent = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+          <h2 style="color: #13776B;">¡Bienvenido a 
+          <span style="color: #14776B;">INPRE</span><span style="color: #33E4DC;">NET</span>!
+          </h2>
+          <p>Hola ${usuario.empleadoCentroTrabajo.empleado.nombreEmpleado},</p>
+          <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
+          <div style="text-align: center;">
+          <img src="cid:logoInprema" alt="Logo INPREMA" style="width: 250px; height: auto; margin-bottom: 10px;">
+          <p>Para empezar, necesitamos que completes tu registro. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
+          <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
+          <div style="text-align: center; margin: 20px 0;">
+              <a href="${verificationUrl}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Completar Registro</a>
+          </div>
+          <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+          <p>¡Gracias por unirte a nosotros!</p>
+          <p>El equipo de INPRENET</p>
+          </div>
+      </div>`;
+
+      await this.mailService.sendMail(usuario.empleadoCentroTrabajo.correo_1, 'Completa tu registro', '', htmlContent, [
+          {
+              filename: 'LOGO-INPRENET.png',
+              path: path.join(process.cwd(), 'assets', 'images', 'LOGO-INPRENET.png'),
+              cid: 'logoInprema'
+          }
+      ]);
+  }
+
+  if (correosRegistrados.length > 0) {
+      throw new BadRequestException(`Los siguientes correos ya estaban registrados: ${correosRegistrados.join(', ')}`);
+  }
+}
+
+
+
+  async completarRegistro(
+    token: string,
+    completeRegistrationDto: CompleteRegistrationDto,
+    archivoIdentificacionBuffer: Buffer | null,
+    fotoEmpleadoBuffer: Buffer | null,
+  ): Promise<void> {
+    const {
+      correo,
+      contrasena,
+      telefonoEmpleado,
+      telefonoEmpleado2,
+      numero_identificacion,
+    } = completeRegistrationDto;
   
     try {
-      const decoded = this.jwtService.verify(token);
+      // Verificar el token ignorando su expiración
+      const decoded = this.jwtService.verify(token, { ignoreExpiration: true });
       if (decoded.correo !== correo) {
         throw new BadRequestException('El correo no coincide');
       }
     } catch (error) {
-      throw new BadRequestException('Token inválido o expirado');
+      throw new BadRequestException('Token inválido');
     }
   
     const usuario = await this.usuarioEmpresaRepository.findOne({
@@ -396,28 +558,36 @@ export class UsuarioService {
   
     await this.empleadoRepository.save(usuario.empleadoCentroTrabajo.empleado);
     await this.usuarioEmpresaRepository.save(usuario);
-  
-    const seguridad1 = this.seguridadRepository.create({
-      pregunta: pregunta_de_usuario_1,
-      respuesta: respuesta_de_usuario_1,
-      usuarioEmpresa: usuario,
-    });
-  
-    const seguridad2 = this.seguridadRepository.create({
-      pregunta: pregunta_de_usuario_2,
-      respuesta: respuesta_de_usuario_2,
-      usuarioEmpresa: usuario,
-    });
-  
-    const seguridad3 = this.seguridadRepository.create({
-      pregunta: pregunta_de_usuario_3,
-      respuesta: respuesta_de_usuario_3,
-      usuarioEmpresa: usuario,
-    });
-  
-    await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]);
   }
   
+  
+  async actualizarEmpleado(
+    id: number,
+    updateEmpleadoParcialDto: any,
+    archivoIdentificacionBuffer: Buffer | null,
+    fotoEmpleadoBuffer: Buffer | null
+  ) {
+    const empleado = await this.empleadoRepository.findOne({
+      where: { id_empleado: id },
+    });
+
+    if (!empleado) {
+      throw new NotFoundException('Empleado no encontrado');
+    }
+    empleado.nombreEmpleado = updateEmpleadoParcialDto.nombreEmpleado || empleado.nombreEmpleado;
+    empleado.telefono_1 = updateEmpleadoParcialDto.telefono_1 || empleado.telefono_1;
+    empleado.telefono_2 = updateEmpleadoParcialDto.telefono_2 || empleado.telefono_2;
+    empleado.numero_identificacion = updateEmpleadoParcialDto.numero_identificacion || empleado.numero_identificacion;
+    if (archivoIdentificacionBuffer) {
+      empleado.archivo_identificacion = archivoIdentificacionBuffer;
+    }
+
+    if (fotoEmpleadoBuffer) {
+      empleado.foto_empleado = fotoEmpleadoBuffer;
+    }
+
+    return this.empleadoRepository.save(empleado);
+  }
 
   async getRolesPorEmpresa(centroId: number) {
     /* return this.rolEmpresaRepository.find({
@@ -434,35 +604,6 @@ export class UsuarioService {
       .getMany();
   } */
 
-
-
-  async loginPrivada(email: string, contrasena: string): Promise<any> {
-
-    const usuario = await this.usuarioPrivadaRepository.findOne({
-      where: { email },
-      relations: ['centroTrabajo'],
-    });
-
-    if (!usuario) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-    const passwordValid = await bcrypt.compare(contrasena, usuario.passwordHash);
-    if (!passwordValid) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-    const payload = {
-      sub: usuario.id_usuario,
-      email: usuario.email,
-      ...(usuario.centroTrabajo && { idCentroTrabajo: usuario.centroTrabajo.id_centro_trabajo }),
-    };
-    const token = this.jwtService.sign(payload);
-
-
-    return {
-      access_token: token,
-    };
-  }
-
   async getUsuariosPorCentro(centroTrabajoId: number) {
     /* try {
       const usuarios = await this.usuarioRepository.createQueryBuilder('usuario')
@@ -478,37 +619,6 @@ export class UsuarioService {
       throw new Error(`Failed to get users for center with id ${centroTrabajoId}`);
     } */
   }
-
-  async createPrivada(email: string, contrasena: string, nombre_usuario: string, idCentroTrabajo?: number) {
-    /* const usuarioExistente = await this.usuarioPrivadaRepository.findOne({ where: { email } });
-    if (usuarioExistente) {
-      throw new BadRequestException('El correo electrónico ya está en uso.');
-    }
-  
-    const rolPrivados = await this.rolRepository.findOneBy({ id_rol: 1 });
-    if (!rolPrivados) {
-      throw new BadRequestException('El rol "PRIVADOS" no existe.');
-    }
-  
-    const hashedPassword = await bcrypt.hash(contrasena, 10);
-  
-    const nuevoUsuario = new NET_USUARIO_PRIVADA();
-    nuevoUsuario.email = email;
-    nuevoUsuario.passwordHash = hashedPassword;
-    nuevoUsuario.nombre_usuario = nombre_usuario;
-    nuevoUsuario.rol = rolPrivados;
-  
-    if (idCentroTrabajo) {
-      const centroTrabajo = await this.centroTrabajoRepository.findOneBy({ id_centro_trabajo: idCentroTrabajo });
-      if (!centroTrabajo) {
-        throw new BadRequestException('El centro de trabajo proporcionado no existe.');
-      }
-      nuevoUsuario.centroTrabajo = centroTrabajo;
-    }
-  
-    return this.usuarioPrivadaRepository.save(nuevoUsuario); */
-  }
-
 
   findAll(paginationDto: PaginationDto) {
     /* const { limit = 10, offset = 0 } = paginationDto
@@ -648,7 +758,6 @@ export class UsuarioService {
     return await this.rolModuloRepository.createQueryBuilder('rol')
       .innerJoinAndSelect('rol.modulo', 'modulo')
       .where('modulo.nombre = :modulo', { modulo })
-      .andWhere('rol.nombre != :nombre', { nombre: 'ADMINISTRADOR' })
       .getMany();
   }
 
@@ -663,95 +772,74 @@ export class UsuarioService {
     });
   }
 
-  private handleException(error: any): void {
-    this.logger.error(error);
-    if (error.driverError && error.driverError.errorNum === 1) {
-      throw new BadRequestException('El Correo o Numero de ID ya esta registrado');
-    } else {
-      throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
-    }
-  }
-
-  async validarPreguntasSeguridad(correo: string, dto: ForgotPasswordDto): Promise<Net_Usuario_Empresa> {
-    const usuario = await this.usuarioEmpresaRepository.findOne({
-      where: { empleadoCentroTrabajo: { correo_1: correo } },
-      relations: ['seguridad', 'empleadoCentroTrabajo'],
-    });
-
-    if (!usuario) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    const preguntasSeguridad = usuario.seguridad;
-
-    let respuestasCorrectas = 0;
-
-    preguntasSeguridad.forEach((pregunta, index) => {
-      const respuestaUsuario = dto[`question${index + 1}Answer`].trim().toLowerCase();
-      const respuestaCorrecta = pregunta.respuesta.trim().toLowerCase();
-      if (respuestaUsuario === respuestaCorrecta) {
-        respuestasCorrectas += 1;
-      }
-    });
-
-    if (respuestasCorrectas < 2) {
-      throw new BadRequestException('Respuestas incorrectas');
-    }
-
-    return usuario;
-  }
-
   async crearTokenRestablecimiento(usuario: Net_Usuario_Empresa): Promise<string> {
     const payload = { id: usuario.id_usuario_empresa, email: usuario.empleadoCentroTrabajo.correo_1 };
-    const token = this.jwtService.sign(payload);
-    return token;
+    return this.jwtService.sign(payload, { expiresIn: '1h' });
+  }
+  
+  async buscarUsuarioPorCorreo(correo: string): Promise<Net_Usuario_Empresa | null> {
+    return this.usuarioEmpresaRepository.findOne({
+      where: { empleadoCentroTrabajo: { correo_1: correo } },
+      relations: ['empleadoCentroTrabajo'],
+    });
   }
 
   async enviarCorreoRestablecimiento(correo: string, token: string): Promise<void> {
     const urlRestablecimiento = `${process.env.HOST_FRONTEND}/restablecer-contrasena/${token}`;
-    const asunto = 'Restablecimiento de contraseña';
-    const texto = `Haga clic en el siguiente enlace para restablecer su contraseña: ${urlRestablecimiento}`;
-    const html = `<p>Haga clic en el siguiente enlace para restablecer su contraseña:</p><a href="${urlRestablecimiento}">${urlRestablecimiento}</a>`;
-
-    await this.mailService.sendMail(correo, asunto, texto, html);
+    const asunto = 'Solicitud de restablecimiento de contraseña - INPRENET';
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; text-align: center;">
+        <h2 style="color: #13776B;">
+          Solicitud de restablecimiento de contraseña en 
+          <span style="color: #14776B;">INPRE</span><span style="color: #33E4DC;">NET</span>
+        </h2>
+        <p>Hola,</p>
+        <p>Recientemente has solicitado restablecer tu contraseña en nuestra plataforma.</p>
+        <p>Para proceder con el restablecimiento, por favor haz clic en el siguiente enlace:</p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${urlRestablecimiento}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Restablecer contraseña</a>
+        </div>
+        <p>Este enlace es válido por un tiempo limitado. Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+        <p>Si tienes alguna pregunta o necesitas asistencia, no dudes en contactarnos.</p>
+        <p>El equipo de <strong><span style="color: #14776B;">INPRE</span><span style="color: #33E4DC;">NET</span></strong></p>
+      </div>`;
+    
+    const textoPlano = `Hola,\n\nHas solicitado restablecer tu contraseña en nuestra plataforma INPRENET.\n\nPara hacerlo, por favor, haz clic en el siguiente enlace o cópialo en tu navegador: ${urlRestablecimiento}\n\nSi no solicitaste este cambio, puedes ignorar este correo.\n\nEl equipo de INPRENET`;
+  
+    try {
+      await this.mailService.sendMail(correo, asunto, textoPlano, htmlContent);
+    } catch (error) {
+      console.error('Error al enviar el correo de restablecimiento:', error.message);
+      throw new InternalServerErrorException('No se pudo enviar el correo de restablecimiento. Por favor, inténtelo más tarde.');
+    }
   }
-
+  
   async restablecerContrasena(token: string, nuevaContrasena: string): Promise<void> {
     let payload;
-
     try {
       payload = this.jwtService.verify(token);
-    } catch (e) {
-      console.log('Token no válido o ha expirado:', token);
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new BadRequestException('El enlace para restablecer la contraseña ha expirado');
+      }
       throw new NotFoundException('Token no válido o ha expirado');
     }
-
-    const usuario = await this.usuarioEmpresaRepository.findOne({ where: { id_usuario_empresa: payload.id } });
-
-    if (!usuario) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    usuario.contrasena = await bcrypt.hash(nuevaContrasena, 10);
-
-    await this.usuarioEmpresaRepository.save(usuario);
-
-    console.log('Contraseña restablecida correctamente para el usuario:', usuario.id_usuario_empresa);
-  }
-
-  async obtenerPreguntasSeguridad(correo: string): Promise<string[]> {
+  
     const usuario = await this.usuarioEmpresaRepository.findOne({
-      where: { empleadoCentroTrabajo: { correo_1: correo } },
-      relations: ['seguridad'],
+      where: { id_usuario_empresa: payload.id },
     });
-
+  
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
-
-    return usuario.seguridad.map(pregunta => pregunta.pregunta);
+  
+    usuario.contrasena = await bcrypt.hash(nuevaContrasena, 10);
+  
+    await this.usuarioEmpresaRepository.save(usuario);
+  
+    console.info(
+      `Contraseña restablecida correctamente para el usuario: ${usuario.id_usuario_empresa}`,
+    );
   }
-
-
 
 }

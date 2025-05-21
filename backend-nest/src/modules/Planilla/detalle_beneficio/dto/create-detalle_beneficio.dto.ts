@@ -37,9 +37,9 @@ export class CreateDetalleBeneficioDto {
 
     @IsString()
     @IsOptional()
-    fecha_calculo: string;
+    fecha_efectividad: string;
 
     @IsOptional()
     @IsNumber()
-    num_rentas_aplicadas?: number;
+    num_rentas_aprobadas?: number;
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, Req, UseInterceptors, ParseIntPipe, Res, Put, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, Req, UseInterceptors, ParseIntPipe, Res, Put, UploadedFiles, NotFoundException, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
@@ -10,12 +10,19 @@ import { LoginDto } from './dto/login.dto';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { net_rol_modulo } from './entities/net_rol_modulo.entity';
 import { net_modulo } from './entities/net_modulo.entity';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('usuario')
 @Controller('usuario')
 export class UsuarioController {
+  private readonly logger = new Logger(UsuarioController.name);
   constructor(private readonly usuarioService: UsuarioService) { }
+
+  @Post('preregistro-masivo')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  async preRegistroMasivo(@Body() createPreRegistroDtos: CreatePreRegistroDto[]): Promise<void> {
+    return this.usuarioService.preRegistroMasivo(createPreRegistroDtos);
+  }
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
@@ -40,11 +47,6 @@ export class UsuarioController {
   async reactivarUsuario(@Param('id') idUsuario: number) {
     await this.usuarioService.reactivarUsuario(idUsuario);
     return { message: 'Usuario reactivado correctamente' };
-  }
-
-  @Get('preguntas-seguridad')
-  async obtenerPreguntasSeguridad(@Query('correo') correo: string): Promise<string[]> {
-    return this.usuarioService.obtenerPreguntasSeguridad(correo);
   }
 
   @Post('preregistro')
@@ -81,6 +83,24 @@ export class UsuarioController {
   return this.usuarioService.obtenerPerfilPorCorreo(correo);
 }
 
+@Patch('actualizar-informacion-empleado/:id')
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'archivo_identificacion', maxCount: 1 },
+    { name: 'foto_empleado', maxCount: 1 }
+  ]))
+  async actualizarInformacionEmpleado(
+    @Param('id') id: number,
+    @UploadedFiles() files: { archivo_identificacion?: Express.Multer.File[], foto_empleado?: Express.Multer.File[] },
+    @Body() updateEmpleadoParcialDto: any
+  ) {
+    const archivoIdentificacionBuffer = files?.archivo_identificacion?.[0]?.buffer || null;
+    const fotoEmpleadoBuffer = files?.foto_empleado?.[0]?.buffer || null;
+    if (!updateEmpleadoParcialDto.nombreEmpleado && !updateEmpleadoParcialDto.telefono_1 && !updateEmpleadoParcialDto.telefono_2 && !archivoIdentificacionBuffer && !fotoEmpleadoBuffer) {
+      throw new BadRequestException('No se han proporcionado datos para actualizar.');
+    }
+    return this.usuarioService.actualizarEmpleado(+id, updateEmpleadoParcialDto, archivoIdentificacionBuffer, fotoEmpleadoBuffer);
+  }
+
   @Put('cambiar-contrasena')
   async cambiarContrasena(@Body() cambiarContrasenaDto: { correo: string; nuevaContrasena: string }) {
     return this.usuarioService.cambiarContrasena(cambiarContrasenaDto.correo, cambiarContrasenaDto.nuevaContrasena);
@@ -89,12 +109,6 @@ export class UsuarioController {
   @Get('roles')
   async getRolesByEmpresa(@Query() query: any) {
     return this.usuarioService.getRolesPorEmpresa(query.idEmpresa);
-  }
-
-  @Post('/loginPrivada')
-  @HttpCode(HttpStatus.OK)
-  async loginPrivada(@Body('email') email: string, @Body('contrasena') contrasena: string) {
-    return this.usuarioService.loginPrivada(email, contrasena);
   }
 
   @Get('modulo-centro-trabajo')
@@ -147,21 +161,6 @@ export class UsuarioController {
       });
     }
   }
-
-  @Post('/crear')
-  async createPrivada(
-    @Body('email') email: string,
-    @Body('contrasena') contrasena: string,
-    @Body('nombre_usuario') nombre_usuario: string,
-    @Body('idCentroTrabajo') idCentroTrabajo?: number
-    ) {
-      try {
-        const nuevoUsuario = await this.usuarioService.createPrivada(email, contrasena, nombre_usuario, idCentroTrabajo);
-      return nuevoUsuario;
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
   
   /* @Post('auth/login')
   async login(@Body() loginDto: CreateUsuarioDto) {
@@ -189,18 +188,21 @@ export class UsuarioController {
   }
 
   @Post('olvido-contrasena')
-  async olvidoContrasena(@Body() dto: ForgotPasswordDto): Promise<{ message: string }> {
-    const usuario = await this.usuarioService.validarPreguntasSeguridad(dto.email, dto);
+  async olvidoContrasena(@Body() dto: any): Promise<void> {
+    const usuario = await this.usuarioService.buscarUsuarioPorCorreo(dto.email);
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
     const token = await this.usuarioService.crearTokenRestablecimiento(usuario);
     await this.usuarioService.enviarCorreoRestablecimiento(usuario.empleadoCentroTrabajo.correo_1, token);
-    return { message: 'Se ha enviado un enlace para restablecer la contraseña a su correo' };
   }
 
   @Post('restablecer-contrasena/:token')
-  async restablecerContrasena(@Param('token') token: string, @Body('nuevaContrasena') nuevaContrasena: string): Promise<{ message: string }> {
-    await this.usuarioService.restablecerContrasena(token, nuevaContrasena);
+  async restablecerContrasena(
+    @Param('token') token: string,
+    @Body() dto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.usuarioService.restablecerContrasena(token, dto.nuevaContrasena);
     return { message: 'Contraseña restablecida correctamente' };
   }
-
-  
 }

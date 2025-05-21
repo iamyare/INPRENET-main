@@ -1,0 +1,43 @@
+<mat-horizontal-stepper style="background: transparent;" [linear]="true" #stepper>
+    <mat-step *ngFor="let step of steps; let i = index">
+      <ng-template matStepLabel>
+        <div class="step-label">
+          <ng-container *ngIf="isStepInvalid(step.formGroup); else validLabel">
+            <mat-icon class="error-icon" color="warn">error_outline</mat-icon>
+            <div class="error-text">
+              <strong>{{ step.label }}</strong>
+            </div>
+          </ng-container>
+          <ng-template #validLabel>{{ step.label }}</ng-template>
+        </div>
+      </ng-template>
+      <ng-container *ngTemplateOutlet="step.template"></ng-container>
+      <div>
+        <button mat-raised-button color="primary" (click)="stepper.previous()">Anterior</button>
+        <button mat-raised-button color="primary" *ngIf="i < steps.length - 1" (click)="stepper.next()">Siguiente</button>
+        <button mat-raised-button color="accent" *ngIf="i === steps.length - 1" (click)="onSubmit()">Enviar</button>
+      </div>
+    </mat-step>
+  </mat-horizontal-stepper>
+  
+  <!-- Plantillas de cada paso -->
+  <ng-template #datosGeneralesTemplate>
+    <app-datos-generales-centro #datosGeneralesComponent [formGroup]="steps[0].formGroup"></app-datos-generales-centro>
+  </ng-template>
+  
+  <ng-template #referenciasTemplate>
+    <app-referencias-centro #referenciasComponent [formGroup]="steps[1].formGroup"></app-referencias-centro>
+  </ng-template>
+  
+  <ng-template #sociedadesTemplate>
+    <app-sociedades-centro #sociedadesComponent [formGroup]="steps[2].formGroup"></app-sociedades-centro>
+  </ng-template>
+  
+  <ng-template #sociosTemplate>
+    <app-socios-centro #sociosComponent [formGroup]="steps[3].formGroup"></app-socios-centro>
+  </ng-template>
+  
+  <ng-template #administracionTemplate>
+    <app-administracion-centro #administracionComponent [formGroup]="steps[4].formGroup"></app-administracion-centro>
+  </ng-template>
+  

@@ -16,7 +16,7 @@ import { ControlContainer, FormControl } from '@angular/forms';
 })
 export class BuscadorComponent {
   searchControl = new FormControl('');
-  results: any[] = [];
+  results: any[] = [];  
 
   @Input() searchFunction!: (query: string) => Promise<any[]>;
   @Output() searchResult = new EventEmitter<any>();

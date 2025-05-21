@@ -1,0 +1,18 @@
+<div class="constancias-container">
+  <h1>Generacion de constancias</h1>
+  <h3 *ngIf="tipoPersona">Tipo de Persona: {{ tipoPersona }}</h3>
+
+  <div *ngIf="filteredButtons.length > 0; else noConstancias" class="buttons-container">
+    <button
+      *ngFor="let button of filteredButtons"
+      [ngClass]="{ 'button': true, 'selected': selectedConstancia === button.label }"
+      (click)="onButtonClick(button)"
+    >
+      {{ button.label }}
+    </button>
+  </div>
+
+  <ng-template #noConstancias>
+    <p class="no-constancias">No hay constancias disponibles para este tipo de persona.</p>
+  </ng-template>
+</div>

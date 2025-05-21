@@ -1,3 +1,4 @@
+//afiliacion-centros.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 
@@ -24,13 +25,15 @@ export class AfiliacionCentrosComponent implements OnInit {
   sociedadSocioForm!: FormGroup;
   adminCentroEducativoForm!: FormGroup;
 
-  datosGeneralesData: any = {}; // Variable para almacenar los datos del formulario de datos generales
-  sociedadData: any = {}; // Variable para almacenar los datos del formulario de sociedad
+  datosGeneralesData: any = {};
+  sociedadData: any = {};
+  adminCentroEducativo: any = {}; 
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
     this.initForms();
+    this.setupFormListeners();
   }
 
   initForms() {
@@ -42,7 +45,33 @@ export class AfiliacionCentrosComponent implements OnInit {
     this.sociedadSocioForm = this.fb.group({
       sociedadSocios: this.fb.array([])
     });
-    this.adminCentroEducativoForm = this.fb.group({});
+    
+    // Configurar adminCentroEducativoForm con subgrupos para cada sección
+    this.adminCentroEducativoForm = this.fb.group({
+      datosAdministrador: this.fb.group({}),
+      datosContador: this.fb.group({}),
+      datosPropietario: this.fb.group({})
+    });
+  }
+
+  setupFormListeners() {
+    this.datosGeneralesForm.valueChanges.subscribe(value => {
+      if (this.datosGeneralesForm.valid) {
+        this.onDatosGeneralesFormUpdate(value);
+      }
+    });
+
+    this.sociedadForm.valueChanges.subscribe(value => {
+      if (this.sociedadForm.valid) {
+        this.onSociedadFormUpdate(value);
+      }
+    });
+
+    this.adminCentroEducativoForm.valueChanges.subscribe(value => {
+      if (this.adminCentroEducativoForm.valid) {
+        this.onAdminCentroEducativo(value);
+      }
+    });
   }
 
   handleStepChange(index: number): void {
@@ -57,18 +86,27 @@ export class AfiliacionCentrosComponent implements OnInit {
     this.sociedadData = formValues;
   }
 
+  onAdminCentroEducativo(formValues: any): void {
+    this.adminCentroEducativo = formValues;
+  }
+
   gatherAllData(): void {
+   
     const allData = {
       datosGenerales: this.datosGeneralesData,
       referencias: this.referenciasForm.value.referencias.length > 0 ? this.referenciasForm.value.referencias : [],
       sociedad: this.sociedadData,
       sociedadSocio: this.sociedadSocioForm.value.sociedadSocios.length > 0 ? this.sociedadSocioForm.value.sociedadSocios : [],
-      adminCentroEducativo: this.isFormGroupEmpty(this.adminCentroEducativoForm) ? {} : this.adminCentroEducativoForm.value
+      adminCentroEducativo: {
+        datosAdministrador: this.adminCentroEducativoForm.get('datosAdministrador')?.value,
+        datosContador: this.adminCentroEducativoForm.get('datosContador')?.value,
+        datosPropietario: this.adminCentroEducativoForm.get('datosPropietario')?.value,
+      }
     };
-    console.log('Datos Completos:', allData);
+
   }
 
   private isFormGroupEmpty(formGroup: FormGroup): boolean {
     return Object.values(formGroup.controls).every(control => control.value === '' || control.value == null);
   }
-}
+} 

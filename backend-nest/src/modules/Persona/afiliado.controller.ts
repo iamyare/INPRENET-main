@@ -12,7 +12,8 @@ import {
   ParseIntPipe,
   UseInterceptors,
   UploadedFiles,
-  HttpException
+  HttpException,
+  Req
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
@@ -26,6 +27,25 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 export class AfiliadoController {
 
   constructor(private readonly afiliadoService: AfiliadoService) { }
+
+  @Get('/ubicacion')
+  async obtenerUbicacion(@Req() req): Promise<any> {
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const ipLimpia = ip.includes(':') ? ip.split(':').pop() : ip;
+    try {
+      const ubicacion = await this.afiliadoService.obtenerUbicacion(ipLimpia);
+
+      if (ubicacion && ubicacion.city) {
+        const municipio = this.afiliadoService.obtenerMunicipio(ubicacion.city);
+        return { municipio, ubicacion };
+      } else {
+        return { error: 'No se pudo determinar la ubicación' };
+      }
+    } catch (error) {
+      return { error: 'Error al procesar la solicitud', detalle: error.message };
+    }
+  }
+
 
   @Get(':id_persona/movimientos-ordenados/:id_tipo_cuenta')
   async getMovimientosOrdenados(
@@ -74,8 +94,7 @@ export class AfiliadoController {
   @Get('/movimientos/:dni')
   async buscarMovimientosPorN_IDENTIFICACION(@Param('dni') dni: string) {
     try {
-      const resultado =
-        await this.afiliadoService.buscarPersonaYMovimientosPorN_IDENTIFICACION(dni);
+      const resultado = await this.afiliadoService.buscarPersonaYMovimientosPorN_IDENTIFICACION(dni);
       return resultado;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -166,16 +185,11 @@ export class AfiliadoController {
 
   @Patch('updatePerfCentroTrabajo/:id')
   async updatePerfCentroTrabajo(@Param('id') id: string, @Body() updateDto: UpdatePerfCentTrabDto) {
-    // Convertir el ID a número para evitar errores de tipo
     const idNum = parseInt(id, 10);
     if (isNaN(idNum)) {
       throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
     }
-
-    // Llamar al servicio para actualizar el perfil
     const updatedProfile = await this.afiliadoService.updatePerfCentroTrabajo(idNum, updateDto);
-
-    // Devolver el perfil actualizado
     return {
       mensaje: `Perfil de centro de trabajo con ID ${idNum} actualizado con éxito.`,
       data: updatedProfile,
@@ -190,7 +204,7 @@ export class AfiliadoController {
     }
     await this.afiliadoService.desactivarPerfCentroTrabajo(idNum);
     return {
-      mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
+      mensaje: `Centro De Trabajo Desactivado Exitosamente`,
     };
   }
 
@@ -208,7 +222,7 @@ export class AfiliadoController {
     );
     return { message: 'Salario base actualizado con éxito.' };
   }
-
+ 
   @Put('actualizarBeneficiario/:id')
   updatePersona(
     @Param('id') id: number,
@@ -225,7 +239,7 @@ export class AfiliadoController {
     }
     await this.afiliadoService.desactivarCuentaBancaria(idNum);
     return {
-      mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
+      mensaje: `Cuenta de Banco Desactivada`,
     };
   }
 
@@ -237,9 +251,18 @@ export class AfiliadoController {
     @UploadedFiles() files?: Express.Multer.File[],
   ) {
     const crearDatosDto: any = JSON.parse(datosGenerales);
-    const fileIdent = files?.find(file => file.fieldname === 'file_ident');
+    const fileIdent = files?.find(file => file.fieldname === 'archivo_identificacion');
     const arch_cert_def = files?.find(file => file.fieldname === 'arch_cert_def');
-    return this.afiliadoService.updateDatosGenerales(idPersona, crearDatosDto, fileIdent, arch_cert_def);
+    const fotoPerfil = files?.find(file => file.fieldname === 'FotoPerfil');
+    const carnetDiscapacidad = files?.find(file => file.fieldname === 'carnet_discapacidad');
+    return this.afiliadoService.updateDatosGenerales(
+      idPersona, 
+      crearDatosDto, 
+      fileIdent, 
+      arch_cert_def, 
+      fotoPerfil, 
+      carnetDiscapacidad
+    );
   }
 
   @Put('activarCuentaBancaria/:id/:id_persona')
@@ -250,7 +273,7 @@ export class AfiliadoController {
     }
     await this.afiliadoService.activarCuentaBancaria(idNum, id_persona);
     return {
-      mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
+      mensaje: `Cuenta de Banco Activada Exitosamente`,
     };
   }
 
@@ -282,9 +305,9 @@ export class AfiliadoController {
 
   @Get('Afiliado/:term')
   findOne(@Param('term') term: string) {
-    return this.afiliadoService.findOne(term); 
+    return this.afiliadoService.findOne(term);
   }
-  
+
   @Get('/getAllPersonaPBanco/:dni')
   getAllPersonaPBanco(@Param('dni') dni: string) {
     return this.afiliadoService.getAllPersonaPBanco(dni);
@@ -322,4 +345,19 @@ export class AfiliadoController {
   remove(@Param('id') id: string) {
     return this.afiliadoService.remove(+id);
   }
+
+  @Get('causantes/:dniCausante')
+  async getDesignadosOBeneficiarios(@Param('dniCausante') dniCausante: string) {
+    const resultado = await this.afiliadoService.getDesignadosOBeneficiarios(dniCausante);
+    return { status: 'success', data: resultado };
+  }
+
+  @Put('updateEstadoAfiliacion')
+  async updateEstadoAfiliacion(@Body() payload: any) {
+    
+    // Implementación del servicio
+    await this.afiliadoService.updateEstadoAfil(payload,);
+    return { message: 'Estado actualizado correctamente' };
+  }
 }
+

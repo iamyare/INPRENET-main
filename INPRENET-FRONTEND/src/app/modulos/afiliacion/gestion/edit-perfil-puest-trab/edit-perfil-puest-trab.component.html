@@ -1,4 +1,4 @@
-<div id="texto" style="text-align: center;" *ngIf="filas.length == 0">
+<div id="texto" style="text-align: center;" *ngIf="filas.length === 0">
   <h2 class="anaranjado desapareciendo">No se encuentra ningún perfil de trabajo</h2>
 </div>
 
@@ -11,7 +11,7 @@
   Agregar Puesto de Trabajo
 </button>
 
-<div *ngIf="filas.length != 0 " style="background-color: white; border-radius: 10px; padding: 20px">
+<div *ngIf="filas.length !== 0" style="background-color: white; border-radius: 10px; padding: 20px">
   <app-dynamic-table
     style="width: 100%"
     titulo="Editar Perfil Del Puesto De Trabajo"
@@ -20,13 +20,9 @@
     [data]="filas"
     [getData]="getFilas"
     (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-    [nombreEncabezadoUno]="'Editar'"
-    [mostrarBotonUno]="mostrarBotonEditar"
-    [etiquetaBotonUno]="'Editar'"
-    (accionBotonUno)="manejarAccionUno($event)"
-    [nombreEncabezadoDos]="'Eliminar'"
-    [mostrarBotonDos]="mostrarBotonEliminar"
-    [etiquetaBotonDos]="'Eliminar'"
-    (accionBotonDos)="manejarAccionDos($event)">
+    [mostrarBotonEditar]="mostrarBotonEditar"
+    (editar)="manejarAccionUno($event)"
+    [mostrarBotonInhabilitar]="mostrarBotonEliminar"
+    (inhabilitar)="manejarAccionDos($event)">
   </app-dynamic-table>
 </div>

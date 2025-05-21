@@ -1,4 +1,6 @@
 import * as moment from 'moment';
+import { format, parseISO } from 'date-fns';
+import { es as localeEs } from 'date-fns/locale';
 
 function convertirFecha(fechaStr: string, hora: boolean): string {
   let fechaFormateada = "";
@@ -21,27 +23,51 @@ function convertirFechaInputs(fecha: string): string {
   return ""
 }
 
+function convertirFechaInputs2(fecha: string): string {
+  if (fecha) {
+    const fechaMoment = moment.utc(fecha);
+    return fechaMoment.format('DD/MM/YYYY');
+  }
+  return ""
+}
+
+function convertirFechaInputsDMY(fecha: string): string {
+  if (fecha) {
+    const fechaMoment = moment.utc(fecha);
+    return fechaMoment.format('DD/MM/YYYY');
+  }
+  return ""
+}
+
 function obtenerNombreMes(fecha: string): string {
   if (fecha) {
-    const partesFecha: string[] = fecha?.split('/');
+    const fechaObjeto = new Date(fecha);
 
-    if (partesFecha.length !== 3) {
+    if (isNaN(fechaObjeto.getTime())) {
       return 'Formato de fecha inválido';
     }
 
-    const numMes: number = parseInt(partesFecha[1], 10);
-    const anio: number = parseInt(partesFecha[2], 10);
+    const numMes: number = fechaObjeto.getUTCMonth(); // Obtener el mes (0-11)
+    const anio: number = fechaObjeto.getUTCFullYear(); // Obtener el año
 
     const meses: string[] = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
 
-    if (numMes >= 1 && numMes <= 12) {
-      const nombreMes: string = meses[numMes - 1];
-      return `${nombreMes} ${anio}`;
-    } else {
-      return '';
-    }
+    const nombreMes: string = meses[numMes];
+    return `${nombreMes} ${anio}`;
   }
+
   return '';
 }
 
-export { convertirFecha, convertirFechaInputs, obtenerNombreMes }
+function obtenerRangoMeses(fechaInicio: string, fechaFin: string): string {
+  const inicio = parseISO(fechaInicio);
+  const fin = parseISO(fechaFin);
+
+  const mesAnioInicio = format(inicio, 'MMMM yyyy', { locale: localeEs }).toUpperCase();
+  const mesAnioFin = format(fin, 'MMMM yyyy', { locale: localeEs }).toUpperCase();
+
+  return mesAnioInicio === mesAnioFin ? mesAnioInicio : `${mesAnioInicio} - ${mesAnioFin}`;
+}
+
+
+export { convertirFechaInputsDMY, convertirFecha, convertirFechaInputs, obtenerNombreMes, obtenerRangoMeses, convertirFechaInputs2 }

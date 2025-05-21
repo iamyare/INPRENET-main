@@ -15,6 +15,12 @@ import { AppDataSource } from '../ormconfig';
 import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/mantenimiento-afiliacion.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { EscalafonModule } from './modules/escalafon/escalafon.module';
+import { BitacoraModule } from './modules/bitacora/bitacora.module';
+import { PrestamosModule } from './modules/prestamos/prestamos.module';
+import { ConasaModule } from './modules/conasa/conasa.module';
+import { WhatsappPruebaModule } from './modules/whatsapp-prueba/whatsapp-prueba.module';
+import { RnpModule } from './modules/rnp/rnp.module';
 
 @Module({
   imports: [
@@ -43,7 +49,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
           migrations: [__dirname + '/../migrations/*{.ts,.js}'],
           dataSource: AppDataSource,
-          //autoLoadEntities: true,
+          autoLoadEntities: true,
           //synchronize: true,
           //migrations: ['src/database/migrations/*{.ts,.js}'],
           //logging: ["query", "schema", "error", "warn", "info", "log", "migration"]
@@ -52,6 +58,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
       inject: [ConfigService],
     }),
     CommonModule,
+    BitacoraModule,
     EmpresarialModule,
     DocumentsModule,
     AfiliadoModule,
@@ -61,7 +68,13 @@ import { DocumentsModule } from './modules/documents/documents.module';
     PlanillaModule,
     RegionalModule,
     TransaccionesModule,
-    AuthModule
+    AuthModule,
+    EscalafonModule,
+    PrestamosModule,
+    ConasaModule,
+    WhatsappPruebaModule,
+    BitacoraModule,
+    RnpModule
   ],
   providers: [MantenimientoAfiliacionService],
 })

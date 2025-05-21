@@ -1,6 +1,6 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MaterialAngularModule } from 'src/app/material-angular/material-angular.module';
+import { MaterialAngularModule } from '../../../../src/app/material-angular/material-angular.module';
 import { AdminCentroEducativoComponent } from './Centros-Educativos/admin-centro-educativo/admin-centro-educativo.component';
 import { AfiliacionCentrosComponent } from './Centros-Educativos/afiliacion-centros/afiliacion-centros.component';
 import { DatosGeneralesCentroComponent } from './Centros-Educativos/datos-generales-centro/datos-generales-centro.component';
@@ -17,11 +17,8 @@ import { BuscarPersonaComponent } from './verPerfil/buscar-persona/buscar-person
 import { CausanteDetalleComponent } from './verPerfil/causante-detalle/causante-detalle.component';
 import { ConstanciasAfiliadoComponent } from './verPerfil/constancias-afiliado/constancias-afiliado.component';
 import { InformacionGeneralComponent } from './verPerfil/informacion-general/informacion-general.component';
-import { JubiladoComponent } from './verPerfil/jubilado/jubilado.component';
-import { PensionadoComponent } from './verPerfil/pensionado/pensionado.component';
 import { PerfilComponent } from './verPerfil/perfil/perfil.component';
-import { VoluntarioComponent } from './verPerfil/voluntario/voluntario.component';
-import { ComponentsModule } from 'src/app/components/components.module';
+import { ComponentsModule } from '../../../../src/app/components/components.module';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { AfiliacionRoutingModule } from './afiliacion-routing.module';
 import { DatBancComponent } from './nose/dat-banc/dat-banc.component';
@@ -35,11 +32,7 @@ import { EditDatosGeneralesComponent } from './gestion/edit-datos-generales/edit
 import { AgregarPuestTrabComponent } from './gestion/agregar-puest-trab/agregar-puest-trab.component';
 import { EditReferPersonalesComponent } from './gestion/edit-refer-personales/edit-refer-personales.component';
 import { AgregarReferenciasPersonalesComponent } from './gestion/agregar-referencias-personales/agregar-referencias-personales.component';
-import { VerCuentasPersonasComponent } from './gestion/ver-cuentas-personas/ver-cuentas-personas.component';
-import { AgregarCuentasComponent } from './gestion/agregar-cuentas/agregar-cuentas.component';
 import { VerDatosAfiliadosComponent } from './gestion/ver-datos-afiliados/ver-datos-afiliados.component';
-import { AfilBancoComponent } from './gestion/afil-banco/afil-banco.component';
-import { DatGeneralesAfiliadoComponent } from './gestion/dat-generales-afiliado/dat-generales-afiliado.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PepsComponent } from './gestion/peps/peps.component';
 import { ColMagisterialesComponent } from './gestion/col-magisteriales/col-magisteriales.component';
@@ -50,7 +43,6 @@ import { BenefComponent } from './gestion/benef/benef.component';
 import { EditPerfilPuestTrabComponent } from './gestion/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
 import { EditColegiosMagisterialesComponent } from './gestion/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { EditPepsComponent } from './gestion/edit-peps/edit-peps.component';
-import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afiliacion-docentes.component';
 import { DatosPropietarioComponent } from './Centros-Educativos/admin-centro-educativo/datos-propietario/datos-propietario.component';
 import { DatosContadorComponent } from './Centros-Educativos/admin-centro-educativo/datos-contador/datos-contador.component';
 import { DatosAdministradorComponent } from './Centros-Educativos/admin-centro-educativo/datos-administrador/datos-administrador.component';
@@ -74,6 +66,14 @@ import { TodosPagosComponent } from '../planilla/todos-pagos/todos-pagos.compone
 import { EditConyugueComponent } from './gestion/edit-conyugue/edit-conyugue.component';
 import { AgregarPepsComponent } from './gestion/agregar-peps/agregar-peps.component';
 import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-familiar.component';
+import { DatosGeneralesTemporalComponent } from './gestion/datos-generales-temporal/datos-generales-temporal.component';
+import { BeneficiarioSinCausanteComponent } from './verPerfil/beneficiario-sin-causante/beneficiario-sin-causante.component';
+import { ContanciasAfiliadosComponent } from './constancias/contancias-afiliados/contancias-afiliados.component';
+import { DialogSuboptionsComponent } from './constancias/dialog-suboptions/dialog-suboptions.component';
+import { EditBeneficiarioModalComponent } from './gestion/edit-beneficiario-modal/edit-beneficiario-modal.component';
+import { ColoniaComponent } from './mantenimiento/colonia/colonia.component';
+import { AldeaComponent } from './mantenimiento/aldea/aldea.component';
+import { AfiliarCentrosComponent } from './centros/afiliar-centros/afiliar-centros.component';
 
 @NgModule({
   declarations: [
@@ -93,10 +93,7 @@ import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-fam
     CausanteDetalleComponent,
     ConstanciasAfiliadoComponent,
     InformacionGeneralComponent,
-    JubiladoComponent,
-    PensionadoComponent,
     PerfilComponent,
-    VoluntarioComponent,
     DatBancComponent,
     AgregarMovimientoComponent,
     EditBeneficiariosComponent,
@@ -108,19 +105,15 @@ import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-fam
     AgregarPuestTrabComponent,
     EditReferPersonalesComponent,
     AgregarReferenciasPersonalesComponent,
-    VerCuentasPersonasComponent,
-    AgregarCuentasComponent,
     VerDatosAfiliadosComponent,
-    AfilBancoComponent,
-    DatGeneralesAfiliadoComponent,
     PepsComponent,
     ColMagisterialesComponent,
     OtrasFuentesIngresoComponent,
     DatPuestoTrabComponent,
     RefPersComponent,
     BenefComponent,
-    EditPerfilPuestTrabComponent, EditColegiosMagisterialesComponent,
-    AfiliacionDocentesComponent,
+    EditPerfilPuestTrabComponent,
+    EditColegiosMagisterialesComponent,
     DatosPropietarioComponent,
     DatosContadorComponent,
     DatosAdministradorComponent,
@@ -144,7 +137,15 @@ import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-fam
     TodosPagosComponent,
     EditConyugueComponent,
     AgregarPepsComponent,
-    AgregarFamiliarComponent
+    AgregarFamiliarComponent,
+    DatosGeneralesTemporalComponent,
+    BeneficiarioSinCausanteComponent,
+    ContanciasAfiliadosComponent,
+    DialogSuboptionsComponent,
+    EditBeneficiarioModalComponent,
+    ColoniaComponent,
+    AldeaComponent,
+    AfiliarCentrosComponent
   ],
   imports: [
     CommonModule,
@@ -155,11 +156,8 @@ import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-fam
   ],
   exports: [
     AdminCentroEducativoComponent,
-    JubiladoComponent,
-    PensionadoComponent,
     BeneficiarioComponent,
     AfiliadoComponent,
-    VoluntarioComponent,
     DatBancComponent,
     EditDatosBancariosComponent,
   ],

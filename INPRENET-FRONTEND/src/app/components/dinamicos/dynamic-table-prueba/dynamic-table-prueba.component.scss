@@ -1,24 +1,35 @@
 .card-header {
-  background-color: white; /* Fondo del contenedor del título */
-  padding: 16px; /* Espaciado alrededor del título */
-  border-radius: 4px; /* Bordes redondeados */
+  background-color: white;
+  /* Fondo del contenedor del título */
+  padding: 16px;
+  /* Espaciado alrededor del título */
+  border-radius: 4px;
+  /* Bordes redondeados */
 }
 
 .card-title {
-  font-size: 1.5rem; /* Tamaño de fuente del título */
-  font-weight: bold; /* Peso de la fuente del título */
-  margin: 0; /* Eliminar márgenes */
-  color: #229e92; /* Color del título */
+  font-size: 1.5rem;
+  /* Tamaño de fuente del título */
+  font-weight: bold;
+  /* Peso de la fuente del título */
+  margin: 0;
+  /* Eliminar márgenes */
+  color: #229e92;
+  /* Color del título */
 }
 
 .card-category {
-  font-size: 1rem; /* Tamaño de fuente del subtítulo */
-  color: #757575; /* Color del subtítulo */
-  margin: 0; /* Eliminar márgenes */
+  font-size: 1rem;
+  /* Tamaño de fuente del subtítulo */
+  color: #757575;
+  /* Color del subtítulo */
+  margin: 0;
+  /* Eliminar márgenes */
 }
 
 .container-fluid {
-  padding: 0 16px; /* Ajuste del espaciado */
+  padding: 0 16px;
+  /* Ajuste del espaciado */
 }
 
 table {
@@ -26,8 +37,10 @@ table {
 }
 
 th.mat-header-cell {
-  background-color: #229e92;  /* Color para el encabezado de la tabla */
-  color: #ffffff;  /* Color del texto del encabezado */
+  background-color: #229e92;
+  /* Color para el encabezado de la tabla */
+  color: #ffffff;
+  /* Color del texto del encabezado */
   padding: 8px;
   text-align: left;
 }
@@ -38,8 +51,10 @@ td.mat-cell {
 }
 
 tr.mat-header-row {
-  background-color: #229e92;  /* Color para el encabezado de la tabla */
-  color: #ffffff;  /* Color del texto del encabezado */
+  background-color: #229e92;
+  /* Color para el encabezado de la tabla */
+  color: #ffffff;
+  /* Color del texto del encabezado */
 }
 
 .selected {
@@ -47,8 +62,8 @@ tr.mat-header-row {
 }
 
 tr.selected {
-  background-color: #229e92; 
-  color: white; 
+  background-color: #229e92;
+  color: white;
   font-weight: bold;
   font-size: 14;
   letter-spacing: 2px;
@@ -69,4 +84,33 @@ tr.selected {
 
 .odd-row {
   background-color: #ffffff;
+}
+
+
+.moneda-left {
+  display: flex;
+  justify-content: space-between;
+  /* Espaciado entre símbolo y número */
+  align-items: center;
+  width: 100%;
+  /* Asegura que ocupe todo el espacio de la celda */
+}
+
+.moneda-simbolo {
+  flex-shrink: 0;
+  /* Evita que el símbolo se reduzca */
+  text-align: center;
+  min-width: 15px;
+  /* Ajusta el ancho según necesidad */
+}
+
+.moneda-valor {
+  flex-grow: 1;
+  /* Permite que el número ocupe el espacio restante */
+  text-align: right;
+  /* Alinea los números a la derecha */
+}
+
+.text-red {
+  color: red;
 }

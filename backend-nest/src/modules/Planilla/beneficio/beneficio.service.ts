@@ -59,7 +59,7 @@ export class BeneficioService {
             const idBeneficio = parseInt(row['CODIGO_BENEFICIO'], 10);
             const primerPago = parseFloat(row['PRIMER_PAGO']);
             const ultimoPago = row['ULTIMO_PAGO'] ? parseFloat(row['ULTIMO_PAGO']) : null;
-            const fechaCalculo = new Date(row['FECHA_CALCULO']);
+            const fechaCalculo = new Date(row['FECHA_EFECTIVIDAD']);
             const numeroRentas = parseInt(row['NUMERO_RENTAS'], 10);
             const montoPorPeriodo = parseFloat(row['MONTO_POR_PERIODO(ORDINARIA)']);
             const periodoInicio = new Date(row['PERIODO_INICIO']);
@@ -153,8 +153,8 @@ export class BeneficioService {
               ID_BENEFICIO: idBeneficio,
               monto_primera_cuota: primerPago,
               monto_ultima_cuota: ultimoPago,
-              fecha_calculo: fechaCalculo,
-              num_rentas_aplicadas: numeroRentas,
+              fecha_efectividad: fechaCalculo,
+              num_rentas_aprobadas: numeroRentas,
               monto_por_periodo: montoPorPeriodo,
               periodo_inicio: periodoInicio,
               estado_solicitud: 'APROBADO'

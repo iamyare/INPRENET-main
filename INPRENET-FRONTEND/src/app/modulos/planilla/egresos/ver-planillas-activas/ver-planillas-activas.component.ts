@@ -1,11 +1,9 @@
-import { ChangeDetectorRef, Component, EventEmitter, Output, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
+import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
@@ -17,6 +15,8 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 export class VerPlanillasActivasComponent {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   @Output() getElemSeleccionados = new EventEmitter<any>()
+  @Output() planActivas = new EventEmitter<any>()
+
   form!: FormGroup;
   form1!: FormGroup;
 
@@ -35,38 +35,37 @@ export class VerPlanillasActivasComponent {
 
   myColumns: any = [
     {
-      header: 'codigo_planilla',
+      header: 'Código Planilla',
       col: 'codigo_planilla',
-
     },
-    { header: 'secuencia', col: 'secuencia', },
     {
-      header: 'estado',
+      header: 'Número Lote',
+      col: 'numero_lote',
+    },
+    {
+      header: 'Número de pagos',
+      col: 'numero_pagos',
+    },
+    { header: 'Secuencia', col: 'secuencia', },
+    {
+      header: 'Estado',
       col: 'estado',
     },
-    { header: 'periodoInicio', col: 'periodoInicio', },
-    { header: 'periodoFinalizacion', col: 'periodoFinalizacion', },
+    { header: 'Fecha Inicio', col: 'periodoInicio', },
+    { header: 'Fecha Finalización', col: 'periodoFinalizacion', },
   ];
   datosTabl: any[] = [];
   filas: any
   ejecF: any;
   desOBenSeleccionado: any
   mostrarB: any;
-  planillasActivas: any[] = []; // Para almacenar las planillas activas
+  planillasActivas: any[] = [];
 
   constructor(
-    private planillaService: PlanillaService,
-    private cdr: ChangeDetectorRef,
-    private svcBeneficioServ: BeneficiosService,
-    private svcAfilServ: AfiliadoService, private fb: FormBuilder,
-    private toastr: ToastrService, private _formBuilder: FormBuilder
+    private planillaService: PlanillaService
   ) { }
 
   ngOnInit(): void {
-
-    this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
-    ];
     this.getFilas().then(() => this.cargar());
     this.cargar();
   }
@@ -74,7 +73,6 @@ export class VerPlanillasActivasComponent {
   getFilas = async () => {
     try {
       const data = await this.planillaService.getPlanillasActivas().toPromise();
-
       this.filas = data.map((item: any) => ({
         id_planilla: item.id_planilla,
         codigo_planilla: item.codigo_planilla,
@@ -82,11 +80,14 @@ export class VerPlanillasActivasComponent {
         fecha_cierre: item.fecha_cierre,
         secuencia: item.secuencia,
         estado: item.estado,
-        periodoInicio: item.periodoInicio,
-        periodoFinalizacion: item.periodoFinalizacion,
-        tipoPlanilla: item.tipoPlanilla.nombre_planilla
+        numero_pagos: item.numero_pagos,
+        numero_lote: item.numero_lote,
+        periodoInicio: convertirFecha(item.periodoInicio, false),
+        periodoFinalizacion: convertirFecha(item.periodoFinalizacion, false),
+        tipoPlanilla: item.tipoPlanilla.nombre_planilla,
+        idTipoPlanilla: item.tipoPlanilla.id_tipo_planilla
       }));
-
+      this.planActivas.emit(this.filas);
       return data;
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);
@@ -106,12 +107,8 @@ export class VerPlanillasActivasComponent {
   }
 
   manejarRowClick(row: any) {
-    // Ocultamos el formulario temporalmente
     this.mostrarB = false;
-
-    // Asignamos el valor del DNI de la fila seleccionada al campo de DNI del beneficiario
     this.desOBenSeleccionado = row;
     this.getElemSeleccionados.emit(this.desOBenSeleccionado);
-
   }
 }

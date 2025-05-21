@@ -3,7 +3,7 @@ import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Net_Departamento } from '../../Regional/provincia/entities/net_departamento.entity';
 import { CreatePrivateCentroTrabajoDto } from './dto/create-private-centro-trabajo.dto';
 import { Net_Nivel_Educativo } from '../entities/net_nivel_educativo.entity';
@@ -39,15 +39,10 @@ export class CentroTrabajoService {
 
     @InjectRepository(Net_Referencia_Centro_Trabajo)
     private readonly refcentroTrabajoRepository: Repository<Net_Referencia_Centro_Trabajo>,
-
-    @InjectRepository(Net_Departamento)
-    private readonly departamentoRepository: Repository<Net_Departamento>,
     @InjectRepository(Net_Nivel_Educativo)
     private readonly nivelEducativoRepository: Repository<Net_Nivel_Educativo>,
     @InjectRepository(Net_Jornada)
     private readonly jornadaRepository: Repository<Net_Jornada>,
-    @InjectRepository(Net_Centro_Trabajo_Nivel)
-    private readonly centroTrabajoNivelRepository: Repository<Net_Centro_Trabajo_Nivel>,
     @InjectRepository(Net_Centro_Trabajo_Jornada)
     private readonly centroTrabajoJornadaRepository: Repository<Net_Centro_Trabajo_Jornada>,
     @InjectRepository(Net_Municipio)
@@ -72,17 +67,30 @@ export class CentroTrabajoService {
     private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>
   ) { }
 
+  async buscarCentroTrabajo(termino: string, idMunicipio?: number): Promise<Net_Centro_Trabajo[]> {
+    const whereCondition: any = [
+      { codigo: ILike(`%${termino}%`), tipo: 'EDUCACION' },
+      { nombre_centro_trabajo: ILike(`%${termino}%`), tipo: 'EDUCACION' },
+    ];
+    if (idMunicipio) {
+      whereCondition.forEach((condition: any) => {
+        condition.municipio = { id_municipio: idMunicipio };
+      });
+    }
+    return await this.centroTrabajoRepository.find({
+      where: whereCondition,
+      relations: ['municipio', 'municipio.departamento'],
+    });
+  }
+
+
   async updateArchivoIdentificacion(id_empleado: number, archivoBuffer: Buffer): Promise<Net_Empleado> {
     const empleado = await this.empleadoRepository.findOne({ where: { id_empleado } });
 
     if (!empleado) {
       throw new NotFoundException(`Empleado con ID ${id_empleado} no encontrado.`);
     }
-
-    // Actualizar el archivo de identificación
     empleado.archivo_identificacion = archivoBuffer;
-
-    // Guardar los cambios en la base de datos
     await this.empleadoRepository.save(empleado);
 
     return empleado;
@@ -165,12 +173,14 @@ export class CentroTrabajoService {
     return await this.centroTrabajoRepository.createQueryBuilder('centroTrabajo')
       .leftJoinAndSelect('centroTrabajo.deduccion', 'deduccion') // Hacer el join con la tabla de deducciones
       .where('centroTrabajo.tipo = :tipo', { tipo: 'INSTITUCION' }) // Filtrar por el tipo de centro de trabajo
+      .orderBy('centroTrabajo.nombre_centro_trabajo', 'ASC')
+      .addOrderBy('deduccion.codigo_deduccion', 'ASC')
       .getMany();
   }
 
 
   async create(createCentroTrabajoDto: CreateCentroTrabajoDto) {
-    try {
+    /* try {
       const departamento = await this.departamentoRepository.findOneBy({ nombre_departamento: createCentroTrabajoDto.nombre_departamento });
       if (!departamento) {
         throw new BadRequestException('departamento not found');
@@ -182,11 +192,14 @@ export class CentroTrabajoService {
       })
     } catch (error) {
       this.handleException(error);
-    }
+    } */
   }
 
   async findAll(): Promise<Net_Centro_Trabajo[]> {
-    return this.centroTrabajoRepository.find({ where: { tipo: 'EDUCACION' } });
+    return this.centroTrabajoRepository.find({
+      where: { tipo: 'EDUCACION' },
+      relations: ['municipio'],
+    });
   }
 
   async getPropietarioByCentro(idCentroTrabajo: number): Promise<any> {
@@ -213,7 +226,6 @@ export class CentroTrabajoService {
     }
   }
   async getContadorByCentro(idCentroTrabajo: number): Promise<any> {
-    console.log(idCentroTrabajo);
     try {
       const result = await this.centroTrabajoRepository.findOne(
         {

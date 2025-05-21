@@ -2,7 +2,9 @@ export interface MenuItem {
   title: string;
   icon: string;
   route?: string;
+  action?: string;
   children?: MenuItem[];
+  isCustomReset?: boolean;
 }
 
 export interface Section {
@@ -12,13 +14,25 @@ export interface Section {
 
 export const MENU_CONFIG: Section[] = [
   {
-    name: 'MANTENIMIENTO',
+    name: 'CARNETIZACION',
     items: [
       {
-        title: 'MANTENIMIENTO',
-        icon: 'build',
+        title: 'Prueba',
+        icon: 'group',
         children: [
-          { title: 'Mantenimiento', route: 'afiliacion/mantenimiento', icon: 'build' },
+          { title: 'Prueba', route: 'rnp/prueba-vida', icon: 'manage_accounts' }
+        ],
+      },
+    ],
+  },
+  {
+    name: 'DOCUMENTOS',
+    items: [
+      {
+        title: 'REPORTES',
+        icon: 'group',
+        children: [
+          { title: 'Menu', route: 'documentos/menu-documentos', icon: 'manage_accounts' }
         ],
       },
     ],
@@ -37,16 +51,29 @@ export const MENU_CONFIG: Section[] = [
     ],
   },
   {
-    name: 'AFILIACIÓN',
+    name: 'AFILIACIONES',
     items: [
       {
-        title: 'AFILIACIÓN',
+        title: 'DOCENTES',
         icon: 'person',
         children: [
           { title: 'Nueva Afiliación', route: 'afiliacion/nueva-afiliacion', icon: 'person_add' },
-          { title: 'Buscar Persona', route: 'afiliacion/buscar-persona', icon: 'search' },
-          { title: 'Nuevo Centro Educativo', route: 'afiliacion/nuevo-centro', icon: 'school' },
-          { title: 'Ver Centro Educativo', route: 'afiliacion/ver-datos-centro', icon: 'visibility' },
+          {
+            title: 'Buscar Persona',
+            route: 'afiliacion/buscar-persona',
+            icon: 'person_search',
+            isCustomReset: true
+          },
+          { title: 'Constancias', route: 'afiliacion/constancias-afiliados', icon: 'description' },
+          { title: 'huella', route: 'afiliacion/huella', icon: 'description' }
+        ],
+      },
+      {
+        title: 'CENTROS EDUCATIVOS',
+        icon: 'school',
+        children: [
+          { title: 'Nuevo Centro Educativo', route: 'afiliacion/nuevo-centro', icon: 'add_business' },
+          { title: 'Ver Centro Educativo', route: 'afiliacion/ver-datos-centro', icon: 'domain' },
         ],
       },
     ],
@@ -58,8 +85,12 @@ export const MENU_CONFIG: Section[] = [
         title: 'GESTIÓN DE BENEFICIOS',
         icon: 'money',
         children: [
-          { title: 'Asignar beneficio', route: 'planilla/Beneficios/nuevo-beneficio-afil', icon: 'add_box' },
-          { title: 'Ver Beneficios Asignados', route: 'planilla/Beneficios/Ver-editar-beneficio-afil', icon: 'visibility' },
+          { title: 'Asignar Beneficio', route: 'planilla/Beneficios/nuevo-beneficio-afil', icon: 'assignment_turned_in' },
+          { title: 'Ver Beneficios Asignados', route: 'planilla/Beneficios/Ver-editar-beneficio-afil', icon: 'list_alt' },
+          { title: 'Crear Beneficio', route: 'planilla/Beneficios/nuevo-beneficio', icon: 'add_circle' },
+          { title: 'Editar Beneficio', route: 'planilla/Beneficios/editar-beneficio', icon: 'edit' },
+          { title: 'Crear Tipo Deducción', route: 'planilla/Beneficios/crear-tipo-deduccion', icon: 'post_add' },
+          { title: 'Editar Tipo Deducción', route: 'planilla/Beneficios/editar-tipo-deduccion', icon: 'edit_note' },
         ],
       },
       /* {
@@ -79,30 +110,38 @@ export const MENU_CONFIG: Section[] = [
         title: 'EGRESOS',
         icon: 'money_off',
         children: [
-          { title: 'Cargar Bajas (FALLECIDOS)', route: 'planilla/Egresos/cargar-fallecidos', icon: 'description' },
-          { title: 'Cambiar Cuenta Bancaria', route: 'planilla/Egresos/editar-banco', icon: 'description' },
-          { title: 'Proceso de Planilla', route: 'planilla/Egresos/proceso-planilla', icon: 'post_add' },
-          { title: 'Ver Todas Las Planillas', route: 'planilla/Egresos/ver-planillas', icon: 'receipt' },
-          { title: 'Generación de documentos', route: 'planilla/Egresos/documentos-planilla', icon: 'description' },
+          { title: 'Cargar Bajas (FALLECIDOS)', route: 'planilla/Egresos/cargar-fallecidos', icon: 'person_remove' },
+          { title: 'Proceso de Planilla', route: 'planilla/Egresos/proceso-planilla', icon: 'work' },
+          { title: 'Ver Todas Las Planillas', route: 'planilla/Egresos/ver-planillas', icon: 'list_alt' },
+          { title: 'Generación de documentos', route: 'planilla/Egresos/documentos-planilla', icon: 'picture_as_pdf' },
+          { title: '60 Rentas', route: 'planilla/Egresos/ver_estatus_60_rentas', icon: 'history' },
+          { title: 'voucher mensual', route: 'planilla/Egresos/voucher-general-mens', icon: 'credit_card' },
+          { title: 'Planillas Definitivas', route: 'planilla/Egresos/planilla-definitivas', icon: 'file_copy' },
+
         ],
       },
-      /* {
+      {
         title: 'INGRESOS',
         icon: 'money',
         children: [
           { title: 'Privados', route: 'planilla/Ingresos/planilla-colegios-privados', icon: 'business' },
+          { title: 'Privados', route: 'planilla/Ingresos/cargar-planilla-privados', icon: 'business' },
+          { title: 'Cotizaciones/Aportaciones', route: 'planilla/Ingresos/cotizacion-aportacion', icon: 'business' },
         ],
-      }, */
+      },
     ],
   },
   {
-    name: 'CUENTAS INPREMA',
+    name: 'CONASA',
     items: [
       {
-        title: 'Movimientos de cuentas',
-        icon: 'money',
+        title: 'GESTION CONASA',
+        icon: 'engineering',
         children: [
-          { title: 'Ver movimiento', route: 'cuentas/Movimientos/Ver-movimientos', icon: 'business' },
+          { title: 'Buscar Afiliado', route: 'conasa/ver-afiliado', icon: 'person_search' },
+          { title: 'Gestion De Contratos', route: 'conasa/menu-conasa', icon: 'description' },
+          { title: 'Menu de Facturas', route: 'conasa/menu-facturas-conasa', icon: 'description' },
+          { title: 'Consultas Medicas', route: 'conasa/ver-consultas-medicas', icon: 'description' },
         ],
       },
     ],
@@ -117,6 +156,27 @@ export const MENU_CONFIG: Section[] = [
           { title: 'Detalle Envío', route: 'escalafon/detalle-envio', icon: 'description' },
         ],
       },
+      {
+        title: 'Movimientos de cuentas',
+        icon: 'money',
+        children: [
+          { title: 'Ver movimiento', route: 'escalafon/Ver-movimientos', icon: 'business' },
+        ],
+      },
     ],
-  }
+  },
+  {
+    name: 'MANTENIMIENTO',
+    items: [
+      {
+        title: 'MANTENIMIENTO',
+        icon: 'build',
+        children: [
+          { title: 'AFILIACIÓN', route: 'afiliacion/mantenimiento', icon: 'build' },
+        ],
+      },
+    ],
+  },
 ];
+
+

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res, HttpCode, ParseIntPipe, NotFoundException, Put, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res, HttpCode, ParseIntPipe, NotFoundException, Put, Query, Req } from '@nestjs/common';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { TransaccionesService } from './transacciones.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -9,6 +9,40 @@ import { crearCuentaDTO } from './dto/cuenta-transaccioens.dto';
 @Controller('transacciones')
 export class TransaccionesController {
   constructor(private readonly transaccionesService: TransaccionesService) { }
+
+  @Get('reporte-afiliados')
+  async obtenerReporteAfiliados() {
+    return await this.transaccionesService.obtenerReporteAfiliados();
+  }
+
+  @Get('cuentas/:n_identificacion')
+  async obtenerCuentasPorIdentificacion(@Param('n_identificacion') n_identificacion: string) {
+      console.log(`Identificación recibida: ${n_identificacion}`);
+      const cuentas = await this.transaccionesService.obtenerCuentasPorIdentificacion(n_identificacion);
+      return { cuentas };
+  }
+
+  @Post('crear-cuenta/:idPersona')
+  async crearCuenta(
+        @Param('idPersona', ParseIntPipe) idPersona: number,
+        @Body() crearCuentaDto: crearCuentaDTO
+    ) {
+        try {
+            const resultado = await this.transaccionesService.crearCuenta(idPersona, crearCuentaDto);
+            return {
+                message: 'Cuenta creada exitosamente',
+                data: resultado,
+            };
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+            }
+            throw new HttpException(
+                'Ocurrió un error al crear la cuenta',
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+  }
 
   @Delete('eliminar-movimiento/:id')
   async eliminarMovimiento(@Param('id') id: number) {
@@ -51,45 +85,6 @@ export class TransaccionesController {
   @Post('crear-movimiento')
   crearMovimiento(@Body() crearMovimientoDto: CrearMovimientoDTO) {
     return this.transaccionesService.crearMovimiento(crearMovimientoDto);
-  }
-
-  @Post('crear-cuenta/:idPersona')
-  crearCuenta(@Param("idPersona") idPersona: number, @Body() crearCuentaDto: [crearCuentaDTO]) {
-    return this.transaccionesService.crearCuenta(idPersona, crearCuentaDto);
-  }
-
-  @Get('/tipos-de-cuenta/:dni')
-  async obtenerTiposDeCuentaPorDNI(@Param('dni') dni: string) {
-    try {
-      const tiposDeCuenta = await this.transaccionesService.obtenerTiposDeCuentaPorDNI(dni);
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Tipos de cuenta obtenidos con éxito',
-        data: tiposDeCuenta,
-      };
-    } catch (error) {
-      throw new HttpException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: error.message || 'Ocurrió un error al obtener los tipos de cuenta',
-      }, HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @Get('/tipos-de-cuenta/')
-  async obtenerTiposDeCuenta() {
-    try {
-      const tiposDeCuenta = await this.transaccionesService.obtenerTiposDeCuenta();
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Tipos de cuenta obtenidos con éxito',
-        data: tiposDeCuenta,
-      };
-    } catch (error) {
-      throw new HttpException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: error.message || 'Ocurrió un error al obtener los tipos de cuenta',
-      }, HttpStatus.BAD_REQUEST);
-    }
   }
 
   @Get('/getAllColegiosMagisteriales/')
@@ -156,7 +151,7 @@ export class TransaccionesController {
   async desactivarCuenta(@Param('numCuenta') numCuenta: string) {
     await this.transaccionesService.desactivarCuenta(numCuenta);
     return {
-      mensaje: `Perfil de centro de trabajo con número ${numCuenta} ha sido marcado como inactivo.`,
+      mensaje: `Cuenta Desactivada`,
     };
   }
 

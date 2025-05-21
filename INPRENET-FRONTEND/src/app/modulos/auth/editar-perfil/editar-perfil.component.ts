@@ -26,6 +26,7 @@ export class EditarPerfilComponent implements OnInit {
     private toastr: ToastrService
   ) {
     this.perfilForm = this.fb.group({
+      idEmpleado: [null],
       nombre: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email]],
       puesto: ['', Validators.required],
@@ -49,9 +50,11 @@ export class EditarPerfilComponent implements OnInit {
   obtenerPerfil(): void {
     this.authService.obtenerPerfil(this.correo).subscribe({
       next: (perfil: any) => {
-        //console.log(perfil);
+        const idEmpleado = perfil.empleadoCentroTrabajo.empleado.id_empleado; // Obtener el idEmpleado
 
+        // Actualizar los valores del formulario, incluyendo idEmpleado
         this.perfilForm.patchValue({
+          idEmpleado: idEmpleado, // Asegúrate de agregar este valor al formulario
           nombre: perfil.empleadoCentroTrabajo.empleado.nombreEmpleado,
           correo: perfil.empleadoCentroTrabajo.correo_1,
           puesto: perfil.empleadoCentroTrabajo.nombrePuesto,
@@ -137,35 +140,34 @@ export class EditarPerfilComponent implements OnInit {
 
   guardar() {
     if (this.perfilForm.valid) {
-      const datos = {
-        nombreEmpleado: this.perfilForm.value.nombre,
-        correo_1: this.perfilForm.value.correo,
-        puesto: this.perfilForm.value.puesto,
-        centroTrabajo: this.perfilForm.value.centroTrabajo,
-        telefono_1: this.perfilForm.value.telefono1,
-        telefono_2: this.perfilForm.value.telefono2,
-        numero_identificacion: this.perfilForm.value.numeroIdentificacion
-      };
+      const idEmpleado = this.perfilForm.value.idEmpleado;
 
-      const archivos: { archivoIdentificacion?: File, fotoEmpleado?: File } = {};
+      const formData: FormData = new FormData();
+      formData.append('nombreEmpleado', this.perfilForm.value.nombre || '');
+      formData.append('telefono_1', this.perfilForm.value.telefono1 || '');
+      formData.append('telefono_2', this.perfilForm.value.telefono2 || '');
+      formData.append('numero_identificacion', this.perfilForm.value.numeroIdentificacion || '');
 
       if (this.archivoIdentificacion) {
-        archivos.archivoIdentificacion = this.archivoIdentificacion;
-      }
-      if (this.fotoEmpleado) {
-        archivos.fotoEmpleado = this.fotoEmpleado;
+        formData.append('archivo_identificacion', this.archivoIdentificacion);
       }
 
-      /* this.authService.actualizarPerfil(datos, archivos).subscribe({
+      if (this.fotoEmpleado) {
+        formData.append('foto_empleado', this.fotoEmpleado);
+      }
+
+      this.authService.actualizarEmpleado(idEmpleado, formData).subscribe({
         next: () => {
           this.toastr.success('Datos guardados con éxito', 'Éxito');
         },
         error: (err: any) => {
           this.toastr.error('Error al guardar los datos', 'Error');
+          console.error(err);
         }
-      }); */
+      });
     } else {
       this.toastr.error('Formulario inválido', 'Error');
     }
   }
+
 }

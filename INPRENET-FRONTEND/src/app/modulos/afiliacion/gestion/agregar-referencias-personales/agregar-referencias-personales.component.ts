@@ -3,6 +3,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
   selector: 'app-agregar-referencias-personales',
@@ -18,6 +19,7 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
     private fb: FormBuilder,
     private toastr: ToastrService,
     private afilService: AfiliacionService,
+    private datosEstaticosService: DatosEstaticosService,
     private dialogRef: MatDialogRef<AgregarReferenciasPersonalesComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: number }
   ) {
@@ -37,18 +39,22 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
   agregarReferencia(datos?: any): void {
     const referenciaForm = this.fb.group({
       tipo_referencia: [datos?.tipo_referencia || '', [Validators.required]],
-      primer_nombre: [datos?.primer_nombre || '', [Validators.required]],
-      segundo_nombre: [datos?.segundo_nombre || ''],
-      tercer_nombre: [datos?.tercer_nombre || ''],
-      primer_apellido: [datos?.primer_apellido || '', [Validators.required]],
-      segundo_apellido: [datos?.segundo_apellido || ''],
-      direccion: [datos?.direccion || ''],
-      telefono_domicilio: [datos?.telefono_domicilio || ''],
-      telefono_trabajo: [datos?.telefono_trabajo || ''],
-      telefono_personal: [datos?.telefono_personal || ''],
-      parentesco: [datos?.parentesco || '', [Validators.required]],
-      n_identificacion: [datos?.n_identificacion || ''],
+      primer_nombre: [datos?.primer_nombre || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      segundo_nombre: [datos?.segundo_nombre || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      tercer_nombre: [datos?.tercer_nombre || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      primer_apellido: [datos?.primer_apellido || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      segundo_apellido: [datos?.segundo_apellido || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      direccion: [datos?.direccion || '', [Validators.required, Validators.minLength(10), Validators.maxLength(200)]],
+      telefono_domicilio: [datos?.telefono_domicilio || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
+      telefono_trabajo: [datos?.telefono_trabajo || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
+      telefono_personal: [datos?.telefono_personal || '', [Validators.required ,Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
+      parentesco: [datos?.parentesco || '', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
     });
+
+    referenciaForm.get('tipo_referencia')?.valueChanges.subscribe(value => {
+      this.cambiarListadoParentesco(value, referenciaForm);
+    });
+
     this.referencias.push(referenciaForm);
   }
 
@@ -59,18 +65,24 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
   }
 
   cargarDatosEstaticos(): void {
-    // Simulando la carga de datos para tipo de referencia y parentesco
     this.tipo_referencia = [
       { label: 'REFERENCIA PERSONAL', value: 'REFERENCIA PERSONAL' },
       { label: 'REFERENCIA FAMILIAR', value: 'REFERENCIA FAMILIAR' }
     ];
 
-    this.parentesco = [
-      { label: 'Padre', value: 'Padre' },
-      { label: 'Madre', value: 'Madre' },
-      { label: 'Hermano/a', value: 'Hermano/a' },
-      { label: 'Amigo/a', value: 'Amigo/a' },
-    ];
+    // Cargando parentesco desde el servicio
+    this.parentesco = this.datosEstaticosService.parentesco;
+  }
+
+  cambiarListadoParentesco(tipoReferencia: string, referenciaForm: FormGroup): void {
+    if (tipoReferencia === 'REFERENCIA FAMILIAR') {
+      this.parentesco = this.datosEstaticosService.parentesco;
+    } else if (tipoReferencia === 'REFERENCIA PERSONAL') {
+      this.parentesco = this.datosEstaticosService.parentescoReferenciasPersonales;
+    }
+
+    // Resetear el valor del parentesco cuando cambia el tipo de referencia
+    referenciaForm.get('parentesco')?.setValue('');
   }
 
   guardarReferencias() {
@@ -80,7 +92,6 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
     }
 
     const referencias = this.formatReferencias(this.formReferencias.value.refpers);
-
     this.afilService.agregarReferencias(this.data.idPersona, referencias).subscribe(
       (res: any) => {
         if (res.length > 0) {
@@ -107,7 +118,6 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
       telefono_domicilio: referencia.telefono_domicilio,
       telefono_trabajo: referencia.telefono_trabajo,
       telefono_personal: referencia.telefono_personal,
-      n_identificacion: referencia.n_identificacion,
       direccion: referencia.direccion,
     }));
   }

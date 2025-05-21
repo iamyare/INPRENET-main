@@ -1,8 +1,12 @@
 .landing-page {
-  font-family: Arial, sans-serif;
-  background-color: #f0f2f5;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f6f8;
   color: #333;
-  padding: 3rem;
+  padding: 5rem; /* Reducido el padding general */
+  background-image: url('/../assets/images/Edificio Color Blanco.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .hero {
@@ -10,37 +14,40 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background: linear-gradient(120deg, #13776B, #33E4DC);
+  background: rgba(0, 0, 0, 0.6); /* Fondo translúcido */
   color: white;
-  padding: 3rem 1.5rem; /* Reducido de 5rem a 3rem y de 2rem a 1.5rem */
+  padding: 2rem 1rem; /* Reducido el padding */
   border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-  margin-bottom: 2rem; /* Reducido el margen inferior */
-  max-width: 1500px; /* Limitar el ancho del cuadro */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1.5rem;
+  max-width: 1000px; /* Reducido el ancho máximo */
   margin-left: auto;
   margin-right: auto;
+  animation: fadeIn 0.8s ease-in-out;
 }
 
 .hero h1 {
-  font-size: 3rem; /* Reducido el tamaño de fuente */
+  font-size: 2.5rem; /* Reducido el tamaño de fuente */
   font-weight: bold;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
+  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.3);
 }
 
 .hero p {
-  font-size: 1.1rem; /* Reducido de 1.3rem a 1.1rem */
+  font-size: 1rem; /* Reducido el tamaño de fuente */
   max-width: 600px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .hero button {
-  font-size: 1rem; /* Reducido el tamaño de fuente */
-  padding: 0.6rem 2rem; /* Ajustado el padding */
+  font-size: 1rem;
+  padding: 0.6rem 1.8rem;
   border-radius: 25px;
   background-color: #1C9588;
   color: white;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .hero button:hover {
@@ -49,65 +56,60 @@
 }
 
 .hero-image img {
-  max-width: 80%; /* Reducir el ancho de la imagen */
+  max-width: 70%; /* Reducido el ancho de la imagen */
   height: auto;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
-
 
 .features {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 2rem;
+  gap: 1.5rem; /* Reducido el espacio entre tarjetas */
 }
 
 .feature {
-  width: 300px;
+  width: 280px; /* Reducido el ancho de las tarjetas */
   background-color: white;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
-  padding: 1.5rem;
+  padding: 1rem; /* Reducido el padding interno */
 }
 
 .feature:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .feature img {
   max-width: 100%;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  margin-bottom: 1rem;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  margin-bottom: 0.8rem;
 }
 
 .feature mat-card-header {
   text-align: center;
-  padding: 1rem 0;
+  padding: 0.8rem 0;
 }
 
 .feature mat-card-title {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   color: #1C9588;
   font-weight: 600;
 }
 
 .feature mat-card-content {
-  padding: 0.5rem 1rem 1.5rem;
-  font-size: 1rem;
+  padding: 0.5rem 1rem 1rem;
+  font-size: 0.9rem;
   color: #555;
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-@keyframes slideIn {
-  from { transform: translateY(20px); }
-  to { transform: translateY(0); }
 }

@@ -26,6 +26,53 @@ export class AuthService {
   private apiRequestsCount: number = 0;
   private idleTimeout: any;
 
+  recuperarContrasena(email: string): Observable<any> {
+    const url = `${environment.API_URL}/api/usuario/olvido-contrasena`;
+    return this.http.post(url, { email }).pipe(
+      map((response) => {
+        this.toastr.success('Se ha enviado un enlace para restablecer la contraseña a su correo.');
+        return response;
+      }),
+      catchError((error) => {
+        if (error.status === 404 && error.error?.message === 'Usuario no encontrado') {
+          this.toastr.error('El correo ingresado no está registrado en el sistema.', 'Error');
+        } else if (error.status === 400) {
+          this.toastr.error('Hubo un error en la solicitud. Verifique la información ingresada.', 'Error');
+        } else {
+          console.error('Error al intentar recuperar contraseña:', error);
+          this.toastr.error('No se pudo enviar el enlace de restablecimiento. Inténtelo más tarde.', 'Error');
+        }
+        return throwError(() => error);
+      })
+    );
+  }
+
+
+  restablecerContrasena(token: string, nuevaContrasena: string): Observable<any> {
+    const url = `${environment.API_URL}/api/usuario/restablecer-contrasena/${token}`;
+    return this.http.post(url, { nuevaContrasena }).pipe(
+      map(response => {
+        this.toastr.success('Contraseña restablecida correctamente.');
+        return response;
+      }),
+      catchError(error => {
+        console.error('Error al restablecer la contraseña:', error);
+        this.toastr.error('No se pudo restablecer la contraseña. Inténtelo más tarde.');
+        return throwError(error);
+      })
+    );
+  }
+
+  actualizarEmpleado(idEmpleado: number, formData: FormData): Observable<any> {
+    const url = `${environment.API_URL}/api/usuario/actualizar-informacion-empleado/${idEmpleado}`;
+    return this.http.patch(url, formData).pipe(
+      catchError(error => {
+        console.error('Error al actualizar los datos del empleado:', error);
+        return throwError(error);
+      })
+    );
+  }
+
   public startIdleWatch(): void {
     ['mousemove', 'keydown', 'wheel', 'touchmove', 'click'].forEach(event => {
       window.addEventListener(event, () => this.resetIdleTimer());
@@ -57,19 +104,6 @@ export class AuthService {
     }
   }
 
-  /* private handleIdleTimeout(): void {
-    if (this.apiRequestsCount === 0) {
-      // Aquí cierras la sesión o realizas cualquier acción para manejar la inactividad
-      console.log('Sesión cerrada por inactividad');
-      // Cerrar sesión o redirigir
-    }
-  } */
-
-  /* private resetIdleTimer(): void {
-    clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => this.handleIdleTimeout(), this.idleTime);
-  } */
-
   private handleIdleTimeout(): void {
     this.ngZone.run(() => {
       const token = sessionStorage.getItem('token');
@@ -77,13 +111,6 @@ export class AuthService {
         this.logout();
       }
     });
-  }
-
-  olvidoContrasena(dto: any): Observable<{ message: string }> {
-    const url = `${environment.API_URL}/api/usuario/olvido-contrasena`;
-    return this.http.post<{ message: string }>(url, dto).pipe(
-      catchError(this.handleError<{ message: string }>('olvidoContrasena'))
-    );
   }
 
   login(correo: string, contrasena: string): Observable<{ accessToken: string }> {
@@ -135,20 +162,6 @@ export class AuthService {
     );
   }
 
-
-  restablecerContrasena(token: string, nuevaContrasena: string): Observable<{ message: string }> {
-    const url = `${environment.API_URL}/api/usuario/restablecer-contrasena/${token}`;
-    return this.http.post<{ message: string }>(url, { nuevaContrasena }).pipe(
-      catchError(this.handleError<{ message: string }>('restablecerContrasena'))
-    );
-  }
-
-  obtenerPreguntasSeguridad(correo: string): Observable<string[]> {
-    return this.http.get<string[]>(`${environment.API_URL}/api/usuario/preguntas-seguridad`, {
-      params: { correo }
-    });
-  }
-
   obtenerPerfil(correo: string): Observable<any> {
     return this.http.get<any>(`${environment.API_URL}/api/usuario/perfil?correo=${correo}`);
   }
@@ -156,7 +169,6 @@ export class AuthService {
   cambiarContrasena(correo: string, nuevaContrasena: string): Observable<any> {
     return this.http.put<any>(`${environment.API_URL}/api/usuario/cambiar-contrasena`, { correo, nuevaContrasena });
   }
-
 
   preRegistro(datos: any): Observable<void> {
     const url = `${environment.API_URL}/api/usuario/preregistro`;
@@ -202,6 +214,22 @@ export class AuthService {
     return this.http.get<any[]>(url).pipe(
       catchError(this.handleError<any[]>('obtenerRolesPorModulo', []))
     );
+  }
+
+  getUsuarioAutenticado(): { nombre: string, correo: string } | null {
+    const token = sessionStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+        const decodedToken: any = jwtDecode(token);
+        return {
+            nombre: decodedToken.nombreEmpleado,
+            correo: decodedToken.correo
+        };
+    } catch (error) {
+        console.error('Error al decodificar el token', error);
+        return null;
+    }
   }
 
   getRolesModulos(): { rol: string, modulo: string }[] {
@@ -253,21 +281,6 @@ export class AuthService {
   clearToken(): void {
     localStorage.removeItem('token');
   }
-
-  loginPrivada(email: string, password: string): Observable<{ access_token: string }> {
-    const url = `${environment.API_URL}/api/usuario/loginPrivada`;
-    return this.http.post<{ access_token: string }>(url, { email, contrasena: password });
-  }
-
-  createPrivada(data: any): Observable<any> {
-    const url = `${environment.API_URL}/api/usuario/crear`;
-    return this.http.post<any>(url, data);
-  }
-
-  /* login(email: string, password: string): Observable<{ token: string }> {
-    const url = `${environment.API_URL}/api/usuario/auth/login`;
-    return this.http.post<{ token: string }>(url, { correo: email, contrasena: password });
-  } */
 
   saveToken(token: string): void {
     localStorage.setItem('token', token);

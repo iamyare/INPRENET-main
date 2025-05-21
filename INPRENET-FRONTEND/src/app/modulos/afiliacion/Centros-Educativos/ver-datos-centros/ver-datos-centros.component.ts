@@ -4,6 +4,7 @@ import { result } from 'lodash-es';
 import { ToastrService } from 'ngx-toastr';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
+import { CentroEducativoService } from 'src/app/services/centro-educativo.service';
 
 @Component({
   selector: 'app-ver-datos-centros',
@@ -118,16 +119,37 @@ export class VerDatosCentrosComponent {
 
   public searchResults: any;
 
-
   constructor(
     private fb: FormBuilder,
     private SVCCentrosTrabajo: CentroTrabajoService,
     private toastr: ToastrService,
-  ) {
+    private centroEducativoService: CentroEducativoService) 
+    {
   }
 
   ngOnInit(): void {
-    this.initForms();
+    this.initForms(); // Mantener la inicialización original
+
+    // Suscribirse a los datos del Administrador
+    this.centroEducativoService.administradorData$.subscribe(data => {
+      if (data) {
+        console.log('Datos del Administrador en ver-datos-centros:', data);
+      }
+    });
+
+    // Suscribirse a los datos del Contador
+    this.centroEducativoService.contadorData$.subscribe(data => {
+      if (data) {
+        console.log('Datos del Contador en ver-datos-centros:', data);
+      }
+    });
+
+    // Suscribirse a los datos del Propietario
+    this.centroEducativoService.propietarioData$.subscribe(data => {
+      if (data) {
+        console.log('Datos del Propietario en ver-datos-centros:', data);
+      }
+    });
   }
 
   initForms() {
@@ -190,9 +212,9 @@ export class VerDatosCentrosComponent {
       referencias: this.referenciasForm.value.referencias.length > 0 ? this.referenciasForm.value.referencias : [],
       sociedad: this.sociedadData,
       sociedadSocio: this.sociedadSocioForm.value.sociedadSocios.length > 0 ? this.sociedadSocioForm.value.sociedadSocios : [],
-      //adminCentroEducativo: this.isFormGroupEmpty(this.adminCentroEducativoForm) ? {} : this.adminCentroEducativoForm.value
+      adminCentroEducativo: this.isFormGroupEmpty(this.adminCentroEducativoForm) ? {} : this.adminCentroEducativoForm.value
     };
-    console.log('Datos Completos:', allData);
+
   }
 
   private isFormGroupEmpty(formGroup: FormGroup): boolean {
@@ -285,7 +307,7 @@ export class VerDatosCentrosComponent {
   }
   handleSearchResult2(form: any) {
     this.datosPropietario = form
-    this.datosPropietario.controls["propietarioNombre"]!.patchValue("hola")
+    this.datosPropietario.controls["propieta  rioNombre"]!.patchValue("hola")
   }
 
   handleSearchResult3(form: any) {
@@ -302,10 +324,9 @@ export class VerDatosCentrosComponent {
     this.searchResults = await searchResult;
     this.datosGeneralesData = this.fb.group({})
     this.mostrar = true;
-
   }
 
   handleFormChange(event: any) {
-    console.log('Form changed:', event);
+
   }
 }

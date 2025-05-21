@@ -17,7 +17,7 @@ export class HeaderComponent implements OnInit {
       title: 'Configuración',
       items: [
         { title: 'Perfil', icon: 'person', route: '/home/usuario/editar' },
-        { title: 'Ajustes', icon: 'settings', route: '/home/ajustes' }
+        //{ title: 'Ajustes', icon: 'settings', route: '/home/ajustes' }
       ]
     },
     {

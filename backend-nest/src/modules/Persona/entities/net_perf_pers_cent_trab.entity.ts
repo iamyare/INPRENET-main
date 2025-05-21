@@ -7,7 +7,7 @@ export class Net_perf_pers_cent_trab {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PERF_PERS_CENTR_TRAB', primaryKeyConstraintName: 'PK_id_pAfCentTrab_PCenTrab' })
     id_perf_pers_centro_trab: number;
 
-    @Column('varchar2', { length: 40, nullable: false, name: 'CARGO' })
+    @Column('varchar2', { length: 40, nullable: true, name: 'CARGO' })
     cargo: string;
 
     @Column('varchar2', { length: 40, nullable: true, name: 'NUMERO_ACUERDO' })
@@ -16,21 +16,21 @@ export class Net_perf_pers_cent_trab {
     @Column('number', { nullable: true, name: 'SALARIO_BASE' })
     salario_base: number;
 
-    @Column('date', { nullable: false, name: 'FECHA_INGRESO' })
+    @Column('date', { nullable: true, name: 'FECHA_INGRESO' })
     fecha_ingreso: string;
 
     @Column('date', { nullable: true, name: 'FECHA_EGRESO' })
     fecha_egreso: string;
 
-    @Column('date', { nullable: true, name: 'FECHA_PAGO' })
-    fecha_pago: string;
+    @Column('number', { nullable: true, name: 'FECHA_PAGO' })
+    fecha_pago: number;
 
     @Column('varchar2', { length: 20, nullable: true, default: 'ACTIVO', name: 'ESTADO' })
     estado: string;
 
     @Column('nvarchar2', { length: 50, nullable: true, name: 'TIPO_JORNADA' })
     tipo_jornada: string;
-    
+
     @Column('nvarchar2', { length: 50, nullable: true, name: 'JORNADA' })
     jornada: string;
 

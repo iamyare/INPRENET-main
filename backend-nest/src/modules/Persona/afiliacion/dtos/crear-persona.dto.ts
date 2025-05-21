@@ -16,10 +16,6 @@ export class CrearPersonaDto {
   n_identificacion: string;
 
   @IsOptional()
-  @IsDateString()
-  fecha_vencimiento_ident?: string;
-
-  @IsOptional()
   @IsString()
   rtn?: string;
 
@@ -30,7 +26,11 @@ export class CrearPersonaDto {
   @IsOptional()
   @IsString()
   estado_civil?: string;
-
+  
+  @IsOptional()
+  @IsDateString()
+  fecha_afiliacion?: string;
+  
   @IsNotEmpty()
   @IsString()
   primer_nombre: string;
@@ -92,7 +92,6 @@ export class CrearPersonaDto {
   @IsString()
   telefono_3?: string;
 
-
   @IsOptional()
   @IsEmail()
   correo_1?: string;
@@ -123,7 +122,15 @@ export class CrearPersonaDto {
 
   @IsOptional()
   @IsString()
+  carnet_discapacidad?: string;
+
+  @IsOptional()
+  @IsString()
   direccion_residencia?: string;
+
+  @IsOptional()
+  @IsString()
+  direccion_residencia_estructurada?: string;
 
   @IsOptional()
   foto_perfil?: Buffer;
@@ -134,7 +141,8 @@ export class CrearPersonaDto {
 
   @IsNotEmpty()
   @IsNumber()
-  id_municipio_nacimiento: number;
+  @IsOptional()
+  id_municipio_nacimiento?: number;
 
   @IsOptional()
   @IsNumber()
@@ -149,6 +157,16 @@ export class CrearPersonaDto {
   @IsNumber()
   @IsOptional()
   id_departamento_residencia?: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsOptional()
+  id_colonia?: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsOptional()
+  id_aldea?: number;
 
   @IsOptional()
   @IsNumber()

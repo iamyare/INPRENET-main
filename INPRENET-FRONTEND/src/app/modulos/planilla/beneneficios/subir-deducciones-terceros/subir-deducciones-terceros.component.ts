@@ -25,7 +25,10 @@ export class SubirDeduccionesTercerosComponent {
   deduccionSeleccionada: number | null = null;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
+  @Input() tipoDeduccion: any;
   @Input() id_planilla: any;
+  @Input() idTipoPlanilla: any;
+  @Input() tipo_planilla: any;
 
   constructor(
     private deduccionesService: DeduccionesService,
@@ -36,6 +39,7 @@ export class SubirDeduccionesTercerosComponent {
 
   ngOnInit(): void {
     this.obtenerCentrosTrabajo();
+
   }
 
   onFileSelected(event: any) {
@@ -74,7 +78,7 @@ export class SubirDeduccionesTercerosComponent {
       let data: any[] = XLSX.utils.sheet_to_json(ws, { raw: false, defval: null });
       data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
       this.AuthService.onApiRequestStart();
-      this.deduccionesService.subirArchivoDeducciones(this.id_planilla, this.file!).subscribe({
+      this.deduccionesService.subirArchivoDeducciones(this.idTipoPlanilla, this.id_planilla, this.file!).subscribe({
         next: (event) => {
           if (event.type === HttpEventType.UploadProgress && event.total) {
             const progress = Math.round(100 * (event.loaded / (event.total || 1)));
@@ -136,17 +140,34 @@ export class SubirDeduccionesTercerosComponent {
 
   generateFailedRowsExcel(failedRows: any[]) {
     const headers = ['anio', 'mes', 'dni', 'codigoDeduccion', 'montoTotal', 'razón'];
-    const formattedRows = failedRows.map(row => {
-      return {
-        anio: row.anio,
-        mes: row.mes,
-        dni: row.dni,
-        codigoDeduccion: row.codigoDeduccion,
-        montoTotal: row.montoTotal,
-        razón: row.error
-      };
-    });
+    const formattedRows = failedRows.map(row => ({
+      anio: row.anio,
+      mes: row.mes,
+      dni: row.dni,
+      codigoDeduccion: row.codigoDeduccion,
+      montoTotal: typeof row.montoTotal === 'number' ? row.montoTotal : parseFloat(row.montoTotal),
+      razón: row.error
+    }));
+
     if (formattedRows && formattedRows.length > 0) {
+      // Calcular la suma total de montoTotal (como número)
+      const totalMonto = formattedRows.reduce((sum, row) => {
+        return sum + row.montoTotal;
+      }, 0);
+
+      // Formatear el total con 2 decimales (como número)
+      const totalMontoFormatted = totalMonto.toFixed(2);
+
+      // Agregar fila con la suma al final
+      formattedRows.push({
+        anio: '',
+        mes: '',
+        dni: ' ',
+        codigoDeduccion: ' ',
+        montoTotal: parseFloat(totalMontoFormatted), // Asegurarse de que sea numérico
+        razón: ''
+      });
+
       const worksheet = XLSX.utils.json_to_sheet(formattedRows, { header: headers });
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Deducciones Fallidas');
@@ -176,7 +197,11 @@ export class SubirDeduccionesTercerosComponent {
   obtenerCentrosTrabajo() {
     this.centrosTrabajoService.obtenerCentrosTrabajoTipoE().subscribe({
       next: (response) => {
-        this.centrosTrabajo = response;
+        if (this.tipoDeduccion == 'INPREMA') {
+          this.centrosTrabajo = response.filter(item => item.id_centro_trabajo === 1);
+        } else if (this.tipoDeduccion == 'TERCEROS') {
+          this.centrosTrabajo = response.filter(item => item.id_centro_trabajo !== 1);
+        }
       },
       error: (error) => {
         this.toastr.error('Error al obtener los centros de trabajo', 'Error');
@@ -196,16 +221,23 @@ export class SubirDeduccionesTercerosComponent {
     if (!this.centroSeleccionado || !this.deduccionSeleccionada) {
       this.toastr.error('Debe seleccionar un centro de trabajo y una deducción.', 'Error');
       return;
+    } else if (!this.id_planilla) {
+      this.toastr.error('Debe seleccionar una planilla', 'Error');
+      return;
+    } else {
+      this.deduccionesService.obtenerDetallesDeduccionPorCentro(this.id_planilla, this.centroSeleccionado.id_centro_trabajo, this.deduccionSeleccionada).subscribe({
+        next: (detalles) => {
+          if (detalles.length > 0) {
+            this.detallesDeduccion = detalles;
+          } else {
+            this.toastr.warning('No hay registros para la planilla, centro de trabajo y tipo de decuccion seleccionada', 'Advertencia');
+          }
+        },
+        error: (error) => {
+          console.error('Error al obtener detalles de deducción:', error);
+        }
+      });
     }
-
-    this.deduccionesService.obtenerDetallesDeduccionPorCentro(this.centroSeleccionado.id_centro_trabajo, this.deduccionSeleccionada).subscribe({
-      next: (detalles) => {
-        this.detallesDeduccion = detalles;
-      },
-      error: (error) => {
-        console.error('Error al obtener detalles de deducción:', error);
-      }
-    });
   }
 
   exportarAExcel() {
@@ -249,5 +281,39 @@ export class SubirDeduccionesTercerosComponent {
       }
     });
   }
+
+  downloadExample() {
+    let encabezados: string[] = []
+    // Define los encabezados del archivo CSV
+    if (this.tipoDeduccion == 'INPREMA') {
+      encabezados = ["anio", "mes", "dni", "codigoDeduccion", "montoTotal", "N_PRESTAMO_INPREMA", "TIPO_PRESTAMO_INPREMA"];
+    } else if (this.tipoDeduccion == 'TERCEROS') {
+      encabezados = ["anio", "mes", "dni", "codigoDeduccion", "montoTotal"];
+    }
+
+    // Convierte los encabezados y los datos en formato CSV con punto y coma como separador
+    const filas = [
+      encabezados.join(";"),
+    ].join("\n");
+
+    // Crea un Blob con el contenido CSV
+    const blob = new Blob([filas], { type: "text/csv;charset=utf-8;" });
+
+    // Crea un enlace de descarga para el archivo CSV
+    const enlace = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    enlace.href = url;
+    enlace.download = "reporte_deducciones.csv";
+
+    // Simula un clic en el enlace para iniciar la descarga
+    enlace.style.display = "none";
+    document.body.appendChild(enlace);
+    enlace.click();
+
+    // Limpia el DOM
+    document.body.removeChild(enlace);
+    URL.revokeObjectURL(url);
+  }
+
 
 }
